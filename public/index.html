@@ -338,8 +338,21 @@
       import priceDatabase from './js/modules/priceDatabase.js';
       window.priceDatabase = priceDatabase;
       window.priceDB = priceDatabase;
-      await priceDatabase.initialize();
-      console.log('🚀 priceDatabase 전역 초기화 완료');
+      
+      try {
+        await priceDatabase.initialize();
+        console.log('🚀 priceDatabase 전역 초기화 완료');
+        
+        // 초기화 완료 이벤트 발생
+        window.dispatchEvent(new CustomEvent('priceDBReady', { detail: priceDatabase }));
+      } catch (error) {
+        console.error('❌ priceDatabase 초기화 실패:', error);
+        // 오류 시에도 기본 객체 제공
+        window.priceDB = {
+          loadSavedState: () => console.warn('priceDB 초기화 실패로 인한 더미 함수'),
+          getDataStatus: () => ({ status: 'error', summary: { total: 0 } })
+        };
+      }
     </script>
     <!-- ES6 모듈 시스템 -->
     <script type="module" src="js/main.js"></script>

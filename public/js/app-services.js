@@ -1054,8 +1054,45 @@ function confirmDataClear() {
 // =============================================================================
 
 function showMaterialManagementModal() {
+    // 디버깅을 위한 로그
+    console.log('🔍 window.priceDB 상태:', window.priceDB);
+    console.log('🔍 window.priceDatabase 상태:', window.priceDatabase);
+    
+    // priceDB가 초기화되지 않은 경우 대기
+    if (!window.priceDB || !window.priceDB.loadSavedState) {
+        console.warn('⚠️ priceDB가 아직 초기화되지 않았습니다.');
+        
+        // 최대 5초 동안 0.1초마다 확인
+        let attempts = 0;
+        const maxAttempts = 50;
+        
+        const checkPriceDB = () => {
+            attempts++;
+            if (window.priceDB && window.priceDB.loadSavedState) {
+                console.log('✅ priceDB 초기화 완료, 모달 표시');
+                showMaterialManagementModal();
+                return;
+            }
+            
+            if (attempts < maxAttempts) {
+                setTimeout(checkPriceDB, 100);
+            } else {
+                console.error('❌ priceDB 초기화 타임아웃');
+                showToast('데이터베이스 초기화에 실패했습니다. 페이지를 새로고침해 주세요.', 'error');
+            }
+        };
+        
+        showToast('데이터베이스 초기화 중...', 'info');
+        setTimeout(checkPriceDB, 100);
+        return;
+    }
+    
     // 저장된 상태 불러오기
-    window.priceDB.loadSavedState();
+    try {
+        window.priceDB.loadSavedState();
+    } catch (error) {
+        console.error('loadSavedState 오류:', error);
+    }
     
     const dataStatus = window.priceDB.getDataStatus();
     
@@ -1764,11 +1801,24 @@ function showLightweightMaterials() {
     }
     
     const lightweightData = window.priceDB.getLightweightComponents();
+    
+    // 디버깅을 위한 로그
+    console.log('🔍 getLightweightComponents 결과:', lightweightData);
+    console.log('🔍 items 길이:', lightweightData?.items?.length);
+    console.log('🔍 첫 번째 아이템:', lightweightData?.items?.[0]);
+    
     const container = document.getElementById('materialTableContainer');
     const materialStats = document.getElementById('materialStats');
     const materialTypeInfo = document.getElementById('materialTypeInfo');
     
     if (!container) return;
+    
+    // 데이터가 없으면 오류 메시지 표시
+    if (!lightweightData || !lightweightData.items || lightweightData.items.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">경량자재 데이터가 없습니다.</div>';
+        console.error('❌ 경량자재 데이터 로드 실패');
+        return;
+    }
     
     // 벽체 경량 자재 테이블 생성 (14개 컬럼)
     const tableHTML = `
@@ -1897,12 +1947,12 @@ function showLightweightMaterials() {
                                     ? item.name 
                                     : item.name + (item.note ? ' ' + item.note : '')
                             }</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;" title="추출된 규격">${newSpecification}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;" title="${item.spec}">${item.spec}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;" title="규격">${item.spec || ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;" title="싸이즈">${item.size || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.unit}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${item.price.toLocaleString()}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${Math.round(item.price * 0.8).toLocaleString()}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">기준</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || 0}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
                                 <input type="number" 
                                        value="${item.laborCompensation || 100}" 
@@ -1911,9 +1961,10 @@ function showLightweightMaterials() {
                                        onchange="updateLaborCompensation('${item.id}', this.value)"
                                        title="노무비 보할 (%)" />%
                             </td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">경량</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">경량</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">벽체</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || ''}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.work || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
                                 <button onclick="editLightweightMaterial('${item.id}')" class="btn btn-sm" style="padding: 2px 4px; margin-right: 2px; background: #3b82f6; color: white; font-size: 10px;" title="자재 편집">
                                     <i class="fas fa-edit"></i>
