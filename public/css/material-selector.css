@@ -1,0 +1,230 @@
+/* =============================================================================
+   Kiyeno 자재 선택 콤보박스 스타일
+   ============================================================================= */
+
+/* 자재 선택 컨테이너 */
+.material-selector-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* 자재 선택 콤보박스 */
+.material-selector {
+    width: 100%;
+    padding: 4px 8px;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    font-size: inherit;
+    font-family: inherit;
+    background-color: white;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.material-selector:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.material-selector:hover {
+    border-color: #0056b3;
+}
+
+/* 옵션 그룹 스타일 */
+.material-selector optgroup {
+    font-weight: bold;
+    color: #495057;
+    background-color: #f8f9fa;
+    padding: 2px 0;
+}
+
+.material-selector option {
+    padding: 4px 8px;
+    font-weight: normal;
+    color: #212529;
+}
+
+.material-selector option:hover {
+    background-color: #e3f2fd;
+}
+
+.material-selector option:selected {
+    background-color: #007bff;
+    color: white;
+}
+
+/* 로딩 상태 */
+.material-selector option[data-loading="true"] {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* 가격 정보 표시 */
+.material-selector option[data-price] {
+    position: relative;
+}
+
+/* 자재 정보 툴팁 (향후 확장용) */
+.material-info-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.material-info-tooltip.show {
+    opacity: 1;
+}
+
+/* 검색 기능 스타일 (향후 확장용) */
+.material-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px 4px 0 0;
+    font-size: 14px;
+    outline: none;
+}
+
+.material-search-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25);
+}
+
+/* 자재 매핑 상태 표시 */
+.cell-editing.material-mapped {
+    background-color: #e8f5e8 !important;
+}
+
+.cell-editing.material-unmapped {
+    background-color: #fff3cd !important;
+}
+
+/* 자재 선택 완료 상태 */
+.material-cell-completed {
+    background: linear-gradient(90deg, #e8f5e8 0%, #f8f9fa 100%);
+    border-left: 3px solid #28a745;
+}
+
+/* 자재 선택 중 상태 */
+.material-cell-editing {
+    background: linear-gradient(90deg, #e3f2fd 0%, #f8f9fa 100%);
+    border-left: 3px solid #007bff;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .material-selector {
+        font-size: 14px;
+        padding: 6px 8px;
+    }
+    
+    .material-selector option {
+        padding: 6px 8px;
+    }
+}
+
+/* 다크 모드 지원 (향후 확장용) */
+@media (prefers-color-scheme: dark) {
+    .material-selector {
+        background-color: #2d3748;
+        color: #e2e8f0;
+        border-color: #4a5568;
+    }
+    
+    .material-selector optgroup {
+        background-color: #4a5568;
+        color: #e2e8f0;
+    }
+    
+    .material-selector option {
+        background-color: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .material-selector option:hover {
+        background-color: #4a5568;
+    }
+    
+    .material-selector option:selected {
+        background-color: #3182ce;
+    }
+}
+
+/* 직접 입력 필드 스타일 */
+.custom-material-input {
+    border-color: #28a745 !important;
+    background-color: #f8fff8;
+    transition: all 0.3s ease;
+}
+
+.custom-material-input:focus {
+    border-color: #20c997 !important;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+    background-color: white;
+}
+
+.custom-material-input::placeholder {
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* 직접 입력 옵션 강조 */
+.material-selector option[data-custom="true"] {
+    background-color: #e8f5e8 !important;
+    color: #155724 !important;
+    font-weight: bold;
+}
+
+.material-selector option[data-custom="true"]:hover {
+    background-color: #d4edda !important;
+}
+
+/* 사용자 지정 자재 표시 */
+.material-cell-custom {
+    background: linear-gradient(90deg, #e8f5e8 0%, #f8fff8 100%);
+    border-left: 3px solid #28a745;
+    font-style: italic;
+}
+
+/* 접근성 개선 */
+.material-selector:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+.custom-material-input:focus-visible {
+    outline: 2px solid #28a745;
+    outline-offset: 2px;
+}
+
+/* 자재 카테고리별 색상 구분 (선택사항) */
+.material-selector optgroup[label*="보드"] {
+    background-color: #f0f8ff;
+}
+
+.material-selector optgroup[label*="스터드"] {
+    background-color: #f5f5dc;
+}
+
+.material-selector optgroup[label*="단열"] {
+    background-color: #f0fff0;
+}
+
+.material-selector optgroup[label*="프레임"] {
+    background-color: #fdf5e6;
+}
+
+.material-selector optgroup[label*="철강"] {
+    background-color: #f5f5f5;
+}

@@ -1,0 +1,401 @@
+/* =============================================================================
+   Kiyeno Logger UI Styles
+   ============================================================================= */
+
+/* 로그 뷰어 컨테이너 */
+.log-viewer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-top: 2px solid #333;
+    z-index: 10000;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    transition: height 0.3s ease;
+    height: 300px;
+}
+
+.log-viewer.minimized {
+    height: 40px;
+}
+
+.log-viewer.hidden {
+    display: none;
+}
+
+/* 로그 뷰어 헤더 */
+.log-viewer-header {
+    background: #2a2a2a;
+    padding: 8px 15px;
+    border-bottom: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.log-viewer-title {
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.log-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+}
+
+.log-stat {
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.log-stat.error { color: #ff6b6b; }
+.log-stat.warn { color: #ffa500; }
+.log-stat.info { color: #4dabf7; }
+.log-stat.debug { color: #888; }
+
+.log-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.log-controls button {
+    background: #444;
+    border: none;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.log-controls button:hover {
+    background: #555;
+}
+
+.log-controls button.active {
+    background: #007acc;
+}
+
+/* 필터 섹션 */
+.log-filters {
+    background: #2a2a2a;
+    padding: 8px 15px;
+    border-bottom: 1px solid #444;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.log-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.log-filter-group label {
+    color: #ccc;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.log-filter-group select,
+.log-filter-group input {
+    background: #333;
+    border: 1px solid #555;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.log-filter-group input[type="search"] {
+    width: 200px;
+}
+
+/* 로그 컨텐츠 */
+.log-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    background: #1a1a1a;
+    max-height: calc(100% - 120px);
+}
+
+.log-viewer.minimized .log-content {
+    display: none;
+}
+
+/* 로그 엔트리 */
+.log-entry {
+    padding: 6px 15px;
+    border-bottom: 1px solid #333;
+    font-size: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.log-entry:hover {
+    background: #2a2a2a;
+}
+
+.log-entry.selected {
+    background: #3a3a3a;
+}
+
+.log-entry.error {
+    border-left: 3px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.log-entry.warn {
+    border-left: 3px solid #ffa500;
+    background: rgba(255, 165, 0, 0.1);
+}
+
+.log-entry.info {
+    border-left: 3px solid #4dabf7;
+    background: rgba(77, 171, 247, 0.1);
+}
+
+.log-entry.debug {
+    border-left: 3px solid #888;
+    background: rgba(136, 136, 136, 0.1);
+}
+
+.log-entry.trace {
+    border-left: 3px solid #ccc;
+    background: rgba(204, 204, 204, 0.05);
+}
+
+/* 로그 시간 */
+.log-timestamp {
+    color: #888;
+    font-size: 10px;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+/* 로그 레벨 */
+.log-level {
+    font-weight: bold;
+    min-width: 60px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+}
+
+.log-level.error {
+    background: #ff6b6b;
+    color: #fff;
+}
+
+.log-level.warn {
+    background: #ffa500;
+    color: #fff;
+}
+
+.log-level.info {
+    background: #4dabf7;
+    color: #fff;
+}
+
+.log-level.debug {
+    background: #888;
+    color: #fff;
+}
+
+.log-level.trace {
+    background: #ccc;
+    color: #333;
+}
+
+/* 로그 카테고리 */
+.log-category {
+    color: #61dafb;
+    font-weight: bold;
+    min-width: 80px;
+    font-size: 11px;
+}
+
+/* 로그 메시지 */
+.log-message {
+    flex: 1;
+    color: #fff;
+    word-break: break-word;
+}
+
+/* 로그 상세 정보 */
+.log-details {
+    margin-top: 8px;
+    padding: 8px;
+    background: #333;
+    border-radius: 3px;
+    border-left: 3px solid #666;
+    display: none;
+}
+
+.log-entry.expanded .log-details {
+    display: block;
+}
+
+.log-details pre {
+    margin: 0;
+    color: #ccc;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* 로그 액션 버튼 */
+.log-actions {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.log-action-btn {
+    background: #444;
+    border: none;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: 10px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.log-action-btn:hover {
+    opacity: 1;
+}
+
+.log-action-btn.fix {
+    background: #28a745;
+}
+
+.log-action-btn.copy {
+    background: #6c757d;
+}
+
+/* 스크롤바 스타일 */
+.log-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.log-content::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .log-viewer {
+        height: 200px;
+    }
+    
+    .log-filters {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .log-entry {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .log-timestamp,
+    .log-level,
+    .log-category {
+        min-width: auto;
+    }
+}
+
+/* 애니메이션 */
+@keyframes logEntryAdd {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.log-entry.new {
+    animation: logEntryAdd 0.3s ease;
+}
+
+/* 로그 분석 결과 */
+.log-analysis {
+    background: #2a2a2a;
+    border-top: 1px solid #444;
+    padding: 8px 15px;
+    display: none;
+}
+
+.log-analysis.visible {
+    display: block;
+}
+
+.log-analysis-title {
+    color: #fff;
+    font-weight: bold;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.log-analysis-content {
+    color: #ccc;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.log-fix-suggestion {
+    background: #3a3a3a;
+    padding: 8px;
+    border-radius: 3px;
+    margin-top: 8px;
+    border-left: 3px solid #28a745;
+}
+
+.log-fix-btn {
+    background: #28a745;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.log-fix-btn:hover {
+    background: #218838;
+}

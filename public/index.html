@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>벽체 정보 관리 시스템 - Wall Management System</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- SheetJS 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/breakdown-styles.css" />
+    <link rel="stylesheet" href="css/material-management.css" />
+    <link rel="stylesheet" href="css/material-selector.css" />
+    <link rel="stylesheet" href="css/revit-responsive.css" />
+    <link rel="stylesheet" href="css/display-system.css" />
+
+    <!-- Dexie.js for IndexedDB management -->
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+
+    <!-- Socket.IO Client for WebSocket communication -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- 상단 메인 컨텐츠 -->
+      <div class="main-content">
+        <!-- 헤더 -->
+        <div class="header">
+          <h1><i class="fas fa-building"></i> Kiyeno 벽체 정보 관리 시스템</h1>
+        </div>
+
+        <!-- 컨트롤 버튼들 -->
+        <div class="controls">
+          <!-- 결과물 디스플레이 시스템 -->
+          <div class="display-mode-dropdown">
+            <button
+              class="display-mode-button"
+              id="displayModeButton"
+              onclick="toggleDisplayModeDropdown()"
+            >
+              <i class="fas fa-list-alt"></i>
+              기본값보기
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="display-mode-dropdown-menu" id="displayModeDropdown">
+              <div
+                class="display-mode-dropdown-item active"
+                onclick="DisplaySystem.setMode('default'); toggleDisplayModeDropdown()"
+              >
+                <i class="fas fa-list-alt"></i>
+                기본값보기
+              </div>
+              <div
+                class="display-mode-dropdown-item"
+                onclick="DisplaySystem.setMode('type'); toggleDisplayModeDropdown()"
+              >
+                <i class="fas fa-layer-group"></i>
+                타입별보기
+              </div>
+              <div
+                class="display-mode-dropdown-item"
+                onclick="DisplaySystem.setMode('material'); toggleDisplayModeDropdown()"
+              >
+                <i class="fas fa-box"></i>
+                재료별보기
+              </div>
+              <div
+                class="display-mode-dropdown-item"
+                onclick="DisplaySystem.setMode('workType'); toggleDisplayModeDropdown()"
+              >
+                <i class="fas fa-hard-hat"></i>
+                공종별보기
+              </div>
+            </div>
+          </div>
+
+          <!-- 자재 관리 버튼 -->
+          <button
+            class="btn btn-green"
+            id="materialManageBtn"
+            onclick="showMaterialManageModal()"
+          >
+            <i class="fas fa-tools"></i> 자재 관리
+          </button>
+
+          <!-- 벽체 타입 관리 버튼 -->
+          <button
+            class="btn btn-purple"
+            id="wallTypeManageBtn"
+            onclick="openRevitTypeMatching()"
+          >
+            <i class="fas fa-layer-group"></i> 벽체 타입 관리
+          </button>
+
+          <!-- 일위대가 관리 버튼 -->
+          <button
+            class="btn btn-orange"
+            id="unitPriceManageBtn"
+            onclick="openUnitPriceManagement()"
+          >
+            <i class="fas fa-calculator"></i> 일위대가 관리
+          </button>
+
+          <!-- Revit 연동 메뉴 -->
+          <div class="dropdown">
+            <button
+              class="btn btn-purple dropdown-toggle"
+              onclick="toggleDropdown('revitIntegration')"
+            >
+              <i class="fas fa-cube"></i> Revit 연동
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu" id="revitIntegration">
+              <div
+                class="dropdown-item wall-selection-button"
+                onclick="selectSingleWallFromRevit()"
+              >
+                <i class="fas fa-mouse-pointer"></i> 벽체 선택 (단일)
+              </div>
+              <div
+                class="dropdown-item wall-selection-button"
+                onclick="selectMultipleWallsFromRevit()"
+              >
+                <i class="fas fa-hand-pointer"></i> 벽체 선택 (다중)
+              </div>
+              <div
+                class="dropdown-item wall-selection-button"
+                onclick="selectWallsByRoomFromRevit()"
+              >
+                <i class="fas fa-home"></i> 룸으로 벽체선택
+              </div>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item" onclick="createWallTypesInRevit()">
+                <i class="fas fa-hammer"></i> WallType 생성
+              </div>
+              <div class="dropdown-divider"></div>
+              <div
+                class="dropdown-item"
+                onclick="toggleRevitDataSection()"
+                id="revitToggleBtn"
+              >
+                <i class="fas fa-table"></i> Revit 데이터 열기/닫기
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 디스플레이 컨테이너 -->
+        <div class="display-container" id="displayContainer">
+          <!-- 디스플레이 내용이 여기에 렌더링됩니다 -->
+        </div>
+      </div>
+      <!-- main-content 닫기 -->
+
+      <!-- Revit 데이터 확인 테이블 (숨김 상태로 시작) -->
+      <div
+        id="revitDataSection"
+        class="revit-data-section"
+        style="display: none"
+      >
+        <div class="revit-header">
+          <h2><i class="fas fa-cube"></i> Revit 벽체 데이터 확인</h2>
+          <div class="revit-controls">
+            <div class="dropdown">
+              <button
+                class="btn btn-primary dropdown-toggle"
+                type="button"
+                id="exportImportDropdown"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <i class="fas fa-download"></i> 데이터 관리
+              </button>
+              <div class="dropdown-menu" aria-labelledby="exportImportDropdown">
+                <a class="dropdown-item" href="#" onclick="exportToExcel()">
+                  <i class="fas fa-file-excel"></i> Excel로 내보내기
+                </a>
+                <a class="dropdown-item" href="#" onclick="exportToJSON()">
+                  <i class="fas fa-file-code"></i> JSON으로 내보내기
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" onclick="importFromFile()">
+                  <i class="fas fa-upload"></i> 파일에서 불러오기
+                </a>
+              </div>
+            </div>
+            <button class="btn btn-secondary" onclick="clearRevitData()">
+              <i class="fas fa-trash"></i> Revit 데이터 지우기
+            </button>
+          </div>
+        </div>
+
+        <!-- 파일 불러오기를 위한 숨겨진 input -->
+        <input
+          type="file"
+          id="fileImportInput"
+          accept=".json,.xlsx,.xls"
+          style="display: none"
+          onchange="handleFileImport(event)"
+        />
+
+        <div class="revit-table-wrapper">
+          <div class="revit-selection-info">
+            <span id="revitSelectionText">Revit 데이터가 없습니다.</span>
+            <div style="font-size: 10px; color: #666; margin-top: 5px">
+              <i class="fas fa-info-circle"></i> 선택 방법: 일반 클릭(단일),
+              Ctrl+클릭(다중), Shift+클릭(범위)
+            </div>
+          </div>
+
+          <!-- 필터 컨트롤 -->
+          <div class="revit-filters">
+            <div class="filter-group">
+              <label for="nameFilter"
+                ><i class="fas fa-filter"></i> Name 필터:</label
+              >
+              <select id="nameFilter" onchange="applyRevitFilters()">
+                <option value="">전체</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="levelFilter"
+                ><i class="fas fa-filter"></i> Level 필터:</label
+              >
+              <select id="levelFilter" onchange="applyRevitFilters()">
+                <option value="">전체</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <button
+                class="btn btn-sm btn-secondary"
+                onclick="clearRevitFilters()"
+              >
+                <i class="fas fa-times"></i> 필터 초기화
+              </button>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-sm btn-info" onclick="selectInRevit()">
+                <i class="fas fa-crosshairs"></i> Revit 객체 선택
+              </button>
+            </div>
+          </div>
+
+          <div class="revit-table-container">
+            <table class="revit-table">
+              <thead>
+                <tr>
+                  <th class="col-select">
+                    <input
+                      type="checkbox"
+                      id="revitSelectAll"
+                      onchange="toggleAllRevitSelection()"
+                    />
+                  </th>
+                  <th class="col-revit-id">Revit ID</th>
+                  <th class="col-revit-name">Name</th>
+                  <th class="col-revit-length">Length (m)</th>
+                  <th class="col-revit-area">Area (m²)</th>
+                  <th class="col-revit-height">Height (m)</th>
+                  <th class="col-revit-thickness">Thickness (m)</th>
+                  <th class="col-revit-level">Level</th>
+                  <th class="col-revit-category">Category</th>
+                  <th class="col-revit-roomname">실명 (Room)</th>
+                </tr>
+              </thead>
+              <tbody id="revitTableBody">
+                <!-- Revit 데이터가 여기에 표시됩니다 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- container 닫기 -->
+
+    <!-- 컨텍스트 메뉴 -->
+    <div id="contextMenu" class="context-menu">
+      <div class="context-menu-item" onclick="duplicateWall()">
+        <i class="fas fa-copy"></i> 벽체 복사
+      </div>
+      <div class="context-menu-item" onclick="deleteWall()">
+        <i class="fas fa-trash-alt"></i> 벽체 삭제
+      </div>
+    </div>
+
+    <!-- 토스트 알림 -->
+    <div id="toast" class="toast">
+      <div id="toastMessage"></div>
+    </div>
+
+    <!-- 선택 정보 -->
+    <div id="selectionInfo" class="selection-info">
+      <span id="selectionText"></span>
+    </div>
+
+    <!-- 실명 입력 모달 -->
+    <div id="roomNameModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-home"></i> 실명 입력</h3>
+          <span class="close" onclick="closeRoomNameModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p>선택된 벽체의 실명(룸 이름)을 입력해주세요:</p>
+          <div class="wall-info" id="modalWallInfo">
+            <!-- 벽체 정보가 여기에 표시됩니다 -->
+          </div>
+          <div class="input-group">
+            <label for="roomNameInput">실명:</label>
+            <input
+              type="text"
+              id="roomNameInput"
+              placeholder="예: 거실, 침실1, 주방..."
+              maxlength="50"
+            />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeRoomNameModal()">
+            <i class="fas fa-times"></i> 취소
+          </button>
+          <button class="btn btn-success" onclick="saveRoomName()">
+            <i class="fas fa-save"></i> 저장
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kiyeno 벽체 관리 시스템 - 통합 모듈 -->
+    <!-- 브릿지 시스템 - 새로운 시스템과 기존 시스템 연결 -->
+    <script src="js/bridge.js"></script>
+    <!-- priceDatabase를 먼저 로드하여 전역에 노출 -->
+    <script type="module">
+      import priceDatabase from './js/modules/priceDatabase.js';
+      window.priceDatabase = priceDatabase;
+      window.priceDB = priceDatabase;
+      await priceDatabase.initialize();
+      console.log('🚀 priceDatabase 전역 초기화 완료');
+    </script>
+    <!-- ES6 모듈 시스템 -->
+    <script type="module" src="js/main.js"></script>
+    <script src="js/app-core.js"></script>
+    <script src="js/app-calculator.js"></script>
+    <script src="js/app-services.js"></script>
+    <script src="js/app-ui.js"></script>
+    <script src="js/revit-type-matching.js"></script>
+    <script src="js/revit-wall-handler.js"></script>
+    <script src="js/display-system.js"></script>
+
+    <!-- 통합 JavaScript 초기화 시스템 -->
+    <script>
+      // 백업용 함수 정의 (파일에서 로드되지 않을 경우를 대비)
+      if (typeof window.selectSingleWallFromRevit !== 'function') {
+        window.selectSingleWallFromRevit = function () {
+          console.log('백업 selectSingleWallFromRevit 함수 호출됨');
+          // WebSocket을 통한 Revit 통신
+          if (window.socketService && window.socketService.isConnected()) {
+            window.socketService.sendRevitCommand('selectWall');
+            if (typeof showToast === 'function') {
+              showToast('🖱️ Revit에서 벽체를 선택해주세요.', 'info');
+            } else {
+              alert('Revit에서 벽체를 선택해주세요.');
+            }
+          } else {
+            alert('Revit 연동 환경이 아닙니다. WebSocket 연결을 확인해주세요.');
+          }
+        };
+      }
+
+      if (typeof window.selectMultipleWallsFromRevit !== 'function') {
+        window.selectMultipleWallsFromRevit = function () {
+          console.log('백업 selectMultipleWallsFromRevit 함수 호출됨');
+          // WebSocket을 통한 Revit 통신
+          if (window.socketService && window.socketService.isConnected()) {
+            window.socketService.sendRevitCommand('selectMultipleWalls');
+            if (typeof showToast === 'function') {
+              showToast(
+                '🖱️ Revit에서 벽체들을 선택해주세요. (완료하려면 Finish 클릭)',
+                'info'
+              );
+            } else {
+              alert(
+                'Revit에서 벽체들을 선택해주세요. (완료하려면 Finish 클릭)'
+              );
+            }
+          } else {
+            alert('Revit 연동 환경이 아닙니다. WebSocket 연결을 확인해주세요.');
+          }
+        };
+      }
+
+      if (typeof window.addWallsFromRevit !== 'function') {
+        window.addWallsFromRevit = function (wallInfos) {
+          console.log('백업 addWallsFromRevit 함수 호출됨', wallInfos);
+
+          // 기본적인 데이터 표시
+          if (wallInfos && Array.isArray(wallInfos) && wallInfos.length > 0) {
+            const revitSection = document.getElementById('revitDataSection');
+            if (revitSection) {
+              revitSection.style.display = 'flex';
+              revitSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // 간단한 테이블 렌더링
+            const tableBody = document.getElementById('revitTableBody');
+            if (tableBody) {
+              tableBody.innerHTML = '';
+              wallInfos.forEach((wall, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                              <td><input type="checkbox"></td>
+                              <td>${wall.Id || wall.id || 'N/A'}</td>
+                              <td>${wall.Name || wall.name || 'N/A'}</td>
+                              <td>${
+                                wall.WallType || wall.wallType || 'N/A'
+                              }</td>
+                              <td>${(wall.Area || wall.area || 0).toFixed(
+                                3
+                              )}</td>
+                              <td>${(wall.Height || wall.height || 0).toFixed(
+                                3
+                              )}</td>
+                              <td>${(wall.Length || wall.length || 0).toFixed(
+                                3
+                              )}</td>
+                              <td>${(
+                                wall.Thickness ||
+                                wall.thickness ||
+                                0
+                              ).toFixed(3)}</td>
+                              <td>${wall.Level || wall.level || 'N/A'}</td>
+                              <td>${
+                                wall.Material || wall.material || 'N/A'
+                              }</td>
+                              <td>${wall.Comments || wall.comments || '-'}</td>
+                          `;
+                tableBody.appendChild(row);
+              });
+            }
+
+            const message = `Revit에서 ${wallInfos.length}개 벽체 데이터를 받았습니다.`;
+            if (typeof showToast === 'function') {
+              showToast(message, 'success');
+            } else {
+              alert(message);
+            }
+
+            console.log('받은 벽체 데이터:', wallInfos);
+          } else {
+            alert('유효한 벽체 데이터가 없습니다.');
+          }
+        };
+      }
+
+      // 백업 함수들 - 메인 함수가 제대로 로드되었는지 확인
+      console.log('HTML 백업 함수 체크 시점의 함수 상태:', {
+        clearRevitData: typeof window.clearRevitData,
+        toggleAllRevitSelection: typeof window.toggleAllRevitSelection,
+        toggleRevitSelection: typeof window.toggleRevitSelection,
+      });
+
+        if (typeof window.clearRevitData !== 'function') {
+          console.warn('clearRevitData 메인 함수 없음 - 백업 함수 등록');
+          window.clearRevitData = function () {
+            console.log('백업 clearRevitData 함수 호출됨');
+            if (confirm('Revit 데이터를 모두 지우시겠습니까?')) {
+              const revitSection = document.getElementById('revitDataSection');
+              if (revitSection) {
+                revitSection.style.display = 'none';
+              }
+              const tableBody = document.getElementById('revitTableBody');
+              if (tableBody) {
+                tableBody.innerHTML =
+                  '<tr><td colspan="11" style="text-align: center; padding: 20px;">Revit 데이터가 삭제되었습니다.</td></tr>';
+              }
+              alert('Revit 데이터가 삭제되었습니다.');
+            }
+          };
+        }
+
+        if (typeof window.toggleAllRevitSelection !== 'function') {
+          console.warn(
+            'toggleAllRevitSelection 메인 함수 없음 - 백업 함수 등록'
+          );
+          window.toggleAllRevitSelection = function () {
+            console.log('백업 toggleAllRevitSelection 함수 호출됨');
+            const checkboxes = document.querySelectorAll(
+              '#revitTableBody input[type="checkbox"]'
+            );
+            const selectAll = document.getElementById('revitSelectAll');
+            const isChecked = selectAll ? selectAll.checked : false;
+
+            checkboxes.forEach((checkbox) => {
+              checkbox.checked = isChecked;
+            });
+          };
+        }
+
+        if (typeof window.toggleRevitSelection !== 'function') {
+          console.warn('toggleRevitSelection 메인 함수 없음 - 백업 함수 등록');
+          window.toggleRevitSelection = function (tempId, checked) {
+            console.log(
+              '백업 toggleRevitSelection 함수 호출됨',
+              tempId,
+              checked
+            );
+            // 기본적인 체크박스 상태 변경만 처리
+          };
+        }
+      }, 50);
+
+      }, 100);
+
+
+
+
+      console.log('HTML 백업 함수 정의 완료:', {
+        selectSingleWallFromRevit: typeof window.selectSingleWallFromRevit,
+        selectMultipleWallsFromRevit:
+          typeof window.selectMultipleWallsFromRevit,
+        addWallsFromRevit: typeof window.addWallsFromRevit,
+        clearRevitData: typeof window.clearRevitData,
+        toggleAllRevitSelection: typeof window.toggleAllRevitSelection,
+        toggleRevitSelection: typeof window.toggleRevitSelection,
+      });
+    </script>
+  </body>
+</html>

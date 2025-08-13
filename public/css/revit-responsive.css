@@ -1,0 +1,217 @@
+/* Revit 타입 매칭 반응형 스타일 */
+
+/* 기본 테이블 스타일 */
+.responsive-wall-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.responsive-wall-table table {
+    min-width: 1200px; /* 최소 테이블 너비 */
+    width: 100%;
+}
+
+/* 컬럼 우선순위 기반 숨김 */
+.col-priority-low {
+    /* 낮은 우선순위 컬럼 */
+}
+
+.col-priority-medium {
+    /* 중간 우선순위 컬럼 */
+}
+
+.col-priority-high {
+    /* 높은 우선순위 컬럼 */
+}
+
+/* 태블릿 대응 (1024px 이하) */
+@media (max-width: 1024px) {
+    .responsive-wall-table {
+        max-height: 400px;
+    }
+    
+    .responsive-wall-table table {
+        min-width: 1000px;
+    }
+    
+    /* 덜 중요한 컬럼 숨기기 */
+    .col-steel,
+    .col-channel,
+    .col-runner {
+        display: none;
+    }
+    
+    /* 헤더 텍스트 크기 조정 */
+    .header-main,
+    .header-sub {
+        font-size: 11px;
+        padding: 6px 4px;
+    }
+    
+    /* 셀 크기 조정 */
+    .responsive-wall-table td {
+        padding: 4px 2px;
+        font-size: 12px;
+    }
+}
+
+/* 모바일 대응 (768px 이하) */
+@media (max-width: 768px) {
+    .responsive-wall-table {
+        max-height: 300px;
+        font-size: 10px;
+    }
+    
+    .responsive-wall-table table {
+        min-width: 800px;
+    }
+    
+    /* 추가로 컬럼 숨기기 */
+    .col-steel,
+    .col-channel,
+    .col-runner,
+    .col-column2 {
+        display: none;
+    }
+    
+    /* 헤더 더 작게 */
+    .header-main,
+    .header-sub {
+        font-size: 10px;
+        padding: 4px 2px;
+        line-height: 1.2;
+    }
+    
+    /* 셀 더 작게 */
+    .responsive-wall-table td {
+        padding: 2px 1px;
+        font-size: 10px;
+    }
+    
+    /* 체크박스 크기 조정 */
+    .responsive-wall-table input[type="checkbox"] {
+        transform: scale(0.8);
+    }
+    
+    /* 버튼 크기 조정 */
+    .responsive-wall-table button {
+        padding: 1px 3px;
+        font-size: 9px;
+    }
+}
+
+/* 작은 모바일 대응 (480px 이하) */
+@media (max-width: 480px) {
+    .responsive-wall-table {
+        max-height: 250px;
+        font-size: 9px;
+    }
+    
+    .responsive-wall-table table {
+        min-width: 600px;
+    }
+    
+    /* 더 많은 컬럼 숨기기 */
+    .col-steel,
+    .col-channel,
+    .col-runner,
+    .col-column2,
+    .col-thickness {
+        display: none;
+    }
+    
+    /* 레이어 컬럼 병합 표시 */
+    .col-layer {
+        min-width: 60px;
+    }
+    
+    /* 헤더 최소 크기 */
+    .header-main,
+    .header-sub {
+        font-size: 9px;
+        padding: 3px 1px;
+    }
+    
+    /* 셀 최소 크기 */
+    .responsive-wall-table td {
+        padding: 1px;
+        font-size: 9px;
+    }
+}
+
+/* 드롭다운 메뉴 반응형 */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        min-width: 200px;
+        max-width: 90vw;
+        z-index: 10002;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    
+    .dropdown-item {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+}
+
+/* 터치 친화적 버튼 */
+@media (max-width: 768px) {
+    .material-cell {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn {
+        min-height: 32px;
+        padding: 8px 12px;
+    }
+    
+    .btn-sm {
+        min-height: 28px;
+        padding: 6px 10px;
+    }
+}
+
+/* 수평 스크롤 힌트 */
+.responsive-wall-table::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to left, rgba(0,0,0,0.1), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.responsive-wall-table:hover::after {
+    opacity: 1;
+}
+
+/* 모바일에서 스크롤 가능 표시 */
+@media (max-width: 768px) {
+    .responsive-wall-table {
+        position: relative;
+    }
+    
+    .responsive-wall-table::before {
+        content: '← 좌우로 스크롤하세요 →';
+        position: absolute;
+        top: -25px;
+        right: 0;
+        font-size: 11px;
+        color: #666;
+        background: #f8f9fa;
+        padding: 2px 8px;
+        border-radius: 4px;
+        z-index: 1;
+    }
+}

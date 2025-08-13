@@ -1,0 +1,752 @@
+/* 수량 계산 세부 정보 스타일 */
+.quantity {
+    position: relative;
+    vertical-align: top;
+    text-align: right;
+}
+
+.quantity small {
+    display: block;
+    margin-top: 3px;
+    font-style: italic;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.quantity:hover {
+    background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* 길이 정보 표시 스타일 (수량 컬럼용) */
+.quantity small {
+    font-weight: 500;
+    color: #6b7280;
+}
+
+/* Revit 데이터 기반 길이 스타일 */
+.data-item[style*="background: #d1fae5"] {
+    border-left: 3px solid #10b981;
+}
+
+.data-item[style*="background: #d1fae5"] .value {
+    color: #065f46;
+    font-weight: 600;
+}
+
+/* 추정 길이 스타일 */
+.data-item[style*="background: #fff3cd"] {
+    border-left: 3px solid #f59e0b;
+}
+
+.data-item[style*="background: #fff3cd"] .value {
+    color: #92400e;
+    font-weight: 500;
+}
+
+/* =============================================================================
+   가격 편집 스타일
+   ============================================================================= */
+.editable-price {
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.editable-price:hover {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border: 1px solid #3b82f6;
+}
+
+.editable-price:hover::after {
+    content: '✏️';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    opacity: 0.7;
+}
+
+.price-editing {
+    background: #fff3cd !important;
+    border: 2px solid #f59e0b !important;
+}
+
+.price-editing input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-weight: 500;
+}/* =============================================================================
+   벽체 상세 내역서 전용 CSS 스타일
+   ============================================================================= */
+
+/* =============================================================================
+   기본 내역서 컨테이너 스타일
+   ============================================================================= */
+.quantity-results,
+.pricing-results,
+.consolidated-quantity,
+.single-wall-breakdown,
+.detailed-breakdown-report {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #374151;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* =============================================================================
+   요약 섹션 스타일
+   ============================================================================= */
+.results-summary,
+.pricing-summary,
+.quantity-summary {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.results-summary h4,
+.pricing-summary h4,
+.quantity-summary h4 {
+    margin: 0 0 15px 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 요약 그리드 레이아웃 */
+.summary-grid,
+.info-grid,
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.summary-item,
+.info-item,
+.data-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.summary-item .label,
+.info-item .label,
+.data-item .label {
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.summary-item .value,
+.info-item .value,
+.data-item .value {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.summary-item .value.success {
+    color: #059669;
+}
+
+.summary-item .value.error {
+    color: #dc2626;
+}
+
+/* =============================================================================
+   비용 표시 스타일
+   ============================================================================= */
+.total-cost {
+    background: white;
+    border: 2px solid #3b82f6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.cost-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.cost-item.total {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e40af;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.cost-breakdown {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.cost-total {
+    text-align: center;
+}
+
+.total-amount {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 10px;
+}
+
+.total-amount .amount {
+    color: #dc2626;
+}
+
+/* =============================================================================
+   카테고리 내역 스타일
+   ============================================================================= */
+.category-breakdown {
+    margin: 20px 0;
+}
+
+.category-breakdown h4 {
+    margin: 0 0 15px 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.category-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    transition: all 0.2s ease;
+}
+
+.category-item:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 600;
+    color: #374151;
+}
+
+.category-total {
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.category-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* =============================================================================
+   벽체 결과 목록 스타일
+   ============================================================================= */
+.wall-results {
+    space-y: 15px;
+}
+
+.wall-result {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.2s ease;
+}
+
+.wall-result.success {
+    border-left: 4px solid #059669;
+}
+
+.wall-result.error {
+    border-left: 4px solid #dc2626;
+}
+
+.wall-result:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.wall-title,
+.wall-id {
+    font-weight: 600;
+    color: #374151;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status.success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.wall-info {
+    margin: 10px 0;
+}
+
+.wall-specs {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 5px;
+}
+
+.components-preview {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 10px;
+}
+
+.component {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.error-message {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+/* =============================================================================
+   테이블 스타일
+   ============================================================================= */
+.materials-table,
+.components-table,
+.materials-detail-table {
+    margin-top: 15px;
+    overflow-x: auto;
+}
+
+.materials-table table,
+.components-table table,
+.materials-detail-table table,
+.summary-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-width: 800px;
+}
+
+.materials-table th,
+.components-table th,
+.materials-detail-table th,
+.summary-table th {
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    color: white;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.materials-table td,
+.components-table td,
+.materials-detail-table td,
+.summary-table td {
+    padding: 10px 8px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    font-size: 12px;
+}
+
+.materials-table tr:nth-child(even),
+.components-table tr:nth-child(even),
+.materials-detail-table tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.materials-table tr:hover,
+.components-table tr:hover,
+.materials-detail-table tr:hover {
+    background: #eff6ff;
+}
+
+/* 테이블 셀 정렬 */
+.material-name,
+.item-name {
+    text-align: left !important;
+    font-weight: 500;
+    max-width: 250px;
+    word-wrap: break-word;
+}
+
+.quantity,
+.unit-price,
+.cost {
+    text-align: right !important;
+    font-feature-settings: 'tnum';
+}
+
+.cost {
+    font-weight: 500;
+}
+
+.cost.total,
+.total-cost {
+    font-weight: 600;
+    color: #dc2626;
+}
+
+.grand-total {
+    font-weight: 700;
+    color: #1e40af;
+    background: #eff6ff !important;
+}
+
+/* 테이블 푸터 */
+.materials-table tfoot tr,
+.components-table tfoot tr,
+.materials-detail-table tfoot tr {
+    background: #f1f5f9 !important;
+    font-weight: 600;
+}
+
+.total-row {
+    border-top: 2px solid #3b82f6;
+}
+
+.total-row .total {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.total-row .grand-total {
+    color: #1e40af;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* =============================================================================
+   단일 벽체 내역서 스타일
+   ============================================================================= */
+.single-wall-breakdown .wall-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.single-wall-breakdown .wall-header h4 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.input-data,
+.cost-summary,
+.components-detail {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.input-data h5,
+.cost-summary h5,
+.components-detail h5 {
+    margin: 0 0 15px 0;
+    color: #1f2937;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+/* =============================================================================
+   상세 내역서 리포트 스타일
+   ============================================================================= */
+.detailed-breakdown-report {
+    max-height: none;
+}
+
+.report-header {
+    text-align: center;
+    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.report-header h3 {
+    margin: 0 0 15px 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.report-info {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.executive-summary {
+    background: #fffbeb;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.executive-summary h4 {
+    margin: 0 0 15px 0;
+    color: #92400e;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.materials-breakdown {
+    margin-bottom: 30px;
+}
+
+.materials-breakdown h4 {
+    margin: 0 0 15px 0;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.breakdown-footer,
+.report-footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.calculation-info,
+.footer-info {
+    text-align: center;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.footer-info div {
+    margin-bottom: 5px;
+}
+
+/* =============================================================================
+   반응형 스타일
+   ============================================================================= */
+@media (max-width: 1200px) {
+    .materials-table table,
+    .components-table table,
+    .materials-detail-table table {
+        min-width: 700px;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-grid,
+    .info-grid,
+    .data-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cost-breakdown {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .wall-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .wall-specs {
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .report-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .materials-table,
+    .components-table,
+    .materials-detail-table {
+        font-size: 10px;
+    }
+    
+    .materials-table th,
+    .components-table th,
+    .materials-detail-table th {
+        padding: 8px 4px;
+    }
+    
+    .materials-table td,
+    .components-table td,
+    .materials-detail-table td {
+        padding: 6px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .quantity-results,
+    .pricing-results,
+    .consolidated-quantity,
+    .single-wall-breakdown {
+        font-size: 12px;
+    }
+    
+    .summary-item,
+    .info-item,
+    .data-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .total-amount {
+        font-size: 18px;
+    }
+    
+    .report-header {
+        padding: 20px;
+    }
+    
+    .report-header h3 {
+        font-size: 20px;
+    }
+}
+
+/* =============================================================================
+   인쇄 스타일
+   ============================================================================= */
+@media print {
+    .quantity-results,
+    .pricing-results,
+    .consolidated-quantity,
+    .single-wall-breakdown,
+    .detailed-breakdown-report {
+        max-height: none;
+        overflow: visible;
+        font-size: 12px;
+    }
+    
+    .materials-table,
+    .components-table,
+    .materials-detail-table {
+        break-inside: avoid;
+    }
+    
+    .wall-result,
+    .category-item {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .report-header {
+        background: #1e40af !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .total-cost {
+        border: 2px solid #3b82f6 !important;
+    }
+}
+
+/* =============================================================================
+   스크롤바 스타일
+   ============================================================================= */
+.quantity-results::-webkit-scrollbar,
+.pricing-results::-webkit-scrollbar,
+.consolidated-quantity::-webkit-scrollbar,
+.single-wall-breakdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.quantity-results::-webkit-scrollbar-track,
+.pricing-results::-webkit-scrollbar-track,
+.consolidated-quantity::-webkit-scrollbar-track,
+.single-wall-breakdown::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.quantity-results::-webkit-scrollbar-thumb,
+.pricing-results::-webkit-scrollbar-thumb,
+.consolidated-quantity::-webkit-scrollbar-thumb,
+.single-wall-breakdown::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.quantity-results::-webkit-scrollbar-thumb:hover,
+.pricing-results::-webkit-scrollbar-thumb:hover,
+.consolidated-quantity::-webkit-scrollbar-thumb:hover,
+.single-wall-breakdown::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
