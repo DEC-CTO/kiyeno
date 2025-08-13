@@ -1,0 +1,44 @@
+🎯 데이터 사용 순서
+
+  1. 수정된 데이터 우선 사용 ✅
+    - lightweightItemsCache 배열이 실제 표시되는 데이터
+    - 사용자가 자재를 수정하면 이 캐시가 업데이트됨
+    - 모든 UI에서 캐시 데이터를 표시
+  2. 원본 데이터는 백업용
+    - originalLightweightData는 초기화 시에만 사용
+    - 캐시가 비어있을 때만 원본으로 복원
+
+  🔄 작동 방식
+
+  // 데이터 조회 시
+  getLightweightComponents() {
+    // 캐시가 비어있으면 원본으로 초기화
+    if (!this.lightweightItemsCache || this.lightweightItemsCache.length === 0) {
+      this.lightweightItemsCache = JSON.parse(JSON.stringify(this.originalLightweightData));
+    }
+
+    // 항상 캐시 데이터 반환 (수정된 데이터)
+    return {
+      items: this.lightweightItemsCache,  // ← 수정된 데이터
+      total: this.lightweightItemsCache.length
+    };
+  }
+
+  📋 실제 시나리오
+
+  1. 초기 로드: 하드코딩 원본 → 캐시로 복사
+  2. 사용자 수정: 캐시 데이터 업데이트
+  3. 화면 표시: 수정된 캐시 데이터 사용
+  4. 재시작: 수정된 데이터 유지 (IndexedDB 저장)
+  5. 초기화: 원본으로 리셋 (수동 초기화 시에만)
+
+  ✅ 결론
+
+  자재관리에서 데이터를 수정하면 수정된 데이터를 사용합니다.
+
+  - 수정사항은 즉시 반영되어 모든 화면에서 사용
+  - 원본 데이터는 단순히 "초기값 백업" 역할만 함
+  - 브라우저를 재시작해도 수정된 데이터 유지
+  - 사용자가 명시적으로 초기화하지 않는 한 계속 수정된 데이터 사용
+
+  이는 일반적인 사용자 경험에 맞는 올바른 동작입니다! 👍

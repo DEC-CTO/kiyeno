@@ -524,7 +524,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -540,7 +540,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -556,7 +556,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -572,7 +572,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -588,7 +588,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -604,7 +604,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -620,7 +620,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -636,7 +636,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -652,7 +652,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -668,7 +668,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -684,7 +684,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -700,7 +700,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -716,7 +716,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -732,7 +732,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -748,7 +748,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -764,7 +764,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -782,7 +782,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -798,7 +798,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -814,7 +814,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -830,7 +830,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -846,7 +846,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -862,7 +862,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -878,7 +878,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -894,7 +894,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -910,7 +910,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -926,7 +926,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -942,7 +942,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -958,7 +958,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -974,7 +974,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -990,7 +990,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1006,7 +1006,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1022,7 +1022,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -1040,7 +1040,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1056,7 +1056,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1072,7 +1072,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1088,7 +1088,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1104,7 +1104,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -1122,7 +1122,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1138,7 +1138,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1154,7 +1154,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1170,7 +1170,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1186,7 +1186,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -1204,7 +1204,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1220,7 +1220,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1236,7 +1236,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1252,7 +1252,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1268,7 +1268,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1284,7 +1284,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1300,7 +1300,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1316,7 +1316,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -1334,7 +1334,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1350,7 +1350,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1366,7 +1366,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1382,7 +1382,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
 
@@ -1400,7 +1400,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1416,7 +1416,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1432,7 +1432,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1448,7 +1448,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1464,7 +1464,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1480,7 +1480,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1496,7 +1496,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1512,7 +1512,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1528,7 +1528,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1544,7 +1544,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1560,7 +1560,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1576,7 +1576,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1592,7 +1592,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1608,7 +1608,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1624,7 +1624,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1640,7 +1640,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1656,7 +1656,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1672,7 +1672,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1688,7 +1688,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1704,7 +1704,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1720,7 +1720,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1736,7 +1736,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
         {
@@ -1752,7 +1752,7 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 100,
           workType1: '경량',
           workType2: '경량',
-          location: '',
+          location: '벽체',
           work: '',
         },
       ];
