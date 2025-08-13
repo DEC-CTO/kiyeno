@@ -32,6 +32,8 @@
           <h1><i class="fas fa-building"></i> Kiyeno 벽체 정보 관리 시스템</h1>
         </div>
 
+        <!-- 필터 및 검색 섹션 제거됨 -->
+
         <!-- 컨트롤 버튼들 -->
         <div class="controls">
           <!-- 결과물 디스플레이 시스템 -->
@@ -93,15 +95,6 @@
             onclick="openRevitTypeMatching()"
           >
             <i class="fas fa-layer-group"></i> 벽체 타입 관리
-          </button>
-
-          <!-- 일위대가 관리 버튼 -->
-          <button
-            class="btn btn-orange"
-            id="unitPriceManageBtn"
-            onclick="openUnitPriceManagement()"
-          >
-            <i class="fas fa-calculator"></i> 일위대가 관리
           </button>
 
           <!-- Revit 연동 메뉴 -->
@@ -333,29 +326,9 @@
     <!-- Kiyeno 벽체 관리 시스템 - 통합 모듈 -->
     <!-- 브릿지 시스템 - 새로운 시스템과 기존 시스템 연결 -->
     <script src="js/bridge.js"></script>
-    <!-- priceDatabase를 먼저 로드하여 전역에 노출 -->
-    <script type="module">
-      import priceDatabase from './js/modules/priceDatabase.js';
-      window.priceDatabase = priceDatabase;
-      window.priceDB = priceDatabase;
-      
-      try {
-        await priceDatabase.initialize();
-        console.log('🚀 priceDatabase 전역 초기화 완료');
-        
-        // 초기화 완료 이벤트 발생
-        window.dispatchEvent(new CustomEvent('priceDBReady', { detail: priceDatabase }));
-      } catch (error) {
-        console.error('❌ priceDatabase 초기화 실패:', error);
-        // 오류 시에도 기본 객체 제공
-        window.priceDB = {
-          loadSavedState: () => console.warn('priceDB 초기화 실패로 인한 더미 함수'),
-          getDataStatus: () => ({ status: 'error', summary: { total: 0 } })
-        };
-      }
-    </script>
     <!-- ES6 모듈 시스템 -->
     <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/modules/priceDatabase.js"></script>
     <script src="js/app-core.js"></script>
     <script src="js/app-calculator.js"></script>
     <script src="js/app-services.js"></script>
@@ -370,16 +343,18 @@
       if (typeof window.selectSingleWallFromRevit !== 'function') {
         window.selectSingleWallFromRevit = function () {
           console.log('백업 selectSingleWallFromRevit 함수 호출됨');
-          // WebSocket을 통한 Revit 통신
-          if (window.socketService && window.socketService.isConnected()) {
-            window.socketService.sendRevitCommand('selectWall');
+          if (window.chrome && window.chrome.webview) {
+            const message = { action: 'selectWall' };
+            window.chrome.webview.postMessage(JSON.stringify(message));
             if (typeof showToast === 'function') {
               showToast('🖱️ Revit에서 벽체를 선택해주세요.', 'info');
             } else {
               alert('Revit에서 벽체를 선택해주세요.');
             }
           } else {
-            alert('Revit 연동 환경이 아닙니다. WebSocket 연결을 확인해주세요.');
+            alert(
+              'Revit 연동 환경이 아닙니다. WebView2 환경에서만 사용 가능합니다.'
+            );
           }
         };
       }
@@ -387,9 +362,9 @@
       if (typeof window.selectMultipleWallsFromRevit !== 'function') {
         window.selectMultipleWallsFromRevit = function () {
           console.log('백업 selectMultipleWallsFromRevit 함수 호출됨');
-          // WebSocket을 통한 Revit 통신
-          if (window.socketService && window.socketService.isConnected()) {
-            window.socketService.sendRevitCommand('selectMultipleWalls');
+          if (window.chrome && window.chrome.webview) {
+            const message = { action: 'selectMultipleWalls' };
+            window.chrome.webview.postMessage(JSON.stringify(message));
             if (typeof showToast === 'function') {
               showToast(
                 '🖱️ Revit에서 벽체들을 선택해주세요. (완료하려면 Finish 클릭)',
@@ -401,7 +376,9 @@
               );
             }
           } else {
-            alert('Revit 연동 환경이 아닙니다. WebSocket 연결을 확인해주세요.');
+            alert(
+              'Revit 연동 환경이 아닙니다. WebView2 환경에서만 사용 가능합니다.'
+            );
           }
         };
       }
@@ -471,10 +448,36 @@
 
       // 백업 함수들 - 메인 함수가 제대로 로드되었는지 확인
       console.log('HTML 백업 함수 체크 시점의 함수 상태:', {
+        calculateRevitTypeAreas: typeof window.calculateRevitTypeAreas,
+        showRevitAreaSummary: typeof window.showRevitAreaSummary,
         clearRevitData: typeof window.clearRevitData,
         toggleAllRevitSelection: typeof window.toggleAllRevitSelection,
         toggleRevitSelection: typeof window.toggleRevitSelection,
       });
+
+      // 백업 함수는 진짜로 메인 함수가 없을 때만 등록
+      setTimeout(() => {
+        if (typeof window.calculateRevitTypeAreas !== 'function') {
+          console.warn(
+            'calculateRevitTypeAreas 메인 함수 없음 - 백업 함수 등록'
+          );
+          window.calculateRevitTypeAreas = function () {
+            console.log('백업 calculateRevitTypeAreas 함수 호출됨');
+            alert(
+              'Revit 면적 계산 기능을 로드하는 중입니다. 잠시 후 다시 시도해주세요.'
+            );
+          };
+        }
+
+        if (typeof window.showRevitAreaSummary !== 'function') {
+          console.warn('showRevitAreaSummary 메인 함수 없음 - 백업 함수 등록');
+          window.showRevitAreaSummary = function () {
+            console.log('백업 showRevitAreaSummary 함수 호출됨');
+            alert(
+              'Revit 면적 요약 기능을 로드하는 중입니다. 잠시 후 다시 시도해주세요.'
+            );
+          };
+        }
 
         if (typeof window.clearRevitData !== 'function') {
           console.warn('clearRevitData 메인 함수 없음 - 백업 함수 등록');
@@ -526,16 +529,597 @@
         }
       }, 50);
 
+      // JavaScript 파일에서 함수를 직접 가져와서 강제 등록
+      setTimeout(() => {
+        console.log('🔧 HTML에서 메인 함수 강제 찾기 및 등록 시도');
+
+        // 모든 전역 변수에서 Revit 함수들을 찾아서 등록
+        try {
+          // calculateRevitTypeAreas 함수 찾기
+          for (let key in window) {
+            if (
+              typeof window[key] === 'function' &&
+              window[key].toString().includes('🧮')
+            ) {
+              console.log(
+                '✅ calculateRevitTypeAreas 메인 함수 발견, 강제 등록'
+              );
+              window.calculateRevitTypeAreas = window[key];
+              break;
+            }
+          }
+
+          // showRevitAreaSummary 함수 찾기
+          for (let key in window) {
+            if (
+              typeof window[key] === 'function' &&
+              window[key].toString().includes('📊')
+            ) {
+              console.log('✅ showRevitAreaSummary 메인 함수 발견, 강제 등록');
+              window.showRevitAreaSummary = window[key];
+              break;
+            }
+          }
+
+          // 직접 함수 정의로 대체 (최후 수단)
+          if (
+            !window.calculateRevitTypeAreas ||
+            !window.calculateRevitTypeAreas.toString().includes('🧮')
+          ) {
+            console.log('🛠️ calculateRevitTypeAreas 메인 함수 직접 정의');
+            window.calculateRevitTypeAreas = function () {
+              console.log('🧮 HTML 정의 calculateRevitTypeAreas 함수 호출됨');
+
+              // 기본적인 면적 계산 로직
+              const revitTableBody = document.getElementById('revitTableBody');
+              if (!revitTableBody) {
+                alert('Revit 데이터가 없습니다.');
+                return;
+              }
+
+              const checkedRows = revitTableBody.querySelectorAll(
+                'input[type="checkbox"]:checked'
+              );
+              if (checkedRows.length === 0) {
+                alert('면적을 계산할 벽체를 선택해주세요.');
+                return;
+              }
+
+              let totalArea = 0;
+              let wallTypes = new Map();
+
+              checkedRows.forEach((checkbox) => {
+                const row = checkbox.closest('tr');
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 5) {
+                  const wallType = cells[3].textContent.trim();
+                  const area = parseFloat(cells[4].textContent) || 0;
+
+                  if (wallTypes.has(wallType)) {
+                    wallTypes.set(wallType, wallTypes.get(wallType) + area);
+                  } else {
+                    wallTypes.set(wallType, area);
+                  }
+                  totalArea += area;
+                }
+              });
+
+              let message = `선택된 ${checkedRows.length}개 벽체의 면적이 계산되었습니다.\n\n`;
+              wallTypes.forEach((area, type) => {
+                message += `${type}: ${area.toFixed(3)}m²\n`;
+              });
+              message += `\n총 면적: ${totalArea.toFixed(3)}m²`;
+
+              alert(message);
+            };
+          }
+
+          if (
+            !window.showRevitAreaSummary ||
+            !window.showRevitAreaSummary.toString().includes('📊')
+          ) {
+            console.log('🛠️ showRevitAreaSummary 메인 함수 직접 정의');
+            window.showRevitAreaSummary = function () {
+              console.log('📊 HTML 정의 showRevitAreaSummary 함수 호출됨');
+
+              const revitTableBody = document.getElementById('revitTableBody');
+              if (!revitTableBody || revitTableBody.children.length === 0) {
+                alert('Revit 데이터가 없습니다.');
+                return;
+              }
+
+              let wallTypes = new Map();
+              const rows = revitTableBody.querySelectorAll('tr');
+
+              rows.forEach((row) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 5) {
+                  const wallType = cells[3].textContent.trim();
+                  const area = parseFloat(cells[4].textContent) || 0;
+
+                  if (wallTypes.has(wallType)) {
+                    wallTypes.set(wallType, wallTypes.get(wallType) + area);
+                  } else {
+                    wallTypes.set(wallType, area);
+                  }
+                }
+              });
+
+              let summary = 'Revit 벽체 면적 요약:\n\n';
+              let totalArea = 0;
+
+              wallTypes.forEach((area, type) => {
+                summary += `${type}: ${area.toFixed(3)}m²\n`;
+                totalArea += area;
+              });
+
+              summary += `\n총 ${
+                wallTypes.size
+              }개 타입, 총 면적: ${totalArea.toFixed(3)}m²`;
+              alert(summary);
+            };
+          }
+        } catch (error) {
+          console.error('함수 등록 중 오류:', error);
+        }
+
+        console.log('✅ HTML 메인 함수 등록 완료');
+
+        // 디버깅용 함수 추가
+        window.testRevitFunctions = function () {
+          console.log('🧪 HTML 디버깅 함수 실행');
+          console.log(
+            'calculateRevitTypeAreas:',
+            typeof window.calculateRevitTypeAreas
+          );
+          console.log(
+            'showRevitAreaSummary:',
+            typeof window.showRevitAreaSummary
+          );
+
+          // 강제로 HTML 함수 재등록
+          window.calculateRevitTypeAreas = function () {
+            console.log('🧮 강제 등록된 calculateRevitTypeAreas 호출');
+            const revitTableBody = document.getElementById('revitTableBody');
+            if (!revitTableBody) {
+              alert('Revit 데이터가 없습니다.');
+              return;
+            }
+
+            const checkedRows = revitTableBody.querySelectorAll(
+              'input[type="checkbox"]:checked'
+            );
+            if (checkedRows.length === 0) {
+              alert('면적을 계산할 벽체를 선택해주세요.');
+              return;
+            }
+
+            alert(
+              `${checkedRows.length}개 벽체가 선택되었습니다. 면적 계산 기능이 실행되었습니다.`
+            );
+          };
+
+          window.showRevitAreaSummary = function () {
+            console.log('📊 강제 등록된 showRevitAreaSummary 호출');
+            const revitTableBody = document.getElementById('revitTableBody');
+            if (!revitTableBody || revitTableBody.children.length === 0) {
+              alert('Revit 데이터가 없습니다.');
+              return;
+            }
+
+            const rows = revitTableBody.querySelectorAll('tr');
+            alert(
+              `총 ${rows.length}개의 Revit 벽체 데이터가 있습니다. 면적 요약 기능이 실행되었습니다.`
+            );
+          };
+
+          console.log('✅ 함수 강제 재등록 완료');
+        };
       }, 100);
 
+      // =============================================================================
+      // 새로운 Revit 면적 계산 및 요약 함수들
+      // =============================================================================
 
+      // 선택된 Revit 데이터의 면적 계산 (모달창으로 표시)
+      window.newCalculateRevitAreas = function () {
+        console.log('🆕 새로운 선택 항목 면적 계산 함수 호출됨');
 
+        const revitTableBody = document.getElementById('revitTableBody');
+        if (!revitTableBody) {
+          alert('Revit 데이터 테이블을 찾을 수 없습니다.');
+          return;
+        }
+
+        const checkedRows = revitTableBody.querySelectorAll(
+          'input[type="checkbox"]:checked'
+        );
+        if (checkedRows.length === 0) {
+          alert('면적을 계산할 벽체를 선택해주세요.');
+          return;
+        }
+
+        // 선택된 벽체의 타입별 면적 계산
+        const wallTypeAreas = new Map();
+        let totalArea = 0;
+
+        checkedRows.forEach((checkbox) => {
+          const row = checkbox.closest('tr');
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 5) {
+            const wallType = cells[3].textContent.trim();
+            const area = parseFloat(cells[4].textContent) || 0;
+
+            if (wallTypeAreas.has(wallType)) {
+              wallTypeAreas.set(wallType, wallTypeAreas.get(wallType) + area);
+            } else {
+              wallTypeAreas.set(wallType, area);
+            }
+            totalArea += area;
+          }
+        });
+
+        // 모달창 표시
+        showAreaCalculationModal(
+          wallTypeAreas,
+          `선택된 ${checkedRows.length}개 벽체`,
+          totalArea,
+          true
+        );
+      };
+
+      // 전체 Revit 데이터의 면적 요약 (모달창으로 표시)
+      window.newShowRevitSummary = function () {
+        console.log('🆕 새로운 면적 요약 함수 호출됨');
+
+        const revitTableBody = document.getElementById('revitTableBody');
+        if (!revitTableBody) {
+          alert('Revit 데이터 테이블을 찾을 수 없습니다.');
+          return;
+        }
+
+        const rows = revitTableBody.querySelectorAll('tr');
+        if (rows.length === 0) {
+          alert('Revit 데이터가 없습니다.');
+          return;
+        }
+
+        // 전체 벽체의 타입별 면적 계산
+        const wallTypeAreas = new Map();
+        let totalArea = 0;
+        let totalCount = 0;
+
+        rows.forEach((row) => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 5 && cells[1].textContent.trim() !== 'N/A') {
+            const wallType = cells[3].textContent.trim();
+            const area = parseFloat(cells[4].textContent) || 0;
+
+            if (wallTypeAreas.has(wallType)) {
+              wallTypeAreas.set(wallType, wallTypeAreas.get(wallType) + area);
+            } else {
+              wallTypeAreas.set(wallType, area);
+            }
+            totalArea += area;
+            totalCount++;
+          }
+        });
+
+        // 모달창 표시
+        showAreaCalculationModal(
+          wallTypeAreas,
+          `전체 ${totalCount}개 벽체`,
+          totalArea,
+          false
+        );
+      };
+
+      // 면적 계산 결과를 모달창으로 표시하는 함수
+      function showAreaCalculationModal(
+        wallTypeAreas,
+        title,
+        totalArea,
+        isSelectedOnly
+      ) {
+        if (wallTypeAreas.size === 0) {
+          alert('계산할 면적 데이터가 없습니다.');
+          return;
+        }
+
+        // 모달 HTML 생성
+        let modalHTML = `
+              <div style="text-align: left; line-height: 1.6; max-width: 600px;">
+                  <h3 style="color: #8b5cf6; margin-bottom: 15px; text-align: center;">
+                      <i class="fas fa-calculator"></i> ${title} 면적 계산 결과
+                  </h3>
+
+                  <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                      <h4 style="margin: 0 0 10px 0; color: #333;">📊 타입별 면적 정보</h4>
+                      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                          <thead>
+                              <tr style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: left;">WallType</th>
+                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: right;">면적 (m²)</th>
+                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: right;">비율 (%)</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+          `;
+
+        // 면적별로 정렬
+        const sortedTypes = Array.from(wallTypeAreas.entries()).sort(
+          (a, b) => b[1] - a[1]
+        );
+
+        sortedTypes.forEach(([wallType, area], index) => {
+          const percentage = totalArea > 0 ? (area / totalArea) * 100 : 0;
+          const rowClass = index % 2 === 0 ? '#ffffff' : '#f8f9fa';
+
+          modalHTML += `
+                  <tr style="background: ${rowClass};">
+                      <td style="border: 1px solid #ddd; padding: 10px; font-weight: 600; color: #8b5cf6;">${wallType}</td>
+                      <td style="border: 1px solid #ddd; padding: 10px; text-align: right; font-weight: 600; color: #0066cc;">${area.toFixed(
+                        3
+                      )}</td>
+                      <td style="border: 1px solid #ddd; padding: 10px; text-align: right;">${percentage.toFixed(
+                        1
+                      )}%</td>
+                  </tr>
+              `;
+        });
+
+        modalHTML += `
+                          </tbody>
+                          <tfoot>
+                              <tr style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); font-weight: bold;">
+                                  <td style="border: 1px solid #ddd; padding: 10px; color: #1976d2;">총계 (${
+                                    wallTypeAreas.size
+                                  }개 타입)</td>
+                                  <td style="border: 1px solid #ddd; padding: 10px; text-align: right; color: #d32f2f; font-size: 16px;">${totalArea.toFixed(
+                                    3
+                                  )}</td>
+                                  <td style="border: 1px solid #ddd; padding: 10px; text-align: right; color: #1976d2;">100.0%</td>
+                              </tr>
+                          </tfoot>
+                      </table>
+                  </div>
+
+                  <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4caf50;">
+                      <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🎯 메인 테이블 적용 옵션</h4>
+                      <p style="margin: 0 0 10px 0; color: #555;">
+                          계산된 면적을 상단 메인 테이블의 <strong>m²</strong> 컬럼에 적용하시겠습니까?
+                      </p>
+                      <div style="background: white; padding: 10px; border-radius: 5px; font-size: 12px; color: #666;">
+                          ℹ️ 적용 시 같은 WallType의 첫 번째 행에만 면적이 표시되고, 나머지 동일 타입 행은 빈 값으로 설정됩니다.
+                      </div>
+                  </div>
+
+                  <div style="text-align: center; margin-top: 20px;">
+                      <button id="btn-apply-areas" style="padding: 12px 24px; margin-right: 10px; background: #4caf50; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                          <i class="fas fa-check"></i> 메인 테이블에 적용
+                      </button>
+                      <button id="btn-copy-data" style="padding: 12px 24px; margin-right: 10px; background: #2196f3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                          <i class="fas fa-copy"></i> 데이터 복사
+                      </button>
+                      <button id="btn-close-modal" style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                          <i class="fas fa-times"></i> 닫기
+                      </button>
+                  </div>
+              </div>
+          `;
+
+        // 모달 생성 및 표시
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+              position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+              background: rgba(0,0,0,0.6); z-index: 3000; display: flex;
+              align-items: center; justify-content: center; backdrop-filter: blur(2px);
+          `;
+
+        const dialog = document.createElement('div');
+        dialog.style.cssText = `
+              background: white; padding: 25px; border-radius: 12px;
+              max-width: 700px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+              max-height: 90vh; overflow-y: auto; animation: fadeInScale 0.3s ease-out;
+          `;
+
+        // CSS 애니메이션 추가
+        if (!document.getElementById('modal-animations')) {
+          const style = document.createElement('style');
+          style.id = 'modal-animations';
+          style.textContent = `
+                  @keyframes fadeInScale {
+                      from { opacity: 0; transform: scale(0.9); }
+                      to { opacity: 1; transform: scale(1); }
+                  }
+              `;
+          document.head.appendChild(style);
+        }
+
+        dialog.innerHTML = modalHTML;
+        modal.appendChild(dialog);
+        document.body.appendChild(modal);
+
+        // 버튼 이벤트 리스너
+        dialog.querySelector('#btn-apply-areas').onclick = () => {
+          // 🔧 수정: wallData를 실제로 업데이트하는 함수 사용
+          if (typeof window.applyRevitAreasToMain === 'function') {
+            window.applyRevitAreasToMain(wallTypeAreas);
+            console.log('✅ applyRevitAreasToMain 함수 호출 완료');
+          } else {
+            // 폴백: UI 업데이트 함수 사용
+            console.warn(
+              '⚠️ applyRevitAreasToMain 함수가 없어서 UI 업데이트만 수행합니다.'
+            );
+            applyAreasToMainTable(wallTypeAreas);
+          }
+          modal.remove();
+        };
+
+        dialog.querySelector('#btn-copy-data').onclick = () => {
+          copyAreaDataToClipboard(wallTypeAreas, totalArea);
+        };
+
+        dialog.querySelector('#btn-close-modal').onclick = () => {
+          modal.remove();
+        };
+
+        // 모달 배경 클릭시 닫기
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            modal.remove();
+          }
+        });
+
+        // ESC 키로 닫기
+        document.addEventListener('keydown', function escHandler(e) {
+          if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+          }
+        });
+      }
+
+      // 계산된 면적을 메인 테이블에 적용하는 함수 (완전 새 버전)
+      function applyAreasToMainTable(wallTypeAreas) {
+        console.log('📊 새로운 면적 적용 함수 시작');
+        console.log('적용할 면적 데이터:', wallTypeAreas);
+
+        // 1단계: wallData에서 직접 업데이트
+        let updatedCount = 0;
+        const processedTypes = new Set();
+
+        if (typeof wallData !== 'undefined' && Array.isArray(wallData)) {
+          wallData.forEach((wall, index) => {
+            console.log(
+              `🔍 벽체 ${index}: wallType="${
+                wall.wallType
+              }", has()=${wallTypeAreas.has(wall.wallType)}`
+            );
+
+            if (wall.wallType && wallTypeAreas.has(wall.wallType)) {
+              if (!processedTypes.has(wall.wallType)) {
+                // 첫 번째 벽체에만 면적 적용
+                const area = wallTypeAreas.get(wall.wallType);
+                wall.calculatedTotalArea = area;
+                processedTypes.add(wall.wallType);
+                updatedCount++;
+                console.log(
+                  `✅ ${wall.wallType}: ${area}m² 적용 (wallData 직접 업데이트)`
+                );
+              } else {
+                // 동일한 타입의 다른 벽체들은 빈 값
+                wall.calculatedTotalArea = '';
+                console.log(`🔄 ${wall.wallType}: 추가 행은 빈 값으로 설정`);
+              }
+            } else {
+              console.log(
+                `❌ 매칭 실패: wallType="${
+                  wall.wallType
+                }" (타입: ${typeof wall.wallType})`
+              );
+            }
+          });
+        } else {
+          console.error(
+            '❌ wallData가 없거나 배열이 아닙니다:',
+            typeof wallData
+          );
+          console.error(
+            'window.wallData 확인:',
+            typeof window.wallData,
+            Array.isArray(window.wallData)
+          );
+          // 대안: window.wallData 사용 시도
+          if (window.wallData && Array.isArray(window.wallData)) {
+            console.log('🔄 window.wallData로 재시도합니다');
+            window.wallData.forEach((wall, index) => {
+              console.log(
+                `🔍 벽체 ${index}: wallType="${
+                  wall.wallType
+                }", has()=${wallTypeAreas.has(wall.wallType)}`
+              );
+
+              if (wall.wallType && wallTypeAreas.has(wall.wallType)) {
+                if (!processedTypes.has(wall.wallType)) {
+                  const area = wallTypeAreas.get(wall.wallType);
+                  wall.calculatedTotalArea = area;
+                  processedTypes.add(wall.wallType);
+                  updatedCount++;
+                  console.log(
+                    `✅ ${wall.wallType}: ${area}m² 적용 (window.wallData 사용)`
+                  );
+                } else {
+                  wall.calculatedTotalArea = '';
+                  console.log(`🔄 ${wall.wallType}: 추가 행은 빈 값으로 설정`);
+                }
+              }
+            });
+          }
+        }
+
+        // 2단계: 데이터 저장
+        if (updatedCount > 0) {
+          // 데이터 변경 표시
+          if (typeof window.markDataAsModified === 'function') {
+            window.markDataAsModified();
+            console.log('📝 데이터 변경 플래그 설정');
+          }
+
+          // localStorage 저장
+          if (typeof window.saveToLocalStorage === 'function') {
+            window.saveToLocalStorage();
+            console.log('💾 localStorage 저장 완료');
+          }
+
+          // 3단계: UI 업데이트
+          if (typeof window.renderTable === 'function') {
+            window.renderTable();
+            console.log('🔄 테이블 재렌더링 완료');
+          }
+
+          alert(
+            `✅ ${updatedCount}개 WallType의 면적이 적용되고 저장되었습니다.`
+          );
+        } else {
+          alert('❌ 적용할 수 있는 WallType을 찾을 수 없습니다.');
+        }
+      }
+
+      // 면적 데이터를 클립보드에 복사하는 함수
+      function copyAreaDataToClipboard(wallTypeAreas, totalArea) {
+        let copyText = 'WallType별 면적 정보\\n\\n';
+
+        wallTypeAreas.forEach((area, wallType) => {
+          copyText += `${wallType}: ${area.toFixed(3)}m²\\n`;
+        });
+
+        copyText += `\\n총 면적: ${totalArea.toFixed(3)}m²`;
+
+        navigator.clipboard
+          .writeText(copyText)
+          .then(() => {
+            alert('📋 면적 데이터가 클립보드에 복사되었습니다.');
+          })
+          .catch(() => {
+            // fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = copyText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('📋 면적 데이터가 클립보드에 복사되었습니다.');
+          });
+      }
 
       console.log('HTML 백업 함수 정의 완료:', {
         selectSingleWallFromRevit: typeof window.selectSingleWallFromRevit,
         selectMultipleWallsFromRevit:
           typeof window.selectMultipleWallsFromRevit,
         addWallsFromRevit: typeof window.addWallsFromRevit,
+        calculateRevitTypeAreas: typeof window.calculateRevitTypeAreas,
+        showRevitAreaSummary: typeof window.showRevitAreaSummary,
         clearRevitData: typeof window.clearRevitData,
         toggleAllRevitSelection: typeof window.toggleAllRevitSelection,
         toggleRevitSelection: typeof window.toggleRevitSelection,

@@ -1230,9 +1230,9 @@ async function loadMaterialList() {
                     category: lightweightComponents.categories[item.category]?.name || item.category,
                     unit: item.unit,
                     materialPrice: item.price,
-                    laborPrice: Math.round(item.price * 0.8), // 자재비의 80%
-                    expensePrice: Math.round(item.price * 0.1), // 자재비의 10%
-                    totalPrice: item.price + Math.round(item.price * 0.8) + Math.round(item.price * 0.1),
+                    laborPrice: item.laborCost || 0, // 데이터베이스의 laborCost 사용
+                    expensePrice: 0, // 경비는 별도 계산
+                    totalPrice: item.price + (item.laborCost || 0),
                     spec: item.spec,
                     note: item.note
                 });
@@ -1955,7 +1955,7 @@ function showLightweightMaterials() {
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || 0}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
                                 <input type="number" 
-                                       value="${item.laborCompensation || 100}" 
+                                       value="${item.laborCompensation || 0}" 
                                        min="0" max="500" step="1"
                                        style="width: 50px; text-align: center; border: 1px solid #ccc; padding: 2px;"
                                        onchange="updateLaborCompensation('${item.id}', this.value)"
@@ -2206,28 +2206,28 @@ function addLightweightMaterial() {
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #6b7280;">노무비 생산성</label>
-                        <input type="text" value="기준" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6;">
+                        <input type="text" id="addMaterialLaborProductivity" placeholder="예: 기준, 고급, 표준" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 보할 (%)</label>
-                        <input type="number" id="addMaterialLaborComp" value="100" min="0" max="500" step="1"
+                        <input type="number" id="addMaterialLaborComp" placeholder="예: 100" min="0" max="500" step="1"
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">공종1</label>
-                        <input type="text" value="경량" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6;">
+                        <input type="text" id="addMaterialWorkType1" placeholder="예: 경량, 습식, 건식" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">공종2</label>
-                        <input type="text" value="경량" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6;">
+                        <input type="text" id="addMaterialWorkType2" placeholder="예: 경량, 벽체, 천장" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">부위</label>
-                        <input type="text" value="벽체" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6;">
+                        <input type="text" id="addMaterialLocation" placeholder="예: 벽체, 천장, 바닥" 
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600;">비고/용도</label>
@@ -2335,17 +2335,17 @@ function editLightweightMaterial(materialId) {
                     <!-- Row 4: 노무비 보할, 공종 (빨간색/녹색) -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 보할 (%)</label>
-                        <input type="number" id="editMaterialLaborCompensation" value="${material.laborCompensation || 100}" min="0" max="500" step="1"
+                        <input type="number" id="editMaterialLaborCompensation" value="${material.laborCompensation || 0}" min="0" max="500" step="1"
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종1</label>
-                        <input type="text" id="editMaterialWorkType1" value="경량" disabled
+                        <input type="text" id="editMaterialWorkType1" value="${material.workType1 || ''}" 
                                style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4; color: #16a34a;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종2</label>
-                        <input type="text" id="editMaterialWorkType2" value="경량" disabled
+                        <input type="text" id="editMaterialWorkType2" value="${material.workType2 || ''}" 
                                style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4; color: #16a34a;">
                     </div>
                     
@@ -2488,7 +2488,7 @@ function updateLightweightMaterial(materialId, modal = null) {
             price: parseInt(document.getElementById('editMaterialPrice')?.value) || 0,
             laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value) || 0,
             laborProductivity: parseFloat(document.getElementById('editMaterialLaborProductivity')?.value) || 0,
-            laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 100,
+            laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 0,
             location: document.getElementById('editMaterialLocation')?.value.trim() || '',
             work: document.getElementById('editMaterialWork')?.value.trim() || '',
             note: document.getElementById('editMaterialNote')?.value.trim() || ''
@@ -3178,11 +3178,11 @@ function filterLightweightMaterials() {
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;" title="${item.spec}">${item.spec}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.unit}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${item.price.toLocaleString()}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${Math.round(item.price * 0.8).toLocaleString()}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">기준</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || ''}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
                     <input type="number" 
-                           value="${item.laborCompensation || 100}" 
+                           value="${item.laborCompensation || 0}" 
                            min="0" max="500" step="1"
                            style="width: 50px; text-align: center; border: 1px solid #ccc; padding: 2px;"
                            onchange="updateLaborCompensation('${item.id}', this.value)"

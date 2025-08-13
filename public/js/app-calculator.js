@@ -23,8 +23,8 @@ Kiyeno.StandardMaterials = {
                     subcategory: item.spec,
                     unit: item.unit,
                     materialPrice: item.price,
-                    laborPrice: Math.round(item.price * 0.8), // 자재비의 80%를 노무비로 설정
-                    expensePrice: Math.round(item.price * 0.1) // 자재비의 10%를 경비로 설정
+                    laborPrice: item.laborCost || 0, // 데이터베이스의 laborCost 사용
+                    expensePrice: 0 // 경비는 별도 계산 로직 적용
                 });
             });
         }
