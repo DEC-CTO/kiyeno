@@ -2037,28 +2037,35 @@ function showGypsumBoards() {
         return;
     }
     
-    // 석고보드 테이블 생성 (석고보드.txt 헤더 구조 참조)
+    // 석고보드 테이블 생성 (새로운 19컬럼 구조)
     const tableHTML = `
         <div class="material-table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                 <thead style="background: #f8f9fa; position: sticky; top: 0;">
                     <tr>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">ID</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 180px; text-align: center;">품명</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">ID</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">품목</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 120px; text-align: center;">품명</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">규격</th>
                         <th colspan="3" style="padding: 8px; border: 1px solid #ddd; background: #e3f2fd; text-align: center;">치수</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">단위</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">수량</th>
-                        <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #fff3e0; text-align: center;">단가</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">M2 단가</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">비고</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">장당단가</th>
+                        <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #fff3e0; text-align: center;">M2</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비생산성</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비보험</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종1</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종2</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">부위</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">작업</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 100px; text-align: center;">관리</th>
                     </tr>
                     <tr>
                         <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; background: #e3f2fd; text-align: center;">W</th>
                         <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; background: #e3f2fd; text-align: center;">H</th>
                         <th style="padding: 4px; border: 1px solid #ddd; min-width: 40px; background: #e3f2fd; text-align: center;">T</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">당초</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">변경</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">자재비</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">노무비</th>
                     </tr>
                     <tr style="background: #ffffff;">
                         <th style="padding: 4px; border: 1px solid #ddd;">
@@ -2092,6 +2099,7 @@ function showGypsumBoards() {
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;">
                             <button onclick="clearGypsumFilters()" style="width: 100%; padding: 4px; font-size: 10px; background: #dc2626; color: white; border: none; border-radius: 2px;" title="필터 초기화">
                                 초기화
@@ -2101,24 +2109,26 @@ function showGypsumBoards() {
                 </thead>
                 <tbody id="materialTableBody">
                     ${gypsumData.items && gypsumData.items.length > 0 ? gypsumData.items.map(item => {
-                        // M2 단가 계산: 변경단가 또는 당초단가를 면적으로 나눔
-                        const unitPrice = (item.priceChanged || item.priceOriginal || 0);
-                        const areaM2 = ((item.w || 0) / 1000) * ((item.h || 0) / 1000);
-                        const pricePerM2 = areaM2 > 0 ? Math.round(unitPrice / areaM2) : 0;
-                        
                         return `
                         <tr>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.id}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.item || '석고보드'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.name}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.spec || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.w}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.h}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.t}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.unit}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.qty.toFixed(2)}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${item.priceOriginal.toLocaleString()}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right; ${item.priceChanged !== item.priceOriginal ? 'background: #fef3c7; font-weight: bold;' : ''}">₩${item.priceChanged.toLocaleString()}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${pricePerM2.toLocaleString()}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; font-size: 10px; text-align: center;">${item.note || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.qty ? item.qty.toFixed(2) : '1.00'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.unitPrice || 0).toLocaleString()}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.materialCost || 0).toLocaleString()}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || '0'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborInsurance || '0'}%</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || '-'}</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.work || '석고보드 설치'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
                                 <button onclick="editGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px; background: #3b82f6; color: white;" title="석고보드 편집">
                                     <i class="fas fa-edit"></i>
@@ -2129,7 +2139,7 @@ function showGypsumBoards() {
                             </td>
                         </tr>
                         `;
-                    }).join('') : '<tr><td colspan="12" style="text-align: center; padding: 20px; color: #666;">석고보드 데이터가 없습니다.</td></tr>'}
+                    }).join('') : '<tr><td colspan="19" style="text-align: center; padding: 20px; color: #666;">석고보드 데이터가 없습니다.</td></tr>'}
                 </tbody>
             </table>
         </div>
