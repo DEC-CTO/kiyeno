@@ -1807,7 +1807,7 @@ class PriceDatabase extends EventEmitter {
           t: 9.5,
           unit: '매',
           qty: 1.0,
-          unitPrice: 3650,
+          unitPrice: 3650, //장당단가
           m2Price: 2254,
           materialCost: 2920,
           laborCost: 730,

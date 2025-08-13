@@ -2068,8 +2068,9 @@ function showGypsumBoards() {
                         <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">노무비</th>
                     </tr>
                     <tr style="background: #ffffff;">
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;">
-                            <input type="text" id="filterGypsumId" placeholder="ID" 
+                            <input type="text" id="filterGypsumItem" placeholder="품목" 
                                    style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 2px; font-size: 10px; text-align: center;"
                                    onkeyup="filterGypsumBoards()">
                         </th>
@@ -2079,20 +2080,17 @@ function showGypsumBoards() {
                                    onkeyup="filterGypsumBoards()">
                         </th>
                         <th style="padding: 4px; border: 1px solid #ddd;">
-                            <input type="text" id="filterGypsumW" placeholder="W" 
+                            <input type="text" id="filterGypsumSpec" placeholder="규격" 
                                    style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 2px; font-size: 10px; text-align: center;"
                                    onkeyup="filterGypsumBoards()">
                         </th>
-                        <th style="padding: 4px; border: 1px solid #ddd;">
-                            <input type="text" id="filterGypsumH" placeholder="H" 
-                                   style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 2px; font-size: 10px; text-align: center;"
-                                   onkeyup="filterGypsumBoards()">
-                        </th>
-                        <th style="padding: 4px; border: 1px solid #ddd;">
-                            <input type="text" id="filterGypsumT" placeholder="T" 
-                                   style="width: 100%; padding: 4px; border: 1px solid #ccc; border-radius: 2px; font-size: 10px; text-align: center;"
-                                   onkeyup="filterGypsumBoards()">
-                        </th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
@@ -2105,6 +2103,7 @@ function showGypsumBoards() {
                                 초기화
                             </button>
                         </th>
+                        <th style="padding: 4px; border: 1px solid #ddd;"></th>
                     </tr>
                 </thead>
                 <tbody id="materialTableBody">
@@ -3239,21 +3238,17 @@ function filterGypsumBoards() {
     if (!window.priceDB) return;
     
     const filters = {
-        id: document.getElementById('filterGypsumId')?.value.toLowerCase() || '',
+        item: document.getElementById('filterGypsumItem')?.value.toLowerCase() || '',
         name: document.getElementById('filterGypsumName')?.value.toLowerCase() || '',
-        w: document.getElementById('filterGypsumW')?.value || '',
-        h: document.getElementById('filterGypsumH')?.value || '',
-        t: document.getElementById('filterGypsumT')?.value || ''
+        spec: document.getElementById('filterGypsumSpec')?.value.toLowerCase() || ''
     };
     
     const gypsumData = window.priceDB.getGypsumBoards();
     const filtered = gypsumData.items.filter(item => {
         return (
-            (filters.id === '' || item.id.toLowerCase().includes(filters.id)) &&
-            (filters.name === '' || item.name.toLowerCase().includes(filters.name)) &&
-            (filters.w === '' || item.w.toString().includes(filters.w)) &&
-            (filters.h === '' || item.h.toString().includes(filters.h)) &&
-            (filters.t === '' || item.t.toString().includes(filters.t))
+            (filters.item === '' || (item.item || '').toLowerCase().includes(filters.item)) &&
+            (filters.name === '' || (item.name || '').toLowerCase().includes(filters.name)) &&
+            (filters.spec === '' || (item.spec || '').toLowerCase().includes(filters.spec))
         );
     });
     
@@ -3261,29 +3256,28 @@ function filterGypsumBoards() {
     const tableBody = document.getElementById('materialTableBody');
     if (tableBody) {
         tableBody.innerHTML = filtered.map(item => {
-            // M2 단가 계산: 변경단가 또는 당초단가를 면적으로 나눔
-            const unitPrice = item.priceChanged || item.priceOriginal;
-            const areaM2 = (item.w / 1000) * (item.h / 1000);
-            const pricePerM2 = areaM2 > 0 ? Math.round(unitPrice / areaM2) : 0;
-            
             return `
             <tr>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.id}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.item || '석고보드'}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.name}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.spec || '-'}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.w}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.h}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.t}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.unit}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${(item.qty || 0).toFixed(2)}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.priceOriginal || 0).toLocaleString()}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: right; ${item.priceChanged !== item.priceOriginal ? 'background: #fef3c7; font-weight: bold;' : ''}">₩${(item.priceChanged || 0).toLocaleString()}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(pricePerM2 || 0).toLocaleString()}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; font-size: 10px; text-align: center;">${item.note || '-'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.qty ? item.qty.toFixed(2) : '1.00'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.unitPrice || 0).toLocaleString()}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.materialCost || 0).toLocaleString()}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || '0'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborInsurance || '0'}%</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || '-'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || '-'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || '-'}</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.work || '석고보드 설치'}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
-                    <button onclick="addGypsumBoard()" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px; background: #059669; color: white;" title="석고보드 추가">
-                        <i class="fas fa-plus"></i>
-                    </button>
-                    <button onclick="editGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px;" title="석고보드 편집">
+                    <button onclick="editGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px; background: #3b82f6; color: white;" title="석고보드 편집">
                         <i class="fas fa-edit"></i>
                     </button>
                     <button onclick="deleteGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; background: #dc2626; color: white;" title="석고보드 삭제">
@@ -3304,11 +3298,15 @@ function filterGypsumBoards() {
 
 // 석고보드 필터 초기화
 function clearGypsumFilters() {
-    document.getElementById('filterGypsumId').value = '';
-    document.getElementById('filterGypsumName').value = '';
-    document.getElementById('filterGypsumW').value = '';
-    document.getElementById('filterGypsumH').value = '';
-    document.getElementById('filterGypsumT').value = '';
+    const filterElements = [
+        document.getElementById('filterGypsumItem'),
+        document.getElementById('filterGypsumName'),
+        document.getElementById('filterGypsumSpec')
+    ];
+    
+    filterElements.forEach(element => {
+        if (element) element.value = '';
+    });
     
     // 전체 목록 다시 표시
     showGypsumBoards();
