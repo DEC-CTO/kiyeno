@@ -14,14 +14,14 @@ window.calculateGypsumLaborCost = function() {
     let workerCount = workers.length;
     
     workers.forEach(worker => {
-        const cost = parseFloat(worker.querySelector('.worker-cost').value) || 0;
+        const cost = parseFloat(worker.querySelector('.worker-cost').value.replace(/,/g, '')) || 0;
         totalCost += cost;
     });
     
     const baseLaborCost = workerCount > 0 ? Math.round(totalCost / workerCount) : 0;
-    const productivity = parseFloat(document.getElementById('editLaborProductivity')?.value) || 1;
-    const compensation = parseFloat(document.getElementById('editLaborCompensation')?.value) || 100;
-    const finalCost = Math.round(baseLaborCost / productivity * (compensation / 100));
+    const productivity = parseFloat(document.getElementById('editLaborProductivity')?.value) || 0;
+    const compensation = parseFloat(document.getElementById('editLaborCompensation')?.value) || 0;
+    const finalCost = (productivity > 0 && compensation > 0) ? Math.round(baseLaborCost / productivity * (compensation / 100)) : 0;
     
     const totalElement = document.getElementById('totalLaborCost');
     const countElement = document.getElementById('workerCount');
@@ -35,8 +35,12 @@ window.calculateGypsumLaborCost = function() {
     
     // M2 노무비 필드에 자동 업데이트
     const laborCostM2Element = document.getElementById('editGypsumLaborCostM2');
+    const baseLaborCostElement = document.getElementById('editGypsumBaseLaborCost');
     if (laborCostM2Element) {
-        laborCostM2Element.value = finalCost;
+        laborCostM2Element.value = finalCost.toLocaleString();
+    }
+    if (baseLaborCostElement) {
+        baseLaborCostElement.value = baseLaborCost.toLocaleString();
     }
     
     // 기본 정보 섹션의 노무비생산성과 노무비보할 필드에도 자동 업데이트
@@ -64,8 +68,9 @@ window.addGypsumWorker = function() {
                 <option value="특별직">특별직</option>
                 <option value="기타">기타</option>
             </select>
-            <input type="number" class="worker-cost" value="220000" 
+            <input type="text" class="worker-cost" value="220,000" 
                    style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                   oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                    onchange="window.calculateGypsumLaborCost()">
             <button type="button" onclick="window.removeGypsumWorker(this)" 
                     style="padding: 4px 8px; background: #dc2626; color: white; border: none; border-radius: 4px; font-size: 11px;">삭제</button>
@@ -99,6 +104,123 @@ window.syncCompensationToCalculator = function(value) {
     if (calculatorCompensationElement) {
         calculatorCompensationElement.value = value;
         window.calculateGypsumLaborCost();
+    }
+};
+
+// ========================================
+// 경량자재용 노무비 계산 함수들
+// ========================================
+
+// 경량자재 노무비 계산
+window.calculateLightweightLaborCost = function() {
+    const workers = [];
+    document.querySelectorAll('#workersList .worker-item').forEach(workerElement => {
+        const type = workerElement.querySelector('.worker-type')?.value || '조공';
+        const cost = parseInt(workerElement.querySelector('.worker-cost')?.value.replace(/,/g, '')) || 0;
+        if (cost > 0) workers.push({ type, cost });
+    });
+
+    const workerCount = workers.length;
+    const totalCost = workers.reduce((sum, worker) => sum + worker.cost, 0);
+    
+    const baseLaborCost = workerCount > 0 ? Math.round(totalCost / workerCount) : 0;
+    const productivity = parseFloat(document.getElementById('editLightweightLaborProductivity')?.value) || 0;
+    const compensation = parseFloat(document.getElementById('editLightweightLaborCompensation')?.value) || 0;
+    const finalCost = (productivity > 0 && compensation > 0) ? Math.round(baseLaborCost / productivity * (compensation / 100)) : 0;
+    
+    // 경량자재용 표시 업데이트
+    const totalElement = document.getElementById('lightweightTotalCost');
+    const countElement = document.getElementById('lightweightWorkerCount');
+    const baseLaborElement = document.getElementById('lightweightBaseLaborCost');
+    const finalElement = document.getElementById('finalLightweightLaborCost');
+    
+    if (totalElement) totalElement.textContent = totalCost.toLocaleString();
+    if (countElement) countElement.textContent = workerCount;
+    if (baseLaborElement) baseLaborElement.textContent = baseLaborCost.toLocaleString();
+    if (finalElement) finalElement.textContent = `${finalCost.toLocaleString()}원`;
+
+    // 상단 노무비 필드에 자동 입력
+    const laborCostElement = document.getElementById('editMaterialLaborCost');
+    const baseLaborCostElement = document.getElementById('editMaterialBaseLaborCost');
+    if (laborCostElement) {
+        laborCostElement.value = finalCost.toLocaleString();
+    }
+    if (baseLaborCostElement) {
+        baseLaborCostElement.value = baseLaborCost.toLocaleString();
+    }
+    
+    // 기본 정보 섹션의 노무비생산성과 노무비보할 필드에도 자동 업데이트
+    const productivityDisplayElement = document.getElementById('editMaterialLaborProductivity');
+    const compensationDisplayElement = document.getElementById('editMaterialLaborCompensation');
+    
+    if (productivityDisplayElement && productivity !== parseFloat(productivityDisplayElement.value)) {
+        productivityDisplayElement.value = productivity;
+    }
+    if (compensationDisplayElement && compensation !== parseFloat(compensationDisplayElement.value)) {
+        compensationDisplayElement.value = compensation;
+    }
+};
+
+// 경량자재용 작업자 추가
+window.addLightweightWorker = function() {
+    const workersList = document.getElementById('workersList');
+    if (!workersList) return;
+    
+    const newWorkerDiv = document.createElement('div');
+    newWorkerDiv.className = 'worker-item';
+    newWorkerDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+    
+    const currentIndex = workersList.children.length;
+    newWorkerDiv.setAttribute('data-index', currentIndex);
+    
+    newWorkerDiv.innerHTML = `
+        <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+            <option value="반장">반장</option>
+            <option value="조공" selected>조공</option>
+            <option value="특별직">특별직</option>
+            <option value="기타">기타</option>
+        </select>
+        <input type="text" class="worker-cost" value="220,000" 
+               style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
+               onchange="window.calculateLightweightLaborCost()">
+        <button type="button" onclick="window.removeLightweightWorker(this)"
+                style="padding: 2px 6px; background: #dc2626; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">삭제</button>
+    `;
+    
+    workersList.appendChild(newWorkerDiv);
+    window.calculateLightweightLaborCost();
+};
+
+// 경량자재용 작업자 제거
+window.removeLightweightWorker = function(button) {
+    const workerItem = button.closest('.worker-item');
+    if (workerItem) {
+        const workersList = document.getElementById('workersList');
+        if (workersList && workersList.children.length > 1) {
+            workerItem.remove();
+            window.calculateLightweightLaborCost();
+        } else {
+            alert('최소 1명의 작업자가 필요합니다.');
+        }
+    }
+};
+
+// 경량자재 상단 생산성 필드에서 계산기로 동기화
+window.syncProductivityToLightweightCalculator = function(value) {
+    const calculatorProductivityElement = document.getElementById('editLightweightLaborProductivity');
+    if (calculatorProductivityElement) {
+        calculatorProductivityElement.value = value;
+        window.calculateLightweightLaborCost();
+    }
+};
+
+// 경량자재 상단 보할 필드에서 계산기로 동기화
+window.syncCompensationToLightweightCalculator = function(value) {
+    const calculatorCompensationElement = document.getElementById('editLightweightLaborCompensation');
+    if (calculatorCompensationElement) {
+        calculatorCompensationElement.value = value;
+        window.calculateLightweightLaborCost();
     }
 };
 
@@ -1933,8 +2055,8 @@ function showLightweightMaterials() {
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 50px; text-align: center;">단위</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">자재비</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비</th>
-                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 100px; text-align: center;">노무비 생산성(기준)</th>
-                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비 보할</th>
+                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 100px; text-align: center;">기준 생산성</th>
+                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">기준 보할</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">공종1</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">공종2</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">부위</th>
@@ -2042,7 +2164,7 @@ function showLightweightMaterials() {
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${item.price.toLocaleString()}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || 0}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">0%</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborCompensation || 0}%</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || ''}</td>
@@ -2134,8 +2256,8 @@ function showGypsumBoards() {
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">수량</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">장당단가</th>
                         <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #fff3e0; text-align: center;">M2</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비생산성</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비보할</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">기준 생산성</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">기준 보할</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종1</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종2</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">부위</th>
@@ -2301,7 +2423,7 @@ function addLightweightMaterial() {
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 보할 (%)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
                         <input type="number" id="addMaterialLaborComp" placeholder="예: 100" min="0" max="500" step="1"
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
@@ -2356,6 +2478,15 @@ function editLightweightMaterial(materialId) {
         return;
     }
 
+    // 노무비 계산 기본 설정 (기존 데이터가 있으면 사용, 없으면 기본값 적용)
+    const laborSettings = material.laborSettings || {
+        workers: [
+            {type: '조공', cost: 0}
+        ],
+        productivity: 0,
+        compensation: 0
+    };
+
     const content = `
         <div style="min-width: 1000px;">
             <h4><i class="fas fa-edit"></i> 경량부품 편집: ${material.name}</h4>
@@ -2409,25 +2540,33 @@ function editLightweightMaterial(materialId) {
                     <!-- Row 3: 가격 정보 (빨간색) -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">자재비 (원) *</label>
-                        <input type="number" id="editMaterialPrice" value="${material.price}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <input type="text" id="editMaterialPrice" value="${(material.price || 0).toLocaleString()}" 
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 (원)</label>
-                        <input type="number" id="editMaterialLaborCost" value="${material.laborCost || 0}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <input type="text" id="editMaterialLaborCost" value="${(material.laborCost || 0).toLocaleString()}" readonly
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 생산성(기준)</label>
-                        <input type="number" id="editMaterialLaborProductivity" value="${material.laborProductivity || 0}" step="0.001"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
+                        <input type="text" id="editMaterialBaseLaborCost" value="0" readonly
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 생산성</label>
+                        <input type="number" id="editMaterialLaborProductivity" value="${material.laborProductivity || laborSettings.productivity}" step="0.001"
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               onchange="window.syncProductivityToLightweightCalculator(this.value)">
                     </div>
                     
                     <!-- Row 4: 노무비 보할, 공종 (빨간색/녹색) -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 보할 (%)</label>
-                        <input type="number" id="editMaterialLaborCompensation" value="${material.laborCompensation || 0}" min="0" max="500" step="1"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
+                        <input type="number" id="editMaterialLaborCompensation" value="${material.laborCompensation || laborSettings.compensation}" min="0" max="500" step="1"
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               onchange="window.syncCompensationToLightweightCalculator(this.value)">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종1</label>
@@ -2452,6 +2591,69 @@ function editLightweightMaterial(materialId) {
                                style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
                     </div>
                 </div>
+                
+            <!-- Section 2: 노무비 계산 섹션 -->
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #fef3c7;">
+                <h5 style="margin: 0 0 15px 0; color: #92400e;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    
+                    <!-- 기준 노무비 설정 -->
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                        <h6 style="margin: 0 0 10px 0; color: #92400e;">기준 노무비 설정</h6>
+                        <div id="workersList" style="margin-bottom: 10px;">
+                            ${laborSettings.workers.map((worker, index) => `
+                                <div class="worker-item" data-index="${index}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                    <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+                                        <option value="반장" ${worker.type === '반장' ? 'selected' : ''}>반장</option>
+                                        <option value="조공" ${worker.type === '조공' ? 'selected' : ''}>조공</option>
+                                        <option value="특별직" ${worker.type === '특별직' ? 'selected' : ''}>특별직</option>
+                                        <option value="기타" ${worker.type === '기타' ? 'selected' : ''}>기타</option>
+                                    </select>
+                                    <input type="text" class="worker-cost" value="${worker.cost ? worker.cost.toLocaleString() : '0'}" 
+                                           style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                                           oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
+                                           onchange="window.calculateLightweightLaborCost()">
+                                    <button type="button" onclick="window.removeLightweightWorker(this)"
+                                            style="padding: 2px 6px; background: #dc2626; color: white; border: none; border-radius: 3px; font-size: 11px; cursor: pointer;">삭제</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <button type="button" onclick="window.addLightweightWorker()" 
+                                style="width: 100%; padding: 8px; background: #16a34a; color: white; border: none; border-radius: 4px; margin-bottom: 10px; cursor: pointer;">
+                            + 작업자 추가
+                        </button>
+                        
+                        <div style="background: #fbbf24; padding: 8px; border-radius: 4px; color: #92400e; font-size: 13px; text-align: center;">
+                            <div>합계: <span id="lightweightTotalCost">0</span>원 | 작업자 수: <span id="lightweightWorkerCount">0</span>명</div>
+                            <div style="font-weight: 600; margin-top: 4px;">→ 기준 노무비: <span id="lightweightBaseLaborCost">0</span>원</div>
+                        </div>
+                    </div>
+
+                    <!-- 생산성 & 보할 설정 -->
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                        <h6 style="margin: 0 0 10px 0; color: #92400e;">생산성 및 보할 설정</h6>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 생산성</label>
+                            <input type="number" id="editLightweightLaborProductivity" value="${laborSettings.productivity}" step="0.01" 
+                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   onchange="window.calculateLightweightLaborCost()">
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 보할 (%)</label>
+                            <input type="number" id="editLightweightLaborCompensation" value="${laborSettings.compensation}" step="1" min="0" max="500"
+                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   onchange="window.calculateLightweightLaborCost()">
+                        </div>
+
+                        <div style="background: #16a34a; padding: 10px; border-radius: 4px; color: white; text-align: center;">
+                            <div style="font-size: 14px; margin-bottom: 4px;">최종 노무비</div>
+                            <div style="font-size: 18px; font-weight: 700;" id="finalLightweightLaborCost">0원</div>
+                            <div style="font-size: 11px; margin-top: 4px; opacity: 0.9;">기준노무비 ÷ 생산성 × 보할</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
             <div style="background: linear-gradient(90deg, #dbeafe 0%, #fef2f2 50%, #f0fdf4 100%); padding: 15px; border-radius: 4px; margin-top: 15px;">
                 <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.4;">
@@ -2472,6 +2674,13 @@ function editLightweightMaterial(materialId) {
             updateLightweightMaterial(materialId, modal);
         }}
     ]);
+    
+    // 모달 로드 후 초기 계산 실행
+    setTimeout(() => {
+        if (typeof window.calculateLightweightLaborCost === 'function') {
+            window.calculateLightweightLaborCost();
+        }
+    }, 300);
 }
 
 // 경량부품 삭제
@@ -2572,12 +2781,32 @@ function updateLightweightMaterial(materialId, modal = null) {
             spec: document.getElementById('editMaterialSpec')?.value.trim() || '',
             size: document.getElementById('editMaterialSize')?.value.trim() || '',
             unit: document.getElementById('editMaterialUnit')?.value || 'M',
-            price: parseInt(document.getElementById('editMaterialPrice')?.value) || 0,
-            laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value) || 0,
+            price: parseInt(document.getElementById('editMaterialPrice')?.value.replace(/,/g, '')) || 0,
+            laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value.replace(/,/g, '')) || 0,
             laborProductivity: parseFloat(document.getElementById('editMaterialLaborProductivity')?.value) || 0,
             laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 0,
+            workType1: document.getElementById('editMaterialWorkType1')?.value.trim() || '',
+            workType2: document.getElementById('editMaterialWorkType2')?.value.trim() || '',
             location: document.getElementById('editMaterialLocation')?.value.trim() || '',
             work: document.getElementById('editMaterialWork')?.value.trim() || ''
+        };
+
+        // 노무비 계산 설정 수집
+        const workers = [];
+        document.querySelectorAll('#workersList .worker-item').forEach(workerElement => {
+            const type = workerElement.querySelector('.worker-type')?.value || '조공';
+            const cost = parseInt(workerElement.querySelector('.worker-cost')?.value.replace(/,/g, '')) || 0;
+            workers.push({ type, cost });
+        });
+
+        const calculatorProductivity = parseFloat(document.getElementById('editLightweightLaborProductivity')?.value) || 0;
+        const calculatorCompensation = parseInt(document.getElementById('editLightweightLaborCompensation')?.value) || 0;
+
+        // 노무비 설정 객체 구성
+        updateData.laborSettings = {
+            workers: workers,
+            productivity: calculatorProductivity,
+            compensation: calculatorCompensation
         };
 
         // 규격은 이제 수동 입력 가능 (자동 추출 제거)
@@ -2592,8 +2821,24 @@ function updateLightweightMaterial(materialId, modal = null) {
         if (!updateData.price || updateData.price <= 0) {
             throw new Error('올바른 자재비를 입력해주세요.');
         }
+        if (!updateData.laborCost || updateData.laborCost < 0) {
+            throw new Error('올바른 노무비를 입력해주세요.');
+        }
         if (updateData.laborCompensation < 0 || updateData.laborCompensation > 500) {
             throw new Error('노무비 보할은 0-500% 범위내에서 입력해주세요.');
+        }
+
+        // 노무비 계산 설정 유효성 검사
+        if (updateData.laborSettings) {
+            if (!updateData.laborSettings.workers || updateData.laborSettings.workers.length === 0) {
+                throw new Error('작업자 설정이 필요합니다.');
+            }
+            if (!updateData.laborSettings.productivity || updateData.laborSettings.productivity <= 0) {
+                throw new Error('올바른 생산성 값을 입력해주세요.');
+            }
+            if (!updateData.laborSettings.compensation || updateData.laborSettings.compensation <= 0) {
+                throw new Error('올바른 보할 값을 입력해주세요.');
+            }
         }
 
         // 데이터베이스 업데이트
@@ -2747,13 +2992,10 @@ function editGypsumBoard(materialId) {
     // 노무비 설정 기본값 (기존 데이터가 없으면 기본값 적용)
     const laborSettings = material.laborSettings || {
         workers: [
-            {type: '반장', cost: 250000},
-            {type: '조공', cost: 220000},
-            {type: '조공', cost: 220000},
-            {type: '조공', cost: 220000}
+            {type: '조공', cost: 0}
         ],
-        productivity: 40,
-        compensation: 90
+        productivity: 0,
+        compensation: 0
     };
 
     const content = `
@@ -2828,29 +3070,36 @@ function editGypsumBoard(materialId) {
                     <!-- 장당단가 -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">장당단가 (원) *</label>
-                        <input type="number" id="editGypsumPrice" value="${material.unitPrice || 0}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <input type="text" id="editGypsumPrice" value="${(material.unitPrice || 0).toLocaleString()}" 
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <!-- M2 자재비, 노무비 -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">M2 자재비 (원)</label>
-                        <input type="number" id="editGypsumMaterialCostM2" value="${material.materialCost || 0}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;">
+                        <input type="text" id="editGypsumMaterialCostM2" value="${(material.materialCost || 0).toLocaleString()}" 
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">M2 노무비 (원)</label>
-                        <input type="number" id="editGypsumLaborCostM2" value="${material.laborCost || 0}" readonly
+                        <input type="text" id="editGypsumLaborCostM2" value="${(material.laborCost || 0).toLocaleString()}" readonly
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
+                        <input type="text" id="editGypsumBaseLaborCost" value="0" readonly
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
                     </div>
                     <!-- 노무비 생산성, 보할 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비생산성</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 생산성</label>
                         <input type="number" id="editGypsumLaborProductivity" value="${material.laborProductivity || laborSettings.productivity}" step="0.01"
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
                                onchange="window.syncProductivityToCalculator(this.value)">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비보할 (%)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
                         <input type="number" id="editGypsumLaborCompensation" value="${material.laborCompensation || laborSettings.compensation}"
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
                                onchange="window.syncCompensationToCalculator(this.value)">
@@ -2896,8 +3145,9 @@ function editGypsumBoard(materialId) {
                                         <option value="특별직" ${worker.type === '특별직' ? 'selected' : ''}>특별직</option>
                                         <option value="기타" ${worker.type === '기타' ? 'selected' : ''}>기타</option>
                                     </select>
-                                    <input type="number" class="worker-cost" value="${worker.cost}" 
+                                    <input type="text" class="worker-cost" value="${worker.cost ? worker.cost.toLocaleString() : '0'}" 
                                            style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                                           oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                                            onchange="window.calculateGypsumLaborCost()">
                                     <button type="button" onclick="window.removeGypsumWorker(this)" 
                                             style="padding: 4px 8px; background: #dc2626; color: white; border: none; border-radius: 4px; font-size: 11px;">삭제</button>
@@ -3072,9 +3322,9 @@ function updateGypsumBoard(materialId, modal = null) {
             t: parseFloat(document.getElementById('editGypsumT')?.value) || 9.5,
             unit: document.getElementById('editGypsumUnit')?.value || '매',
             qty: parseFloat(document.getElementById('editGypsumQty')?.value) || 1.00,
-            unitPrice: parseInt(document.getElementById('editGypsumPrice')?.value) || 0,
-            materialCost: parseInt(document.getElementById('editGypsumMaterialCostM2')?.value) || 0,
-            laborCost: parseInt(document.getElementById('editGypsumLaborCostM2')?.value) || 0,
+            unitPrice: parseInt(document.getElementById('editGypsumPrice')?.value.replace(/,/g, '')) || 0,
+            materialCost: parseInt(document.getElementById('editGypsumMaterialCostM2')?.value.replace(/,/g, '')) || 0,
+            laborCost: parseInt(document.getElementById('editGypsumLaborCostM2')?.value.replace(/,/g, '')) || 0,
             laborProductivity: parseFloat(document.getElementById('editGypsumLaborProductivity')?.value) || 0,
             laborCompensation: parseInt(document.getElementById('editGypsumLaborCompensation')?.value) || 0,
             workType1: document.getElementById('editGypsumWorkType1')?.value.trim() || '',
@@ -3087,12 +3337,12 @@ function updateGypsumBoard(materialId, modal = null) {
         const workers = [];
         document.querySelectorAll('.worker-item').forEach(workerElement => {
             const type = workerElement.querySelector('.worker-type')?.value || '조공';
-            const cost = parseInt(workerElement.querySelector('.worker-cost')?.value) || 220000;
+            const cost = parseInt(workerElement.querySelector('.worker-cost')?.value.replace(/,/g, '')) || 0;
             workers.push({ type, cost });
         });
 
-        const calculatorProductivity = parseFloat(document.getElementById('editLaborProductivity')?.value) || 40;
-        const calculatorCompensation = parseInt(document.getElementById('editLaborCompensation')?.value) || 90;
+        const calculatorProductivity = parseFloat(document.getElementById('editLaborProductivity')?.value) || 0;
+        const calculatorCompensation = parseInt(document.getElementById('editLaborCompensation')?.value) || 0;
 
         // 노무비 설정 객체 구성
         materialData.laborSettings = {
@@ -3496,7 +3746,7 @@ function filterGypsumBoards() {
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.materialCost || 0).toLocaleString()}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || '0'}</td>
-                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborInsurance || '0'}%</td>
+                <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborCompensation || '0'}%</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || '-'}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || '-'}</td>
                 <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || '-'}</td>

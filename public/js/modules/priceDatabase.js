@@ -506,6 +506,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -522,6 +530,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -538,6 +554,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -554,6 +578,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -570,6 +602,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -586,6 +626,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -602,6 +650,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -618,6 +674,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -634,6 +698,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -650,6 +722,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -666,6 +746,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -682,6 +770,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -698,6 +794,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -714,6 +818,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -730,6 +842,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -746,6 +866,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -762,6 +890,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -780,6 +916,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -796,6 +940,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -812,6 +964,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -828,6 +988,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -844,6 +1012,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -860,6 +1036,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -876,6 +1060,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -892,6 +1084,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -908,6 +1108,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -924,6 +1132,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -940,6 +1156,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -956,6 +1180,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -972,6 +1204,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -988,6 +1228,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1004,6 +1252,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1020,6 +1276,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1038,6 +1302,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1054,6 +1326,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1070,6 +1350,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1086,6 +1374,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1102,6 +1398,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1120,6 +1424,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1136,6 +1448,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1152,6 +1472,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1168,6 +1496,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1184,6 +1520,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1202,6 +1546,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1218,6 +1570,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1234,6 +1594,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1250,6 +1618,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1266,6 +1642,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1282,6 +1666,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1298,6 +1690,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1314,6 +1714,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1332,6 +1740,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1348,6 +1764,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1364,6 +1788,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1380,6 +1812,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1398,6 +1838,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1414,6 +1862,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1430,6 +1886,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1446,6 +1910,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1462,6 +1934,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1478,6 +1958,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1494,6 +1982,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1510,6 +2006,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1526,6 +2030,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1542,6 +2054,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1558,6 +2078,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1574,6 +2102,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1590,6 +2126,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1606,6 +2150,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1622,6 +2174,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1638,6 +2198,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1654,6 +2222,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1670,6 +2246,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1686,6 +2270,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1702,6 +2294,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1718,6 +2318,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1734,6 +2342,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1750,6 +2366,14 @@ class PriceDatabase extends EventEmitter {
           laborCost: 0,
           laborProductivity: 0,
           laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
@@ -1811,7 +2435,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2254,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1832,7 +2464,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3025,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1853,7 +2493,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3791,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1874,7 +2522,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2311,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1895,7 +2551,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3102,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1915,7 +2579,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3796,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1936,7 +2608,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2313,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1957,7 +2637,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3105,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1978,7 +2666,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3100,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -1999,7 +2695,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3793,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2022,7 +2726,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3642,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2043,7 +2755,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 5185,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2064,7 +2784,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 7167,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2085,7 +2813,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3698,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2106,7 +2842,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 5269,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2127,7 +2871,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 7171,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2148,7 +2900,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3693,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2169,7 +2929,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 5267,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2192,7 +2960,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3920,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2213,7 +2989,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 4877,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2234,7 +3018,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 6932,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2255,7 +3047,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 9843,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2276,7 +3076,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3972,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2297,7 +3105,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 4995,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2318,7 +3134,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 6932,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2339,7 +3163,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3972,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2360,7 +3192,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3976,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2381,7 +3221,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 4996,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2404,7 +3252,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 6586,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2425,7 +3281,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 8025,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2446,7 +3310,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 10167,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2467,7 +3339,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 6583,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2488,7 +3368,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 8032,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2509,7 +3397,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 10167,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2530,7 +3426,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 6586,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2551,7 +3455,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 13500,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2572,7 +3484,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 13507,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2595,7 +3515,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2685,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2616,7 +3544,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3549,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2637,7 +3573,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 4395,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2658,7 +3602,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3602,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2679,7 +3631,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 4398,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2700,7 +3660,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3604,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2723,7 +3691,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2494,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2744,7 +3720,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3346,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2765,7 +3749,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 2495,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2786,7 +3778,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 3343,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2809,7 +3809,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 7333,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2831,7 +3839,15 @@ class PriceDatabase extends EventEmitter {
           materialCost: 7333,
           laborCost: 0,
           laborProductivity: 0,
-          laborInsurance: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [
+              {type: '조공', cost: 0}
+            ],
+            productivity: 0,
+            compensation: 0
+          },
           workType1: '건자재',
           workType2: '경량',
           location: '벽체',
@@ -2894,7 +3910,7 @@ class PriceDatabase extends EventEmitter {
       );
       const newId = `LC${String(maxId + 1).padStart(3, '0')}`;
 
-      // 새 자재 생성
+      // 새 자재 생성 (기본 노무비 설정 포함)
       const newMaterial = {
         id: newId,
         name: materialData.name,
@@ -2903,6 +3919,21 @@ class PriceDatabase extends EventEmitter {
         unit: materialData.unit,
         price: materialData.price,
         note: materialData.note || '',
+        laborCost: 0,
+        laborProductivity: 0,
+        laborCompensation: 0,
+        baseLabor: 0,
+        laborSettings: {
+          workers: [
+            {type: '조공', cost: 0}
+          ],
+          productivity: 0,
+          compensation: 0
+        },
+        workType1: '경량',
+        workType2: '경량',
+        location: '벽체',
+        work: ''
       };
 
       // 메모리 내 데이터에 추가
@@ -3066,19 +4097,35 @@ class PriceDatabase extends EventEmitter {
       );
       const newId = `GB${String(maxId + 1).padStart(3, '0')}`;
 
-      // 새 석고보드 생성
+      // 새 석고보드 생성 (기본 노무비 설정 포함)
       const newMaterial = {
         id: newId,
+        item: '석고보드',
         name: materialData.name,
         category: materialData.category,
+        spec: `${materialData.t}T*1PLY`,
         w: materialData.w,
         h: materialData.h,
         t: materialData.t,
         unit: materialData.unit,
         qty: materialData.qty,
-        priceOriginal: materialData.priceOriginal,
-        priceChanged: materialData.priceChanged || materialData.priceOriginal,
-        unitPriceM2: materialData.unitPriceM2,
+        unitPrice: materialData.priceOriginal,
+        materialCost: Math.round(materialData.priceOriginal * 0.618),
+        laborCost: 0,
+        laborProductivity: 0,
+        laborCompensation: 0,
+        baseLabor: 0,
+        laborSettings: {
+          workers: [
+            {type: '조공', cost: 0}
+          ],
+          productivity: 0,
+          compensation: 0
+        },
+        workType1: '건자재',
+        workType2: '경량',
+        location: '벽체',
+        work: '석고보드 설치',
         note: materialData.note || '',
       };
 
