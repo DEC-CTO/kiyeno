@@ -2205,7 +2205,7 @@ function showGypsumBoards() {
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.materialCost || 0).toLocaleString()}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: right;">₩${(item.laborCost || 0).toLocaleString()}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborProductivity || '0'}</td>
-                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborInsurance || '0'}%</td>
+                            <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.laborCompensation || '0'}%</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType1 || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.workType2 || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || '-'}</td>
@@ -2845,13 +2845,13 @@ function editGypsumBoard(materialId) {
                     <!-- 노무비 생산성, 보할 -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비생산성</label>
-                        <input type="number" id="editGypsumLaborProductivity" value="${material.laborProductivity || 0}" step="0.01"
+                        <input type="number" id="editGypsumLaborProductivity" value="${material.laborProductivity || laborSettings.productivity}" step="0.01"
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
                                onchange="window.syncProductivityToCalculator(this.value)">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비보할 (%)</label>
-                        <input type="number" id="editGypsumLaborCompensation" value="${material.laborCompensation || 0}"
+                        <input type="number" id="editGypsumLaborCompensation" value="${material.laborCompensation || laborSettings.compensation}"
                                style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
                                onchange="window.syncCompensationToCalculator(this.value)">
                     </div>
@@ -3065,16 +3065,40 @@ function updateGypsumBoard(materialId, modal = null) {
     try {
         const materialData = {
             name: document.getElementById('editGypsumName')?.value.trim() || '',
+            category: document.getElementById('editGypsumCategory')?.value || '',
+            spec: document.getElementById('editGypsumSpec')?.value.trim() || '',
             w: parseInt(document.getElementById('editGypsumW')?.value) || 900,
             h: parseInt(document.getElementById('editGypsumH')?.value) || 1800,
             t: parseFloat(document.getElementById('editGypsumT')?.value) || 9.5,
-            category: document.getElementById('editGypsumCategory')?.value || '',
             unit: document.getElementById('editGypsumUnit')?.value || '매',
             qty: parseFloat(document.getElementById('editGypsumQty')?.value) || 1.00,
-            priceOriginal: parseInt(document.getElementById('editGypsumPriceOriginal')?.value) || 0,
-            priceChanged: parseInt(document.getElementById('editGypsumPriceChanged')?.value) || 0,
-            unitPriceM2: parseInt(document.getElementById('editGypsumPriceM2')?.value) || null,
-            note: document.getElementById('editGypsumNote')?.value.trim() || ''
+            unitPrice: parseInt(document.getElementById('editGypsumPrice')?.value) || 0,
+            materialCost: parseInt(document.getElementById('editGypsumMaterialCostM2')?.value) || 0,
+            laborCost: parseInt(document.getElementById('editGypsumLaborCostM2')?.value) || 0,
+            laborProductivity: parseFloat(document.getElementById('editGypsumLaborProductivity')?.value) || 0,
+            laborCompensation: parseInt(document.getElementById('editGypsumLaborCompensation')?.value) || 0,
+            workType1: document.getElementById('editGypsumWorkType1')?.value.trim() || '',
+            workType2: document.getElementById('editGypsumWorkType2')?.value.trim() || '',
+            location: document.getElementById('editGypsumLocation')?.value.trim() || '',
+            work: document.getElementById('editGypsumWork')?.value.trim() || ''
+        };
+
+        // 노무비 계산 설정 수집
+        const workers = [];
+        document.querySelectorAll('.worker-item').forEach(workerElement => {
+            const type = workerElement.querySelector('.worker-type')?.value || '조공';
+            const cost = parseInt(workerElement.querySelector('.worker-cost')?.value) || 220000;
+            workers.push({ type, cost });
+        });
+
+        const calculatorProductivity = parseFloat(document.getElementById('editLaborProductivity')?.value) || 40;
+        const calculatorCompensation = parseInt(document.getElementById('editLaborCompensation')?.value) || 90;
+
+        // 노무비 설정 객체 구성
+        materialData.laborSettings = {
+            workers: workers,
+            productivity: calculatorProductivity,
+            compensation: calculatorCompensation
         };
 
         // 유효성 검사
@@ -3084,11 +3108,29 @@ function updateGypsumBoard(materialId, modal = null) {
         if (!materialData.category) {
             throw new Error('카테고리를 선택해주세요.');
         }
-        if (!materialData.priceOriginal || materialData.priceOriginal <= 0) {
-            throw new Error('올바른 당초 단가를 입력해주세요.');
+        
+        // 필수 필드 유효성 검사
+        if (!materialData.unitPrice || materialData.unitPrice <= 0) {
+            throw new Error('올바른 장당단가를 입력해주세요.');
         }
-        if (!materialData.priceChanged || materialData.priceChanged <= 0) {
-            throw new Error('올바른 변경 단가를 입력해주세요.');
+        if (!materialData.materialCost || materialData.materialCost < 0) {
+            throw new Error('올바른 재료비를 입력해주세요.');
+        }
+        if (!materialData.laborCost || materialData.laborCost < 0) {
+            throw new Error('올바른 노무비를 입력해주세요.');
+        }
+
+        // 노무비 계산 설정 유효성 검사
+        if (materialData.laborSettings) {
+            if (!materialData.laborSettings.workers || materialData.laborSettings.workers.length === 0) {
+                throw new Error('작업자 설정이 필요합니다.');
+            }
+            if (!materialData.laborSettings.productivity || materialData.laborSettings.productivity <= 0) {
+                throw new Error('올바른 생산성 값을 입력해주세요.');
+            }
+            if (!materialData.laborSettings.compensation || materialData.laborSettings.compensation <= 0) {
+                throw new Error('올바른 보할 값을 입력해주세요.');
+            }
         }
 
         // 데이터베이스 업데이트
