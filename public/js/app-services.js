@@ -2053,7 +2053,7 @@ function showGypsumBoards() {
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">장당단가</th>
                         <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #fff3e0; text-align: center;">M2</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비생산성</th>
-                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비보험</th>
+                        <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">노무비보할</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종1</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종2</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">부위</th>
