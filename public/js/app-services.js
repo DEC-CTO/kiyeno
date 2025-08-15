@@ -3396,18 +3396,7 @@ function performGypsumDeletion(materialId) {
     }
 }
 
-// 자재 관리 함수들
-console.log('🔧 app-services.js 로딩 중: showMaterialManagementModal 함수 등록');
-window.showMaterialManagementModal = showMaterialManagementModal;
-console.log('✅ showMaterialManagementModal 전역 등록 완료:', typeof window.showMaterialManagementModal);
-window.loadStandardMaterials = loadStandardMaterials;
-window.loadMaterialList = loadMaterialList;
-window.editMaterial = editMaterial;
-window.showLightweightMaterials = showLightweightMaterials;
-window.showGypsumBoards = showGypsumBoards;
-window.deleteMaterial = deleteMaterial;
-window.exportMaterials = exportMaterials;
-window.importMaterials = importMaterials;
+// 자재 관리 함수들 (materialManager.js로 이동됨)
 
 // 경량부품 관리 함수들
 // window.addLightweightMaterial 제거됨

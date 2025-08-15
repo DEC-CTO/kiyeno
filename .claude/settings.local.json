@@ -39,7 +39,8 @@
       "Bash(wget:*)",
       "Bash(ss:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git branch:*)"
     ],
     "deny": []
   }
