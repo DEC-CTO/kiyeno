@@ -1,0 +1,970 @@
+// =============================================================================
+// Kiyeno 벽체 관리 시스템 - 일위대가 관리 모듈
+// 일위대가 생성, 편집, 계산, 관리 전담 모듈
+// =============================================================================
+
+// =============================================================================
+// 전역 변수
+// =============================================================================
+let unitPriceItems = []; // 일위대가 아이템 목록
+let currentUnitPriceData = {}; // 현재 편집 중인 일위대가 데이터
+
+// =============================================================================
+// 일위대가 관리 메인 함수들
+// =============================================================================
+
+// 일위대가 관리 모달 열기
+function openUnitPriceManagement() {
+    console.log('💰 일위대가 관리 모달 열기');
+    
+    // createSubModal 함수 존재 여부 확인
+    if (typeof createSubModal !== 'function') {
+        console.error('❌ createSubModal 함수를 찾을 수 없습니다.');
+        alert('모달 시스템을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+        return;
+    }
+    
+    // 모달 HTML 생성
+    const modalHTML = createUnitPriceManagementModal();
+    
+    // 모달 표시 (닫기 버튼 추가)
+    const modal = createSubModal('💰 일위대가 관리', modalHTML, [
+        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) }
+    ], {
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+    
+    if (modal) {
+        // 모달이 DOM에 추가된 후 초기화
+        setTimeout(() => {
+            loadUnitPriceItems();
+            renderUnitPriceItemsList();
+        }, 100);
+    }
+}
+
+// 일위대가 관리 모달 HTML 생성
+function createUnitPriceManagementModal() {
+    return `
+        <div class="unit-price-management-container">
+            <!-- 헤더 및 컨트롤 -->
+            <div class="unit-price-header">
+                <div class="controls-section">
+                    <button class="btn btn-success" onclick="openUnitPriceBasicModal()">
+                        <i class="fas fa-plus"></i> 새 일위대가 추가
+                    </button>
+                    <button class="btn btn-info" onclick="exportUnitPriceData()">
+                        <i class="fas fa-download"></i> 데이터 내보내기
+                    </button>
+                    <button class="btn btn-warning" onclick="importUnitPriceData()">
+                        <i class="fas fa-upload"></i> 데이터 가져오기
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 일위대가 목록 -->
+            <div class="unit-price-list-container">
+                <h4><i class="fas fa-list"></i> 일위대가 목록</h4>
+                <div id="unitPriceItemsList" class="unit-price-items-grid">
+                    <!-- 동적으로 생성되는 일위대가 아이템들 -->
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 기본 정보 입력 모달 열기
+function openUnitPriceBasicModal(editData = null) {
+    console.log('📝 일위대가 기본 정보 입력 모달 열기');
+    
+    const isEdit = editData !== null;
+    const modalTitle = isEdit ? '일위대가 수정' : '새 일위대가 추가';
+    
+    const basicModalHTML = `
+        <div class="unit-price-basic-form">
+            <div class="form-grid">
+                <!-- 아이템명 -->
+                <div class="form-group">
+                    <label>아이템 <span class="required">*</span></label>
+                    <input type="text" id="itemName" placeholder="예: C-STUD" value="${editData?.basic?.itemName || ''}" required>
+                </div>
+                
+                <!-- 간격 드롭다운 -->
+                <div class="form-group">
+                    <label>간격 <span class="required">*</span></label>
+                    <select id="spacing" required>
+                        <option value="">선택하세요</option>
+                        <option value="@400" ${editData?.basic?.spacing === '@400' ? 'selected' : ''}>@400</option>
+                        <option value="@450" ${editData?.basic?.spacing === '@450' ? 'selected' : ''}>@450</option>
+                        <option value="@500" ${editData?.basic?.spacing === '@500' ? 'selected' : ''}>@500</option>
+                    </select>
+                </div>
+                
+                <!-- 높이 드롭다운 -->
+                <div class="form-group">
+                    <label>높이 <span class="required">*</span></label>
+                    <select id="height" required>
+                        <option value="">선택하세요</option>
+                        <option value="3600이하" ${editData?.basic?.height === '3600이하' ? 'selected' : ''}>3600이하</option>
+                        <option value="3600이상" ${editData?.basic?.height === '3600이상' ? 'selected' : ''}>3600이상</option>
+                    </select>
+                </div>
+                
+                <!-- 규격 -->
+                <div class="form-group">
+                    <label>SIZE <span class="required">*</span></label>
+                    <input type="text" id="size" placeholder="예: 50형" value="${editData?.basic?.size || ''}" required>
+                </div>
+                
+                <!-- 부위 -->
+                <div class="form-group">
+                    <label>부위 <span class="required">*</span></label>
+                    <input type="text" id="location" placeholder="예: 벽체" value="${editData?.basic?.location || ''}" required>
+                </div>
+                
+                <!-- 공종 -->
+                <div class="form-group">
+                    <label>공종 <span class="required">*</span></label>
+                    <input type="text" id="workType" placeholder="예: 경량" value="${editData?.basic?.workType || ''}" required>
+                </div>
+                
+                <!-- 단위 드롭다운 -->
+                <div class="form-group">
+                    <label>UNIT <span class="required">*</span></label>
+                    <select id="unit" required>
+                        <option value="">선택하세요</option>
+                        <option value="M2" ${editData?.basic?.unit === 'M2' ? 'selected' : ''}>M2</option>
+                        <option value="M" ${editData?.basic?.unit === 'M' ? 'selected' : ''}>M</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- 버튼들은 createSubModal에서 처리 -->
+        </div>
+    `;
+    
+    // 현재 편집 중인 데이터 저장
+    if (editData) {
+        currentUnitPriceData = JSON.parse(JSON.stringify(editData));
+    } else {
+        currentUnitPriceData = {};
+    }
+    
+    // 기본 정보 입력 모달 표시 (취소 및 세부 설정 버튼)
+    const modal = createSubModal(modalTitle, basicModalHTML, [
+        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
+        { text: isEdit ? '수정 계속' : '세부 설정', class: 'btn-primary', onClick: (modal) => proceedToDetailInput(isEdit) }
+    ], {
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+}
+
+// 기본 정보에서 세부 설정으로 진행
+function proceedToDetailInput(isEdit = false) {
+    // 입력값 수집
+    const basicData = {
+        itemName: document.getElementById('itemName').value.trim(),
+        spacing: document.getElementById('spacing').value,
+        height: document.getElementById('height').value,
+        size: document.getElementById('size').value.trim(),
+        location: document.getElementById('location').value.trim(),
+        workType: document.getElementById('workType').value.trim(),
+        unit: document.getElementById('unit').value
+    };
+    
+    // 필수 필드 검증
+    const requiredFields = ['itemName', 'spacing', 'height', 'size', 'location', 'workType', 'unit'];
+    for (const field of requiredFields) {
+        if (!basicData[field]) {
+            alert(`${getFieldLabel(field)} 필드를 입력해주세요.`);
+            return;
+        }
+    }
+    
+    // 현재 데이터에 기본 정보 저장
+    currentUnitPriceData.basic = basicData;
+    
+    // 기존 구성품이 없다면 초기화
+    if (!currentUnitPriceData.components) {
+        currentUnitPriceData.components = [];
+    }
+    
+    // 현재 모달 닫기
+    closeCurrentModal();
+    
+    // 세부 입력 모달 열기
+    setTimeout(() => {
+        openUnitPriceDetailModal(isEdit);
+    }, 100);
+}
+
+// 필드 라벨 매핑
+function getFieldLabel(field) {
+    const labels = {
+        itemName: '아이템',
+        spacing: '간격',
+        height: '높이',
+        size: 'SIZE',
+        location: '부위',
+        workType: '공종',
+        unit: 'UNIT'
+    };
+    return labels[field] || field;
+}
+
+// =============================================================================
+// 세부 설정 모달 관련 함수들
+// =============================================================================
+
+// 세부 아이템 입력 모달 열기  
+function openUnitPriceDetailModal(isEdit = false) {
+    console.log('🔧 세부 아이템 입력 모달 열기');
+    
+    const basic = currentUnitPriceData.basic;
+    const itemSummary = `${basic.itemName} ${basic.spacing} ${basic.height} ${basic.size} | ${basic.location} | ${basic.workType} | ${basic.unit}`;
+    const modalTitle = isEdit ? '세부 아이템 수정' : '세부 아이템 설정';
+    
+    const detailModalHTML = createDetailModalHTML(itemSummary);
+    
+    // 세부 입력 모달 표시 (취소 및 저장 버튼)
+    const modal = createSubModal(modalTitle, detailModalHTML, [
+        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
+        { text: isEdit ? '수정 완료' : '저장', class: 'btn-primary', onClick: (modal) => saveUnitPriceItem() }
+    ], {
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+    
+    if (modal) {
+        setTimeout(() => {
+            // 기존 구성품이 있다면 로드
+            loadExistingComponents();
+            
+            // 기본 구성품이 없다면 하나 추가
+            if (!currentUnitPriceData.components || currentUnitPriceData.components.length === 0) {
+                addComponentRow();
+            }
+        }, 100);
+    }
+}
+
+// 세부 모달 HTML 생성
+function createDetailModalHTML(itemSummary) {
+    return `
+        <div class="unit-price-detail-form">
+            <div class="detail-header">
+                <h4><i class="fas fa-info-circle"></i> ${itemSummary}</h4>
+            </div>
+            
+            <div class="controls-section">
+                <button class="btn btn-success btn-sm" onclick="addComponentRow()">
+                    <i class="fas fa-plus"></i> 구성품 추가
+                </button>
+            </div>
+            
+            <!-- 세부 아이템 테이블 (석고보드 스타일) -->
+            <div class="unit-price-table-container" style="max-height: 500px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table class="unit-price-detail-table" style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;">
+                    <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 150px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">품명</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">규격</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">단위</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">수량</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-weight: 600;">재료비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; text-align: center; font-weight: 600;">노무비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-align: center; font-weight: 600;">경비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; text-align: center; font-weight: 600;">합계</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">삭제</th>
+                        </tr>
+                        <tr>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #ecfdf5; color: #065f46; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #ecfdf5; color: #065f46; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #eff6ff; color: #1e40af; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #eff6ff; color: #1e40af; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #fefbeb; color: #92400e; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #fefbeb; color: #92400e; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #fef2f2; color: #b91c1c; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #fef2f2; color: #b91c1c; text-align: center; font-weight: 500;">금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="componentsTable">
+                        <!-- 동적으로 추가되는 행들 -->
+                    </tbody>
+                    <!-- 고정 로우들 -->
+                    <tbody id="fixedRowsTable">
+                        <!-- 자재로스 -->
+                        <tr class="fixed-row material-loss-row">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재로스</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="3" step="0.1" oninput="calculateGrandTotal()" placeholder="3.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
+                        </tr>
+                        <!-- 자재운반비 및 양중비 -->
+                        <tr class="fixed-row transport-cost-row">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재운반비 및 양중비</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="1.5" step="0.1" oninput="calculateGrandTotal()" placeholder="1.5" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
+                        </tr>
+                        <!-- 자재비 이윤 -->
+                        <tr class="fixed-row material-profit-row">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재비 이윤</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="15" step="0.1" oninput="calculateGrandTotal()" placeholder="15.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
+                        </tr>
+                        <!-- 공구손료 및 기계경비 -->
+                        <tr class="fixed-row tool-expense-row">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">공구손료 및 기계경비</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">노무비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="2" step="0.1" oninput="calculateGrandTotal()" placeholder="2.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-expense-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="fixed-expense-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
+                        </tr>
+                    </tbody>
+                    <tfoot style="background: #f9fafb; position: sticky; bottom: 0;">
+                        <tr class="summary-row">
+                            <td colspan="4" style="padding: 12px 8px; border: 1px solid #e2e8f0; font-weight: 700; text-align: center; background: #6366f1; color: white;"><strong>총 합계</strong></td>
+                            <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #ecfdf5; color: #065f46;">0원</td>
+                            <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #eff6ff; color: #1e40af;">0원</td>
+                            <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #fefbeb; color: #92400e;">0원</td>
+                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700; background: #fef2f2; color: #b91c1c; font-size: 14px;">0원</td>
+                            <td style="border: 1px solid #e2e8f0; background: #6366f1;"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+            <!-- 버튼들은 createSubModal에서 처리 -->
+        </div>
+    `;
+}
+
+// =============================================================================
+// 구성품 행 관리 함수들
+// =============================================================================
+
+// 구성품 행 추가
+function addComponentRow(componentData = null) {
+    const tbody = document.getElementById('componentsTable');
+    if (!tbody) return;
+    
+    const rowIndex = tbody.children.length;
+    const row = document.createElement('tr');
+    row.className = 'component-row';
+    
+    const data = componentData || {
+        name: '',
+        spec: '',
+        unit: '',
+        quantity: 1,
+        materialPrice: 0,
+        laborPrice: 0,
+        expensePrice: 0
+    };
+    
+    row.innerHTML = `
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="text" class="component-name" value="${data.name}" placeholder="품명 입력" 
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="text" class="component-spec" value="${data.spec}" placeholder="규격 입력"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="text" class="component-unit" value="${data.unit}" placeholder="단위"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="number" class="component-quantity" value="${data.quantity}" min="0" step="0.01"
+                   oninput="calculateRowTotal(this)"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="number" class="material-price" value="${data.materialPrice}" min="0"
+                   oninput="calculateRowTotal(this)"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="material-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="number" class="labor-price" value="${data.laborPrice}" min="0"
+                   oninput="calculateRowTotal(this)"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+            <input type="number" class="expense-price" value="${data.expensePrice}" min="0"
+                   oninput="calculateRowTotal(this)"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="expense-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="total-price">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 700;" class="total-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
+            <button onclick="removeComponentRow(this)" class="btn btn-sm" 
+                    style="padding: 2px 6px; background: #dc2626; color: white; border: none; border-radius: 3px; font-size: 11px;">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    tbody.appendChild(row);
+    calculateRowTotal(row.querySelector('.component-quantity'));
+    calculateGrandTotal();
+}
+
+// 구성품 행 삭제
+function removeComponentRow(button) {
+    const row = button.closest('tr');
+    if (row) {
+        row.remove();
+    }
+    calculateGrandTotal();
+}
+
+// 행별 계산
+function calculateRowTotal(input) {
+    const row = input.closest('tr');
+    if (!row) return;
+    
+    const quantity = parseFloat(row.querySelector('.component-quantity')?.value) || 0;
+    const materialPrice = parseFloat(row.querySelector('.material-price')?.value) || 0;
+    const laborPrice = parseFloat(row.querySelector('.labor-price')?.value) || 0;
+    const expensePrice = parseFloat(row.querySelector('.expense-price')?.value) || 0;
+    
+    const materialAmount = quantity * materialPrice;
+    const laborAmount = quantity * laborPrice;
+    const expenseAmount = quantity * expensePrice;
+    const totalAmount = materialAmount + laborAmount + expenseAmount;
+    
+    // 각 금액 업데이트
+    const materialAmountElement = row.querySelector('.material-amount');
+    const laborAmountElement = row.querySelector('.labor-amount');
+    const expenseAmountElement = row.querySelector('.expense-amount');
+    const totalAmountElement = row.querySelector('.total-amount');
+    
+    if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
+    if (laborAmountElement) laborAmountElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
+    if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
+    if (totalAmountElement) totalAmountElement.textContent = Math.round(totalAmount).toLocaleString() + '원';
+    
+    calculateGrandTotal();
+}
+
+// =============================================================================
+// 전체 합계 계산 함수들
+// =============================================================================
+
+// 전체 합계 계산 (구성품 + 고정 로우)
+function calculateGrandTotal() {
+    let totalMaterial = 0, totalLabor = 0, totalExpense = 0, grandTotal = 0;
+    
+    // 구성품 테이블 계산
+    document.querySelectorAll('#componentsTable tr').forEach(row => {
+        const materialElement = row.querySelector('.material-amount');
+        const laborElement = row.querySelector('.labor-amount');
+        const expenseElement = row.querySelector('.expense-amount');
+        const totalElement = row.querySelector('.total-amount');
+        
+        if (materialElement) totalMaterial += parseFloat(materialElement.textContent.replace(/[,원]/g, '') || 0);
+        if (laborElement) totalLabor += parseFloat(laborElement.textContent.replace(/[,원]/g, '') || 0);
+        if (expenseElement) totalExpense += parseFloat(expenseElement.textContent.replace(/[,원]/g, '') || 0);
+        if (totalElement) grandTotal += parseFloat(totalElement.textContent.replace(/[,원]/g, '') || 0);
+    });
+    
+    // 고정 로우 계산 (백분율 기반)
+    calculateFixedRows(totalMaterial, totalLabor, totalExpense);
+    
+    // 고정 로우 금액을 카테고리별로 추가
+    // 자재로스, 자재운반비, 자재비이윤 → 재료비에 추가
+    const materialLossRow = document.querySelector('.material-loss-row');
+    const transportCostRow = document.querySelector('.transport-cost-row');
+    const materialProfitRow = document.querySelector('.material-profit-row');
+    
+    if (materialLossRow) {
+        const amount = parseFloat(materialLossRow.querySelector('.fixed-material-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        totalMaterial += amount;
+        grandTotal += amount;
+    }
+    if (transportCostRow) {
+        const amount = parseFloat(transportCostRow.querySelector('.fixed-material-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        totalMaterial += amount;
+        grandTotal += amount;
+    }
+    if (materialProfitRow) {
+        const amount = parseFloat(materialProfitRow.querySelector('.fixed-material-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        totalMaterial += amount;
+        grandTotal += amount;
+    }
+    
+    // 공구손료 및 기계경비 → 경비에 추가
+    const toolExpenseRow = document.querySelector('.tool-expense-row');
+    if (toolExpenseRow) {
+        const amount = parseFloat(toolExpenseRow.querySelector('.fixed-expense-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        totalExpense += amount;
+        grandTotal += amount;
+    }
+    
+    // 합계 표시 업데이트
+    const totalMaterialElement = document.getElementById('totalMaterial');
+    const totalLaborElement = document.getElementById('totalLabor');
+    const totalExpenseElement = document.getElementById('totalExpense');
+    const grandTotalElement = document.getElementById('grandTotal');
+    
+    if (totalMaterialElement) totalMaterialElement.textContent = Math.round(totalMaterial).toLocaleString() + '원';
+    if (totalLaborElement) totalLaborElement.textContent = Math.round(totalLabor).toLocaleString() + '원';
+    if (totalExpenseElement) totalExpenseElement.textContent = Math.round(totalExpense).toLocaleString() + '원';
+    if (grandTotalElement) grandTotalElement.textContent = Math.round(grandTotal).toLocaleString() + '원';
+}
+
+// 고정 로우 계산 (백분율 기반)
+function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
+    // 자재로스 (자재비의 %)
+    const materialLossRow = document.querySelector('.material-loss-row');
+    if (materialLossRow) {
+        const percentage = parseFloat(materialLossRow.querySelector('.fixed-quantity')?.value) || 0;
+        const amount = Math.round(baseMaterial * percentage / 100);
+        const amountElement = materialLossRow.querySelector('.fixed-material-amount');
+        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+    }
+    
+    // 자재운반비 및 양중비 (자재비의 %)
+    const transportCostRow = document.querySelector('.transport-cost-row');
+    if (transportCostRow) {
+        const percentage = parseFloat(transportCostRow.querySelector('.fixed-quantity')?.value) || 0;
+        const amount = Math.round(baseMaterial * percentage / 100);
+        const amountElement = transportCostRow.querySelector('.fixed-material-amount');
+        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+    }
+    
+    // 자재비 이윤 (자재비의 %)
+    const materialProfitRow = document.querySelector('.material-profit-row');
+    if (materialProfitRow) {
+        const percentage = parseFloat(materialProfitRow.querySelector('.fixed-quantity')?.value) || 0;
+        const amount = Math.round(baseMaterial * percentage / 100);
+        const amountElement = materialProfitRow.querySelector('.fixed-material-amount');
+        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+    }
+    
+    // 공구손료 및 기계경비 (노무비의 %)
+    const toolExpenseRow = document.querySelector('.tool-expense-row');
+    if (toolExpenseRow) {
+        const percentage = parseFloat(toolExpenseRow.querySelector('.fixed-quantity')?.value) || 0;
+        const amount = Math.round(baseLabor * percentage / 100);
+        const amountElement = toolExpenseRow.querySelector('.fixed-expense-amount');
+        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+        
+        // 단가도 업데이트
+        const priceElement = toolExpenseRow.querySelector('.fixed-expense-price');
+        if (priceElement) priceElement.textContent = amount.toLocaleString();
+    }
+}
+
+// =============================================================================
+// 데이터 저장 및 로드 함수들
+// =============================================================================
+
+// 기존 구성품 로드
+function loadExistingComponents() {
+    if (!currentUnitPriceData.components || currentUnitPriceData.components.length === 0) {
+        return;
+    }
+    
+    currentUnitPriceData.components.forEach(component => {
+        addComponentRow(component);
+    });
+}
+
+// 현재 구성품 데이터 수집
+function collectCurrentComponents() {
+    const components = [];
+    const rows = document.querySelectorAll('#componentsTable .component-row');
+    
+    rows.forEach(row => {
+        const component = {
+            name: row.querySelector('.component-name')?.value || '',
+            spec: row.querySelector('.component-spec')?.value || '',
+            unit: row.querySelector('.component-unit')?.value || '',
+            quantity: parseFloat(row.querySelector('.component-quantity')?.value) || 0,
+            materialPrice: parseFloat(row.querySelector('.material-price')?.value) || 0,
+            laborPrice: parseFloat(row.querySelector('.labor-price')?.value) || 0,
+            expensePrice: parseFloat(row.querySelector('.expense-price')?.value) || 0
+        };
+        
+        if (component.name.trim()) { // 품명이 있는 것만 저장
+            components.push(component);
+        }
+    });
+    
+    currentUnitPriceData.components = components;
+}
+
+// 일위대가 아이템 저장
+function saveUnitPriceItem() {
+    // 구성품 데이터 수집
+    collectCurrentComponents();
+    
+    // 총 비용 계산 및 저장
+    const totalMaterial = parseFloat(document.getElementById('totalMaterial')?.textContent.replace(/[,원]/g, '') || 0);
+    const totalLabor = parseFloat(document.getElementById('totalLabor')?.textContent.replace(/[,원]/g, '') || 0);
+    const totalExpense = parseFloat(document.getElementById('totalExpense')?.textContent.replace(/[,원]/g, '') || 0);
+    const grandTotal = parseFloat(document.getElementById('grandTotal')?.textContent.replace(/[,원]/g, '') || 0);
+    
+    currentUnitPriceData.totalCosts = {
+        material: totalMaterial,
+        labor: totalLabor,
+        expense: totalExpense,
+        total: grandTotal
+    };
+    
+    // 고정 비용 비율 저장
+    currentUnitPriceData.fixedRates = {
+        materialLoss: parseFloat(document.querySelector('.material-loss-row .fixed-quantity')?.value) || 3,
+        transportCost: parseFloat(document.querySelector('.transport-cost-row .fixed-quantity')?.value) || 1.5,
+        materialProfit: parseFloat(document.querySelector('.material-profit-row .fixed-quantity')?.value) || 15,
+        toolExpense: parseFloat(document.querySelector('.tool-expense-row .fixed-quantity')?.value) || 2
+    };
+    
+    // 기존 아이템 수정인지 새 아이템인지 확인
+    const existingIndex = unitPriceItems.findIndex(item => item.id === currentUnitPriceData.id);
+    
+    if (existingIndex >= 0) {
+        // 기존 아이템 수정
+        unitPriceItems[existingIndex] = currentUnitPriceData;
+        console.log('✅ 일위대가 아이템 수정됨:', currentUnitPriceData.id);
+    } else {
+        // 새 아이템 추가
+        currentUnitPriceData.id = generateUnitPriceId(currentUnitPriceData.basic);
+        currentUnitPriceData.createdAt = new Date().toISOString();
+        unitPriceItems.push(currentUnitPriceData);
+        console.log('✅ 일위대가 아이템 추가됨:', currentUnitPriceData.id);
+    }
+    
+    // 로컬스토리지에 저장
+    saveUnitPriceItems();
+    
+    // 모달 닫기
+    closeCurrentModal();
+    
+    // 목록 새로고침
+    setTimeout(() => {
+        renderUnitPriceItemsList();
+    }, 100);
+    
+    alert('일위대가가 성공적으로 저장되었습니다.');
+}
+
+// 일위대가 ID 생성
+function generateUnitPriceId(basic) {
+    const timestamp = Date.now();
+    const shortId = `${basic.itemName}-${basic.spacing}-${basic.height}-${basic.size}`.replace(/[^a-zA-Z0-9가-힣\-]/g, '');
+    return `${shortId}-${timestamp}`;
+}
+
+// 현재 모달 닫기 (유틸리티 함수)
+function closeCurrentModal() {
+    const modal = document.querySelector('.modal.show') || document.querySelector('.modal');
+    if (modal && typeof closeSubModal === 'function') {
+        closeSubModal(modal);
+    }
+}
+
+// =============================================================================
+// 일위대가 목록 관리 함수들
+// =============================================================================
+
+// 일위대가 아이템 목록 로드
+function loadUnitPriceItems() {
+    try {
+        const saved = localStorage.getItem('kiyeno_unitPriceItems');
+        if (saved) {
+            unitPriceItems = JSON.parse(saved);
+            console.log(`✅ 일위대가 데이터 로드됨: ${unitPriceItems.length}개 아이템`);
+        } else {
+            unitPriceItems = [];
+        }
+    } catch (error) {
+        console.error('일위대가 데이터 로드 실패:', error);
+        unitPriceItems = [];
+    }
+    return unitPriceItems;
+}
+
+// 일위대가 아이템 목록 저장
+function saveUnitPriceItems() {
+    try {
+        localStorage.setItem('kiyeno_unitPriceItems', JSON.stringify(unitPriceItems));
+        console.log('✅ 일위대가 데이터 저장됨:', unitPriceItems.length + '개 아이템');
+    } catch (error) {
+        console.error('일위대가 데이터 저장 실패:', error);
+        alert('데이터 저장에 실패했습니다.');
+    }
+}
+
+// 일위대가 아이템 목록 렌더링
+function renderUnitPriceItemsList() {
+    const container = document.getElementById('unitPriceItemsList');
+    if (!container) return;
+    
+    if (unitPriceItems.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>등록된 일위대가가 없습니다.</p>
+                <p style="font-size: 14px;">상단의 "새 일위대가 추가" 버튼을 클릭하여 시작하세요.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Excel 스타일 테이블 생성
+    const tableHTML = `
+        <div class="unit-price-table-wrapper" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;">
+                <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">재료비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">노무비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">경비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">총계</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600;">작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${unitPriceItems.map(item => {
+                        const basic = item.basic;
+                        const costs = item.totalCosts || { material: 0, labor: 0, expense: 0, total: 0 };
+                        return `
+                            <tr style="border-bottom: 1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 500;">${basic?.itemName || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.spacing || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.height || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.size || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.location || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.unit || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #ecfdf5; color: #065f46; font-weight: 600;">${Math.round(costs.material).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;">${Math.round(costs.labor).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fefbeb; color: #92400e; font-weight: 600;">${Math.round(costs.expense).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 700; font-size: 13px;">${Math.round(costs.total).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
+                                    <button onclick="editUnitPriceItem('${item.id}')" class="btn btn-sm" 
+                                            style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; margin-right: 4px; font-size: 11px;">
+                                        <i class="fas fa-edit"></i> 수정
+                                    </button>
+                                    <button onclick="deleteUnitPriceItem('${item.id}')" class="btn btn-sm"
+                                            style="padding: 4px 8px; background: #dc2626; color: white; border: none; border-radius: 4px; font-size: 11px;">
+                                        <i class="fas fa-trash"></i> 삭제
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    container.innerHTML = tableHTML;
+}
+
+// 일위대가 아이템 수정
+function editUnitPriceItem(id) {
+    const item = unitPriceItems.find(item => item.id === id);
+    if (!item) {
+        alert('해당 아이템을 찾을 수 없습니다.');
+        return;
+    }
+    
+    console.log('✏️ 일위대가 아이템 수정:', id);
+    
+    // 현재 모달 닫기
+    closeCurrentModal();
+    
+    // 수정 모달 열기
+    setTimeout(() => {
+        openUnitPriceBasicModal(item);
+    }, 300);
+}
+
+// 일위대가 아이템 삭제
+function deleteUnitPriceItem(id) {
+    const item = unitPriceItems.find(item => item.id === id);
+    if (!item) {
+        alert('해당 아이템을 찾을 수 없습니다.');
+        return;
+    }
+    
+    const itemName = item.basic?.itemName || 'Unknown';
+    if (confirm(`"${itemName}" 일위대가를 삭제하시겠습니까?`)) {
+        unitPriceItems = unitPriceItems.filter(item => item.id !== id);
+        saveUnitPriceItems();
+        renderUnitPriceItemsList();
+        console.log('✅ 일위대가 아이템 삭제됨:', id);
+    }
+}
+
+// =============================================================================
+// 데이터 내보내기/가져오기 함수들
+// =============================================================================
+
+// 일위대가 데이터 내보내기
+function exportUnitPriceData() {
+    if (unitPriceItems.length === 0) {
+        alert('내보낼 데이터가 없습니다.');
+        return;
+    }
+    
+    const exportData = {
+        version: '1.0',
+        exportDate: new Date().toISOString(),
+        itemsCount: unitPriceItems.length,
+        items: unitPriceItems
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `kiyeno_unitprice_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    console.log('✅ 일위대가 데이터 내보내기 완료');
+}
+
+// 일위대가 데이터 가져오기
+function importUnitPriceData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importData = JSON.parse(e.target.result);
+                
+                // 데이터 검증
+                if (!importData.items || !Array.isArray(importData.items)) {
+                    alert('올바르지 않은 일위대가 데이터 형식입니다.');
+                    return;
+                }
+                
+                // 유효한 아이템만 필터링
+                const validItems = importData.items.filter(item => 
+                    item.basic && item.basic.itemName && item.totalCosts
+                );
+                
+                if (validItems.length === 0) {
+                    alert('가져올 수 있는 유효한 일위대가 데이터가 없습니다.');
+                    return;
+                }
+                
+                // 기존 데이터와 병합 (중복 ID는 새 데이터로 덮어쓰기)
+                const confirmMessage = `${validItems.length}개의 일위대가 데이터를 가져오시겠습니까?\n(기존 데이터와 ID가 같은 경우 덮어쓰기됩니다)`;
+                
+                if (confirm(confirmMessage)) {
+                    validItems.forEach(newItem => {
+                        const existingIndex = unitPriceItems.findIndex(item => item.id === newItem.id);
+                        if (existingIndex >= 0) {
+                            unitPriceItems[existingIndex] = newItem;
+                        } else {
+                            unitPriceItems.push(newItem);
+                        }
+                    });
+                    
+                    saveUnitPriceItems();
+                    renderUnitPriceItemsList();
+                    
+                    alert(`${validItems.length}개의 일위대가 아이템을 가져왔습니다.`);
+                    console.log('✅ 일위대가 데이터 가져오기 완료');
+                }
+            } catch (error) {
+                console.error('일위대가 데이터 가져오기 실패:', error);
+                alert('파일을 읽는 중 오류가 발생했습니다.');
+            }
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    input.click();
+}
+
+// =============================================================================
+// 전역 함수 등록 (unitPriceManager.js)
+// =============================================================================
+
+// 일위대가 관리 메인 함수들
+window.openUnitPriceManagement = openUnitPriceManagement;
+window.openUnitPriceBasicModal = openUnitPriceBasicModal;
+window.proceedToDetailInput = proceedToDetailInput;
+window.openUnitPriceDetailModal = openUnitPriceDetailModal;
+
+// 구성품 관리 함수들
+window.addComponentRow = addComponentRow;
+window.removeComponentRow = removeComponentRow;
+window.calculateRowTotal = calculateRowTotal;
+window.calculateGrandTotal = calculateGrandTotal;
+
+// 데이터 관리 함수들
+window.saveUnitPriceItem = saveUnitPriceItem;
+window.loadUnitPriceItems = loadUnitPriceItems;
+window.saveUnitPriceItems = saveUnitPriceItems;
+window.renderUnitPriceItemsList = renderUnitPriceItemsList;
+window.editUnitPriceItem = editUnitPriceItem;
+window.deleteUnitPriceItem = deleteUnitPriceItem;
+window.exportUnitPriceData = exportUnitPriceData;
+window.importUnitPriceData = importUnitPriceData;
+
+console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 전역 함수 등록됨');

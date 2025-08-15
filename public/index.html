@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/material-selector.css" />
     <link rel="stylesheet" href="css/revit-responsive.css" />
     <link rel="stylesheet" href="css/display-system.css" />
+    <link rel="stylesheet" href="css/logger-styles.css" />
 
     <!-- Dexie.js for IndexedDB management -->
     <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
@@ -343,12 +344,16 @@
     <script src="js/modules/materialManager.js"></script>
     <script src="js/modules/revitManager.js"></script>
     
+    <!-- 분리된 모듈들 (기존 revit-type-matching.js 분리) -->
+    <script src="js/modules/revitUtilities.js"></script>
+    <script src="js/modules/unitPriceManager.js"></script>
+    <script src="js/modules/revitTypeMatching.js"></script>
+    
     <!-- 메인 애플리케이션 파일들 -->
     <script src="js/app-core.js"></script>
     <script src="js/app-calculator.js"></script>
     <script src="js/app-services.js"></script>
     <script src="js/app-ui.js"></script>
-    <script src="js/revit-type-matching.js"></script>
     <script src="js/revit-wall-handler.js"></script>
     <script src="js/display-system.js"></script>
 
