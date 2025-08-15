@@ -1291,7 +1291,8 @@ function showMaterialManagementModal() {
             attempts++;
             if (window.priceDB && window.priceDB.loadSavedState) {
                 console.log('✅ priceDB 초기화 완료, 모달 표시');
-                showMaterialManagementModal();
+                // 재귀 호출 대신 직접 모달 표시 로직 실행
+                showMaterialManagementModalDirectly();
                 return;
             }
             
@@ -1308,6 +1309,12 @@ function showMaterialManagementModal() {
         return;
     }
     
+    // 실제 모달 표시 로직 실행
+    showMaterialManagementModalDirectly();
+}
+
+// 실제 모달 표시 로직 (재귀 호출 방지용 분리 함수)
+function showMaterialManagementModalDirectly() {
     // 저장된 상태 불러오기
     try {
         window.priceDB.loadSavedState();
@@ -1338,7 +1345,7 @@ function showMaterialManagementModal() {
                             <i class="fas fa-square"></i> 석고보드
                         </button>
                         <div style="margin-left: 15px; display: flex; gap: 5px;">
-                            <button onclick="addCurrentMaterial()" id="addMaterialBtn" class="btn btn-success btn-sm" style="padding: 6px 12px;">
+                            <button onclick="openMaterialEditModal('add')" class="btn btn-success btn-sm" style="padding: 6px 12px;">
                                 <i class="fas fa-plus"></i> 자재 추가
                             </button>
                         </div>
@@ -2368,114 +2375,42 @@ function showGypsumBoards() {
 // 경량부품 관리 함수들
 // =============================================================================
 
-// 경량부품 추가 (14개 컬럼 구조)
-function addLightweightMaterial() {
-    const content = `
-        <div style="min-width: 1000px; max-height: 80vh; overflow-y: auto;">
-            <h4><i class="fas fa-plus"></i> 경량부품 추가</h4>
-            <div style="margin: 20px 0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2563eb;">자재명 *</label>
-                        <input type="text" id="addMaterialName" placeholder="예: 메탈 스터드 250형" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2563eb;">품목 (카테고리) *</label>
-                        <select id="addMaterialCategory" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="">카테고리 선택</option>
-                            <option value="STUD_KS">STUD - KS형</option>
-                            <option value="RUNNER_KS">RUNNER - KS형</option>
-                            <option value="STUD_BS">STUD - BS형</option>
-                            <option value="RUNNER_BS">RUNNER - BS형</option>
-                            <option value="CH_STUD_J_RUNNER">CH-STUD / J런너</option>
-                            <option value="BEADS">비드류</option>
-                            <option value="FASTENERS">체결부품</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #6b7280;">규격 (자동생성)</label>
-                        <input type="text" id="addMaterialNewSpec" placeholder="자동 생성됨" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6;" readonly>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2563eb;">싸이즈 *</label>
-                        <input type="text" id="addMaterialSpec" placeholder="예: 0.8T*250*45, 3*21, DN22" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2563eb;">단위 *</label>
-                        <select id="addMaterialUnit" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="M">M (미터)</option>
-                            <option value="EA">EA (개)</option>
-                            <option value="KG">KG (킬로그램)</option>
-                            <option value="T">T (톤)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">자재비 (원) *</label>
-                        <input type="number" id="addMaterialPrice" placeholder="예: 2500" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #6b7280;">노무비 생산성</label>
-                        <input type="text" id="addMaterialLaborProductivity" placeholder="예: 기준, 고급, 표준" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
-                        <input type="number" id="addMaterialLaborComp" placeholder="예: 100" min="0" max="500" step="1"
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">공종1</label>
-                        <input type="text" id="addMaterialWorkType1" placeholder="예: 경량, 습식, 건식" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">공종2</label>
-                        <input type="text" id="addMaterialWorkType2" placeholder="예: 경량, 벽체, 천장" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #059669;">부위</label>
-                        <input type="text" id="addMaterialLocation" placeholder="예: 벽체, 천장, 바닥" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">비고/용도</label>
-                        <input type="text" id="addMaterialNote" placeholder="예: ㉿, 구조틀용, 석고취부용" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                </div>
-            </div>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                <p style="margin: 0; font-size: 14px; color: #6b7280;">
-                    <strong>ℹ️ 안내</strong><br>
-                    • <span style="color: #2563eb;">파란색</span>: 필수 입력 필드<br>
-                    • <span style="color: #dc2626;">빨간색</span>: 가격/노무 관련 필드<br>
-                    • <span style="color: #059669;">초록색</span>: 자동 설정 필드<br>
-                    • <span style="color: #6b7280;">회색</span>: 자동 생성 필드<br>
-                    • 규격은 자재명과 비고를 기반으로 자동 생성됩니다.
-                </p>
-            </div>
-        </div>
-    `;
-
-    createSubModal('경량부품 추가', content, [
-        { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '추가', class: 'btn-primary', onClick: (modal) => {
-            saveLightweightMaterial(modal);
-        }}
-    ]);
-}
+// 경량부품 추가 함수 제거됨 - 편집 모달로 통합
 
 // 경량부품 편집
-function editLightweightMaterial(materialId) {
-    const material = window.priceDB.findLightweightComponentById(materialId);
-    if (!material) {
-        showToast('자재를 찾을 수 없습니다.', 'error');
-        return;
+function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
+    let material;
+    
+    if (isAddMode) {
+        // 추가 모드: 기본값으로 초기화
+        material = {
+            name: '',
+            category: 'STUD_KS',
+            spec: '',
+            size: '',
+            unit: 'M',
+            price: 0,
+            laborCost: 0,
+            laborProductivity: 0,
+            laborCompensation: 0,
+            workType1: '',
+            workType2: '',
+            location: '',
+            work: '',
+            baseLabor: 0,
+            laborSettings: {
+                workers: [{ type: '조공', cost: 0 }],
+                productivity: 0,
+                compensation: 0
+            }
+        };
+    } else {
+        // 편집 모드: 기존 자료 로드
+        material = window.priceDB.findLightweightComponentById(materialId);
+        if (!material) {
+            showToast('자재를 찾을 수 없습니다.', 'error');
+            return;
+        }
     }
 
     // 노무비 계산 기본 설정 (기존 데이터가 있으면 사용, 없으면 기본값 적용)
@@ -2489,7 +2424,7 @@ function editLightweightMaterial(materialId) {
 
     const content = `
         <div style="min-width: 1000px;">
-            <h4><i class="fas fa-edit"></i> 경량부품 편집: ${material.name}</h4>
+            <h4><i class="fas fa-${isAddMode ? 'plus' : 'edit'}"></i> 경량부품 ${isAddMode ? '추가' : '편집'}${isAddMode ? '' : ': ' + material.name}</h4>
             <div style="margin: 20px 0;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                     <!-- Row 1: 기본 정보 (파란색) -->
@@ -2668,10 +2603,17 @@ function editLightweightMaterial(materialId) {
         </div>
     `;
 
-    createSubModal('경량부품 편집', content, [
+    const modalTitle = isAddMode ? '경량부품 추가' : '경량부품 편집';
+    const buttonText = isAddMode ? '추가' : '저장';
+    
+    createSubModal(modalTitle, content, [
         { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '저장', class: 'btn-primary', onClick: (modal) => {
-            updateLightweightMaterial(materialId, modal);
+        { text: buttonText, class: 'btn-primary', onClick: (modal) => {
+            if (isAddMode) {
+                addLightweightMaterial(modal);
+            } else {
+                updateLightweightMaterial(materialId, modal);
+            }
         }}
     ]);
     
@@ -2764,6 +2706,83 @@ function saveLightweightMaterial(modal = null) {
         // 서브 모달 닫기
         if (modal) {
             closeSubModal(modal);
+        }
+
+    } catch (error) {
+        console.error('❌ 경량부품 추가 실패:', error);
+        showToast(`추가 실패: ${error.message}`, 'error');
+    }
+}
+
+// 경량부품 추가 (편집 모달 재사용)
+function addLightweightMaterial(modal = null) {
+    try {
+        const materialData = {
+            name: document.getElementById('editMaterialName')?.value.trim() || '',
+            category: document.getElementById('editMaterialCategory')?.value || '',
+            spec: document.getElementById('editMaterialSpec')?.value.trim() || '',
+            size: document.getElementById('editMaterialSize')?.value.trim() || '',
+            unit: document.getElementById('editMaterialUnit')?.value || 'M',
+            price: parseInt(document.getElementById('editMaterialPrice')?.value.replace(/,/g, '')) || 0,
+            laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value.replace(/,/g, '')) || 0,
+            laborProductivity: parseFloat(document.getElementById('editMaterialLaborProductivity')?.value) || 0,
+            laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 0,
+            workType1: document.getElementById('editMaterialWorkType1')?.value.trim() || '',
+            workType2: document.getElementById('editMaterialWorkType2')?.value.trim() || '',
+            location: document.getElementById('editMaterialLocation')?.value.trim() || '',
+            work: document.getElementById('editMaterialWork')?.value.trim() || ''
+        };
+
+        // 노무비 계산 설정 수집
+        const workers = [];
+        document.querySelectorAll('#workersList .worker-item').forEach(workerElement => {
+            const type = workerElement.querySelector('.worker-type')?.value || '조공';
+            const cost = parseInt(workerElement.querySelector('.worker-cost')?.value.replace(/,/g, '')) || 0;
+            workers.push({ type, cost });
+        });
+
+        const calculatorProductivity = parseFloat(document.getElementById('editLightweightLaborProductivity')?.value) || 0;
+        const calculatorCompensation = parseInt(document.getElementById('editLightweightLaborCompensation')?.value) || 0;
+
+        // 노무비 설정 객체 구성
+        materialData.laborSettings = {
+            workers: workers,
+            productivity: calculatorProductivity,
+            compensation: calculatorCompensation
+        };
+
+        // 기준 노무비 계산
+        const totalCost = workers.reduce((sum, worker) => sum + worker.cost, 0);
+        const workerCount = workers.length;
+        materialData.baseLabor = workerCount > 0 ? Math.round(totalCost / workerCount) : 0;
+
+        // 유효성 검사
+        if (!materialData.name) {
+            throw new Error('자재명을 입력해주세요.');
+        }
+        if (!materialData.category) {
+            throw new Error('카테고리를 선택해주세요.');
+        }
+        if (!materialData.price || materialData.price <= 0) {
+            throw new Error('올바른 자재비를 입력해주세요.');
+        }
+
+        // 데이터베이스에 추가
+        const newMaterial = window.priceDB.addLightweightComponent(materialData);
+        
+        if (newMaterial) {
+            // UI 새로고침
+            showLightweightMaterials();
+            
+            // 성공 메시지
+            showToast(`경량부품이 추가되었습니다: ${materialData.name}`, 'success');
+            
+            // 서브 모달 닫기
+            if (modal) {
+                closeSubModal(modal);
+            }
+        } else {
+            throw new Error('자재 추가에 실패했습니다.');
         }
 
     } catch (error) {
@@ -2890,103 +2909,45 @@ function performLightweightDeletion(materialId) {
 // 석고보드 관리 함수들
 // =============================================================================
 
-// 석고보드 추가
-function addGypsumBoard() {
-    const content = `
-        <div style="min-width: 600px;">
-            <h4><i class="fas fa-plus"></i> 석고보드 추가</h4>
-            <div style="margin: 20px 0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                    <div style="grid-column: 1 / -1;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">품명 *</label>
-                        <input type="text" id="addGypsumName" placeholder="예: 일반석고보드" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">폭(W) *</label>
-                        <input type="number" id="addGypsumW" value="900" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">높이(H) *</label>
-                        <input type="number" id="addGypsumH" value="1800" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">두께(T) *</label>
-                        <input type="number" id="addGypsumT" value="9.5" step="0.1" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">카테고리 *</label>
-                        <select id="addGypsumCategory" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="">카테고리 선택</option>
-                            <option value="STANDARD">일반석고보드</option>
-                            <option value="MOISTURE">방수석고보드</option>
-                            <option value="FIRE">방화석고보드</option>
-                            <option value="FIRE_MOISTURE">방화방수석고보드</option>
-                            <option value="SOUND">차음석고보드</option>
-                            <option value="ANTIBACTERIAL">방균석고보드</option>
-                            <option value="INSULATION">그라스울</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">단위 *</label>
-                        <select id="addGypsumUnit" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                            <option value="매">매</option>
-                            <option value="M2">M2</option>
-                            <option value="EA">EA</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">수량</label>
-                        <input type="number" id="addGypsumQty" value="1.00" step="0.01" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">당초 단가 (원) *</label>
-                        <input type="number" id="addGypsumPriceOriginal" placeholder="예: 3350" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">변경 단가 (원) *</label>
-                        <input type="number" id="addGypsumPriceChanged" placeholder="예: 3650" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">M2 단가 (원)</label>
-                        <input type="number" id="addGypsumPriceM2" placeholder="예: 2253" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                    <div style="grid-column: 1 / -1;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600;">비고</label>
-                        <input type="text" id="addGypsumNote" placeholder="예: 1매 - (1.62m2)" 
-                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </div>
-                </div>
-            </div>
-            <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                <p style="margin: 0; font-size: 14px; color: #6b7280;">
-                    <strong>*</strong> 필수 입력 항목입니다.
-                </p>
-            </div>
-        </div>
-    `;
-
-    createSubModal('석고보드 추가', content, [
-        { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '추가', class: 'btn-primary', onClick: (modal) => {
-            saveGypsumBoard(modal);
-        }}
-    ]);
-}
+// 석고보드 추가 함수 제거됨 - 편집 모달로 통합
 
 // 석고보드 편집
-function editGypsumBoard(materialId) {
-    const material = window.priceDB.findGypsumBoardById(materialId);
-    if (!material) {
-        showToast('석고보드를 찾을 수 없습니다.', 'error');
-        return;
+function editGypsumBoard(materialId, modal = null, isAddMode = false) {
+    let material;
+    
+    if (isAddMode) {
+        // 추가 모드: 기본값으로 초기화
+        material = {
+            name: '',
+            w: 900,
+            h: 1800,
+            t: 9.5,
+            category: 'STANDARD',
+            unit: '매',
+            qty: 1.00,
+            unitPrice: 0,
+            materialCost: 0,
+            laborCost: 0,
+            laborProductivity: 0,
+            laborCompensation: 0,
+            workType1: '',
+            workType2: '',
+            location: '',
+            work: '',
+            baseLabor: 0,
+            laborSettings: {
+                workers: [{ type: '조공', cost: 0 }],
+                productivity: 0,
+                compensation: 0
+            }
+        };
+    } else {
+        // 편집 모드: 기존 자료 로드
+        material = window.priceDB.findGypsumBoardById(materialId);
+        if (!material) {
+            showToast('석고보드를 찾을 수 없습니다.', 'error');
+            return;
+        }
     }
 
     // 노무비 설정 기본값 (기존 데이터가 없으면 기본값 적용)
@@ -3000,7 +2961,7 @@ function editGypsumBoard(materialId) {
 
     const content = `
         <div style="min-width: 1200px; max-height: 80vh; overflow-y: auto;">
-            <h4><i class="fas fa-edit"></i> 석고보드 편집: ${material.name}</h4>
+            <h4><i class="fas fa-${isAddMode ? 'plus' : 'edit'}"></i> 석고보드 ${isAddMode ? '추가' : '편집'}${isAddMode ? '' : ': ' + material.name}</h4>
             
             <!-- Section 1: 기본 정보 편집 -->
             <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #f9fafb;">
@@ -3201,10 +3162,17 @@ function editGypsumBoard(materialId) {
         </div>
     `;
 
-    createSubModal('석고보드 편집', content, [
+    const modalTitle = isAddMode ? '석고보드 추가' : '석고보드 편집';
+    const buttonText = isAddMode ? '추가' : '저장';
+    
+    createSubModal(modalTitle, content, [
         { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '저장', class: 'btn-primary', onClick: (modal) => {
-            updateGypsumBoard(materialId, modal);
+        { text: buttonText, class: 'btn-primary', onClick: (modal) => {
+            if (isAddMode) {
+                saveGypsumBoard(modal); // 기존 saveGypsumBoard 함수 재사용
+            } else {
+                updateGypsumBoard(materialId, modal);
+            }
         }}
     ]);
     
@@ -3429,7 +3397,9 @@ function performGypsumDeletion(materialId) {
 }
 
 // 자재 관리 함수들
+console.log('🔧 app-services.js 로딩 중: showMaterialManagementModal 함수 등록');
 window.showMaterialManagementModal = showMaterialManagementModal;
+console.log('✅ showMaterialManagementModal 전역 등록 완료:', typeof window.showMaterialManagementModal);
 window.loadStandardMaterials = loadStandardMaterials;
 window.loadMaterialList = loadMaterialList;
 window.editMaterial = editMaterial;
@@ -3440,12 +3410,12 @@ window.exportMaterials = exportMaterials;
 window.importMaterials = importMaterials;
 
 // 경량부품 관리 함수들
-window.addLightweightMaterial = addLightweightMaterial;
+// window.addLightweightMaterial 제거됨
 window.editLightweightMaterial = editLightweightMaterial;
 window.deleteLightweightMaterial = deleteLightweightMaterial;
 
 // 석고보드 관리 함수들
-window.addGypsumBoard = addGypsumBoard;
+// window.addGypsumBoard 제거됨
 window.editGypsumBoard = editGypsumBoard;
 window.deleteGypsumBoard = deleteGypsumBoard;
 
@@ -3456,19 +3426,26 @@ window.filterGypsumBoards = filterGypsumBoards;
 window.clearGypsumFilters = clearGypsumFilters;
 
 // 통합 자재 추가 함수
-function addCurrentMaterial() {
+// =============================================================================
+// 통합 자재 편집/추가 모달 시스템
+// =============================================================================
+
+// 통합 자재 편집/추가 모달 호출 함수
+function openMaterialEditModal(mode, materialId = null) {
     const lightweightTab = document.getElementById('lightweightTab');
-    const isLightweight = lightweightTab && lightweightTab.classList.contains('active');
+    const isLightweight = lightweightTab && lightweightTab.classList.contains('btn-primary');
     
     if (isLightweight) {
-        addLightweightMaterial();
+        // 경량자재 편집/추가
+        editLightweightMaterial(materialId, null, mode === 'add');
     } else {
-        addGypsumBoard();
+        // 석고보드 편집/추가  
+        editGypsumBoard(materialId, null, mode === 'add');
     }
 }
 
-// 통합 자재 추가 함수 전역 등록
-window.addCurrentMaterial = addCurrentMaterial;
+// 전역 함수 등록
+window.openMaterialEditModal = openMaterialEditModal;
 
 // 데이터 관리 함수들
 window.toggleDataManagementDropdown = toggleDataManagementDropdown;

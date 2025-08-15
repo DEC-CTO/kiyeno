@@ -1523,7 +1523,17 @@ function importData() {
 }
 
 function showMaterialManageModal() {
-    showMaterialManagementModal();
+    // app-services.js의 showMaterialManagementModal 함수 호출
+    console.log('🔍 자재 관리 모달 호출 시도, 함수 타입:', typeof window.showMaterialManagementModal);
+    console.log('🔍 window 객체의 해당 함수:', window.showMaterialManagementModal);
+    
+    if (typeof window.showMaterialManagementModal === 'function') {
+        console.log('✅ showMaterialManagementModal 함수 발견, 호출 시작');
+        window.showMaterialManagementModal();
+    } else {
+        console.error('❌ showMaterialManagementModal 함수를 찾을 수 없습니다.');
+        console.error('💡 가능한 해결 방법: 페이지를 새로고침하여 스크립트를 다시 로드해주세요.');
+    }
 }
 
 function showRevitDialog() {
