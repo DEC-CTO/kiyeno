@@ -424,8 +424,15 @@ function addComponentRow(componentData = null) {
     
     row.innerHTML = `
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
-            <input type="text" class="component-name" value="${data.name}" placeholder="품명 입력" 
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+            <div style="display: flex; gap: 4px; align-items: center;">
+                <input type="text" class="component-name" value="${data.name}" placeholder="품명 입력" 
+                       style="flex: 1; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+                <button type="button" class="material-select-btn" onclick="openMaterialSelector(this)" 
+                        style="padding: 4px 6px; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; white-space: nowrap;"
+                        title="자재 선택">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
             <input type="text" class="component-spec" value="${data.spec}" placeholder="싸이즈 입력"
@@ -1301,4 +1308,424 @@ unitPriceStyles.textContent = `
 
 document.head.appendChild(unitPriceStyles);
 
-console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 전역 함수 등록됨 (CSS 스타일 포함)');
+// =============================================================================
+// 자재 선택 기능
+// =============================================================================
+
+// 현재 선택 중인 행을 저장하는 변수
+let currentMaterialSelectRow = null;
+
+// 자재 선택 모달 열기
+function openMaterialSelector(button) {
+    console.log('🔍 자재 선택 모달 열기');
+    
+    // 현재 행 저장 (버튼의 부모 요소들을 통해 tr 찾기)
+    currentMaterialSelectRow = button.closest('tr');
+    
+    if (!currentMaterialSelectRow) {
+        console.error('❌ 구성품 행을 찾을 수 없습니다.');
+        alert('구성품 행을 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 자재 선택 모달 창 생성
+    createMaterialSelectModal();
+}
+
+// 자재 선택 모달 창 생성
+function createMaterialSelectModal() {
+    console.log('🏗️ 자재 선택 모달 창 생성');
+    
+    const modalHTML = `
+        <div class="material-select-modal" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); z-index: 99999; display: flex; 
+            align-items: center; justify-content: center;
+        ">
+            <div class="material-select-content" style="
+                background: white; border-radius: 12px; width: 90%; max-width: 1000px; 
+                max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            ">
+                <!-- 헤더 -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
+                        <i class="fas fa-search" style="margin-right: 8px;"></i>
+                        자재 선택
+                    </h3>
+                    <button onclick="closeMaterialSelectModal()" style="
+                        background: none; border: none; color: white; font-size: 24px; 
+                        cursor: pointer; padding: 0; width: 30px; height: 30px; 
+                        display: flex; align-items: center; justify-content: center;
+                    ">&times;</button>
+                </div>
+                
+                <!-- 필터 영역 -->
+                <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">검색어</label>
+                            <input type="text" id="materialSearchInput" placeholder="품명, 싸이즈, 단위로 검색" 
+                                   oninput="filterMaterials()" style="
+                                width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; 
+                                border-radius: 6px; font-size: 14px;
+                            ">
+                        </div>
+                        <div style="min-width: 150px;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">카테고리</label>
+                            <select id="materialCategoryFilter" onchange="filterMaterials()" style="
+                                width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; 
+                                border-radius: 6px; font-size: 14px;
+                            ">
+                                <option value="">전체</option>
+                                <option value="경량자재">경량자재</option>
+                                <option value="석고보드">석고보드</option>
+                            </select>
+                        </div>
+                        <button onclick="clearMaterialFilters()" style="
+                            padding: 8px 16px; background: #6b7280; color: white; border: none; 
+                            border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px;
+                        ">초기화</button>
+                    </div>
+                </div>
+                
+                <!-- 자재 목록 -->
+                <div id="materialListContainer" style="padding: 20px; max-height: 400px; overflow-y: auto;">
+                    자재 데이터를 로드하는 중...
+                </div>
+                
+                <!-- 하단 버튼 -->
+                <div style="padding: 20px; border-top: 1px solid #e2e8f0; text-align: right;">
+                    <button onclick="closeMaterialSelectModal()" style="
+                        padding: 10px 20px; background: #6b7280; color: white; border: none; 
+                        border-radius: 6px; cursor: pointer; margin-right: 10px;
+                    ">취소</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // 자재 데이터 로드
+    loadMaterialsForSelection();
+}
+
+// 자재 선택 모달 닫기
+function closeMaterialSelectModal() {
+    const modal = document.querySelector('.material-select-modal');
+    if (modal) {
+        modal.remove();
+    }
+    currentMaterialSelectRow = null;
+}
+
+// 자재 데이터 로드 (기본 데이터 + IndexedDB 데이터)
+async function loadMaterialsForSelection() {
+    console.log('📦 자재 선택용 데이터 로드 시작');
+    
+    try {
+        let allMaterials = [];
+        
+        if (window.priceDatabase) {
+            console.log('🔍 priceDatabase 인스턴스에서 데이터 로드');
+            
+            // 1순위: IndexedDB 사용자 데이터 확인
+            const lightweightCache = window.priceDatabase.lightweightItemsCache || [];
+            const gypsumCache = window.priceDatabase.gypsumItemsCache || [];
+            
+            console.log(`📊 캐시된 데이터 확인 - 경량자재: ${lightweightCache.length}개, 석고보드: ${gypsumCache.length}개`);
+            
+            // IndexedDB에 사용자 데이터가 있는 경우 (캐시에 데이터가 있음)
+            if (lightweightCache.length > 0 || gypsumCache.length > 0) {
+                console.log('📦 IndexedDB 사용자 데이터 사용');
+                
+                // 경량자재 사용자 데이터
+                if (lightweightCache.length > 0) {
+                    const lightweightMaterials = lightweightCache.map(item => ({
+                        품명: item.name,
+                        규격: item.size || item.spec,
+                        단위: item.unit,
+                        재료비단가: item.materialPrice || 0,
+                        노무비단가: item.laborPrice || 0,
+                        category: '경량자재',
+                        source: 'indexeddb',
+                        originalData: item
+                    }));
+                    allMaterials.push(...lightweightMaterials);
+                }
+                
+                // 석고보드 사용자 데이터
+                if (gypsumCache.length > 0) {
+                    const gypsumBoards = gypsumCache.map(item => ({
+                        품명: item.name,
+                        규격: item.size || item.spec,
+                        단위: item.unit,
+                        재료비단가: item.재료비단가 || item.materialPrice || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || 0,
+                        category: '석고보드',
+                        source: 'indexeddb',
+                        originalData: item
+                    }));
+                    allMaterials.push(...gypsumBoards);
+                }
+            } else {
+                // 2순위: IndexedDB가 비어있으면 하드코딩된 기본 데이터 사용
+                console.log('📦 하드코딩된 기본 데이터 사용 (IndexedDB 비어있음)');
+                
+                // 경량자재 기본 데이터 가져오기
+                const lightweightData = window.priceDatabase.getLightweightComponents();
+                if (lightweightData && lightweightData.items) {
+                    console.log(`📦 경량자재 기본 데이터 ${lightweightData.items.length}개 로드`);
+                    const lightweightMaterials = lightweightData.items.map(item => ({
+                        품명: item.name,
+                        규격: item.size || item.spec,
+                        단위: item.unit,
+                        재료비단가: item.materialPrice || 0,
+                        노무비단가: item.laborPrice || 0,
+                        category: '경량자재',
+                        source: 'default',
+                        originalData: item
+                    }));
+                    allMaterials.push(...lightweightMaterials);
+                }
+                
+                // 석고보드 기본 데이터 가져오기
+                const gypsumData = window.priceDatabase.getGypsumBoards();
+                if (gypsumData && gypsumData.items) {
+                    console.log(`📦 석고보드 기본 데이터 ${gypsumData.items.length}개 로드`);
+                    const gypsumBoards = gypsumData.items.map(item => ({
+                        품명: item.name,
+                        규격: item.size || item.spec,
+                        단위: item.unit,
+                        재료비단가: item.재료비단가 || item.materialPrice || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || 0,
+                        category: '석고보드',
+                        source: 'default',
+                        originalData: item
+                    }));
+                    allMaterials.push(...gypsumBoards);
+                }
+            }
+        } else {
+            console.warn('⚠️ priceDatabase 인스턴스를 찾을 수 없습니다.');
+        }
+        
+        console.log(`📦 로드된 자재 수: ${allMaterials.length}개`);
+        
+        if (allMaterials.length === 0) {
+            throw new Error('자재 데이터를 찾을 수 없습니다.');
+        }
+        
+        // 자재 목록 렌더링
+        renderMaterialsList(allMaterials);
+        
+        // 전역 변수에 저장 (필터링용)
+        window.currentMaterialsData = allMaterials;
+        
+    } catch (error) {
+        console.error('❌ 자재 데이터 로드 실패:', error);
+        
+        const container = document.getElementById('materialListContainer');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #ef4444;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+                    <p>자재 데이터를 로드할 수 없습니다.</p>
+                    <p style="font-size: 14px; color: #6b7280;">priceDatabase 인스턴스를 확인해주세요.</p>
+                    <p style="font-size: 12px; color: #9ca3af;">오류: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// 자재 목록 렌더링
+function renderMaterialsList(materials) {
+    const container = document.getElementById('materialListContainer');
+    if (!container) return;
+    
+    if (materials.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <p>조건에 맞는 자재가 없습니다.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const tableHTML = `
+        <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead style="background: #f9fafb; position: sticky; top: 0;">
+                    <tr>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">품명</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">싸이즈</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">단위</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">재료비 단가</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">노무비 단가</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">카테고리</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">선택</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${materials.map((material, index) => `
+                        <tr style="border-bottom: 1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; font-weight: 500;">${material.품명 || material.name || ''}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.규격 || material.spec || ''}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.단위 || material.unit || ''}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialPrice || 0).toLocaleString()}원</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.노무비단가 || material.laborPrice || 0).toLocaleString()}원</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
+                                <span style="padding: 2px 6px; border-radius: 4px; font-size: 10px; background: ${material.category === '경량자재' ? '#dbeafe' : '#fef3c7'}; color: ${material.category === '경량자재' ? '#1e40af' : '#92400e'};">
+                                    ${material.category}
+                                </span>
+                            </td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
+                                <button onclick="selectUnitPriceMaterial(${index})" style="
+                                    padding: 4px 8px; background: #10b981; color: white; border: none; 
+                                    border-radius: 4px; cursor: pointer; font-size: 11px;
+                                " title="이 자재 선택">
+                                    <i class="fas fa-check"></i> 선택
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    container.innerHTML = tableHTML;
+}
+
+// 자재 필터링
+function filterMaterials() {
+    if (!window.currentMaterialsData) return;
+    
+    const searchText = document.getElementById('materialSearchInput')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('materialCategoryFilter')?.value || '';
+    
+    const filteredMaterials = window.currentMaterialsData.filter(material => {
+        // 검색어 필터
+        const searchMatch = !searchText || 
+            (material.품명 || material.name || '').toLowerCase().includes(searchText) ||
+            (material.규격 || material.spec || '').toLowerCase().includes(searchText) ||
+            (material.단위 || material.unit || '').toLowerCase().includes(searchText);
+        
+        // 카테고리 필터
+        const categoryMatch = !categoryFilter || material.category === categoryFilter;
+        
+        return searchMatch && categoryMatch;
+    });
+    
+    renderMaterialsList(filteredMaterials);
+}
+
+// 자재 필터 초기화
+function clearMaterialFilters() {
+    const searchInput = document.getElementById('materialSearchInput');
+    const categoryFilter = document.getElementById('materialCategoryFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    
+    // 전체 자재 목록 다시 표시
+    if (window.currentMaterialsData) {
+        renderMaterialsList(window.currentMaterialsData);
+    }
+}
+
+// 자재 선택 처리 (일위대가용)
+function selectUnitPriceMaterial(materialIndex) {
+    console.log('🔍 자재 선택 시작 - 인덱스:', materialIndex);
+    console.log('🔍 currentMaterialsData:', window.currentMaterialsData?.length || 0, '개');
+    console.log('🔍 currentMaterialSelectRow:', currentMaterialSelectRow);
+    
+    if (!window.currentMaterialsData || !currentMaterialSelectRow) {
+        console.error('❌ 자재 데이터 또는 선택 행이 없습니다.');
+        console.error('  - 자재 데이터:', !!window.currentMaterialsData);
+        console.error('  - 선택 행:', !!currentMaterialSelectRow);
+        alert('자재 데이터 또는 구성품 행을 찾을 수 없습니다.');
+        return;
+    }
+    
+    const selectedMaterial = window.currentMaterialsData[materialIndex];
+    if (!selectedMaterial) {
+        console.error('❌ 선택된 자재를 찾을 수 없습니다. 인덱스:', materialIndex);
+        console.error('  - 전체 자재 수:', window.currentMaterialsData.length);
+        alert('선택된 자재를 찾을 수 없습니다.');
+        return;
+    }
+    
+    console.log('✅ 자재 선택됨:', selectedMaterial);
+    
+    // 구성품 행에 자재 데이터 입력
+    fillComponentRowWithMaterial(currentMaterialSelectRow, selectedMaterial);
+    
+    // 모달 닫기
+    closeMaterialSelectModal();
+}
+
+// 선택된 자재 데이터로 구성품 행 채우기
+function fillComponentRowWithMaterial(row, material) {
+    console.log('🔧 구성품 행 데이터 입력 시작');
+    console.log('  - 행:', row);
+    console.log('  - 자재:', material);
+    
+    if (!row || !material) {
+        console.error('❌ 행 또는 자재 데이터가 없습니다.');
+        return;
+    }
+    
+    try {
+        // 각 필드별로 데이터 입력
+        const nameInput = row.querySelector('.component-name');
+        const specInput = row.querySelector('.component-spec');
+        const unitInput = row.querySelector('.component-unit');
+        const materialPriceInput = row.querySelector('.material-price');
+        const laborPriceInput = row.querySelector('.labor-price');
+        
+        console.log('🔧 DOM 요소 확인:');
+        console.log('  - nameInput:', !!nameInput);
+        console.log('  - specInput:', !!specInput);
+        console.log('  - unitInput:', !!unitInput);
+        console.log('  - materialPriceInput:', !!materialPriceInput);
+        console.log('  - laborPriceInput:', !!laborPriceInput);
+        
+        if (nameInput) nameInput.value = material.품명 || material.name || '';
+        if (specInput) specInput.value = material.규격 || material.size || material.spec || '';
+        if (unitInput) unitInput.value = material.단위 || material.unit || '';
+        if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialPrice || 0;
+        if (laborPriceInput) laborPriceInput.value = material.노무비단가 || material.laborPrice || 0;
+        
+        console.log('🔧 입력된 값들:');
+        console.log('  - 품명:', material.품명 || material.name || '');
+        console.log('  - 싸이즈:', material.규격 || material.size || material.spec || '');
+        console.log('  - 단위:', material.단위 || material.unit || '');
+        console.log('  - 재료비단가:', material.재료비단가 || material.materialPrice || 0);
+        console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || 0);
+        
+        // 행 총계 다시 계산
+        const quantityInput = row.querySelector('.component-quantity');
+        if (quantityInput) {
+            calculateRowTotal(quantityInput);
+        }
+        
+        console.log('✅ 구성품 행에 자재 데이터 입력 완료');
+        
+    } catch (error) {
+        console.error('❌ 자재 데이터 입력 실패:', error);
+        alert('자재 데이터를 입력하는 중 오류가 발생했습니다.');
+    }
+}
+
+// 전역 함수 등록
+window.openMaterialSelector = openMaterialSelector;
+window.closeMaterialSelectModal = closeMaterialSelectModal;
+window.filterMaterials = filterMaterials;
+window.clearMaterialFilters = clearMaterialFilters;
+window.selectUnitPriceMaterial = selectUnitPriceMaterial;
+
+console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 자재 선택 기능 (CSS 스타일 포함)');

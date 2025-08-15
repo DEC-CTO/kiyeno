@@ -4536,4 +4536,7 @@ class PriceDatabase extends EventEmitter {
 // 싱글톤 인스턴스 생성
 const priceDatabase = new PriceDatabase();
 
+// 전역 변수로 할당 (다른 모듈에서 접근 가능하도록)
+window.priceDatabase = priceDatabase;
+
 export default priceDatabase;
