@@ -293,4 +293,85 @@ window.clearRevitData = function() {
     Kiyeno.RevitService.clearRevitData();
 };
 
+// 룸별 벽체 선택
+window.selectWallsByRoomFromRevit = function() {
+    try {
+        // WebSocket을 통한 Revit 통신
+        if (window.socketService && window.socketService.isConnected()) {
+            window.socketService.sendRevitCommand('selectWallsByRoom');
+        } else {
+            console.log('일반 브라우저에서 실행 중 - 룸별 벽체 선택 시뮬레이션');
+            Kiyeno.RevitService.simulateRevitWallSelection(true);
+        }
+    } catch (error) {
+        console.error('Revit 룸별 벽체 선택 실패:', error);
+        showToast('Revit 연동 중 오류가 발생했습니다.', 'error');
+    }
+};
+
+// Revit에 벽체 타입 생성
+window.createWallTypesInRevit = function() {
+    try {
+        // WebSocket을 통한 Revit 통신
+        if (window.socketService && window.socketService.isConnected()) {
+            // 현재 wallData에서 벽체 타입 정보 수집
+            const wallTypes = [];
+            if (window.wallData && Array.isArray(window.wallData)) {
+                window.wallData.forEach(wall => {
+                    if (wall.wallType && !wallTypes.find(wt => wt.name === wall.wallType)) {
+                        wallTypes.push({
+                            name: wall.wallType,
+                            thickness: wall.thickness || 100,
+                            materials: {
+                                fire: wall.fire || '',
+                                sound: wall.sound || '',
+                                thermal: wall.thermal || '',
+                                structure: wall.structure || '',
+                                waterproof: wall.waterproof || '',
+                                finish: wall.finish || ''
+                            }
+                        });
+                    }
+                });
+            }
+            
+            window.socketService.sendRevitCommand('CREATE_WALL_TYPES', { wallTypes });
+            showToast(`${wallTypes.length}개 벽체 타입을 Revit에 생성하도록 요청했습니다.`, 'info');
+        } else {
+            console.log('일반 브라우저에서 실행 중 - Revit 벽체 타입 생성 시뮬레이션');
+            showToast('Revit 연동 환경이 아닙니다. WebSocket 연결이 필요합니다.', 'warning');
+        }
+    } catch (error) {
+        console.error('Revit 벽체 타입 생성 실패:', error);
+        showToast('Revit 벽체 타입 생성 중 오류가 발생했습니다.', 'error');
+    }
+};
+
+// Revit 데이터 섹션 토글
+window.toggleRevitDataSection = function() {
+    const container = document.getElementById('revitDataContainer');
+    const button = document.querySelector('[onclick="toggleRevitDataSection()"]');
+    
+    if (!container) {
+        console.warn('Revit 데이터 컨테이너를 찾을 수 없습니다.');
+        return;
+    }
+    
+    const isHidden = container.style.display === 'none';
+    
+    if (isHidden) {
+        container.style.display = 'block';
+        if (button) {
+            button.innerHTML = '<i class="fas fa-table"></i> Revit 데이터 닫기';
+        }
+        console.log('Revit 데이터 섹션 열림');
+    } else {
+        container.style.display = 'none';
+        if (button) {
+            button.innerHTML = '<i class="fas fa-table"></i> Revit 데이터 열기/닫기';
+        }
+        console.log('Revit 데이터 섹션 닫힘');
+    }
+};
+
 console.log('✅ revitManager.js 로드 완료 - Revit 연동 함수들 등록됨');

@@ -407,4 +407,239 @@ window.UNIT_PRICE_STATUS = UNIT_PRICE_STATUS;
 window.FILE_TYPES = FILE_TYPES;
 window.MODAL_SIZES = MODAL_SIZES;
 
-console.log('✅ revitUtilities.js 로드 완료 - 공통 유틸리티 함수들 및 상수 등록됨');
+// =============================================================================
+// CSS 스타일 추가 (원본에서 분리된 스타일)
+// =============================================================================
+
+// 반응형 모달 관련 CSS 스타일 추가
+const revitUtilitiesStyles = document.createElement('style');
+revitUtilitiesStyles.textContent = `
+/* 반응형 생성 모달 스타일 */
+.responsive-creation-modal {
+    width: 90vw;
+    max-width: 400px;
+    min-width: 280px;
+    padding: 20px;
+}
+
+.responsive-creation-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .responsive-creation-modal {
+        width: 95vw;
+        padding: 15px;
+    }
+    
+    .responsive-creation-input {
+        padding: 8px;
+        font-size: 16px; /* iOS에서 줌 방지 */
+    }
+}
+
+/* 선택된 자재 행 스타일 */
+.selected-material-row {
+    background-color: rgba(0, 123, 255, 0.1);
+    border-left: 4px solid #007bff;
+}
+
+.selected-material-row td {
+    color: #0056b3;
+    font-weight: 500;
+}
+
+/* 반응형 모달 스타일 */
+.responsive-modal {
+    width: 90vw;
+    max-width: 900px;
+    min-width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.responsive-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.responsive-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.responsive-modal-body {
+    padding: 0;
+}
+
+.responsive-modal-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .responsive-modal {
+        width: 95vw;
+        max-height: 90vh;
+        padding: 15px;
+    }
+    
+    .responsive-modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .responsive-modal-title {
+        font-size: 16px;
+    }
+    
+    .responsive-modal-footer {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .responsive-modal-footer button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .responsive-modal {
+        width: 100vw;
+        height: 100vh;
+        max-height: 100vh;
+        max-width: 100vw;
+        padding: 10px;
+        border-radius: 0;
+    }
+    
+    .responsive-modal-header {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+    
+    .responsive-modal-title {
+        font-size: 14px;
+    }
+}
+
+/* 자재 정보 표시 스타일 */
+.material-info-display {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 5px 0;
+    font-size: 12px;
+    color: #495057;
+}
+
+.material-info-display.selected {
+    background: #e3f2fd;
+    border-color: #2196f3;
+    color: #1976d2;
+}
+
+.material-info-display .material-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.material-info-display .material-details {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+/* 모달 오버레이 개선 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sub-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.sub-modal-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border: 2px solid #007bff;
+}
+
+/* 모바일에서 모달 전체화면 */
+@media (max-width: 480px) {
+    .modal-overlay,
+    .sub-modal-overlay {
+        padding: 0;
+    }
+    
+    .modal-content,
+    .sub-modal-content {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+    }
+}
+`;
+
+document.head.appendChild(revitUtilitiesStyles);
+
+console.log('✅ revitUtilities.js 로드 완료 - 공통 유틸리티 함수들 및 상수 등록됨 (CSS 스타일 포함)');

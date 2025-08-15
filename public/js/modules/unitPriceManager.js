@@ -90,25 +90,16 @@ function openUnitPriceBasicModal(editData = null) {
                     <input type="text" id="itemName" placeholder="예: C-STUD" value="${editData?.basic?.itemName || ''}" required>
                 </div>
                 
-                <!-- 간격 드롭다운 -->
+                <!-- 간격 입력 -->
                 <div class="form-group">
                     <label>간격 <span class="required">*</span></label>
-                    <select id="spacing" required>
-                        <option value="">선택하세요</option>
-                        <option value="@400" ${editData?.basic?.spacing === '@400' ? 'selected' : ''}>@400</option>
-                        <option value="@450" ${editData?.basic?.spacing === '@450' ? 'selected' : ''}>@450</option>
-                        <option value="@500" ${editData?.basic?.spacing === '@500' ? 'selected' : ''}>@500</option>
-                    </select>
+                    <input type="text" id="spacing" placeholder="예: @400" value="${editData?.basic?.spacing || ''}" required>
                 </div>
                 
-                <!-- 높이 드롭다운 -->
+                <!-- 높이 입력 -->
                 <div class="form-group">
                     <label>높이 <span class="required">*</span></label>
-                    <select id="height" required>
-                        <option value="">선택하세요</option>
-                        <option value="3600이하" ${editData?.basic?.height === '3600이하' ? 'selected' : ''}>3600이하</option>
-                        <option value="3600이상" ${editData?.basic?.height === '3600이상' ? 'selected' : ''}>3600이상</option>
-                    </select>
+                    <input type="text" id="height" placeholder="예: 3600이하" value="${editData?.basic?.height || ''}" required>
                 </div>
                 
                 <!-- 규격 -->
@@ -123,10 +114,16 @@ function openUnitPriceBasicModal(editData = null) {
                     <input type="text" id="location" placeholder="예: 벽체" value="${editData?.basic?.location || ''}" required>
                 </div>
                 
-                <!-- 공종 -->
+                <!-- 공종1 -->
                 <div class="form-group">
-                    <label>공종 <span class="required">*</span></label>
-                    <input type="text" id="workType" placeholder="예: 경량" value="${editData?.basic?.workType || ''}" required>
+                    <label>공종1 <span class="required">*</span></label>
+                    <input type="text" id="workType1" placeholder="예: 경량" value="${editData?.basic?.workType1 || ''}" required>
+                </div>
+                
+                <!-- 공종2 -->
+                <div class="form-group">
+                    <label>공종2</label>
+                    <input type="text" id="workType2" placeholder="예: 벽체" value="${editData?.basic?.workType2 || ''}">
                 </div>
                 
                 <!-- 단위 드롭다운 -->
@@ -166,16 +163,17 @@ function proceedToDetailInput(isEdit = false) {
     // 입력값 수집
     const basicData = {
         itemName: document.getElementById('itemName').value.trim(),
-        spacing: document.getElementById('spacing').value,
-        height: document.getElementById('height').value,
+        spacing: document.getElementById('spacing').value.trim(),
+        height: document.getElementById('height').value.trim(),
         size: document.getElementById('size').value.trim(),
         location: document.getElementById('location').value.trim(),
-        workType: document.getElementById('workType').value.trim(),
+        workType1: document.getElementById('workType1').value.trim(),
+        workType2: document.getElementById('workType2').value.trim(),
         unit: document.getElementById('unit').value
     };
     
     // 필수 필드 검증
-    const requiredFields = ['itemName', 'spacing', 'height', 'size', 'location', 'workType', 'unit'];
+    const requiredFields = ['itemName', 'spacing', 'height', 'size', 'location', 'workType1', 'unit'];
     for (const field of requiredFields) {
         if (!basicData[field]) {
             alert(`${getFieldLabel(field)} 필드를 입력해주세요.`);
@@ -208,7 +206,8 @@ function getFieldLabel(field) {
         height: '높이',
         size: 'SIZE',
         location: '부위',
-        workType: '공종',
+        workType1: '공종1',
+        workType2: '공종2',
         unit: 'UNIT'
     };
     return labels[field] || field;
@@ -223,7 +222,8 @@ function openUnitPriceDetailModal(isEdit = false) {
     console.log('🔧 세부 아이템 입력 모달 열기');
     
     const basic = currentUnitPriceData.basic;
-    const itemSummary = `${basic.itemName} ${basic.spacing} ${basic.height} ${basic.size} | ${basic.location} | ${basic.workType} | ${basic.unit}`;
+    const workTypeDisplay = basic.workType2 ? `${basic.workType1}/${basic.workType2}` : basic.workType1;
+    const itemSummary = `${basic.itemName} ${basic.spacing} ${basic.height} ${basic.size} | ${basic.location} | ${workTypeDisplay} | ${basic.unit}`;
     const modalTitle = isEdit ? '세부 아이템 수정' : '세부 아이템 설정';
     
     const detailModalHTML = createDetailModalHTML(itemSummary);
@@ -270,7 +270,7 @@ function createDetailModalHTML(itemSummary) {
                     <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
                         <tr>
                             <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 150px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">품명</th>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">규격</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">싸이즈</th>
                             <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">단위</th>
                             <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">수량</th>
                             <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-weight: 600;">재료비</th>
@@ -298,8 +298,8 @@ function createDetailModalHTML(itemSummary) {
                         <!-- 자재로스 -->
                         <tr class="fixed-row material-loss-row">
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재로스</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="3" step="0.1" oninput="calculateGrandTotal()" placeholder="3.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
@@ -308,14 +308,14 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 자재운반비 및 양중비 -->
                         <tr class="fixed-row transport-cost-row">
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재운반비 및 양중비</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="1.5" step="0.1" oninput="calculateGrandTotal()" placeholder="1.5" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
@@ -324,14 +324,14 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 자재비 이윤 -->
                         <tr class="fixed-row material-profit-row">
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">자재비 이윤</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">자재비의</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="15" step="0.1" oninput="calculateGrandTotal()" placeholder="15.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
@@ -340,14 +340,14 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 공구손료 및 기계경비 -->
                         <tr class="fixed-row tool-expense-row">
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; font-weight: 600;">공구손료 및 기계경비</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">노무비의</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">%</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">노무비의</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="2" step="0.1" oninput="calculateGrandTotal()" placeholder="2.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;">0원</td>
@@ -356,8 +356,29 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-expense-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="fixed-expense-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 700;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
+                        </tr>
+                        <!-- 단수 정리 -->
+                        <tr class="fixed-row rounding-row">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; font-weight: 600;">단수 정리</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: center;">원미만</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: center;">절사</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;"><select class="rounding-unit" onchange="calculateGrandTotal()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: white;">
+                                <option value="1">원</option>
+                                <option value="10">10원</option>
+                                <option value="100" selected>100원</option>
+                                <option value="1000">1000원</option>
+                            </select></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="rounding-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;" class="rounding-labor-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="rounding-expense-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="rounding-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="rounding-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #fef3c7;"></td>
                         </tr>
                     </tbody>
                     <tfoot style="background: #f9fafb; position: sticky; bottom: 0;">
@@ -366,7 +387,7 @@ function createDetailModalHTML(itemSummary) {
                             <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #ecfdf5; color: #065f46;">0원</td>
                             <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #eff6ff; color: #1e40af;">0원</td>
                             <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #fefbeb; color: #92400e;">0원</td>
-                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700; background: #fef2f2; color: #b91c1c; font-size: 14px;">0원</td>
+                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
                             <td style="border: 1px solid #e2e8f0; background: #6366f1;"></td>
                         </tr>
                     </tfoot>
@@ -406,13 +427,13 @@ function addComponentRow(componentData = null) {
             <input type="text" class="component-name" value="${data.name}" placeholder="품명 입력" 
                    style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0;">
-            <input type="text" class="component-spec" value="${data.spec}" placeholder="규격 입력"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
+            <input type="text" class="component-spec" value="${data.spec}" placeholder="싸이즈 입력"
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center;">
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
             <input type="text" class="component-unit" value="${data.unit}" placeholder="단위"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <input type="number" class="component-quantity" value="${data.quantity}" min="0" step="0.01"
@@ -438,7 +459,7 @@ function addComponentRow(componentData = null) {
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="expense-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="total-price">0원</td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 700;" class="total-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: bold; font-size: 12px;" class="total-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
             <button onclick="removeComponentRow(this)" class="btn btn-sm" 
                     style="padding: 2px 6px; background: #dc2626; color: white; border: none; border-radius: 3px; font-size: 11px;">
@@ -542,6 +563,41 @@ function calculateGrandTotal() {
         const amount = parseFloat(toolExpenseRow.querySelector('.fixed-expense-amount')?.textContent.replace(/[,원]/g, '') || 0);
         totalExpense += amount;
         grandTotal += amount;
+    }
+    
+    // 단수 정리 적용
+    const roundingRow = document.querySelector('.rounding-row');
+    if (roundingRow) {
+        const roundingUnit = parseInt(roundingRow.querySelector('.rounding-unit')?.value || 100);
+        
+        // 각 카테고리별 단수 정리 적용 (내림)
+        const roundedMaterial = Math.floor(totalMaterial / roundingUnit) * roundingUnit;
+        const roundedLabor = Math.floor(totalLabor / roundingUnit) * roundingUnit;
+        const roundedExpense = Math.floor(totalExpense / roundingUnit) * roundingUnit;
+        const roundedGrandTotal = Math.floor(grandTotal / roundingUnit) * roundingUnit;
+        
+        // 단수 정리 차액 계산
+        const materialDiff = totalMaterial - roundedMaterial;
+        const laborDiff = totalLabor - roundedLabor;
+        const expenseDiff = totalExpense - roundedExpense;
+        const totalDiff = grandTotal - roundedGrandTotal;
+        
+        // 단수 정리 로우에 차액 표시
+        const roundingMaterialElement = roundingRow.querySelector('.rounding-material-amount');
+        const roundingLaborElement = roundingRow.querySelector('.rounding-labor-amount');
+        const roundingExpenseElement = roundingRow.querySelector('.rounding-expense-amount');
+        const roundingTotalElement = roundingRow.querySelector('.rounding-total-amount');
+        
+        if (roundingMaterialElement) roundingMaterialElement.textContent = `-${Math.round(materialDiff).toLocaleString()}원`;
+        if (roundingLaborElement) roundingLaborElement.textContent = `-${Math.round(laborDiff).toLocaleString()}원`;
+        if (roundingExpenseElement) roundingExpenseElement.textContent = `-${Math.round(expenseDiff).toLocaleString()}원`;
+        if (roundingTotalElement) roundingTotalElement.textContent = `-${Math.round(totalDiff).toLocaleString()}원`;
+        
+        // 최종 값을 반올림된 값으로 업데이트
+        totalMaterial = roundedMaterial;
+        totalLabor = roundedLabor;
+        totalExpense = roundedExpense;
+        grandTotal = roundedGrandTotal;
     }
     
     // 합계 표시 업데이트
@@ -767,7 +823,8 @@ function renderUnitPriceItemsList() {
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">재료비</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">노무비</th>
@@ -787,12 +844,13 @@ function renderUnitPriceItemsList() {
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.height || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.size || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.location || ''}</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType1 || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType2 || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.unit || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #ecfdf5; color: #065f46; font-weight: 600;">${Math.round(costs.material).toLocaleString()}원</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;">${Math.round(costs.labor).toLocaleString()}원</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fefbeb; color: #92400e; font-weight: 600;">${Math.round(costs.expense).toLocaleString()}원</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 700; font-size: 13px;">${Math.round(costs.total).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 600;">${Math.round(costs.total).toLocaleString()}원</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
                                     <button onclick="editUnitPriceItem('${item.id}')" class="btn btn-sm" 
                                             style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; margin-right: 4px; font-size: 11px;">
@@ -967,4 +1025,280 @@ window.deleteUnitPriceItem = deleteUnitPriceItem;
 window.exportUnitPriceData = exportUnitPriceData;
 window.importUnitPriceData = importUnitPriceData;
 
-console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 전역 함수 등록됨');
+// =============================================================================
+// CSS 스타일 추가 (원본에서 분리된 스타일)
+// =============================================================================
+
+// 일위대가 관리 관련 CSS 스타일 추가
+const unitPriceStyles = document.createElement('style');
+unitPriceStyles.textContent = `
+/* 일위대가 관리 기본 폼 스타일 */
+.unit-price-basic-form {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-grid.full-width {
+    grid-template-columns: 1fr;
+}
+
+/* 일위대가 상세 입력 폼 스타일 */
+.unit-price-detail-form {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.detail-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+}
+
+.detail-section h3 {
+    margin: 0 0 20px 0;
+    color: #495057;
+    font-size: 18px;
+    font-weight: 600;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+}
+
+.components-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.components-table th,
+.components-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.components-table th {
+    background: #007bff;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.components-table td input,
+.components-table td select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.components-table td input:focus,
+.components-table td select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.components-table .quantity-cell,
+.components-table .unit-price-cell,
+.components-table .total-cell {
+    width: 120px;
+    text-align: right;
+}
+
+.components-table .actions-cell {
+    width: 80px;
+    text-align: center;
+}
+
+.components-table .total-cell {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* 일위대가 관리 버튼 스타일 */
+.btn-add-component {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 10px 0;
+    transition: background-color 0.3s ease;
+}
+
+.btn-add-component:hover {
+    background: #218838;
+}
+
+.btn-remove-component {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-remove-component:hover {
+    background: #c82333;
+}
+
+/* 일위대가 총계 표시 스타일 */
+.grand-total-section {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 25px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.grand-total-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.grand-total-amount {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* 일위대가 목록 테이블 스타일 */
+.unit-price-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.unit-price-list-table th,
+.unit-price-list-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.unit-price-list-table th {
+    background: #f8f9fa;
+    color: #495057;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.unit-price-list-table tr:hover {
+    background: #f8f9fa;
+}
+
+.unit-price-list-table .actions-column {
+    width: 120px;
+    text-align: center;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .components-table {
+        font-size: 12px;
+    }
+    
+    .components-table th,
+    .components-table td {
+        padding: 8px;
+    }
+    
+    .grand-total-section {
+        padding: 15px;
+    }
+    
+    .grand-total-amount {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .unit-price-basic-form,
+    .unit-price-detail-form {
+        padding: 10px;
+    }
+    
+    .detail-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .components-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+`;
+
+document.head.appendChild(unitPriceStyles);
+
+console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 전역 함수 등록됨 (CSS 스타일 포함)');

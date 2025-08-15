@@ -1,5 +1,5 @@
 // =============================================================================
-// Kiyeno 벽체 관리 시스템 - Revit 타입 매칭 모듈
+// Kiyeno 벽체 관리 시스템 - Revit 타입 매칭 모듈 (원본 복원)
 // Revit 벽체 타입 관리, 자재 매핑, 프로젝트 관리 전담 모듈
 // =============================================================================
 
@@ -26,6 +26,9 @@ function openRevitTypeMatching() {
             return null;
         }
         
+        // 스타일 추가
+        addRevitTypeMappingStyles();
+        
         // 모달 HTML 생성
         console.log('📄 모달 HTML 생성 중...');
         const modalHTML = createRevitTypeMappingModal();
@@ -49,50 +52,57 @@ function openRevitTypeMatching() {
                 attempts++;
                 console.log(`🚀 초기화 시도 ${attempts}/${maxAttempts}...`);
                 
-                const success = initializeTypeMappingTabs();
-                if (!success && attempts < maxAttempts) {
-                    setTimeout(initWithRetry, 300);
-                } else if (success) {
-                    console.log('✅ 초기화 성공!');
+                // DOM 요소 존재 여부 확인
+                const tableBody = document.getElementById('revit-wall-table-body');
+                
+                if (tableBody) {
+                    console.log('✅ DOM 요소 발견, 초기화 진행...');
+                    
+                    // 데이터 로드 및 초기화
+                    loadRevitWallTypes();
+                    updateRevitWallTable();
+                    initializeTypeMappingTabs();
+                    
+                    return;
+                } else if (attempts < maxAttempts) {
+                    console.log('⏳ DOM 요소를 찾지 못함, 재시도...');
+                    setTimeout(initWithRetry, 200);
                 } else {
-                    console.error('❌ 초기화 최대 시도 횟수 초과');
+                    console.error('❌ 최대 시도 횟수 초과, 초기화 실패');
+                    alert('모달 초기화에 실패했습니다. 페이지를 새로고침해주세요.');
                 }
             };
             
+            // 초기화 시작
             setTimeout(initWithRetry, 100);
         }
         
         return modal;
         
     } catch (error) {
-        console.error('❌ 벽체 타입 관리 모달 열기 오류:', error);
-        alert('모달을 열 수 없습니다: ' + error.message);
+        console.error('❌ 벽체 타입 관리 모달 열기 실패:', error);
+        alert('모달을 열 수 없습니다. 페이지를 새로고침해주세요.');
         return null;
     }
 }
 
 function closeRevitTypeMatching() {
-    console.log('🏗️ 벽체 타입 관리 모달 닫기');
+    console.log('🚪 벽체 타입 관리 모달 닫기');
     
-    // 현재 활성화된 서브 모달 오버레이 찾기
-    const subModalOverlay = document.querySelector('.sub-modal-overlay');
-    if (subModalOverlay) {
-        subModalOverlay.remove();
-        console.log('✅ 서브 모달 오버레이 제거됨');
-    } else {
-        console.log('⚠️ 서브 모달 오버레이를 찾을 수 없음');
-        
-        // 대안으로 모든 모달 찾아서 제거
-        const modals = document.querySelectorAll('[class*="modal"]');
-        modals.forEach(modal => {
-            if (modal.style.display !== 'none') {
-                modal.remove();
-            }
-        });
+    // 서브 모달 닫기
+    const subModal = document.querySelector('.sub-modal-overlay');
+    if (subModal && typeof closeSubModal === 'function') {
+        closeSubModal(subModal);
+        return;
     }
     
-    // body 스크롤 복원
-    document.body.style.overflow = '';
+    // 일반 모달 닫기
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+        modal.remove();
+    } else {
+        console.warn('⚠️ 서브 모달 오버레이를 찾을 수 없습니다.');
+    }
 }
 
 // =============================================================================
@@ -100,107 +110,129 @@ function closeRevitTypeMatching() {
 // =============================================================================
 
 function createRevitTypeMappingModal() {
-    console.log('🔧 Revit 타입 매칭 모달 HTML 생성');
-    
-    const content = createRevitTypeMappingModalContent();
-    
-    // 스타일 추가
-    const styles = addRevitTypeMappingStyles();
-    
-    return content + styles;
+    return `
+        <div class="revit-type-matching-container">
+            <!-- 프로젝트 관리 컨텐츠 -->
+            <div class="project-content">
+                ${createProjectManagementPanel()}
+            </div>
+
+            <!-- 하단 버튼들 -->
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeRevitTypeMatching()">
+                    <i class="fas fa-times"></i> 닫기
+                </button>
+                <button class="btn btn-primary" onclick="saveAllChanges()">
+                    <i class="fas fa-save"></i> 모든 변경사항 저장
+                </button>
+            </div>
+        </div>
+    `;
 }
 
+// 자재 관리 모달 내부에서 사용할 컨텐츠만 반환하는 함수
 function createRevitTypeMappingModalContent() {
     return `
-        <div class="revit-type-mapping-container" style="width: 95vw; max-width: 1400px; height: 85vh; overflow: hidden;">
-            ${createProjectManagementPanel()}
-            
-            <div style="height: calc(85vh - 120px); overflow: hidden;">
-                <div class="tab-container" style="height: 100%; display: flex; flex-direction: column;">
-                    <ul class="nav nav-tabs" id="typeMappingTabs" style="flex-shrink: 0;">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-tab="wall-types" href="#" style="font-size: 14px;">
-                                <i class="fas fa-building"></i> Revit 벽체 타입 관리
-                            </a>
-                        </li>
-                    </ul>
-                    
-                    <div class="tab-content" style="flex: 1; overflow: hidden; border: 1px solid #dee2e6; border-top: none;">
-                        <div class="tab-pane active" id="wall-types-content" style="height: 100%; overflow: auto; padding: 20px;">
-                            <!-- Revit 벽체 타입 관리 내용 -->
-                            <div id="revitWallTypesContainer">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <div>
-                                        <h5><i class="fas fa-building"></i> Revit 벽체 타입</h5>
-                                        <small class="text-muted">Revit에서 가져온 벽체 타입들을 관리하고 자재를 매핑합니다</small>
-                                    </div>
-                                    
-                                    <div class="btn-group">
-                                        <div class="dropdown">
-                                            <button class="btn btn-outline-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()">
-                                                <i class="fas fa-plus"></i> 작업 ▼
-                                            </button>
-                                            <div class="dropdown-menu" id="revitActionsDropdown" style="display: none;">
-                                                <div class="dropdown-item" onclick="addRevitWallType()">
-                                                    <i class="fas fa-plus"></i> 새 벽체 타입 추가
-                                                </div>
-                                                <div class="dropdown-item" onclick="duplicateRevitWall()">
-                                                    <i class="fas fa-copy"></i> 선택 복사
-                                                </div>
-                                                <div class="dropdown-divider"></div>
-                                                <div class="dropdown-item" onclick="openUnitPriceManagement()">
-                                                    <i class="fas fa-calculator"></i> 일위대가 관리
-                                                </div>
-                                                <div class="dropdown-item" onclick="showUnitPriceSummary()">
-                                                    <i class="fas fa-list-alt"></i> 일위대가 연동 현황
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div id="revitWallTypesTable">
-                                    <!-- 벽체 타입 테이블이 동적으로 로드됩니다 -->
-                                </div>
+        <div class="revit-type-matching-container">
+            <!-- 프로젝트 관리 컨텐츠 -->
+            <div class="project-content">
+                ${createProjectManagementPanel()}
+            </div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// 탭 패널 생성 함수들
+// =============================================================================
+
+function createProjectManagementPanel() {
+    return `
+        <div class="project-panel">
+            <h3><i class="fas fa-project-diagram"></i> 벽체 타입 관리</h3>
+
+            <!-- 기본 작업 드롭다운 -->
+            <div class="action-section">
+                <h4><i class="fas fa-tools"></i> 기본 작업</h4>
+                <div class="dropdown-container">
+                    <div class="dropdown" style="position: relative;">
+                        <button class="btn btn-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()">
+                            <i class="fas fa-plus"></i> 벽체 작업
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-menu" id="revitActionsDropdown" style="display: none;">
+                            <div class="dropdown-item" onclick="addRevitWallType()">
+                                <i class="fas fa-plus"></i> 새 WallType 생성
+                            </div>
+                            <div class="dropdown-item" onclick="duplicateRevitWall()">
+                                <i class="fas fa-copy"></i> 선택 복사
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="openUnitPriceManagement()">
+                                <i class="fas fa-calculator"></i> 일위대가 관리
+                            </div>
+                            <div class="dropdown-item" onclick="showUnitPriceSummary()">
+                                <i class="fas fa-list-alt"></i> 일위대가 연동 현황
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
+                                <i class="fas fa-trash-alt"></i> 선택 삭제
+                            </div>
+                            <div class="dropdown-item" onclick="clearRevitWallData()">
+                                <i class="fas fa-eraser"></i> 전체 초기화
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="exportRevitWallTypesToJSON()">
+                                <i class="fas fa-download"></i> JSON 내보내기
+                            </div>
+                            <div class="dropdown-item" onclick="importRevitWallTypesFromJSON()">
+                                <i class="fas fa-upload"></i> JSON 불러오기
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `;
-}
 
-function createProjectManagementPanel() {
-    return `
-        <div class="project-management-panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="d-flex align-items-center">
-                        <div class="project-icon" style="background: rgba(255,255,255,0.2); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                            <i class="fas fa-building" style="font-size: 24px;"></i>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0; font-weight: 600;">Revit 타입 매칭</h4>
-                            <p style="margin: 0; font-size: 14px; opacity: 0.9;">Revit 벽체 타입과 자재 데이터베이스 매핑 관리</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 text-right">
-                    <div class="d-flex justify-content-end gap-2">
-                        <button onclick="exportRevitWallTypesToJSON()" class="btn btn-light btn-sm" style="opacity: 0.9;">
-                            <i class="fas fa-download"></i> 내보내기
-                        </button>
-                        <button onclick="importRevitWallTypesFromJSON()" class="btn btn-light btn-sm" style="opacity: 0.9;">
-                            <i class="fas fa-upload"></i> 가져오기
-                        </button>
-                        <button onclick="saveAllChanges()" class="btn btn-warning btn-sm" style="background: #f59e0b; border-color: #f59e0b;">
-                            <i class="fas fa-save"></i> 저장
-                        </button>
-                        <button onclick="closeRevitTypeMatching()" class="btn btn-light btn-sm">
-                            <i class="fas fa-times"></i> 닫기
-                        </button>
-                    </div>
+            <!-- 벽체 타입 데이터 테이블 -->
+            <div class="action-section">
+                <h4><i class="fas fa-table"></i> 벽체 타입 목록</h4>
+                <div class="wall-table-container responsive-wall-table" style="max-height: 500px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
+                    <table class="wall-table-small">
+                        <thead>
+                            <tr class="header-main-row">
+                                <th rowspan="2" class="header-main" style="width: 40px;">
+                                    <input type="checkbox" id="selectAllRevitWalls" onchange="toggleAllRevitWallSelection()">
+                                </th>
+                                <th rowspan="2" class="header-main col-no" title="순서 번호">No</th>
+                                <th rowspan="2" class="header-main col-walltype" title="벽체 타입명">WallType</th>
+                                <th colspan="3" class="header-main" title="석고보드 구조체 레이어">석고보드 구조체</th>
+                                <th rowspan="2" class="header-main col-column col-priority-high" title="Column 모듈게이지">Column<br/>모듈게이지</th>
+                                <th rowspan="2" class="header-main col-infill col-priority-high" title="충진재">Infill</th>
+                                <th colspan="3" class="header-main col-priority-high" title="석고보드 구조체 레이어">석고보드 구조체</th>
+                                <th rowspan="2" class="header-main col-column2 col-priority-medium" title="컬럼">Column</th>
+                                <th rowspan="2" class="header-main col-channel col-priority-low" title="채널">Channel</th>
+                                <th rowspan="2" class="header-main col-runner col-priority-low" title="러너">Runner</th>
+                                <th rowspan="2" class="header-main col-steel col-priority-low" title="아연도금 철판">Steel Plate<br/>(Galvanizing)</th>
+                                <th rowspan="2" class="header-main col-thickness col-priority-medium" title="벽체 두께 (밀리미터)">두께(mm)</th>
+                                <th rowspan="2" class="header-main col-unitprice col-priority-high" title="연결된 일위대가">일위대가</th>
+                            </tr>
+                            <tr class="header-sub-row">
+                                <th class="header-sub col-layer" title="레이어 3">Layer3</th>
+                                <th class="header-sub col-layer" title="레이어 2">Layer2</th>
+                                <th class="header-sub col-layer" title="레이어 1">Layer1</th>
+                                <th class="header-sub col-layer" title="레이어 1">Layer1</th>
+                                <th class="header-sub col-layer" title="레이어 2">Layer2</th>
+                                <th class="header-sub col-layer" title="레이어 3">Layer3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="revit-wall-table-body">
+                            <tr>
+                                <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
+                                    벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -208,274 +240,225 @@ function createProjectManagementPanel() {
 }
 
 // =============================================================================
-// 초기화 및 탭 관리
+// 초기화 함수
 // =============================================================================
 
 function initializeTypeMappingTabs() {
-    console.log('🎯 타입 매핑 탭 초기화 시작');
-    
     try {
-        // 탭 클릭 이벤트 바인딩
-        const tabLinks = document.querySelectorAll('#typeMappingTabs .nav-link');
-        console.log('📋 탭 링크 개수:', tabLinks.length);
-        
-        if (tabLinks.length === 0) {
-            console.warn('⚠️ 탭 링크를 찾을 수 없음. DOM이 아직 준비되지 않았을 수 있음.');
-            return false;
-        }
-        
-        // 기존 이벤트 리스너 제거 후 새로 추가
-        tabLinks.forEach(link => {
-            const newLink = link.cloneNode(true);
-            link.parentNode.replaceChild(newLink, link);
-        });
-        
-        // 새 이벤트 리스너 추가
-        const newTabLinks = document.querySelectorAll('#typeMappingTabs .nav-link');
-        newTabLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const tabId = this.getAttribute('data-tab');
-                console.log('🎯 탭 클릭:', tabId);
-                
-                // 모든 탭 비활성화
-                newTabLinks.forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.tab-pane').forEach(pane => {
-                    pane.classList.remove('active');
-                });
-                
-                // 선택된 탭 활성화
-                this.classList.add('active');
-                const targetPane = document.getElementById(tabId + '-content');
-                if (targetPane) {
-                    targetPane.classList.add('active');
-                }
-            });
-        });
-        
-        // 초기 데이터 로드
-        loadRevitWallTypes();
-        updateRevitWallTable();
-        
-        console.log('✅ 타입 매핑 탭 초기화 완료');
+        // 프로젝트 관리 패널 초기화
+        updateProjectStatus();
+        console.log('✅ 벽체 타입 관리 시스템 초기화 완료');
         return true;
-        
     } catch (error) {
-        console.error('❌ 타입 매핑 탭 초기화 실패:', error);
+        console.error('❌ 초기화 오류:', error);
         return false;
     }
 }
 
 // =============================================================================
-// 저장 및 상태 관리
+// 데이터 관리 함수들
 // =============================================================================
 
 function saveAllChanges() {
-    try {
-        saveRevitWallTypes();
-        updateProjectStatus();
-        alert('모든 변경사항이 저장되었습니다.');
-        console.log('✅ 모든 변경사항 저장 완료');
-    } catch (error) {
-        console.error('❌ 저장 실패:', error);
-        alert('저장 중 오류가 발생했습니다: ' + error.message);
+    console.log('💾 모든 변경사항 저장 중...');
+    
+    const success = saveRevitWallTypes();
+    
+    if (success) {
+        alert('✅ 모든 변경사항이 저장되었습니다.');
+    } else {
+        alert('❌ 저장 중 오류가 발생했습니다.');
     }
 }
 
+// =============================================================================
+// 프로젝트 관리 함수들
+// =============================================================================
+
 function updateProjectStatus() {
-    // 프로젝트 상태 업데이트 로직
-    const totalWalls = revitWallTypes.length;
-    const mappedWalls = revitWallTypes.filter(wall => 
-        wall.fire || wall.sound || wall.thermal || wall.structure || wall.waterproof || wall.finish
-    ).length;
-    
-    console.log(`📊 프로젝트 상태: ${mappedWalls}/${totalWalls} 벽체 매핑됨`);
+    try {
+        // 독립적인 벽체 타입 데이터 로드
+        loadRevitWallTypes();
+        
+        // 벽체 테이블 업데이트
+        updateRevitWallTable();
+        
+        console.log(`📊 Revit 벽체 타입 업데이트: 총 ${revitWallTypes.length}개`);
+        
+    } catch (error) {
+        console.error('❌ 프로젝트 상태 업데이트 오류:', error);
+    }
 }
 
 // =============================================================================
-// 데이터 관리
+// 독립적인 벽체 타입 데이터 관리
 // =============================================================================
 
+// 벽체 타입 데이터 로드
 function loadRevitWallTypes() {
     try {
-        const saved = localStorage.getItem('kiyeno_revitWallTypes');
-        if (saved) {
-            const data = JSON.parse(saved);
-            revitWallTypes = data.wallTypes || [];
-            revitWallTypeCounter = data.counter || 0;
-            console.log(`✅ Revit 벽체 타입 로드됨: ${revitWallTypes.length}개`);
+        const savedData = localStorage.getItem('kiyeno_revit_wall_types');
+        
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            revitWallTypes = parsedData.types || [];
+            revitWallTypeCounter = parsedData.counter || 0;
+            console.log(`✅ Revit 벽체 타입 로드: ${revitWallTypes.length}개`);
         } else {
             revitWallTypes = [];
             revitWallTypeCounter = 0;
-            console.log('📝 새로운 Revit 벽체 타입 목록 생성');
+            console.log('📝 새로운 Revit 벽체 타입 목록 시작');
         }
+        
+        // ID가 누락된 항목 수정
+        revitWallTypes.forEach((wall, index) => {
+            if (!wall.id) {
+                wall.id = ++revitWallTypeCounter;
+            }
+            wall.no = index + 1;
+        });
+        
+        return true;
     } catch (error) {
-        console.error('❌ Revit 벽체 타입 로드 실패:', error);
+        console.error('❌ 벽체 타입 데이터 로드 실패:', error);
         revitWallTypes = [];
         revitWallTypeCounter = 0;
+        return false;
     }
 }
 
+// 벽체 타입 데이터 저장
 function saveRevitWallTypes() {
     try {
-        const data = {
-            wallTypes: revitWallTypes,
+        const dataToSave = {
+            types: revitWallTypes,
             counter: revitWallTypeCounter,
             lastSaved: new Date().toISOString()
         };
-        localStorage.setItem('kiyeno_revitWallTypes', JSON.stringify(data));
-        console.log(`✅ Revit 벽체 타입 저장됨: ${revitWallTypes.length}개`);
+        localStorage.setItem('kiyeno_revit_wall_types', JSON.stringify(dataToSave));
+        console.log('✅ Revit 벽체 타입 데이터 저장됨');
+        return true;
     } catch (error) {
-        console.error('❌ Revit 벽체 타입 저장 실패:', error);
-        throw error;
+        console.error('❌ 벽체 타입 데이터 저장 실패:', error);
+        return false;
     }
 }
 
-// =============================================================================
-// 테이블 업데이트
-// =============================================================================
-
+// 벽체 테이블 업데이트 함수
 function updateRevitWallTable() {
-    const container = document.getElementById('revitWallTypesTable');
-    if (!container) {
-        console.warn('⚠️ revitWallTypesTable 컨테이너를 찾을 수 없음');
-        return;
-    }
+    const tableBody = document.getElementById('revit-wall-table-body');
+    if (!tableBody) return;
     
-    if (revitWallTypes.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: #6c757d;">
-                <i class="fas fa-building" style="font-size: 48px; opacity: 0.3; margin-bottom: 20px;"></i>
-                <h5>Revit 벽체 타입이 없습니다</h5>
-                <p>상단의 "작업" 버튼을 클릭하여 새 벽체 타입을 추가하세요.</p>
-                <button onclick="addRevitWallType()" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> 새 벽체 타입 추가
-                </button>
-            </div>
+    if (!revitWallTypes || revitWallTypes.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
+                    벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
+                </td>
+            </tr>
         `;
         return;
     }
     
-    const tableHTML = `
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th width="40"><input type="checkbox" onchange="toggleAllRevitWallSelection()"></th>
-                        <th width="200">벽체 타입</th>
-                        <th width="80">두께</th>
-                        <th width="150">방화</th>
-                        <th width="150">차음</th>
-                        <th width="150">단열</th>
-                        <th width="150">구조</th>
-                        <th width="150">방수</th>
-                        <th width="150">마감</th>
-                        <th width="150">일위대가</th>
-                        <th width="100">작업</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${revitWallTypes.map(wall => createRevitWallTableRow(wall)).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
-    
-    container.innerHTML = tableHTML;
+    // 벽체 데이터를 테이블 행으로 변환
+    const tableRows = revitWallTypes.map(wall => createRevitWallTableRow(wall)).join('');
+    tableBody.innerHTML = tableRows;
 }
 
+// 벽체 테이블 행 생성 함수 (클릭 가능한 자재 셀 포함)
 function createRevitWallTableRow(wall) {
     const isSelected = selectedRevitWalls.has(wall.id);
+    
     return `
-        <tr ${isSelected ? 'style="background-color: #e3f2fd;"' : ''}>
-            <td>
+        <tr data-wall-id="${wall.id}" class="${isSelected ? 'selected' : ''}">
+            <td style="text-align: center;">
                 <input type="checkbox" ${isSelected ? 'checked' : ''} 
                        onchange="toggleRevitWallSelection(${wall.id})">
             </td>
-            <td>
-                <div class="d-flex align-items-center">
-                    <input type="text" value="${wall.name}" class="form-control form-control-sm" 
-                           onblur="saveWallTypeName(${wall.id}, this.value, this)"
-                           onkeydown="handleWallTypeNameKeydown(event, ${wall.id}, '${wall.name}', this)"
-                           style="min-width: 180px;">
-                </div>
+            <td style="text-align: center;">${wall.no}</td>
+            <td style="text-align: center;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer3_1')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_1')" class="material-cell">
+                ${wall.layer3_1 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <input type="number" value="${wall.thickness || ''}" class="form-control form-control-sm" 
-                       onblur="saveWallThickness(${wall.id}, this.value, this)"
-                       onkeydown="handleWallThicknessKeydown(event, ${wall.id}, '${wall.thickness || ''}', this)"
-                       placeholder="mm" style="width: 70px;">
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer2_1')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_1')" class="material-cell">
+                ${wall.layer2_1 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.fire ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'fire')" style="width: 100%; font-size: 11px;">
-                    ${wall.fire || '선택'}
-                    ${wall.fire ? `<button onclick="clearMaterial(event, ${wall.id}, 'fire')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer1_1')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_1')" class="material-cell">
+                ${wall.layer1_1 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.sound ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'sound')" style="width: 100%; font-size: 11px;">
-                    ${wall.sound || '선택'}
-                    ${wall.sound ? `<button onclick="clearMaterial(event, ${wall.id}, 'sound')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'column1')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'column1')" class="material-cell col-column col-priority-high">
+                ${wall.column1 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.thermal ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'thermal')" style="width: 100%; font-size: 11px;">
-                    ${wall.thermal || '선택'}
-                    ${wall.thermal ? `<button onclick="clearMaterial(event, ${wall.id}, 'thermal')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'infill')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'infill')" class="material-cell col-infill col-priority-high">
+                ${wall.infill || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.structure ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'structure')" style="width: 100%; font-size: 11px;">
-                    ${wall.structure || '선택'}
-                    ${wall.structure ? `<button onclick="clearMaterial(event, ${wall.id}, 'structure')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer1_2')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_2')" class="material-cell col-layer col-priority-high">
+                ${wall.layer1_2 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.waterproof ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'waterproof')" style="width: 100%; font-size: 11px;">
-                    ${wall.waterproof || '선택'}
-                    ${wall.waterproof ? `<button onclick="clearMaterial(event, ${wall.id}, 'waterproof')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer2_2')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_2')" class="material-cell col-layer col-priority-high">
+                ${wall.layer2_2 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
-                <button class="btn btn-sm ${wall.finish ? 'btn-success' : 'btn-outline-secondary'}" 
-                        onclick="selectMaterial(${wall.id}, 'finish')" style="width: 100%; font-size: 11px;">
-                    ${wall.finish || '선택'}
-                    ${wall.finish ? `<button onclick="clearMaterial(event, ${wall.id}, 'finish')" style="background: none; border: none; color: white; margin-left: 5px;">×</button>` : ''}
-                </button>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer3_2')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_2')" class="material-cell col-layer col-priority-high">
+                ${wall.layer3_2 || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
-            <td>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'column2')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'column2')" class="material-cell col-column2 col-priority-medium">
+                ${wall.column2 || '<span style="color: #999;">클릭하여 선택</span>'}
+            </td>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'channel')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'channel')" class="material-cell col-channel col-priority-low">
+                ${wall.channel || '<span style="color: #999;">클릭하여 선택</span>'}
+            </td>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'runner')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'runner')" class="material-cell col-runner col-priority-low">
+                ${wall.runner || '<span style="color: #999;">클릭하여 선택</span>'}
+            </td>
+            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'steelPlate')" 
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'steelPlate')" class="material-cell col-steel col-priority-low">
+                ${wall.steelPlate || '<span style="color: #999;">클릭하여 선택</span>'}
+            </td>
+            <td style="text-align: center;" ondblclick="editRevitWallThickness(${wall.id})" class="col-thickness col-priority-medium">${wall.thickness || ''}</td>
+            <td style="text-align: center;" class="col-unitprice col-priority-high">
                 ${createUnitPriceDropdown(wall)}
-            </td>
-            <td>
-                <button onclick="editRevitWallType(${wall.id})" class="btn btn-sm btn-outline-primary" title="편집">
-                    <i class="fas fa-edit"></i>
-                </button>
             </td>
         </tr>
     `;
 }
 
+// =============================================================================
+// 일위대가 연동 함수들
+// =============================================================================
+
 // 일위대가 드롭다운 생성
 function createUnitPriceDropdown(wall) {
-    const unitPriceItems = loadUnitPriceItems();
-    const selectedId = wall.unitPriceId || '';
+    // 로컬스토리지에서 일위대가 데이터 가져오기
+    let unitPriceItems = [];
+    try {
+        const savedData = localStorage.getItem('kiyeno_unitPriceItems');
+        if (savedData) {
+            unitPriceItems = JSON.parse(savedData);
+        }
+    } catch (error) {
+        console.error('일위대가 데이터 로드 실패:', error);
+    }
     
-    let options = '<option value="">선택하세요</option>';
-    unitPriceItems.forEach(item => {
-        const basic = item.basic;
-        const displayName = `${basic.itemName} ${basic.spacing} ${basic.height}`;
-        const selected = item.id === selectedId ? 'selected' : '';
-        options += `<option value="${item.id}" ${selected}>${displayName}</option>`;
-    });
+    const options = unitPriceItems.map(item => 
+        `<option value="${item.id}" ${wall.unitPriceId === item.id ? 'selected' : ''}>
+            ${item.name} (${item.unit || 'N/A'})
+        </option>`
+    ).join('');
     
     return `
-        <select onchange="assignUnitPriceToWall(${wall.id}, this.value)" 
-                class="form-control form-control-sm" style="font-size: 11px;">
+        <select onchange="assignUnitPriceToWall(${wall.id}, this.value)" style="width: 100%; font-size: 11px;">
+            <option value="">일위대가 선택</option>
             ${options}
         </select>
     `;
@@ -484,167 +467,113 @@ function createUnitPriceDropdown(wall) {
 // 벽체에 일위대가 할당
 function assignUnitPriceToWall(wallId, unitPriceId) {
     const wall = revitWallTypes.find(w => w.id === wallId);
-    if (!wall) {
-        console.error('❌ 벽체를 찾을 수 없음:', wallId);
-        return;
-    }
+    if (!wall) return;
     
-    wall.unitPriceId = unitPriceId || '';
-    
-    // 연결된 일위대가 정보 표시
-    if (unitPriceId) {
-        const unitPriceItems = loadUnitPriceItems();
-        const selectedItem = unitPriceItems.find(item => item.id === unitPriceId);
-        if (selectedItem) {
-            const totalCost = selectedItem.totalCosts?.total || 0;
-            console.log(`✅ 벽체 "${wall.name}"에 일위대가 "${selectedItem.basic.itemName}" 연결됨 (${totalCost.toLocaleString()}원)`);
-        }
-    }
-    
+    wall.unitPriceId = unitPriceId;
     saveRevitWallTypes();
+    
+    console.log(`✅ 벽체 ${wallId}에 일위대가 ${unitPriceId} 할당됨`);
 }
 
-// 일위대가 연동 현황 보기
+// 일위대가 연동 현황 표시
 function showUnitPriceSummary() {
-    console.log('📋 일위대가 연동 현황 보기');
+    const linkedWalls = revitWallTypes.filter(wall => wall.unitPriceId);
+    const unlinkedWalls = revitWallTypes.filter(wall => !wall.unitPriceId);
     
-    const unitPriceItems = loadUnitPriceItems();
-    const wallTypesWithUnitPrice = revitWallTypes.filter(wall => wall.unitPriceId);
+    const summaryHTML = `
+        <div class="unit-price-summary">
+            <h4>일위대가 연동 현황</h4>
+            <div class="summary-stats">
+                <div class="stat-item">
+                    <span class="stat-label">전체 벽체 타입:</span>
+                    <span class="stat-value">${revitWallTypes.length}개</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">연동 완료:</span>
+                    <span class="stat-value">${linkedWalls.length}개</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">연동 필요:</span>
+                    <span class="stat-value">${unlinkedWalls.length}개</span>
+                </div>
+            </div>
+        </div>
+    `;
     
-    const modalContent = createUnitPriceSummaryModal(wallTypesWithUnitPrice, unitPriceItems);
-    
-    const modal = createSubModal('📋 일위대가 연동 현황', modalContent, [
+    const modal = createSubModal('📊 일위대가 연동 현황', summaryHTML, [
         { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) }
     ]);
 }
 
-// 일위대가 연동 현황 모달 컨텐츠 생성
-function createUnitPriceSummaryModal(wallTypesWithUnitPrice, unitPriceItems) {
-    const totalWalls = revitWallTypes.length;
-    const connectedWalls = wallTypesWithUnitPrice.length;
-    const connectionRate = totalWalls > 0 ? Math.round((connectedWalls / totalWalls) * 100) : 0;
-    
-    let tableRows = '';
-    
-    if (wallTypesWithUnitPrice.length === 0) {
-        tableRows = `
-            <tr>
-                <td colspan="5" style="text-align: center; padding: 40px; color: #6c757d;">
-                    <i class="fas fa-link" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></i>
-                    <p>연결된 일위대가가 없습니다.</p>
-                </td>
-            </tr>
-        `;
-    } else {
-        tableRows = wallTypesWithUnitPrice.map(wall => {
-            const unitPriceItem = unitPriceItems.find(item => item.id === wall.unitPriceId);
-            if (!unitPriceItem) {
-                return `
-                    <tr>
-                        <td>${wall.name}</td>
-                        <td colspan="4" style="color: #dc3545;">❌ 연결된 일위대가를 찾을 수 없음</td>
-                    </tr>
-                `;
-            }
-            
-            const basic = unitPriceItem.basic;
-            const totalCost = unitPriceItem.totalCosts;
-            
-            return `
-                <tr>
-                    <td style="font-weight: 500;">${wall.name}</td>
-                    <td>${basic.itemName} ${basic.spacing} ${basic.height}</td>
-                    <td>${basic.size} | ${basic.location} | ${basic.workType}</td>
-                    <td>${basic.unit}</td>
-                    <td style="text-align: right; font-weight: 600; color: #dc2626;">
-                        ${Math.round(totalCost?.total || 0).toLocaleString()}원
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
-    
-    return `
-        <div class="unit-price-summary-container">
-            <div class="summary-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                <div class="row">
-                    <div class="col-md-8">
-                        <h4><i class="fas fa-chart-pie"></i> 일위대가 연동 현황</h4>
-                        <p style="margin: 0; opacity: 0.9;">Revit 벽체 타입과 일위대가 연결 상태를 확인합니다</p>
-                    </div>
-                    <div class="col-md-4 text-right">
-                        <div class="connection-rate" style="background: rgba(255,255,255,0.2); padding: 10px 15px; border-radius: 8px; display: inline-block;">
-                            <div style="font-size: 24px; font-weight: 700;">${connectionRate}%</div>
-                            <div style="font-size: 12px; opacity: 0.8;">${connectedWalls}/${totalWalls} 연결됨</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>벽체 타입</th>
-                            <th>일위대가</th>
-                            <th>상세정보</th>
-                            <th>단위</th>
-                            <th style="text-align: right;">총 단가</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-}
-
 // =============================================================================
-// 벽체 타입 관리 (추가/삭제/복사)
+// 드롭다운 관리
 // =============================================================================
 
 function toggleRevitActionsDropdown() {
     const dropdown = document.getElementById('revitActionsDropdown');
-    if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-    }
-}
-
-function addRevitWallType() {
-    console.log('➕ 새 벽체 타입 추가');
+    if (!dropdown) return;
     
-    const modal = createWallTypeCreationModal();
-    if (modal) {
-        // 입력 필드에 포커스
+    const isVisible = dropdown.style.display === 'block';
+    
+    // 모든 드롭다운 닫기
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+        menu.style.display = 'none';
+    });
+    
+    // 현재 드롭다운 토글
+    dropdown.style.display = isVisible ? 'none' : 'block';
+    
+    // 클릭 외부 영역에서 닫기
+    if (!isVisible) {
         setTimeout(() => {
-            const nameInput = document.getElementById('newWallTypeName');
-            if (nameInput) {
-                nameInput.focus();
-            }
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
         }, 100);
     }
 }
 
-function createWallTypeCreationModal() {
+// =============================================================================
+// 벽체 타입 생성 및 관리
+// =============================================================================
+
+function addRevitWallType() {
+    console.log('➕ 새 벽체 타입 추가 시작');
+    
+    // 드롭다운 닫기
+    const dropdown = document.getElementById('revitActionsDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+    
+    return createWallTypeModal();
+}
+
+// 벽체 타입 생성 모달 생성
+function createWallTypeModal() {
+    const defaultName = `WallType_${revitWallTypeCounter + 1}`;
+    
     const modalHTML = `
         <div class="wall-type-creation-form">
-            <div class="form-group mb-3">
-                <label for="newWallTypeName" class="form-label">
-                    <i class="fas fa-building"></i> 벽체 타입명 <span class="text-danger">*</span>
+            <div class="form-group">
+                <label for="newWallTypeName">
+                    <i class="fas fa-tag"></i> WallType 이름 <span style="color: #dc3545;">*</span>
                 </label>
-                <input type="text" id="newWallTypeName" class="form-control" 
-                       placeholder="예: 콘크리트 벽 200mm" 
+                <input type="text" id="newWallTypeName" value="${defaultName}" 
+                       class="form-control"
+                       placeholder="WallType 이름을 입력하세요"
                        onkeydown="handleWallTypeCreationKeydown(event)">
             </div>
             
-            <div class="form-group mb-3">
-                <label for="newWallThickness" class="form-label">
-                    <i class="fas fa-ruler"></i> 벽체 두께 (mm)
+            <div class="form-group">
+                <label for="newWallThickness">
+                    <i class="fas fa-ruler-horizontal"></i> 벽체 두께 (mm)
                 </label>
-                <input type="number" id="newWallThickness" class="form-control" 
-                       placeholder="200" min="1" max="1000"
+                <input type="number" id="newWallThickness" 
+                       class="form-control"
+                       placeholder="벽체 두께를 입력하세요 (예: 100)"
+                       min="1" max="9999"
                        onkeydown="handleWallTypeCreationKeydown(event)">
             </div>
             
@@ -683,7 +612,7 @@ function createNewWallType(modal) {
     }
     
     // 중복 이름 확인
-    const isDuplicate = revitWallTypes.some(wall => wall.name.toLowerCase() === wallName.toLowerCase());
+    const isDuplicate = revitWallTypes.some(wall => wall.wallType && wall.wallType.toLowerCase() === wallName.toLowerCase());
     if (isDuplicate) {
         alert('이미 존재하는 벽체 타입명입니다.');
         nameInput.focus();
@@ -693,14 +622,21 @@ function createNewWallType(modal) {
     // 새 벽체 타입 생성
     const newWallType = {
         id: ++revitWallTypeCounter,
-        name: wallName,
+        no: revitWallTypes.length + 1,
+        wallType: wallName,
         thickness: wallThickness,
-        fire: '',
-        sound: '',
-        thermal: '',
-        structure: '',
-        waterproof: '',
-        finish: '',
+        layer3_1: '',
+        layer2_1: '',
+        layer1_1: '',
+        column1: '',
+        infill: '',
+        layer1_2: '',
+        layer2_2: '',
+        layer3_2: '',
+        column2: '',
+        channel: '',
+        runner: '',
+        steelPlate: '',
         unitPriceId: '',
         createdAt: new Date().toISOString(),
         source: 'manual'
@@ -717,46 +653,10 @@ function createNewWallType(modal) {
     alert(`"${wallName}" 벽체 타입이 추가되었습니다.`);
 }
 
-function createWallTypeWithPrompt() {
-    const wallName = prompt('새 벽체 타입명을 입력하세요:', '새 벽체 타입');
-    
-    if (!wallName || !wallName.trim()) {
-        return;
-    }
-    
-    // 중복 이름 확인
-    const isDuplicate = revitWallTypes.some(wall => wall.name.toLowerCase() === wallName.toLowerCase());
-    if (isDuplicate) {
-        alert('이미 존재하는 벽체 타입명입니다.');
-        return;
-    }
-    
-    const newWallType = {
-        id: ++revitWallTypeCounter,
-        name: wallName.trim(),
-        thickness: 0,
-        fire: '',
-        sound: '',
-        thermal: '',
-        structure: '',
-        waterproof: '',
-        finish: '',
-        unitPriceId: '',
-        createdAt: new Date().toISOString(),
-        source: 'manual'
-    };
-    
-    revitWallTypes.push(newWallType);
-    saveRevitWallTypes();
-    updateRevitWallTable();
-    
-    console.log('✅ 새 벽체 타입 추가됨:', newWallType);
-}
-
 function handleWallTypeCreationKeydown(event) {
     if (event.key === 'Enter') {
         // Enter 키로 모달의 "추가" 버튼 클릭
-        const modal = event.target.closest('.sub-modal');
+        const modal = event.target.closest('.sub-modal-overlay');
         if (modal) {
             createNewWallType(modal);
         }
@@ -778,7 +678,8 @@ function duplicateRevitWall() {
             const duplicatedWall = {
                 ...originalWall,
                 id: ++revitWallTypeCounter,
-                name: originalWall.name + ' (복사본)',
+                no: revitWallTypes.length + 1,
+                wallType: originalWall.wallType + ' (복사본)',
                 createdAt: new Date().toISOString(),
                 source: 'duplicated'
             };
@@ -789,6 +690,11 @@ function duplicateRevitWall() {
     });
     
     if (duplicatedCount > 0) {
+        // 번호 재정렬
+        revitWallTypes.forEach((wall, index) => {
+            wall.no = index + 1;
+        });
+        
         saveRevitWallTypes();
         updateRevitWallTable();
         selectedRevitWalls.clear();
@@ -812,6 +718,11 @@ function deleteSelectedRevitWalls() {
     // 선택된 벽체 타입들 삭제
     revitWallTypes = revitWallTypes.filter(wall => !selectedIds.includes(wall.id));
     selectedRevitWalls.clear();
+    
+    // 번호 재정렬
+    revitWallTypes.forEach((wall, index) => {
+        wall.no = index + 1;
+    });
     
     saveRevitWallTypes();
     updateRevitWallTable();
@@ -880,12 +791,18 @@ function selectMaterial(wallId, fieldName) {
 
 function getFieldDisplayName(fieldName) {
     const fieldNames = {
-        fire: '방화',
-        sound: '차음', 
-        thermal: '단열',
-        structure: '구조',
-        waterproof: '방수',
-        finish: '마감'
+        layer3_1: '석고보드 Layer3 (좌)',
+        layer2_1: '석고보드 Layer2 (좌)', 
+        layer1_1: '석고보드 Layer1 (좌)',
+        column1: 'Column 모듈게이지',
+        infill: 'Infill 충진재',
+        layer1_2: '석고보드 Layer1 (우)',
+        layer2_2: '석고보드 Layer2 (우)',
+        layer3_2: '석고보드 Layer3 (우)',
+        column2: 'Column',
+        channel: 'Channel',
+        runner: 'Runner',
+        steelPlate: 'Steel Plate'
     };
     return fieldNames[fieldName] || fieldName;
 }
@@ -902,7 +819,7 @@ function createMaterialSelectionModal(wallId, fieldName) {
     const modalHTML = `
         <div class="material-selection-container">
             <div class="material-header mb-3">
-                <h5><i class="fas fa-cube"></i> ${wall.name} - ${fieldDisplayName} 자재 선택</h5>
+                <h5><i class="fas fa-cube"></i> ${wall.wallType} - ${fieldDisplayName} 자재 선택</h5>
                 <div class="input-group">
                     <input type="text" id="materialSearchInput" class="form-control" 
                            placeholder="자재명으로 검색..." 
@@ -1044,8 +961,7 @@ function applySelectedMaterial(wallId, fieldName, modal) {
     // 선택된 자재 데이터 초기화
     selectedMaterialData = null;
     
-    console.log(`✅ 자재 적용됨: ${wall.name} - ${getFieldDisplayName(fieldName)}: ${selectedMaterialData?.name}`);
-    alert(`${getFieldDisplayName(fieldName)} 자재가 적용되었습니다.`);
+    console.log(`✅ 자재 적용됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}: ${wall[fieldName]}`);
 }
 
 function clearMaterial(event, wallId, fieldName) {
@@ -1058,7 +974,7 @@ function clearMaterial(event, wallId, fieldName) {
     saveRevitWallTypes();
     updateRevitWallTable();
     
-    console.log(`🗑️ 자재 제거됨: ${wall.name} - ${getFieldDisplayName(fieldName)}`);
+    console.log(`🗑️ 자재 제거됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
 }
 
 function clearMaterialFromModal(wallId, fieldName, modal) {
@@ -1073,7 +989,7 @@ function clearMaterialFromModal(wallId, fieldName, modal) {
     updateRevitWallTable();
     closeSubModal(modal);
     
-    console.log(`🗑️ 자재 제거됨: ${wall.name} - ${getFieldDisplayName(fieldName)}`);
+    console.log(`🗑️ 자재 제거됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
 }
 
 // =============================================================================
@@ -1087,44 +1003,30 @@ function editRevitWallType(wallId) {
         return;
     }
     
-    console.log('✏️ 벽체 타입 편집:', wall.name);
-    // 여기에 편집 모달 로직 구현 가능
-}
-
-function saveWallTypeName(wallId, newName, inputElement) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
-    if (!wall) return;
+    const newName = prompt('벽체 타입명을 입력하세요:', wall.wallType || '');
+    if (newName === null) return;
     
     const trimmedName = newName.trim();
     if (!trimmedName) {
-        inputElement.value = wall.name;
         alert('벽체 타입명을 입력해주세요.');
         return;
     }
     
     // 중복 이름 확인 (현재 벽체 제외)
     const isDuplicate = revitWallTypes.some(w => 
-        w.id !== wallId && w.name.toLowerCase() === trimmedName.toLowerCase()
+        w.id !== wallId && w.wallType && w.wallType.toLowerCase() === trimmedName.toLowerCase()
     );
     
     if (isDuplicate) {
-        inputElement.value = wall.name;
         alert('이미 존재하는 벽체 타입명입니다.');
         return;
     }
     
-    wall.name = trimmedName;
+    wall.wallType = trimmedName;
     saveRevitWallTypes();
+    updateRevitWallTable();
+    
     console.log(`✅ 벽체 타입명 변경됨: ${wallId} -> ${trimmedName}`);
-}
-
-function handleWallTypeNameKeydown(event, wallId, currentValue, inputElement) {
-    if (event.key === 'Enter') {
-        inputElement.blur();
-    } else if (event.key === 'Escape') {
-        inputElement.value = currentValue;
-        inputElement.blur();
-    }
 }
 
 function editRevitWallThickness(wallId) {
@@ -1144,31 +1046,6 @@ function editRevitWallThickness(wallId) {
     saveRevitWallTypes();
     updateRevitWallTable();
     console.log(`✅ 벽체 두께 변경됨: ${wallId} -> ${thickness}mm`);
-}
-
-function saveWallThickness(wallId, newThickness, inputElement) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
-    if (!wall) return;
-    
-    const thickness = parseInt(newThickness);
-    if (isNaN(thickness) || thickness < 0) {
-        inputElement.value = wall.thickness || '';
-        alert('올바른 두께 값을 입력해주세요.');
-        return;
-    }
-    
-    wall.thickness = thickness;
-    saveRevitWallTypes();
-    console.log(`✅ 벽체 두께 변경됨: ${wallId} -> ${thickness}mm`);
-}
-
-function handleWallThicknessKeydown(event, wallId, currentValue, inputElement) {
-    if (event.key === 'Enter') {
-        inputElement.blur();
-    } else if (event.key === 'Escape') {
-        inputElement.value = currentValue;
-        inputElement.blur();
-    }
 }
 
 // =============================================================================
@@ -1252,6 +1129,11 @@ function importRevitWallTypesFromJSON() {
                     revitWallTypeCounter = importData.counter || Math.max(...revitWallTypes.map(w => w.id), 0);
                     selectedRevitWalls.clear();
                     
+                    // 번호 재정렬
+                    revitWallTypes.forEach((wall, index) => {
+                        wall.no = index + 1;
+                    });
+                    
                     saveRevitWallTypes();
                     updateRevitWallTable();
                     
@@ -1275,73 +1157,286 @@ function importRevitWallTypesFromJSON() {
 // =============================================================================
 
 function addRevitTypeMappingStyles() {
-    return `
-        <style>
-            .revit-type-mapping-container {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            }
-            
-            .project-management-panel {
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
-            
-            .tab-container .nav-tabs {
-                border-bottom: 2px solid #dee2e6;
-            }
-            
-            .tab-container .nav-link {
-                border: none;
-                border-bottom: 3px solid transparent;
-                background: none;
-                color: #6c757d;
-                transition: all 0.3s ease;
-            }
-            
-            .tab-container .nav-link:hover {
-                color: #495057;
-                border-bottom-color: #dee2e6;
-            }
-            
-            .tab-container .nav-link.active {
-                color: #667eea;
-                border-bottom-color: #667eea;
-                background: none;
-            }
-            
-            .material-row:hover {
-                background-color: #f8f9fa;
-            }
-            
-            .material-row.table-primary {
-                background-color: #cce5ff !important;
-            }
-            
-            .empty-state {
-                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-                border-radius: 8px;
-                border: 2px dashed #dee2e6;
-            }
-            
-            .dropdown-menu {
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                border: 1px solid #e9ecef;
-            }
-            
-            .dropdown-item:hover {
-                background-color: #f8f9fa;
-            }
-            
-            .form-control:focus {
-                border-color: #667eea;
-                box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            }
-            
-            .btn-outline-primary:hover {
-                background-color: #667eea;
-                border-color: #667eea;
-            }
-        </style>
+    const styleId = 'revit-type-matching-styles';
+    if (document.getElementById(styleId)) return;
+    
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+        .revit-type-matching-container {
+            width: 100%;
+            height: 100%;
+            min-width: 1400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .panel-description {
+            color: #64748b;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .action-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .action-section h4 {
+            margin: 0 0 15px 0;
+            color: #1e293b;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .status-value {
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* 작은 벽체 테이블 스타일 */
+        .wall-table-small {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            background: white;
+        }
+
+        .wall-table-small th,
+        .wall-table-small td {
+            border: 1px solid #e2e8f0;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .wall-table-small .header-main {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 10px;
+        }
+
+        .wall-table-small .header-sub {
+            background: #f8fafc;
+            color: #4a5568;
+            font-weight: 500;
+            font-size: 9px;
+        }
+
+        .wall-table-small tbody tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .wall-table-small tbody tr:hover {
+            background: #e2e8f0;
+        }
+
+        .wall-table-small tbody tr.selected {
+            background: #dbeafe;
+        }
+
+        /* 자재 셀 스타일 */
+        .material-cell {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1 !important;
+            transition: all 0.2s ease;
+        }
+
+        .material-cell:hover {
+            background: #e0f2fe;
+            border-color: #0ea5e9 !important;
+        }
+
+        /* 일위대가 컬럼 스타일 */
+        .col-unitprice {
+            min-width: 180px;
+            width: 180px;
+        }
+
+        .col-unitprice select {
+            width: 100% !important;
+            padding: 2px 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 11px;
+            background: white;
+            color: #1e293b;
+        }
+
+        .col-unitprice select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        /* 드롭다운 스타일 */
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            min-width: 200px;
+            padding: 8px 0;
+            margin: 2px 0 0;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            clear: both;
+            font-weight: 400;
+            color: #1f2937;
+            text-decoration: none;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .dropdown-divider {
+            height: 0;
+            margin: 8px 0;
+            overflow: hidden;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        /* 자재 선택 모달 스타일 */
+        .material-selection-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .material-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .material-header h5 {
+            color: #495057;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .material-table-container {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .material-table-container table {
+            margin-bottom: 0;
+        }
+
+        .material-table-container tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .material-table-container .table-primary {
+            background-color: #cce5ff !important;
+        }
+
+        /* 선택된 자재 정보 스타일 */
+        .selected-material-info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 6px;
+            padding: 12px;
+        }
+
+        .selected-material-info strong {
+            color: #004085;
+        }
+
+        /* 벽체 타입 생성 모달 스타일 */
+        .wall-type-creation-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .wall-type-creation-form label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .wall-type-creation-form input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .wall-type-creation-form input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
     `;
+    
+    document.head.appendChild(style);
 }
 
 // =============================================================================
@@ -1380,10 +1475,7 @@ window.filterMaterialSelectionTable = filterMaterialSelectionTable;
 
 // 벽체 편집 함수들
 window.editRevitWallType = editRevitWallType;
-window.saveWallTypeName = saveWallTypeName;
-window.handleWallTypeNameKeydown = handleWallTypeNameKeydown;
-window.saveWallThickness = saveWallThickness;
-window.handleWallThicknessKeydown = handleWallThicknessKeydown;
+window.editRevitWallThickness = editRevitWallThickness;
 
 // 일위대가 연동 함수들
 window.createUnitPriceDropdown = createUnitPriceDropdown;
@@ -1398,4 +1490,4 @@ window.importRevitWallTypesFromJSON = importRevitWallTypesFromJSON;
 window.saveAllChanges = saveAllChanges;
 window.initializeTypeMappingTabs = initializeTypeMappingTabs;
 
-console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 및 전역 함수 등록됨');
+console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 (원본 복원) 및 전역 함수 등록됨');
