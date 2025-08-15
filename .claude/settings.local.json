@@ -37,7 +37,9 @@
       "Bash(npm run dev:*)",
       "Bash(kill:*)",
       "Bash(wget:*)",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
