@@ -1430,10 +1430,14 @@ async function loadMaterialsForSelection() {
         if (window.priceDatabase) {
             console.log('🔍 priceDatabase 인스턴스에서 최신 데이터 로드');
             
-            // 최신 데이터 강제 로드 (자재 관리에서 수정된 데이터 반영)
-            console.log('🔄 최신 데이터 강제 로드 시작...');
-            window.priceDatabase.getLightweightComponents();
-            window.priceDatabase.getGypsumBoards();
+            // 캐시 강제 무효화 (자재 관리에서 수정된 데이터 반영을 위해)
+            console.log('🔄 캐시 무효화 및 최신 데이터 강제 로드...');
+            window.priceDatabase.lightweightItemsCache = null;
+            window.priceDatabase.gypsumItemsCache = null;
+            
+            // 최신 데이터 강제 로드 (await 사용으로 완전한 로드 보장)
+            await window.priceDatabase.getLightweightComponents();
+            await window.priceDatabase.getGypsumBoards();
             
             // 1순위: IndexedDB 사용자 데이터 확인 (강제 로드 후)
             const lightweightCache = window.priceDatabase.lightweightItemsCache || [];
@@ -1451,8 +1455,8 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.materialPrice || 0,
-                        노무비단가: item.laborPrice || 0,
+                        재료비단가: item.materialPrice || item.price || 0,     // localStorage: price 필드 매핑
+                        노무비단가: item.laborPrice || item.laborCost || 0,   // localStorage: laborCost 필드 매핑
                         category: '경량자재',
                         source: 'indexeddb',
                         originalData: item
@@ -1466,8 +1470,8 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || 0,
-                        노무비단가: item.노무비단가 || item.laborPrice || 0,
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,     // localStorage: price 필드 매핑
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,   // localStorage: laborCost 필드 매핑
                         category: '석고보드',
                         source: 'indexeddb',
                         originalData: item
@@ -1486,8 +1490,8 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.materialPrice || 0,
-                        노무비단가: item.laborPrice || 0,
+                        재료비단가: item.materialPrice || item.price || 0,  // 호환성: materialPrice 우선, price 폴백
+                        노무비단가: item.laborPrice || item.laborCost || 0,  // 호환성: laborPrice 우선, laborCost 폴백
                         category: '경량자재',
                         source: 'default',
                         originalData: item
@@ -1503,8 +1507,8 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || 0,
-                        노무비단가: item.노무비단가 || item.laborPrice || 0,
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,  // 호환성: 한글필드 우선, 영문필드 폴백
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,  // 호환성: 한글필드 우선, 영문필드 폴백
                         category: '석고보드',
                         source: 'default',
                         originalData: item
@@ -1725,6 +1729,23 @@ function fillComponentRowWithMaterial(row, material) {
         alert('자재 데이터를 입력하는 중 오류가 발생했습니다.');
     }
 }
+
+// =============================================================================
+// 자재 데이터 업데이트 이벤트 리스너 (자재 관리에서 저장 시 캐시 무효화)
+// =============================================================================
+
+// 자재 데이터 업데이트 이벤트 리스너 등록
+window.addEventListener('materialDataUpdated', function(event) {
+    console.log('🔔 자재 데이터 업데이트 이벤트 수신:', event.detail);
+    
+    // priceDatabase 캐시 무효화
+    if (window.priceDatabase) {
+        console.log('🔄 자재 선택용 캐시 무효화...');
+        window.priceDatabase.lightweightItemsCache = null;
+        window.priceDatabase.gypsumItemsCache = null;
+        console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
+    }
+});
 
 // 전역 함수 등록
 window.openMaterialSelector = openMaterialSelector;

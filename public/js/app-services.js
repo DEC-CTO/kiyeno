@@ -1677,11 +1677,11 @@ function toggleDataManagementDropdown() {
 }
 
 // 현재 상태 저장
-function saveCurrentState() {
+async function saveCurrentState() {
     try {
-        const savedState = window.priceDB.saveCurrentState();
+        const savedState = await window.priceDB.saveCurrentState();
         if (savedState) {
-            showToast('현재 상태가 저장되었습니다.', 'success');
+            showToast('현재 상태가 저장되었습니다. (localStorage + IndexedDB)', 'success');
             
             // 자재 관리 모달 새로고침
             const modal = document.querySelector('.modal');

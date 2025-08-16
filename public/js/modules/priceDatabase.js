@@ -4338,7 +4338,7 @@ class PriceDatabase extends EventEmitter {
   // 데이터 관리 기능들
 
   // 현재 상태 저장
-  saveCurrentState() {
+  async saveCurrentState() {
     const currentState = {
       lightweightComponents: this.lightweightItemsCache
         ? JSON.parse(JSON.stringify(this.lightweightItemsCache))
@@ -4350,9 +4350,94 @@ class PriceDatabase extends EventEmitter {
       savedAt: new Date().toISOString(),
     };
 
-    localStorage.setItem('kiyeno_material_state', JSON.stringify(currentState));
-    console.log('✅ 현재 상태 저장 완료');
-    return currentState;
+    try {
+      // 1. localStorage 백업 저장 (기존 방식)
+      localStorage.setItem('kiyeno_material_state', JSON.stringify(currentState));
+
+      // 2. IndexedDB 저장 (새로 추가)
+      await this.saveToIndexedDB(currentState);
+
+      console.log('✅ 현재 상태 저장 완료 (localStorage + IndexedDB)');
+      return currentState;
+    } catch (error) {
+      console.error('❌ 상태 저장 실패:', error);
+      // localStorage라도 저장되었으므로 상태는 반환
+      return currentState;
+    }
+  }
+
+  // IndexedDB에 데이터 저장하는 헬퍼 함수
+  async saveToIndexedDB(currentState) {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    if (!this.db) {
+      throw new Error('IndexedDB가 초기화되지 않았습니다');
+    }
+
+    console.log('📦 IndexedDB 저장 시작...');
+    let savedCount = 0;
+    
+    // 저장 전 캐시 무효화 (자재 선택에서 최신 데이터 반영을 위해)
+    console.log('🔄 저장 전 캐시 무효화...');
+    this.lightweightItemsCache = null;
+    this.gypsumItemsCache = null;
+
+    // 경량자재 저장
+    if (currentState.lightweightComponents && currentState.lightweightComponents.length > 0) {
+      for (const material of currentState.lightweightComponents) {
+        try {
+          const transaction = this.db.transaction(['materials'], 'readwrite');
+          const store = transaction.objectStore('materials');
+          await store.put({
+            ...material,
+            category: 'lightweight',
+            updatedAt: new Date().toISOString()
+          });
+          savedCount++;
+        } catch (error) {
+          console.warn(`경량자재 저장 실패 (${material.name}):`, error);
+        }
+      }
+    }
+
+    // 석고보드 저장  
+    if (currentState.gypsumBoards && currentState.gypsumBoards.length > 0) {
+      for (const material of currentState.gypsumBoards) {
+        try {
+          const transaction = this.db.transaction(['materials'], 'readwrite');
+          const store = transaction.objectStore('materials');
+          await store.put({
+            ...material,
+            category: 'gypsum',
+            updatedAt: new Date().toISOString()
+          });
+          savedCount++;
+        } catch (error) {
+          console.warn(`석고보드 저장 실패 (${material.name}):`, error);
+        }
+      }
+    }
+
+    console.log(`📦 IndexedDB 저장 완료: ${savedCount}개 자재`);
+    
+    // 저장 완료 후 전역 캐시 무효화 이벤트 발생
+    console.log('📡 자재 데이터 저장 완료 이벤트 발생...');
+    this.triggerMaterialDataUpdateEvent();
+  }
+  
+  // 자재 데이터 업데이트 이벤트 발생 (다른 모듈에서 캐시 무효화를 위해)
+  triggerMaterialDataUpdateEvent() {
+    // 전역 이벤트 발생 (일위대가 관리 등에서 감지)
+    const event = new CustomEvent('materialDataUpdated', {
+      detail: {
+        timestamp: new Date().toISOString(),
+        message: '자재 데이터가 업데이트되었습니다'
+      }
+    });
+    window.dispatchEvent(event);
+    console.log('📡 materialDataUpdated 이벤트 발생됨');
   }
 
   // 저장된 상태 불러오기
