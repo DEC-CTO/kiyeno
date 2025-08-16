@@ -1428,9 +1428,14 @@ async function loadMaterialsForSelection() {
         let allMaterials = [];
         
         if (window.priceDatabase) {
-            console.log('🔍 priceDatabase 인스턴스에서 데이터 로드');
+            console.log('🔍 priceDatabase 인스턴스에서 최신 데이터 로드');
             
-            // 1순위: IndexedDB 사용자 데이터 확인
+            // 최신 데이터 강제 로드 (자재 관리에서 수정된 데이터 반영)
+            console.log('🔄 최신 데이터 강제 로드 시작...');
+            window.priceDatabase.getLightweightComponents();
+            window.priceDatabase.getGypsumBoards();
+            
+            // 1순위: IndexedDB 사용자 데이터 확인 (강제 로드 후)
             const lightweightCache = window.priceDatabase.lightweightItemsCache || [];
             const gypsumCache = window.priceDatabase.gypsumItemsCache || [];
             
