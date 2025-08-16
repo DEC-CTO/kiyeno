@@ -85,7 +85,7 @@ class PriceDatabase extends EventEmitter {
    */
   async initIndexedDB() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('KiyenoDB', 1);
+      const request = indexedDB.open('KiyenoMaterialsDB', 1);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
