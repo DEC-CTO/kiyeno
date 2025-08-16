@@ -14,8 +14,22 @@ let currentUnitPriceData = {}; // 현재 편집 중인 일위대가 데이터
 // =============================================================================
 
 // 일위대가 관리 모달 열기
-function openUnitPriceManagement() {
+async function openUnitPriceManagement() {
     console.log('💰 일위대가 관리 모달 열기');
+    
+    // 모달 열기 시 최신 자재 데이터 캐시 강제 로드
+    console.log('🔄 자재 데이터 캐시 강제 갱신...');
+    if (window.priceDatabase) {
+        // 캐시 무효화
+        window.priceDatabase.lightweightItemsCache = null;
+        window.priceDatabase.gypsumItemsCache = null;
+        
+        // 최신 데이터 로드
+        await window.priceDatabase.getLightweightComponents();
+        await window.priceDatabase.getGypsumBoards();
+        
+        console.log('✅ 자재 데이터 캐시 갱신 완료');
+    }
     
     // createSubModal 함수 존재 여부 확인
     if (typeof createSubModal !== 'function') {
@@ -1422,7 +1436,7 @@ function closeMaterialSelectModal() {
 
 // 자재 데이터 로드 (기본 데이터 + IndexedDB 데이터)
 async function loadMaterialsForSelection() {
-    console.log('📦 자재 선택용 데이터 로드 시작');
+    console.log('📦 자재 선택용 데이터 로드 시작 (IndexedDB 우선 전략)');
     
     try {
         let allMaterials = [];
@@ -1439,82 +1453,97 @@ async function loadMaterialsForSelection() {
             await window.priceDatabase.getLightweightComponents();
             await window.priceDatabase.getGypsumBoards();
             
-            // 1순위: IndexedDB 사용자 데이터 확인 (강제 로드 후)
+            // 1순위: IndexedDB 사용자 데이터 우선 확인
             const lightweightCache = window.priceDatabase.lightweightItemsCache || [];
             const gypsumCache = window.priceDatabase.gypsumItemsCache || [];
             
-            console.log(`📊 캐시된 데이터 확인 - 경량자재: ${lightweightCache.length}개, 석고보드: ${gypsumCache.length}개`);
+            console.log(`📊 IndexedDB 데이터 확인 - 경량자재: ${lightweightCache.length}개, 석고보드: ${gypsumCache.length}개`);
             
-            // IndexedDB에 사용자 데이터가 있는 경우 (캐시에 데이터가 있음)
-            if (lightweightCache.length > 0 || gypsumCache.length > 0) {
-                console.log('📦 IndexedDB 사용자 데이터 사용');
-                
-                // 경량자재 사용자 데이터
-                if (lightweightCache.length > 0) {
-                    const lightweightMaterials = lightweightCache.map(item => ({
+            // IndexedDB 데이터 우선 로드 (수정된 자재들)
+            const indexedDBMaterials = [];
+            const usedMaterialNames = new Set(); // 중복 방지용
+            
+            // 경량자재 IndexedDB 데이터 (사용자 수정 데이터)
+            if (lightweightCache.length > 0) {
+                console.log('✅ IndexedDB 경량자재 데이터 우선 로드');
+                lightweightCache.forEach(item => {
+                    const material = {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.materialPrice || item.price || 0,     // localStorage: price 필드 매핑
-                        노무비단가: item.laborPrice || item.laborCost || 0,   // localStorage: laborCost 필드 매핑
+                        재료비단가: item.materialPrice || item.price || 0,
+                        노무비단가: item.laborPrice || item.laborCost || 0,
                         category: '경량자재',
                         source: 'indexeddb',
                         originalData: item
-                    }));
-                    allMaterials.push(...lightweightMaterials);
-                }
-                
-                // 석고보드 사용자 데이터
-                if (gypsumCache.length > 0) {
-                    const gypsumBoards = gypsumCache.map(item => ({
+                    };
+                    indexedDBMaterials.push(material);
+                    usedMaterialNames.add(item.name);
+                });
+            }
+            
+            // 석고보드 IndexedDB 데이터 (사용자 수정 데이터)
+            if (gypsumCache.length > 0) {
+                console.log('✅ IndexedDB 석고보드 데이터 우선 로드');
+                gypsumCache.forEach(item => {
+                    const material = {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,     // localStorage: price 필드 매핑
-                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,   // localStorage: laborCost 필드 매핑
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '석고보드',
                         source: 'indexeddb',
                         originalData: item
-                    }));
-                    allMaterials.push(...gypsumBoards);
-                }
-            } else {
-                // 2순위: IndexedDB가 비어있으면 하드코딩된 기본 데이터 사용
-                console.log('📦 하드코딩된 기본 데이터 사용 (IndexedDB 비어있음)');
-                
-                // 경량자재 기본 데이터 가져오기
-                const lightweightData = window.priceDatabase.getLightweightComponents();
-                if (lightweightData && lightweightData.items) {
-                    console.log(`📦 경량자재 기본 데이터 ${lightweightData.items.length}개 로드`);
-                    const lightweightMaterials = lightweightData.items.map(item => ({
+                    };
+                    indexedDBMaterials.push(material);
+                    usedMaterialNames.add(item.name);
+                });
+            }
+            
+            // IndexedDB 데이터 먼저 추가
+            allMaterials.push(...indexedDBMaterials);
+            console.log(`📦 IndexedDB 우선 로드 완료: ${indexedDBMaterials.length}개`);
+            
+            // 2순위: 하드코딩 기본 데이터에서 누락된 자재만 추가 (폴백용)
+            console.log('📦 하드코딩 기본 데이터에서 누락 자재 폴백 로드...');
+            
+            // 경량자재 기본 데이터 폴백
+            const lightweightData = window.priceDatabase.getLightweightComponents();
+            if (lightweightData && lightweightData.items) {
+                const fallbackLightweight = lightweightData.items
+                    .filter(item => !usedMaterialNames.has(item.name)) // IndexedDB에 없는 것만
+                    .map(item => ({
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.materialPrice || item.price || 0,  // 호환성: materialPrice 우선, price 폴백
-                        노무비단가: item.laborPrice || item.laborCost || 0,  // 호환성: laborPrice 우선, laborCost 폴백
+                        재료비단가: item.materialPrice || item.price || 0,
+                        노무비단가: item.laborPrice || item.laborCost || 0,
                         category: '경량자재',
                         source: 'default',
                         originalData: item
                     }));
-                    allMaterials.push(...lightweightMaterials);
-                }
-                
-                // 석고보드 기본 데이터 가져오기
-                const gypsumData = window.priceDatabase.getGypsumBoards();
-                if (gypsumData && gypsumData.items) {
-                    console.log(`📦 석고보드 기본 데이터 ${gypsumData.items.length}개 로드`);
-                    const gypsumBoards = gypsumData.items.map(item => ({
+                allMaterials.push(...fallbackLightweight);
+                console.log(`📦 경량자재 폴백 로드: ${fallbackLightweight.length}개`);
+            }
+            
+            // 석고보드 기본 데이터 폴백
+            const gypsumData = window.priceDatabase.getGypsumBoards();
+            if (gypsumData && gypsumData.items) {
+                const fallbackGypsum = gypsumData.items
+                    .filter(item => !usedMaterialNames.has(item.name)) // IndexedDB에 없는 것만
+                    .map(item => ({
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,  // 호환성: 한글필드 우선, 영문필드 폴백
-                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,  // 호환성: 한글필드 우선, 영문필드 폴백
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '석고보드',
                         source: 'default',
                         originalData: item
                     }));
-                    allMaterials.push(...gypsumBoards);
-                }
+                allMaterials.push(...fallbackGypsum);
+                console.log(`📦 석고보드 폴백 로드: ${fallbackGypsum.length}개`);
             }
         } else {
             console.warn('⚠️ priceDatabase 인스턴스를 찾을 수 없습니다.');
@@ -1706,15 +1735,15 @@ function fillComponentRowWithMaterial(row, material) {
         if (nameInput) nameInput.value = material.품명 || material.name || '';
         if (specInput) specInput.value = material.규격 || material.size || material.spec || '';
         if (unitInput) unitInput.value = material.단위 || material.unit || '';
-        if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialPrice || 0;
-        if (laborPriceInput) laborPriceInput.value = material.노무비단가 || material.laborPrice || 0;
+        if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialPrice || material.price || 0;
+        if (laborPriceInput) laborPriceInput.value = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
         console.log('🔧 입력된 값들:');
         console.log('  - 품명:', material.품명 || material.name || '');
         console.log('  - 싸이즈:', material.규격 || material.size || material.spec || '');
         console.log('  - 단위:', material.단위 || material.unit || '');
-        console.log('  - 재료비단가:', material.재료비단가 || material.materialPrice || 0);
-        console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || 0);
+        console.log('  - 재료비단가:', material.재료비단가 || material.materialPrice || material.price || 0);
+        console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || material.laborCost || 0);
         
         // 행 총계 다시 계산
         const quantityInput = row.querySelector('.component-quantity');
