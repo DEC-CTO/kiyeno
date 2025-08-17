@@ -1795,6 +1795,188 @@ function fillComponentRowWithMaterial(row, material) {
 // =============================================================================
 
 // =============================================================================
+// 세션 상태 보존 시스템
+// =============================================================================
+
+// 일위대가 관리 모달 세션 상태 저장
+function saveUnitPriceSession() {
+    try {
+        const modal = document.getElementById('unitPriceModal');
+        if (!modal || modal.style.display === 'none') {
+            return null;
+        }
+
+        console.log('💾 일위대가 관리 세션 상태 저장 중...');
+
+        // 현재 입력된 모든 데이터 수집
+        const sessionData = {
+            // 기본 정보
+            itemName: document.getElementById('unitPriceItemName')?.value || '',
+            workType: document.getElementById('unitPriceWorkType')?.value || '',
+            unit: document.getElementById('unitPriceUnit')?.value || '',
+            note: document.getElementById('unitPriceNote')?.value || '',
+            
+            // 세부 구성품 데이터
+            components: [],
+            
+            // 총합 정보
+            totals: {
+                materialTotal: 0,
+                laborTotal: 0,
+                grandTotal: 0
+            },
+            
+            // 메타데이터
+            savedAt: new Date().toISOString(),
+            modalWasOpen: true
+        };
+
+        // 모든 세부 구성품 행 데이터 수집
+        const componentRows = document.querySelectorAll('.component-row');
+        componentRows.forEach((row, index) => {
+            const componentData = {
+                name: row.querySelector('.component-name')?.value || '',
+                size: row.querySelector('.component-size')?.value || '',
+                unit: row.querySelector('.component-unit')?.value || '',
+                quantity: row.querySelector('.component-quantity')?.value || '1',
+                materialPrice: row.querySelector('.component-material-price')?.value || '0',
+                laborPrice: row.querySelector('.component-labor-price')?.value || '0',
+                subtotal: row.querySelector('.component-subtotal')?.textContent || '0'
+            };
+            sessionData.components.push(componentData);
+        });
+
+        // 총합 정보 수집
+        sessionData.totals.materialTotal = document.getElementById('unitPriceMaterialTotal')?.textContent?.replace(/[^\d]/g, '') || '0';
+        sessionData.totals.laborTotal = document.getElementById('unitPriceLaborTotal')?.textContent?.replace(/[^\d]/g, '') || '0';
+        sessionData.totals.grandTotal = document.getElementById('unitPriceGrandTotal')?.textContent?.replace(/[^\d]/g, '') || '0';
+
+        // sessionStorage에 저장
+        sessionStorage.setItem('unitPriceSession', JSON.stringify(sessionData));
+        console.log(`✅ 일위대가 관리 세션 저장 완료 (구성품 ${sessionData.components.length}개)`);
+        
+        return sessionData;
+    } catch (error) {
+        console.error('❌ 세션 저장 실패:', error);
+        return null;
+    }
+}
+
+// 일위대가 관리 모달 세션 상태 복원
+function restoreUnitPriceSession() {
+    try {
+        const sessionJson = sessionStorage.getItem('unitPriceSession');
+        if (!sessionJson) {
+            console.log('📝 저장된 세션이 없습니다.');
+            return false;
+        }
+
+        const sessionData = JSON.parse(sessionJson);
+        if (!sessionData.modalWasOpen) {
+            console.log('📝 이전에 모달이 열려있지 않았습니다.');
+            return false;
+        }
+
+        console.log('🔄 일위대가 관리 세션 복원 중...');
+
+        // 기본 정보 복원
+        if (document.getElementById('unitPriceItemName')) {
+            document.getElementById('unitPriceItemName').value = sessionData.itemName || '';
+        }
+        if (document.getElementById('unitPriceWorkType')) {
+            document.getElementById('unitPriceWorkType').value = sessionData.workType || '';
+        }
+        if (document.getElementById('unitPriceUnit')) {
+            document.getElementById('unitPriceUnit').value = sessionData.unit || '';
+        }
+        if (document.getElementById('unitPriceNote')) {
+            document.getElementById('unitPriceNote').value = sessionData.note || '';
+        }
+
+        // 기존 구성품 행 제거
+        const existingRows = document.querySelectorAll('.component-row');
+        existingRows.forEach(row => row.remove());
+
+        // 세부 구성품 복원
+        sessionData.components.forEach((componentData, index) => {
+            const row = createComponentRow(componentData, index);
+            const tbody = document.querySelector('#unitPriceComponentsTable tbody');
+            if (tbody) {
+                tbody.appendChild(row);
+            }
+        });
+
+        // 총합 재계산
+        setTimeout(() => {
+            updateUnitPriceTotals();
+            console.log(`✅ 일위대가 관리 세션 복원 완료 (구성품 ${sessionData.components.length}개)`);
+        }, 100);
+
+        return true;
+    } catch (error) {
+        console.error('❌ 세션 복원 실패:', error);
+        return false;
+    }
+}
+
+// 세션 상태 정리
+function clearUnitPriceSession() {
+    try {
+        sessionStorage.removeItem('unitPriceSession');
+        console.log('🗑️ 일위대가 관리 세션 정리 완료');
+    } catch (error) {
+        console.error('❌ 세션 정리 실패:', error);
+    }
+}
+
+// 구성품 행 생성 함수 (복원용)
+function createComponentRow(data, index) {
+    const row = document.createElement('tr');
+    row.className = 'component-row';
+    row.innerHTML = `
+        <td style="text-align: center; padding: 8px;">
+            <input type="text" class="component-name" value="${data.name}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <input type="text" class="component-size" value="${data.size}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <input type="text" class="component-unit" value="${data.unit}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <input type="number" class="component-quantity" value="${data.quantity}" 
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;"
+                   onchange="updateComponentSubtotal(this.closest('tr'))">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <input type="number" class="component-material-price" value="${data.materialPrice}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <input type="number" class="component-labor-price" value="${data.laborPrice}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <span class="component-subtotal" style="font-weight: 500;">${data.subtotal}</span>
+        </td>
+        <td style="text-align: center; padding: 8px;">
+            <button onclick="openMaterialSelector(this)" 
+                    style="background: #3b82f6; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; margin-right: 4px;">
+                자재선택
+            </button>
+            <button onclick="removeComponentRow(this)" 
+                    style="background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                삭제
+            </button>
+        </td>
+    `;
+    return row;
+}
+
+// =============================================================================
 // 실시간 UI 자동 갱신 시스템
 // =============================================================================
 
@@ -1966,6 +2148,123 @@ function updateComponentSubtotal(row) {
     }
 }
 
+// =============================================================================
+// 백그라운드 변경사항 추적 시스템
+// =============================================================================
+
+// 백그라운드 변경사항 큐 (모달이 닫혀있을 때 변경사항 저장)
+let materialUpdateQueue = [];
+
+// 백그라운드 변경사항 추가
+function addMaterialUpdateToQueue(updateInfo) {
+    materialUpdateQueue.push({
+        timestamp: new Date().toISOString(),
+        ...updateInfo
+    });
+    console.log(`📋 백그라운드 변경사항 큐에 추가: ${materialUpdateQueue.length}개 항목`);
+}
+
+// 백그라운드 변경사항 처리
+function processMaterialUpdateQueue() {
+    if (materialUpdateQueue.length === 0) {
+        console.log('📝 처리할 백그라운드 변경사항이 없습니다.');
+        return false;
+    }
+
+    console.log(`🔄 백그라운드 변경사항 처리 시작: ${materialUpdateQueue.length}개 항목`);
+    
+    // 현재 세션의 모든 구성품에 대해 최신 데이터 적용
+    const componentRows = document.querySelectorAll('.component-row');
+    let updatedCount = 0;
+    
+    componentRows.forEach(async (row) => {
+        const materialName = row.querySelector('.component-name')?.value;
+        if (materialName && materialName !== '자재 선택 버튼을 사용해주세요' && materialName.trim() !== '') {
+            try {
+                await updateComponentPricing(row, materialName);
+                updatedCount++;
+            } catch (error) {
+                console.error(`백그라운드 변경사항 적용 실패 (${materialName}):`, error);
+            }
+        }
+    });
+
+    // 총합 재계산
+    setTimeout(() => {
+        updateUnitPriceTotals();
+        console.log(`✅ 백그라운드 변경사항 처리 완료 (${updatedCount}개 항목 업데이트)`);
+        
+        // 사용자 알림 표시
+        if (updatedCount > 0) {
+            showMaterialUpdateNotification(updatedCount, materialUpdateQueue.length);
+        }
+    }, 100);
+
+    // 큐 초기화
+    materialUpdateQueue = [];
+    return true;
+}
+
+// 자재 업데이트 알림 표시
+function showMaterialUpdateNotification(updatedCount, queueCount) {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        font-size: 14px;
+        max-width: 300px;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 16px;">🔄</span>
+            <div>
+                <div style="font-weight: 600;">자재 데이터 동기화 완료</div>
+                <div style="font-size: 12px; opacity: 0.9;">
+                    ${updatedCount}개 항목이 최신 데이터로 업데이트되었습니다.
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 애니메이션 CSS 추가
+    if (!document.querySelector('#materialUpdateAnimations')) {
+        const style = document.createElement('style');
+        style.id = 'materialUpdateAnimations';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(notification);
+
+    // 3초 후 알림 제거
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
 // 자재 데이터 업데이트 이벤트 리스너 등록 (확장된 버전)
 window.addEventListener('materialDataUpdated', function(event) {
     console.log('🔔 자재 데이터 업데이트 이벤트 수신:', event.detail);
@@ -1978,10 +2277,24 @@ window.addEventListener('materialDataUpdated', function(event) {
         console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
     }
     
-    // 2. 활성화된 일위대가 관리 모달의 UI 자동 갱신 (새로 추가)
-    setTimeout(() => {
-        refreshActiveUnitPriceComponents();
-    }, 100); // 캐시 무효화 후 UI 갱신
+    // 2. 모달 상태에 따른 처리 분기
+    const unitPriceModal = document.getElementById('unitPriceModal');
+    const isModalOpen = unitPriceModal && unitPriceModal.style.display !== 'none';
+    
+    if (isModalOpen) {
+        // 모달이 열려있으면 즉시 UI 갱신
+        console.log('🔄 일위대가 관리 모달이 열려있음 - 즉시 UI 갱신');
+        setTimeout(() => {
+            refreshActiveUnitPriceComponents();
+        }, 100);
+    } else {
+        // 모달이 닫혀있으면 백그라운드 큐에 추가
+        console.log('📋 일위대가 관리 모달이 닫혀있음 - 백그라운드 큐에 추가');
+        addMaterialUpdateToQueue({
+            type: 'materialDataUpdated',
+            detail: event.detail
+        });
+    }
 });
 
 // 전역 함수 등록
@@ -1995,5 +2308,100 @@ window.refreshActiveUnitPriceComponents = refreshActiveUnitPriceComponents;
 window.updateComponentPricing = updateComponentPricing;
 window.findMaterialByName = findMaterialByName;
 window.updateComponentSubtotal = updateComponentSubtotal;
+
+// 세션 관리 전역 함수 등록
+window.saveUnitPriceSession = saveUnitPriceSession;
+window.restoreUnitPriceSession = restoreUnitPriceSession;
+window.clearUnitPriceSession = clearUnitPriceSession;
+window.processMaterialUpdateQueue = processMaterialUpdateQueue;
+
+// =============================================================================
+// 모달 생명주기 통합 시스템
+// =============================================================================
+
+// 일위대가 관리 모달 닫기 시 세션 저장
+function onUnitPriceModalClose() {
+    console.log('📝 일위대가 관리 모달 닫기 - 세션 저장 중...');
+    saveUnitPriceSession();
+}
+
+// 일위대가 관리 모달 열기 시 세션 복원 + 백그라운드 변경사항 처리
+function onUnitPriceModalOpen() {
+    console.log('🔄 일위대가 관리 모달 열기 - 세션 복원 및 동기화 중...');
+    
+    // 약간의 지연 후 처리 (DOM이 완전히 렌더링된 후)
+    setTimeout(() => {
+        // 1. 세션 복원
+        const sessionRestored = restoreUnitPriceSession();
+        
+        // 2. 백그라운드 변경사항 처리
+        setTimeout(() => {
+            const changesProcessed = processMaterialUpdateQueue();
+            
+            if (sessionRestored && changesProcessed) {
+                console.log('✅ 세션 복원 및 백그라운드 동기화 완료');
+            } else if (sessionRestored) {
+                console.log('✅ 세션 복원 완료 (변경사항 없음)');
+            } else if (changesProcessed) {
+                console.log('✅ 백그라운드 동기화 완료 (새 세션)');
+            } else {
+                console.log('📝 새로운 일위대가 관리 세션 시작');
+            }
+        }, 200);
+    }, 300);
+}
+
+// 모달 생명주기 자동 연결 시스템
+function setupModalLifecycleHooks() {
+    // MutationObserver를 사용하여 모달의 열기/닫기 상태 감지
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const modal = mutation.target;
+                if (modal.id === 'unitPriceModal') {
+                    const isNowVisible = modal.style.display !== 'none' && modal.style.display !== '';
+                    const wasVisible = modal.dataset.wasVisible === 'true';
+                    
+                    if (isNowVisible && !wasVisible) {
+                        // 모달이 열림
+                        modal.dataset.wasVisible = 'true';
+                        onUnitPriceModalOpen();
+                    } else if (!isNowVisible && wasVisible) {
+                        // 모달이 닫힘
+                        modal.dataset.wasVisible = 'false';
+                        onUnitPriceModalClose();
+                    }
+                }
+            }
+        });
+    });
+
+    // DOM 변화 감지 시작
+    setTimeout(() => {
+        const modal = document.getElementById('unitPriceModal');
+        if (modal) {
+            observer.observe(modal, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+            console.log('🔗 일위대가 관리 모달 생명주기 훅 설정 완료');
+        } else {
+            // 모달이 아직 생성되지 않았으면 재시도
+            setTimeout(setupModalLifecycleHooks, 1000);
+        }
+    }, 500);
+}
+
+// 페이지 로드 시 생명주기 훅 설정
+document.addEventListener('DOMContentLoaded', function() {
+    setupModalLifecycleHooks();
+});
+
+// 이미 DOM이 로드된 경우에도 설정
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupModalLifecycleHooks);
+} else {
+    setupModalLifecycleHooks();
+}
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 자재 선택 기능 (CSS 스타일 포함)');
