@@ -1485,7 +1485,7 @@ async function loadMaterialsForSelection() {
                         품명: item.name || item.품명 || '',
                         규격: item.size || item.spec || item.규격 || '',
                         단위: item.unit || item.단위 || '',
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: item.category || '기타',
                         source: 'KiyenoMaterialsDB',
@@ -1528,7 +1528,7 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '경량자재',
                         source: 'hardcoded_fallback',
@@ -1544,7 +1544,7 @@ async function loadMaterialsForSelection() {
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '석고보드',
                         source: 'hardcoded_fallback',
@@ -1633,7 +1633,7 @@ function renderMaterialsList(materials) {
                             </td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.규격 || material.spec || ''}</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.단위 || material.unit || ''}</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialPrice || 0).toLocaleString()}원</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialCost || material.materialPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.노무비단가 || material.laborPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
                                 <button onclick="selectUnitPriceMaterial(${index})" style="
@@ -1760,7 +1760,7 @@ function fillComponentRowWithMaterial(row, material) {
         if (nameInput) nameInput.value = material.품명 || material.name || '';
         if (specInput) specInput.value = material.규격 || material.size || material.spec || '';
         if (unitInput) unitInput.value = material.단위 || material.unit || '';
-        if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialPrice || material.price || 0;
+        if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialCost || material.materialPrice || material.price || 0;
         if (laborPriceInput) laborPriceInput.value = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
         // 수량을 기본값 1로 설정 (자재 선택 시에만)
@@ -1773,7 +1773,7 @@ function fillComponentRowWithMaterial(row, material) {
         console.log('  - 품명:', material.품명 || material.name || '');
         console.log('  - 싸이즈:', material.규격 || material.size || material.spec || '');
         console.log('  - 단위:', material.단위 || material.unit || '');
-        console.log('  - 재료비단가:', material.재료비단가 || material.materialPrice || material.price || 0);
+        console.log('  - 재료비단가:', material.재료비단가 || material.materialCost || material.materialPrice || material.price || 0);
         console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || material.laborCost || 0);
         console.log('  - 수량:', quantityInput?.value || 1);
         
