@@ -10,6 +10,239 @@ let unitPriceItems = []; // 일위대가 아이템 목록
 let currentUnitPriceData = {}; // 현재 편집 중인 일위대가 데이터
 
 // =============================================================================
+// IndexedDB 일위대가 관리 클래스
+// =============================================================================
+
+class UnitPriceDB {
+    constructor() {
+        this.dbName = 'KiyenoMaterialsDB';
+        this.dbVersion = 2; // v1에서 v2로 업그레이드
+        this.unitPricesStore = 'unitPrices';
+    }
+
+    // DB 초기화 및 업그레이드
+    async initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(this.dbName, this.dbVersion);
+
+            request.onerror = () => {
+                console.error('❌ UnitPriceDB 열기 실패');
+                reject(request.error);
+            };
+
+            request.onsuccess = () => {
+                console.log('✅ UnitPriceDB 연결 성공');
+                resolve(request.result);
+            };
+
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                console.log(`🔧 UnitPriceDB 업그레이드: v${event.oldVersion} → v${event.newVersion}`);
+
+                // v1 → v2: unitPrices 테이블 추가
+                if (event.oldVersion < 2) {
+                    if (!db.objectStoreNames.contains(this.unitPricesStore)) {
+                        const unitPricesStore = db.createObjectStore(this.unitPricesStore, {
+                            keyPath: 'id',
+                            autoIncrement: false
+                        });
+
+                        // 인덱스 추가
+                        unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
+                        unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+                        unitPricesStore.createIndex('workType1', 'basic.workType1', { unique: false });
+
+                        console.log('✅ unitPrices 테이블 생성 완료');
+                    }
+                }
+            };
+        });
+    }
+
+    // 일위대가 저장
+    async saveUnitPrice(unitPriceData) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.unitPricesStore], 'readwrite');
+            const store = transaction.objectStore(this.unitPricesStore);
+
+            // 타임스탬프 추가
+            const now = new Date().toISOString();
+            if (!unitPriceData.createdAt) {
+                unitPriceData.createdAt = now;
+            }
+            unitPriceData.updatedAt = now;
+
+            const request = store.put(unitPriceData);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 일위대가 저장 완료: ${unitPriceData.id}`);
+                    resolve(unitPriceData);
+                };
+                request.onerror = () => {
+                    console.error('❌ 일위대가 저장 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('일위대가 저장 오류:', error);
+            throw error;
+        }
+    }
+
+    // 모든 일위대가 조회
+    async getAllUnitPrices() {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.unitPricesStore], 'readonly');
+            const store = transaction.objectStore(this.unitPricesStore);
+            const request = store.getAll();
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    const unitPrices = request.result || [];
+                    console.log(`✅ 일위대가 전체 조회 완료: ${unitPrices.length}개`);
+                    resolve(unitPrices);
+                };
+                request.onerror = () => {
+                    console.error('❌ 일위대가 조회 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('일위대가 조회 오류:', error);
+            throw error;
+        }
+    }
+
+    // ID로 일위대가 조회
+    async getUnitPriceById(id) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.unitPricesStore], 'readonly');
+            const store = transaction.objectStore(this.unitPricesStore);
+            const request = store.get(id);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    const unitPrice = request.result;
+                    if (unitPrice) {
+                        console.log(`✅ 일위대가 조회 완료: ${id}`);
+                    } else {
+                        console.warn(`⚠️ 일위대가를 찾을 수 없음: ${id}`);
+                    }
+                    resolve(unitPrice);
+                };
+                request.onerror = () => {
+                    console.error('❌ 일위대가 조회 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('일위대가 조회 오류:', error);
+            throw error;
+        }
+    }
+
+    // 일위대가 삭제
+    async deleteUnitPrice(id) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.unitPricesStore], 'readwrite');
+            const store = transaction.objectStore(this.unitPricesStore);
+            const request = store.delete(id);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 일위대가 삭제 완료: ${id}`);
+                    resolve(true);
+                };
+                request.onerror = () => {
+                    console.error('❌ 일위대가 삭제 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('일위대가 삭제 오류:', error);
+            throw error;
+        }
+    }
+
+    // 검색
+    async searchUnitPrices(query) {
+        try {
+            const allUnitPrices = await this.getAllUnitPrices();
+            const filteredResults = allUnitPrices.filter(item => {
+                const basic = item.basic || {};
+                return (
+                    basic.itemName?.toLowerCase().includes(query.toLowerCase()) ||
+                    basic.workType1?.toLowerCase().includes(query.toLowerCase()) ||
+                    basic.location?.toLowerCase().includes(query.toLowerCase())
+                );
+            });
+            
+            console.log(`🔍 일위대가 검색 완료: "${query}" - ${filteredResults.length}개 결과`);
+            return filteredResults;
+        } catch (error) {
+            console.error('일위대가 검색 오류:', error);
+            throw error;
+        }
+    }
+
+    // JSON 내보내기
+    async exportToJSON() {
+        try {
+            const allUnitPrices = await this.getAllUnitPrices();
+            const exportData = {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                unitPrices: allUnitPrices
+            };
+            
+            console.log(`📤 JSON 내보내기 준비: ${allUnitPrices.length}개 일위대가`);
+            return exportData;
+        } catch (error) {
+            console.error('JSON 내보내기 오류:', error);
+            throw error;
+        }
+    }
+
+    // JSON 가져오기
+    async importFromJSON(jsonData) {
+        try {
+            const unitPrices = jsonData.unitPrices || [];
+            let importedCount = 0;
+
+            for (const unitPrice of unitPrices) {
+                await this.saveUnitPrice(unitPrice);
+                importedCount++;
+            }
+
+            console.log(`📥 JSON 가져오기 완료: ${importedCount}개 일위대가`);
+            return importedCount;
+        } catch (error) {
+            console.error('JSON 가져오기 오류:', error);
+            throw error;
+        }
+    }
+
+    // localStorage 정리
+    clearLocalStorage() {
+        try {
+            localStorage.removeItem('kiyeno_unitPriceItems');
+            localStorage.removeItem('unitPriceData');
+            console.log('🗑️ localStorage 일위대가 데이터 정리 완료');
+        } catch (error) {
+            console.error('localStorage 정리 실패:', error);
+        }
+    }
+}
+
+// 전역 인스턴스 생성
+const unitPriceDB = new UnitPriceDB();
+
+// =============================================================================
 // 일위대가 관리 메인 함수들
 // =============================================================================
 
@@ -55,9 +288,9 @@ async function openUnitPriceManagement() {
     
     if (modal) {
         // 모달이 DOM에 추가된 후 초기화
-        setTimeout(() => {
-            loadUnitPriceItems();
-            renderUnitPriceItemsList();
+        setTimeout(async () => {
+            await loadUnitPriceItems();
+            await renderUnitPriceItemsList();
             
             // 세션 복원 시도 (모달이 닫힌 후 재열기 시)
             const sessionRestored = restoreUnitPriceSession();
@@ -84,6 +317,9 @@ function createUnitPriceManagementModal() {
                 <div class="controls-section">
                     <button class="btn btn-success" onclick="openUnitPriceBasicModal()">
                         <i class="fas fa-plus"></i> 새 일위대가 추가
+                    </button>
+                    <button class="btn btn-primary" onclick="loadUnitPriceDataFromDB()">
+                        <i class="fas fa-sync-alt"></i> DB에서 로드
                     </button>
                     <button class="btn btn-info" onclick="exportUnitPriceData()">
                         <i class="fas fa-download"></i> 데이터 내보내기
@@ -766,7 +1002,7 @@ function collectCurrentComponents() {
 }
 
 // 일위대가 아이템 저장
-function saveUnitPriceItem() {
+async function saveUnitPriceItem() {
     // 구성품 데이터 수집
     collectCurrentComponents();
     
@@ -791,33 +1027,38 @@ function saveUnitPriceItem() {
         toolExpense: parseFloat(document.querySelector('.tool-expense-row .fixed-quantity')?.value) || 2
     };
     
-    // 기존 아이템 수정인지 새 아이템인지 확인
-    const existingIndex = unitPriceItems.findIndex(item => item.id === currentUnitPriceData.id);
-    
-    if (existingIndex >= 0) {
-        // 기존 아이템 수정
-        unitPriceItems[existingIndex] = currentUnitPriceData;
-        console.log('✅ 일위대가 아이템 수정됨:', currentUnitPriceData.id);
-    } else {
-        // 새 아이템 추가
+    // 새 아이템이면 ID와 생성일 설정
+    if (!currentUnitPriceData.id) {
         currentUnitPriceData.id = generateUnitPriceId(currentUnitPriceData.basic);
         currentUnitPriceData.createdAt = new Date().toISOString();
-        unitPriceItems.push(currentUnitPriceData);
-        console.log('✅ 일위대가 아이템 추가됨:', currentUnitPriceData.id);
     }
     
-    // 로컬스토리지에 저장
-    saveUnitPriceItems();
+    // IndexedDB에 저장
+    const success = await unitPriceDB.saveUnitPrice(currentUnitPriceData);
     
-    // 모달 닫기
-    closeCurrentModal();
-    
-    // 목록 새로고침
-    setTimeout(() => {
-        renderUnitPriceItemsList();
-    }, 100);
-    
-    alert('일위대가가 성공적으로 저장되었습니다.');
+    if (success) {
+        console.log('✅ 일위대가 아이템 저장됨:', currentUnitPriceData.id);
+        
+        // 메모리 배열도 업데이트
+        const existingIndex = unitPriceItems.findIndex(item => item.id === currentUnitPriceData.id);
+        if (existingIndex >= 0) {
+            unitPriceItems[existingIndex] = currentUnitPriceData;
+        } else {
+            unitPriceItems.push(currentUnitPriceData);
+        }
+        
+        // 모달 닫기
+        closeCurrentModal();
+        
+        // 목록 새로고침
+        setTimeout(async () => {
+            await renderUnitPriceItemsList();
+        }, 100);
+        
+        alert('일위대가가 성공적으로 저장되었습니다.');
+    } else {
+        alert('일위대가 저장에 실패했습니다.');
+    }
 }
 
 // 일위대가 ID 생성
@@ -840,15 +1081,10 @@ function closeCurrentModal() {
 // =============================================================================
 
 // 일위대가 아이템 목록 로드
-function loadUnitPriceItems() {
+async function loadUnitPriceItems() {
     try {
-        const saved = localStorage.getItem('kiyeno_unitPriceItems');
-        if (saved) {
-            unitPriceItems = JSON.parse(saved);
-            console.log(`✅ 일위대가 데이터 로드됨: ${unitPriceItems.length}개 아이템`);
-        } else {
-            unitPriceItems = [];
-        }
+        unitPriceItems = await unitPriceDB.getAllUnitPrices();
+        console.log(`✅ 일위대가 데이터 로드됨: ${unitPriceItems.length}개 아이템`);
     } catch (error) {
         console.error('일위대가 데이터 로드 실패:', error);
         unitPriceItems = [];
@@ -856,19 +1092,102 @@ function loadUnitPriceItems() {
     return unitPriceItems;
 }
 
-// 일위대가 아이템 목록 저장
-function saveUnitPriceItems() {
+// 일위대가 아이템 목록 저장 (개별 저장으로 변경, 대량 저장시에만 사용)
+async function saveUnitPriceItems() {
     try {
-        localStorage.setItem('kiyeno_unitPriceItems', JSON.stringify(unitPriceItems));
-        console.log('✅ 일위대가 데이터 저장됨:', unitPriceItems.length + '개 아이템');
+        // 개별 저장 방식으로 변경되었으므로 이 함수는 대량 업데이트시만 사용
+        console.log('✅ IndexedDB 사용 중: 개별 저장 방식으로 변경됨');
     } catch (error) {
         console.error('일위대가 데이터 저장 실패:', error);
         alert('데이터 저장에 실패했습니다.');
     }
 }
 
+// 아이템의 총 비용 계산 (구성품 + 고정비용)
+function calculateItemTotalCosts(item) {
+    try {
+        if (!item || !item.components) {
+            console.log(`⚠️ 계산 불가 - 아이템 또는 구성품 없음:`, { item: !!item, components: !!item?.components });
+            return { material: 0, labor: 0, expense: 0, total: 0 };
+        }
+        
+        console.log(`🧮 아이템 비용 계산 시작: ${item.basic?.itemName || 'Unknown'} (구성품 ${item.components.length}개)`);
+        
+        // 저장된 totalCosts가 있으면 사용 (이미 계산된 값)
+        if (item.totalCosts && typeof item.totalCosts === 'object') {
+            console.log(`✅ 저장된 totalCosts 사용:`, item.totalCosts);
+            return {
+                material: item.totalCosts.material || 0,
+                labor: item.totalCosts.labor || 0,
+                expense: item.totalCosts.expense || 0,
+                total: item.totalCosts.total || 0
+            };
+        }
+        
+        let materialTotal = 0;
+        let laborTotal = 0;
+        let expenseTotal = 0;
+        
+        // 구성품별 비용 계산
+        item.components.forEach((component, index) => {
+            const quantity = parseFloat(component.quantity) || 0;
+            const materialPrice = parseFloat(component.materialPrice) || 0;
+            const laborPrice = parseFloat(component.laborPrice) || 0;
+            const expensePrice = parseFloat(component.expensePrice) || 0;
+            
+            const componentMaterial = quantity * materialPrice;
+            const componentLabor = quantity * laborPrice;
+            const componentExpense = quantity * expensePrice;
+            
+            console.log(`  구성품 ${index + 1}: ${component.name || 'Unknown'} - 수량:${quantity}, 재료비:${materialPrice}, 노무비:${laborPrice} → 재료비합계:${componentMaterial}, 노무비합계:${componentLabor}`);
+            
+            materialTotal += componentMaterial;
+            laborTotal += componentLabor;
+            expenseTotal += componentExpense;
+        });
+        
+        console.log(`📊 구성품 합계 - 재료비:${materialTotal}, 노무비:${laborTotal}, 경비:${expenseTotal}`);
+        
+        // 고정비용 계산 (저장된 비율 또는 기본값 사용)
+        const fixedRates = item.fixedRates || {
+            materialLoss: 3,
+            transportCost: 1.5,
+            materialProfit: 15,
+            toolExpense: 2
+        };
+        
+        // 자재로스 (자재비의 %)
+        const materialLoss = Math.round(materialTotal * fixedRates.materialLoss / 100);
+        // 자재운반비 (자재비의 %)
+        const transportCost = Math.round(materialTotal * fixedRates.transportCost / 100);
+        // 자재비 이윤 (자재비의 %)
+        const materialProfit = Math.round(materialTotal * fixedRates.materialProfit / 100);
+        // 공구손료 (노무비의 %)
+        const toolExpense = Math.round(laborTotal * fixedRates.toolExpense / 100);
+        
+        // 최종 합계
+        const finalMaterial = materialTotal + materialLoss + transportCost + materialProfit;
+        const finalLabor = laborTotal;
+        const finalExpense = expenseTotal + toolExpense;
+        const finalTotal = finalMaterial + finalLabor + finalExpense;
+        
+        console.log(`💰 최종 계산 결과 - 재료비:${finalMaterial}, 노무비:${finalLabor}, 경비:${finalExpense}, 총계:${finalTotal}`);
+        
+        return {
+            material: finalMaterial,
+            labor: finalLabor,
+            expense: finalExpense,
+            total: finalTotal
+        };
+        
+    } catch (error) {
+        console.error('아이템 비용 계산 실패:', error);
+        return { material: 0, labor: 0, expense: 0, total: 0 };
+    }
+}
+
 // 일위대가 아이템 목록 렌더링
-function renderUnitPriceItemsList() {
+async function renderUnitPriceItemsList() {
     const container = document.getElementById('unitPriceItemsList');
     if (!container) return;
     
@@ -907,7 +1226,7 @@ function renderUnitPriceItemsList() {
                 <tbody>
                     ${unitPriceItems.map(item => {
                         const basic = item.basic;
-                        const costs = item.totalCosts || { material: 0, labor: 0, expense: 0, total: 0 };
+                        const costs = calculateItemTotalCosts(item);
                         return `
                             <tr style="border-bottom: 1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 500;">${basic?.itemName || ''}</td>
@@ -963,7 +1282,7 @@ function editUnitPriceItem(id) {
 }
 
 // 일위대가 아이템 삭제
-function deleteUnitPriceItem(id) {
+async function deleteUnitPriceItem(id) {
     const item = unitPriceItems.find(item => item.id === id);
     if (!item) {
         alert('해당 아이템을 찾을 수 없습니다.');
@@ -972,10 +1291,14 @@ function deleteUnitPriceItem(id) {
     
     const itemName = item.basic?.itemName || 'Unknown';
     if (confirm(`"${itemName}" 일위대가를 삭제하시겠습니까?`)) {
-        unitPriceItems = unitPriceItems.filter(item => item.id !== id);
-        saveUnitPriceItems();
-        renderUnitPriceItemsList();
-        console.log('✅ 일위대가 아이템 삭제됨:', id);
+        const success = await unitPriceDB.deleteUnitPrice(id);
+        if (success) {
+            unitPriceItems = unitPriceItems.filter(item => item.id !== id);
+            await renderUnitPriceItemsList();
+            console.log('✅ 일위대가 아이템 삭제됨:', id);
+        } else {
+            alert('삭제에 실패했습니다.');
+        }
     }
 }
 
@@ -1043,20 +1366,25 @@ function importUnitPriceData() {
                 const confirmMessage = `${validItems.length}개의 일위대가 데이터를 가져오시겠습니까?\n(기존 데이터와 ID가 같은 경우 덮어쓰기됩니다)`;
                 
                 if (confirm(confirmMessage)) {
-                    validItems.forEach(newItem => {
+                    // IndexedDB에 데이터 저장
+                    Promise.all(validItems.map(async newItem => {
+                        await unitPriceDB.saveUnitPrice(newItem);
+                        
+                        // 메모리 배열도 업데이트
                         const existingIndex = unitPriceItems.findIndex(item => item.id === newItem.id);
                         if (existingIndex >= 0) {
                             unitPriceItems[existingIndex] = newItem;
                         } else {
                             unitPriceItems.push(newItem);
                         }
+                    })).then(async () => {
+                        await renderUnitPriceItemsList();
+                        alert(`${validItems.length}개의 일위대가 아이템을 가져왔습니다.`);
+                        console.log('✅ 일위대가 데이터 가져오기 완료');
+                    }).catch(error => {
+                        console.error('데이터 저장 실패:', error);
+                        alert('일부 데이터 저장에 실패했습니다.');
                     });
-                    
-                    saveUnitPriceItems();
-                    renderUnitPriceItemsList();
-                    
-                    alert(`${validItems.length}개의 일위대가 아이템을 가져왔습니다.`);
-                    console.log('✅ 일위대가 데이터 가져오기 완료');
                 }
             } catch (error) {
                 console.error('일위대가 데이터 가져오기 실패:', error);
@@ -1095,6 +1423,50 @@ window.editUnitPriceItem = editUnitPriceItem;
 window.deleteUnitPriceItem = deleteUnitPriceItem;
 window.exportUnitPriceData = exportUnitPriceData;
 window.importUnitPriceData = importUnitPriceData;
+
+// localStorage 정리 함수 (IndexedDB 마이그레이션 후 정리용)
+function cleanupLocalStorage() {
+    try {
+        localStorage.removeItem('kiyeno_unitPriceItems');
+        localStorage.removeItem('kiyeno_unitPriceSession');
+        console.log('✅ localStorage 정리 완료');
+    } catch (error) {
+        console.error('localStorage 정리 실패:', error);
+    }
+}
+
+window.cleanupLocalStorage = cleanupLocalStorage;
+
+// DB에서 일위대가 데이터 로드
+async function loadUnitPriceDataFromDB() {
+    try {
+        console.log('🔄 DB에서 일위대가 데이터 로드 시작...');
+        
+        // IndexedDB에서 최신 데이터 로드
+        const dbItems = await unitPriceDB.getAllUnitPrices();
+        
+        if (dbItems.length === 0) {
+            alert('DB에 저장된 일위대가 데이터가 없습니다.');
+            return;
+        }
+        
+        // 메모리 배열 업데이트
+        unitPriceItems.length = 0; // 기존 배열 비우기
+        unitPriceItems.push(...dbItems); // 새 데이터로 채우기
+        
+        // 목록 새로고침
+        await renderUnitPriceItemsList();
+        
+        console.log(`✅ DB에서 ${dbItems.length}개 일위대가 데이터 로드 완료`);
+        alert(`DB에서 ${dbItems.length}개의 일위대가 데이터를 불러왔습니다.`);
+        
+    } catch (error) {
+        console.error('❌ DB 데이터 로드 실패:', error);
+        alert('DB에서 데이터를 불러오는 중 오류가 발생했습니다.');
+    }
+}
+
+window.loadUnitPriceDataFromDB = loadUnitPriceDataFromDB;
 
 // =============================================================================
 // CSS 스타일 추가 (원본에서 분리된 스타일)
@@ -1469,19 +1841,19 @@ function closeMaterialSelectModal() {
     currentMaterialSelectRow = null;
 }
 
-// 자재 데이터 로드 (KiyenoMaterialsDB materials 테이블 직접 조회)
+// 자재 데이터 로드 (KiyenoMaterialsDB v2 materials 테이블 직접 조회)
 async function loadMaterialsForSelection() {
-    console.log('📦 자재 선택용 데이터 로드 시작 (KiyenoMaterialsDB materials 테이블 직접 조회)');
+    console.log('📦 자재 선택용 데이터 로드 시작 (KiyenoMaterialsDB v2 materials 테이블 직접 조회)');
     
     try {
         let allMaterials = [];
         
-        // 1순위: KiyenoMaterialsDB의 materials 테이블에서 직접 데이터 로드
+        // 1순위: KiyenoMaterialsDB v2의 materials 테이블에서 직접 데이터 로드
         try {
-            console.log('🔍 KiyenoMaterialsDB materials 테이블 직접 조회...');
+            console.log('🔍 KiyenoMaterialsDB v2 materials 테이블 직접 조회...');
             
             const materialsFromDB = await new Promise((resolve, reject) => {
-                const request = indexedDB.open('KiyenoMaterialsDB', 1);
+                const request = indexedDB.open('KiyenoMaterialsDB', 2);
                 
                 request.onerror = () => {
                     console.error('❌ KiyenoMaterialsDB 열기 실패');
@@ -1506,11 +1878,22 @@ async function loadMaterialsForSelection() {
                     };
                 };
                 
-                request.onupgradeneeded = () => {
-                    console.log('🔧 KiyenoMaterialsDB 구조 생성...');
-                    const db = request.result;
+                request.onupgradeneeded = (event) => {
+                    console.log('🔧 KiyenoMaterialsDB v2 구조 생성...');
+                    const db = event.target.result;
+                    
+                    // materials 테이블이 없으면 생성
                     if (!db.objectStoreNames.contains('materials')) {
-                        db.createObjectStore('materials', { keyPath: 'id', autoIncrement: true });
+                        const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
+                        materialsStore.createIndex('name', 'name', { unique: false });
+                        materialsStore.createIndex('category', 'category', { unique: false });
+                    }
+                    
+                    // unitPrices 테이블이 없으면 생성 (일위대가용)
+                    if (!db.objectStoreNames.contains('unitPrices')) {
+                        const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
+                        unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
+                        unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
                     }
                 };
             });
@@ -2118,9 +2501,9 @@ async function findMaterialByNameDirect(materialName) {
     try {
         console.log(`🔍 KiyenoMaterialsDB를 사용한 직접 검색: ${materialName}`);
         
-        // 자재선택 모달과 동일한 방법: KiyenoMaterialsDB materials 테이블 직접 조회
+        // 자재선택 모달과 동일한 방법: KiyenoMaterialsDB v2 materials 테이블 직접 조회
         const materialsFromDB = await new Promise((resolve, reject) => {
-            const request = indexedDB.open('KiyenoMaterialsDB', 1);
+            const request = indexedDB.open('KiyenoMaterialsDB', 2);
             
             request.onerror = () => {
                 console.error('❌ KiyenoMaterialsDB 열기 실패');
@@ -2143,6 +2526,25 @@ async function findMaterialByNameDirect(materialName) {
                     console.error('❌ materials 테이블 조회 실패');
                     reject(getAllRequest.error);
                 };
+            };
+            
+            request.onupgradeneeded = (event) => {
+                console.log('🔧 findMaterialByNameDirect: KiyenoMaterialsDB v2 구조 생성...');
+                const db = event.target.result;
+                
+                // materials 테이블이 없으면 생성
+                if (!db.objectStoreNames.contains('materials')) {
+                    const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
+                    materialsStore.createIndex('name', 'name', { unique: false });
+                    materialsStore.createIndex('category', 'category', { unique: false });
+                }
+                
+                // unitPrices 테이블이 없으면 생성 (일위대가용)
+                if (!db.objectStoreNames.contains('unitPrices')) {
+                    const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
+                    unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
+                    unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+                }
             };
         });
         
@@ -2179,11 +2581,16 @@ async function findMaterialByNameDirect(materialName) {
                 const dbName = item.name || '';
                 if (dbName === materialName || dbName.includes(materialName) || materialName.includes(dbName)) {
                     console.log(`✅ 백업 - 경량자재에서 발견: ${dbName}`, item);
+                    
+                    // 노무비 계산: DB 값이 있으면 사용, 없으면 재료비의 50% 적용
+                    const materialPrice = item.price || 0;
+                    const laborPrice = item.laborCost || Math.round(materialPrice * 0.5);
+                    
                     return {
-                        재료비단가: item.price || 0,
-                        노무비단가: item.laborCost || 0,
-                        materialCost: item.price || 0,
-                        laborCost: item.laborCost || 0
+                        재료비단가: materialPrice,
+                        노무비단가: laborPrice,
+                        materialCost: materialPrice,
+                        laborCost: laborPrice
                     };
                 }
             }
@@ -2307,11 +2714,15 @@ async function findMaterialByName(materialName) {
             );
             
             if (lightweightMatch) {
+                // 노무비 계산: DB 값이 있으면 사용, 없으면 재료비의 50% 적용
+                const materialPrice = lightweightMatch.price || 0;
+                const laborPrice = lightweightMatch.laborCost || Math.round(materialPrice * 0.5);
+                
                 return {
-                    재료비단가: lightweightMatch.price || 0,
-                    노무비단가: lightweightMatch.laborCost || 0,
-                    materialCost: lightweightMatch.price || 0,
-                    laborCost: lightweightMatch.laborCost || 0
+                    재료비단가: materialPrice,
+                    노무비단가: laborPrice,
+                    materialCost: materialPrice,
+                    laborCost: laborPrice
                 };
             }
             
