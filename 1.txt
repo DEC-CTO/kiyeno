@@ -1,0 +1,23 @@
+💰 일위대가 관리 모달 열기
+unitPriceManager.js:21 🔄 자재 데이터 캐시 강제 갱신...
+priceDatabase.js:2393 🔄 lightweightItemsCache 초기화: 78
+priceDatabase.js:3865 🔄 gypsumItemsCache 초기화: 49
+unitPriceManager.js:31 ✅ 자재 데이터 캐시 갱신 완료
+unitPriceManager.js:819 ✅ 일위대가 데이터 로드됨: 1개 아이템
+unitPriceManager.js:1893 📝 저장된 세션이 없습니다.
+unitPriceManager.js:2286 🔄 메인 모달 일위대가 목록 데이터 동기화 시작...
+unitPriceManager.js:2330 ℹ️ 메인 모달 - 업데이트할 데이터가 없습니다.
+unitPriceManager.js:71 ✅ 메인 모달 데이터 동기화 완료
+unitPriceManager.js:925 ✏️ 일위대가 아이템 수정: STUD-450-3600이하-50형-1755358862988
+unitPriceManager.js:110 📝 일위대가 기본 정보 입력 모달 열기
+unitPriceManager.js:253 🔧 세부 아이템 입력 모달 열기
+unitPriceManager.js:2338 🔄 일위대가 관리 최신 데이터 동기화 시작...
+unitPriceManager.js:2341 📋 동기화 대상 행 수: 1
+unitPriceManager.js:2350 🔄 동기화 중: 메탈 스터드 50형 ㉿
+unitPriceManager.js:2100 🔍 자재 가격 업데이트 중: 메탈 스터드 50형 ㉿
+unitPriceManager.js:2045 🔍 priceDB를 사용한 직접 검색: 메탈 스터드 50형 ㉿
+unitPriceManager.js:2052 📊 priceDB 접근 성공
+unitPriceManager.js:2056 📦 경량자재 78개 조회
+unitPriceManager.js:2061 ✅ 경량자재에서 발견: 메탈 스터드 50형 ㉿ {id: 'ST001', category: 'STUD_KS', name: '메탈 스터드 50형 ㉿', spec: '50형', size: '0.8T*60*45', …}baseLabor: 0category: "STUD_KS"id: "ST001"laborCompensation: 0laborCost: 0laborProductivity: 0laborSettings: {workers: Array(1), productivity: 0, compensation: 0}compensation: 0productivity: 0workers: [{…}][[Prototype]]: Objectlocation: "벽체"name: "메탈 스터드 50형 ㉿"price: 1160size: "0.8T*60*45"spec: "50형"unit: "M"work: ""workType1: "경량"workType2: "경량"[[Prototype]]: Object
+unitPriceManager.js:2361 ✅ 일위대가 관리 데이터 동기화 완료 (1개 항목 업데이트)
+unitPriceManager.js:284 ✅ 세부 모달 데이터 동기화 완료
