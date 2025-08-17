@@ -1794,17 +1794,194 @@ function fillComponentRowWithMaterial(row, material) {
 // 자재 데이터 업데이트 이벤트 리스너 (자재 관리에서 저장 시 캐시 무효화)
 // =============================================================================
 
-// 자재 데이터 업데이트 이벤트 리스너 등록
+// =============================================================================
+// 실시간 UI 자동 갱신 시스템
+// =============================================================================
+
+// 활성화된 일위대가 관리 모달의 UI 자동 갱신
+function refreshActiveUnitPriceComponents() {
+    // 현재 열려있는 일위대가 관리 모달 확인
+    const unitPriceModal = document.getElementById('unitPriceModal');
+    if (!unitPriceModal || unitPriceModal.style.display === 'none') {
+        console.log('📝 일위대가 관리 모달이 열려있지 않음 - UI 갱신 건너뜀');
+        return;
+    }
+    
+    console.log('🔄 일위대가 관리 UI 자동 갱신 시작...');
+    
+    // 모든 세부아이템 행에서 자재 정보 재로드
+    const componentRows = document.querySelectorAll('.component-row');
+    let updatedCount = 0;
+    
+    componentRows.forEach(async (row) => {
+        const materialNameInput = row.querySelector('.component-name');
+        const materialName = materialNameInput ? materialNameInput.value : '';
+        
+        if (materialName && materialName !== '자재 선택 버튼을 사용해주세요' && materialName.trim() !== '') {
+            try {
+                await updateComponentPricing(row, materialName);
+                updatedCount++;
+            } catch (error) {
+                console.error(`컴포넌트 가격 업데이트 실패 (${materialName}):`, error);
+            }
+        }
+    });
+    
+    // 총합 계산 갱신
+    setTimeout(() => {
+        updateUnitPriceTotals();
+        console.log(`✅ 일위대가 관리 UI 자동 갱신 완료 (${updatedCount}개 항목 업데이트)`);
+    }, 100);
+}
+
+// 개별 컴포넌트 가격 업데이트
+async function updateComponentPricing(row, materialName) {
+    try {
+        console.log(`🔍 자재 가격 업데이트 중: ${materialName}`);
+        
+        // 최신 자재 데이터 조회
+        const materialData = await findMaterialByName(materialName);
+        if (!materialData) {
+            console.warn(`⚠️ 자재 정보를 찾을 수 없음: ${materialName}`);
+            return;
+        }
+        
+        // 가격 필드 업데이트
+        const materialPriceInput = row.querySelector('.component-material-price');
+        const laborPriceInput = row.querySelector('.component-labor-price');
+        
+        if (materialPriceInput) {
+            const newMaterialPrice = materialData.재료비단가 || materialData.materialCost || materialData.materialPrice || materialData.price || 0;
+            const currentPrice = parseInt(materialPriceInput.value) || 0;
+            
+            if (currentPrice !== newMaterialPrice) {
+                materialPriceInput.value = newMaterialPrice;
+                console.log(`💰 재료비 업데이트: ${materialName} - ${currentPrice} → ${newMaterialPrice}`);
+            }
+        }
+        
+        if (laborPriceInput) {
+            const newLaborPrice = materialData.노무비단가 || materialData.laborCost || materialData.laborPrice || 0;
+            const currentLaborPrice = parseInt(laborPriceInput.value) || 0;
+            
+            if (currentLaborPrice !== newLaborPrice) {
+                laborPriceInput.value = newLaborPrice;
+                console.log(`👷 노무비 업데이트: ${materialName} - ${currentLaborPrice} → ${newLaborPrice}`);
+            }
+        }
+        
+        // 소계 재계산
+        updateComponentSubtotal(row);
+        
+    } catch (error) {
+        console.error('컴포넌트 가격 업데이트 실패:', error);
+    }
+}
+
+// 자재명으로 최신 자재 데이터 조회
+async function findMaterialByName(materialName) {
+    try {
+        // 1. priceDatabase에서 검색 (경량자재 + 석고보드)
+        if (window.priceDatabase) {
+            // 경량자재 검색
+            const lightweightItems = window.priceDatabase.getLightweightComponents();
+            const lightweightMatch = lightweightItems.items.find(item => 
+                item.name === materialName || 
+                item.name.includes(materialName) || 
+                materialName.includes(item.name)
+            );
+            
+            if (lightweightMatch) {
+                return {
+                    재료비단가: lightweightMatch.price || 0,
+                    노무비단가: lightweightMatch.laborCost || 0,
+                    materialCost: lightweightMatch.price || 0,
+                    laborCost: lightweightMatch.laborCost || 0
+                };
+            }
+            
+            // 석고보드 검색
+            const gypsumItems = window.priceDatabase.getGypsumBoards();
+            const gypsumMatch = gypsumItems.items.find(item => {
+                const fullName = `${item.name} ${item.w}x${item.h}x${item.t}`;
+                return fullName === materialName || 
+                       fullName.includes(materialName) || 
+                       materialName.includes(fullName) ||
+                       item.name === materialName;
+            });
+            
+            if (gypsumMatch) {
+                return {
+                    재료비단가: gypsumMatch.materialCost || gypsumMatch.priceChanged || gypsumMatch.priceOriginal || 0,
+                    노무비단가: Math.round((gypsumMatch.materialCost || gypsumMatch.priceChanged || gypsumMatch.priceOriginal || 0) * 0.6),
+                    materialCost: gypsumMatch.materialCost || gypsumMatch.priceChanged || gypsumMatch.priceOriginal || 0,
+                    laborCost: Math.round((gypsumMatch.materialCost || gypsumMatch.priceChanged || gypsumMatch.priceOriginal || 0) * 0.6)
+                };
+            }
+        }
+        
+        // 2. IndexedDB에서 검색
+        if (window.KiyenoMaterialsDB) {
+            const dbMaterials = await window.KiyenoMaterialsDB.materials
+                .where('name')
+                .startsWithIgnoreCase(materialName)
+                .toArray();
+            
+            if (dbMaterials.length > 0) {
+                const match = dbMaterials[0];
+                return {
+                    재료비단가: match.materialPrice || match.materialCost || 0,
+                    노무비단가: match.laborPrice || match.laborCost || 0,
+                    materialCost: match.materialPrice || match.materialCost || 0,
+                    laborCost: match.laborPrice || match.laborCost || 0
+                };
+            }
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('자재 검색 실패:', error);
+        return null;
+    }
+}
+
+// 컴포넌트 소계 업데이트
+function updateComponentSubtotal(row) {
+    try {
+        const quantityInput = row.querySelector('.component-quantity');
+        const materialPriceInput = row.querySelector('.component-material-price');
+        const laborPriceInput = row.querySelector('.component-labor-price');
+        const subtotalElement = row.querySelector('.component-subtotal');
+        
+        if (quantityInput && materialPriceInput && laborPriceInput && subtotalElement) {
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const materialPrice = parseFloat(materialPriceInput.value) || 0;
+            const laborPrice = parseFloat(laborPriceInput.value) || 0;
+            
+            const subtotal = (materialPrice + laborPrice) * quantity;
+            subtotalElement.textContent = subtotal.toLocaleString();
+        }
+    } catch (error) {
+        console.error('소계 계산 실패:', error);
+    }
+}
+
+// 자재 데이터 업데이트 이벤트 리스너 등록 (확장된 버전)
 window.addEventListener('materialDataUpdated', function(event) {
     console.log('🔔 자재 데이터 업데이트 이벤트 수신:', event.detail);
     
-    // priceDatabase 캐시 무효화
+    // 1. priceDatabase 캐시 무효화 (기존)
     if (window.priceDatabase) {
         console.log('🔄 자재 선택용 캐시 무효화...');
         window.priceDatabase.lightweightItemsCache = null;
         window.priceDatabase.gypsumItemsCache = null;
         console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
     }
+    
+    // 2. 활성화된 일위대가 관리 모달의 UI 자동 갱신 (새로 추가)
+    setTimeout(() => {
+        refreshActiveUnitPriceComponents();
+    }, 100); // 캐시 무효화 후 UI 갱신
 });
 
 // 전역 함수 등록
@@ -1812,5 +1989,11 @@ window.openMaterialSelector = openMaterialSelector;
 window.closeMaterialSelectModal = closeMaterialSelectModal;
 window.filterMaterials = filterMaterials;
 window.selectUnitPriceMaterial = selectUnitPriceMaterial;
+
+// 실시간 UI 갱신 전역 함수 등록
+window.refreshActiveUnitPriceComponents = refreshActiveUnitPriceComponents;
+window.updateComponentPricing = updateComponentPricing;
+window.findMaterialByName = findMaterialByName;
+window.updateComponentSubtotal = updateComponentSubtotal;
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 자재 선택 기능 (CSS 스타일 포함)');
