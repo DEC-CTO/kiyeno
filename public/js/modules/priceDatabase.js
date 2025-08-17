@@ -4357,7 +4357,11 @@ class PriceDatabase extends EventEmitter {
       // 2. IndexedDB 저장 (새로 추가)
       await this.saveToIndexedDB(currentState);
 
-      console.log('✅ 현재 상태 저장 완료 (localStorage + IndexedDB)');
+      // 3. 자재 데이터 업데이트 이벤트 발생 (일위대가 관리 동기화용)
+      console.log('📡 자재 데이터 저장 완료 이벤트 발생...');
+      this.triggerMaterialDataUpdateEvent();
+
+      console.log('✅ 현재 상태 저장 완료 (localStorage + IndexedDB + 이벤트 발생)');
       return currentState;
     } catch (error) {
       console.error('❌ 상태 저장 실패:', error);
