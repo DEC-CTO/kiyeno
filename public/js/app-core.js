@@ -39,6 +39,8 @@ class KiyenoDB extends Dexie {
 // 전역 데이터베이스 인스턴스
 let kiyenoDB;
 
+// KiyenoDB 자동 생성 주석 처리 (KiyenoMaterialsDB 통합 사용)
+/*
 try {
     kiyenoDB = new KiyenoDB();
     window.kiyenoDB = kiyenoDB;
@@ -46,6 +48,7 @@ try {
 } catch (error) {
     console.error('❌ 데이터베이스 초기화 실패:', error);
 }
+*/
 
 // =============================================================================
 // 핵심 데이터 관리

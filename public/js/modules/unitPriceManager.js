@@ -1375,30 +1375,15 @@ function createMaterialSelectModal() {
                 
                 <!-- 필터 영역 -->
                 <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
-                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 200px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">검색어</label>
-                            <input type="text" id="materialSearchInput" placeholder="품명, 싸이즈, 단위로 검색" 
+                    <div style="display: flex; align-items: center;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">품명 검색</label>
+                            <input type="text" id="materialSearchInput" placeholder="품명으로 검색하세요" 
                                    oninput="filterMaterials()" style="
                                 width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; 
                                 border-radius: 6px; font-size: 14px;
                             ">
                         </div>
-                        <div style="min-width: 150px;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">카테고리</label>
-                            <select id="materialCategoryFilter" onchange="filterMaterials()" style="
-                                width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; 
-                                border-radius: 6px; font-size: 14px;
-                            ">
-                                <option value="">전체</option>
-                                <option value="경량자재">경량자재</option>
-                                <option value="석고보드">석고보드</option>
-                            </select>
-                        </div>
-                        <button onclick="clearMaterialFilters()" style="
-                            padding: 8px 16px; background: #6b7280; color: white; border: none; 
-                            border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 20px;
-                        ">초기화</button>
                     </div>
                 </div>
                 
@@ -1434,119 +1419,154 @@ function closeMaterialSelectModal() {
     currentMaterialSelectRow = null;
 }
 
-// 자재 데이터 로드 (기본 데이터 + IndexedDB 데이터)
+// 자재 데이터 로드 (KiyenoMaterialsDB materials 테이블 직접 조회)
 async function loadMaterialsForSelection() {
-    console.log('📦 자재 선택용 데이터 로드 시작 (IndexedDB 우선 전략)');
+    console.log('📦 자재 선택용 데이터 로드 시작 (KiyenoMaterialsDB materials 테이블 직접 조회)');
     
     try {
         let allMaterials = [];
         
-        if (window.priceDatabase) {
-            console.log('🔍 priceDatabase 인스턴스에서 최신 데이터 로드');
+        // 1순위: KiyenoMaterialsDB의 materials 테이블에서 직접 데이터 로드
+        try {
+            console.log('🔍 KiyenoMaterialsDB materials 테이블 직접 조회...');
             
-            // 캐시 강제 무효화 (자재 관리에서 수정된 데이터 반영을 위해)
-            console.log('🔄 캐시 무효화 및 최신 데이터 강제 로드...');
-            window.priceDatabase.lightweightItemsCache = null;
-            window.priceDatabase.gypsumItemsCache = null;
+            const materialsFromDB = await new Promise((resolve, reject) => {
+                const request = indexedDB.open('KiyenoMaterialsDB', 1);
+                
+                request.onerror = () => {
+                    console.error('❌ KiyenoMaterialsDB 열기 실패');
+                    reject(request.error);
+                };
+                
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const transaction = db.transaction(['materials'], 'readonly');
+                    const store = transaction.objectStore('materials');
+                    const getAllRequest = store.getAll();
+                    
+                    getAllRequest.onsuccess = () => {
+                        const materials = getAllRequest.result || [];
+                        console.log(`✅ KiyenoMaterialsDB materials 테이블에서 ${materials.length}개 데이터 로드`);
+                        resolve(materials);
+                    };
+                    
+                    getAllRequest.onerror = () => {
+                        console.error('❌ materials 테이블 데이터 조회 실패');
+                        reject(getAllRequest.error);
+                    };
+                };
+                
+                request.onupgradeneeded = () => {
+                    console.log('🔧 KiyenoMaterialsDB 구조 생성...');
+                    const db = request.result;
+                    if (!db.objectStoreNames.contains('materials')) {
+                        db.createObjectStore('materials', { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
             
-            // 최신 데이터 강제 로드 (await 사용으로 완전한 로드 보장)
-            await window.priceDatabase.getLightweightComponents();
-            await window.priceDatabase.getGypsumBoards();
-            
-            // 1순위: IndexedDB 사용자 데이터 우선 확인
-            const lightweightCache = window.priceDatabase.lightweightItemsCache || [];
-            const gypsumCache = window.priceDatabase.gypsumItemsCache || [];
-            
-            console.log(`📊 IndexedDB 데이터 확인 - 경량자재: ${lightweightCache.length}개, 석고보드: ${gypsumCache.length}개`);
-            
-            // IndexedDB 데이터 우선 로드 (수정된 자재들)
-            const indexedDBMaterials = [];
-            const usedMaterialNames = new Set(); // 중복 방지용
-            
-            // 경량자재 IndexedDB 데이터 (사용자 수정 데이터)
-            if (lightweightCache.length > 0) {
-                console.log('✅ IndexedDB 경량자재 데이터 우선 로드');
-                lightweightCache.forEach(item => {
+            // KiyenoMaterialsDB 데이터를 자재 선택 형식으로 변환
+            if (materialsFromDB && materialsFromDB.length > 0) {
+                console.log('✅ KiyenoMaterialsDB 데이터 변환 시작');
+                
+                // ID 순서로 정렬 (자재관리와 동일한 순서)
+                materialsFromDB.sort((a, b) => {
+                    const idA = a.id || 0;
+                    const idB = b.id || 0;
+                    return idA - idB;
+                });
+                
+                materialsFromDB.forEach(item => {
+                    // 실제 필드 구조 확인을 위한 로그
+                    if (allMaterials.length === 0) {
+                        console.log('📋 첫 번째 DB 아이템 구조:', item);
+                    }
+                    
                     const material = {
+                        id: item.id || 0,  // ID 추가
+                        품명: item.name || item.품명 || '',
+                        규격: item.size || item.spec || item.규격 || '',
+                        단위: item.unit || item.단위 || '',
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
+                        category: item.category || '기타',
+                        source: 'KiyenoMaterialsDB',
+                        originalData: item
+                    };
+                    
+                    allMaterials.push(material);
+                });
+                
+                console.log(`✅ KiyenoMaterialsDB 데이터 변환 완료: ${allMaterials.length}개`);
+                
+                // 첫 번째 변환된 데이터 샘플 로그
+                if (allMaterials.length > 0) {
+                    const sample = allMaterials[0];
+                    console.log('📋 변환된 샘플 데이터:', {
+                        품명: sample.품명,
+                        재료비단가: sample.재료비단가,
+                        노무비단가: sample.노무비단가,
+                        source: sample.source
+                    });
+                }
+            }
+            
+        } catch (dbError) {
+            console.warn('⚠️ KiyenoMaterialsDB 조회 실패, fallback 사용:', dbError);
+        }
+        
+        // 2순위: KiyenoMaterialsDB에 데이터가 없는 경우 기본 데이터 사용
+        if (allMaterials.length === 0 && window.priceDatabase) {
+            console.log('🔄 KiyenoMaterialsDB에 데이터가 없어 기본 데이터 사용');
+            
+            try {
+                const hardcodedLightweight = window.priceDatabase.getOriginalLightweightData();
+                const hardcodedGypsum = window.priceDatabase.getOriginalGypsumData();
+                
+                // 경량자재 기본 데이터
+                hardcodedLightweight.forEach(item => {
+                    const material = {
+                        id: item.id || 0,  // ID 추가
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
-                        재료비단가: item.materialPrice || item.price || 0,
-                        노무비단가: item.laborPrice || item.laborCost || 0,
+                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
+                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '경량자재',
-                        source: 'indexeddb',
+                        source: 'hardcoded_fallback',
                         originalData: item
                     };
-                    indexedDBMaterials.push(material);
-                    usedMaterialNames.add(item.name);
+                    allMaterials.push(material);
                 });
-            }
-            
-            // 석고보드 IndexedDB 데이터 (사용자 수정 데이터)
-            if (gypsumCache.length > 0) {
-                console.log('✅ IndexedDB 석고보드 데이터 우선 로드');
-                gypsumCache.forEach(item => {
+                
+                // 석고보드 기본 데이터
+                hardcodedGypsum.forEach(item => {
                     const material = {
+                        id: item.id || 0,  // ID 추가
                         품명: item.name,
                         규격: item.size || item.spec,
                         단위: item.unit,
                         재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
                         category: '석고보드',
-                        source: 'indexeddb',
+                        source: 'hardcoded_fallback',
                         originalData: item
                     };
-                    indexedDBMaterials.push(material);
-                    usedMaterialNames.add(item.name);
+                    allMaterials.push(material);
                 });
+                
+                // fallback 데이터도 ID 순서로 정렬
+                allMaterials.sort((a, b) => {
+                    const idA = a.id || 0;
+                    const idB = b.id || 0;
+                    return idA - idB;
+                });
+                
+                console.log(`✅ 기본 데이터 fallback 완료: ${allMaterials.length}개`);
+                
+            } catch (error) {
+                console.error('❌ 기본 데이터 fallback 실패:', error);
             }
-            
-            // IndexedDB 데이터 먼저 추가
-            allMaterials.push(...indexedDBMaterials);
-            console.log(`📦 IndexedDB 우선 로드 완료: ${indexedDBMaterials.length}개`);
-            
-            // 2순위: 하드코딩 기본 데이터에서 누락된 자재만 추가 (폴백용)
-            console.log('📦 하드코딩 기본 데이터에서 누락 자재 폴백 로드...');
-            
-            // 경량자재 기본 데이터 폴백
-            const lightweightData = window.priceDatabase.getLightweightComponents();
-            if (lightweightData && lightweightData.items) {
-                const fallbackLightweight = lightweightData.items
-                    .filter(item => !usedMaterialNames.has(item.name)) // IndexedDB에 없는 것만
-                    .map(item => ({
-                        품명: item.name,
-                        규격: item.size || item.spec,
-                        단위: item.unit,
-                        재료비단가: item.materialPrice || item.price || 0,
-                        노무비단가: item.laborPrice || item.laborCost || 0,
-                        category: '경량자재',
-                        source: 'default',
-                        originalData: item
-                    }));
-                allMaterials.push(...fallbackLightweight);
-                console.log(`📦 경량자재 폴백 로드: ${fallbackLightweight.length}개`);
-            }
-            
-            // 석고보드 기본 데이터 폴백
-            const gypsumData = window.priceDatabase.getGypsumBoards();
-            if (gypsumData && gypsumData.items) {
-                const fallbackGypsum = gypsumData.items
-                    .filter(item => !usedMaterialNames.has(item.name)) // IndexedDB에 없는 것만
-                    .map(item => ({
-                        품명: item.name,
-                        규격: item.size || item.spec,
-                        단위: item.unit,
-                        재료비단가: item.재료비단가 || item.materialPrice || item.price || 0,
-                        노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
-                        category: '석고보드',
-                        source: 'default',
-                        originalData: item
-                    }));
-                allMaterials.push(...fallbackGypsum);
-                console.log(`📦 석고보드 폴백 로드: ${fallbackGypsum.length}개`);
-            }
-        } else {
-            console.warn('⚠️ priceDatabase 인스턴스를 찾을 수 없습니다.');
         }
         
         console.log(`📦 로드된 자재 수: ${allMaterials.length}개`);
@@ -1558,8 +1578,9 @@ async function loadMaterialsForSelection() {
         // 자재 목록 렌더링
         renderMaterialsList(allMaterials);
         
-        // 전역 변수에 저장 (필터링용)
+        // 전역 변수에 저장 (필터링용 - 원본 데이터 보존)
         window.currentMaterialsData = allMaterials;
+        window.originalMaterialsData = [...allMaterials]; // 원본 데이터 복사본 저장
         
     } catch (error) {
         console.error('❌ 자재 데이터 로드 실패:', error);
@@ -1570,7 +1591,7 @@ async function loadMaterialsForSelection() {
                 <div style="text-align: center; padding: 40px; color: #ef4444;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
                     <p>자재 데이터를 로드할 수 없습니다.</p>
-                    <p style="font-size: 14px; color: #6b7280;">priceDatabase 인스턴스를 확인해주세요.</p>
+                    <p style="font-size: 14px; color: #6b7280;">KiyenoMaterialsDB 연결을 확인해주세요.</p>
                     <p style="font-size: 12px; color: #9ca3af;">오류: ${error.message}</p>
                 </div>
             `;
@@ -1603,23 +1624,19 @@ function renderMaterialsList(materials) {
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">단위</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">재료비 단가</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">노무비 단가</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">카테고리</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">선택</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${materials.map((material, index) => `
                         <tr style="border-bottom: 1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
-                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; font-weight: 500;">${material.품명 || material.name || ''}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; font-weight: 500;">
+                                <span style="color: #6b7280; font-size: 10px; font-weight: 400; margin-right: 8px;">[${material.id || 'N/A'}]</span>${material.품명 || material.name || ''}
+                            </td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.규격 || material.spec || ''}</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.단위 || material.unit || ''}</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.노무비단가 || material.laborPrice || 0).toLocaleString()}원</td>
-                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
-                                <span style="padding: 2px 6px; border-radius: 4px; font-size: 10px; background: ${material.category === '경량자재' ? '#dbeafe' : '#fef3c7'}; color: ${material.category === '경량자재' ? '#1e40af' : '#92400e'};">
-                                    ${material.category}
-                                </span>
-                            </td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
                                 <button onclick="selectUnitPriceMaterial(${index})" style="
                                     padding: 4px 8px; background: #10b981; color: white; border: none; 
@@ -1638,42 +1655,52 @@ function renderMaterialsList(materials) {
     container.innerHTML = tableHTML;
 }
 
-// 자재 필터링
+// 자재 필터링 (품명 검색만)
 function filterMaterials() {
-    if (!window.currentMaterialsData) return;
+    console.log('🔍 자재 필터링 시작 (품명 검색)');
+    
+    // 원본 데이터 사용 (필터링으로 인한 데이터 손실 방지)
+    const originalData = window.originalMaterialsData || window.currentMaterialsData;
+    if (!originalData) {
+        console.warn('⚠️ 원본 자재 데이터가 없습니다.');
+        return;
+    }
     
     const searchText = document.getElementById('materialSearchInput')?.value.toLowerCase() || '';
-    const categoryFilter = document.getElementById('materialCategoryFilter')?.value || '';
     
-    const filteredMaterials = window.currentMaterialsData.filter(material => {
-        // 검색어 필터
+    console.log('🔍 검색어:', searchText);
+    
+    const filteredMaterials = originalData.filter(material => {
+        // 품명 검색만 (품명 위주로 강화)
+        const materialName = (material.품명 || material.name || '').toLowerCase();
+        const materialSpec = (material.규격 || material.spec || '').toLowerCase();
+        const materialUnit = (material.단위 || material.unit || '').toLowerCase();
+        
         const searchMatch = !searchText || 
-            (material.품명 || material.name || '').toLowerCase().includes(searchText) ||
-            (material.규격 || material.spec || '').toLowerCase().includes(searchText) ||
-            (material.단위 || material.unit || '').toLowerCase().includes(searchText);
+            materialName.includes(searchText) ||
+            materialSpec.includes(searchText) ||
+            materialUnit.includes(searchText);
         
-        // 카테고리 필터
-        const categoryMatch = !categoryFilter || material.category === categoryFilter;
+        if (searchText && searchMatch) {
+            console.log('🎯 검색 매치:', {
+                품명: material.품명,
+                searchText,
+                materialName,
+                match: materialName.includes(searchText)
+            });
+        }
         
-        return searchMatch && categoryMatch;
+        return searchMatch;
     });
+    
+    console.log(`✅ 필터링 완료: ${filteredMaterials.length}/${originalData.length}개`);
+    
+    // 필터된 결과를 currentMaterialsData에 저장 (selectUnitPriceMaterial에서 사용)
+    window.currentMaterialsData = filteredMaterials;
     
     renderMaterialsList(filteredMaterials);
 }
 
-// 자재 필터 초기화
-function clearMaterialFilters() {
-    const searchInput = document.getElementById('materialSearchInput');
-    const categoryFilter = document.getElementById('materialCategoryFilter');
-    
-    if (searchInput) searchInput.value = '';
-    if (categoryFilter) categoryFilter.value = '';
-    
-    // 전체 자재 목록 다시 표시
-    if (window.currentMaterialsData) {
-        renderMaterialsList(window.currentMaterialsData);
-    }
-}
 
 // 자재 선택 처리 (일위대가용)
 function selectUnitPriceMaterial(materialIndex) {
@@ -1780,7 +1807,6 @@ window.addEventListener('materialDataUpdated', function(event) {
 window.openMaterialSelector = openMaterialSelector;
 window.closeMaterialSelectModal = closeMaterialSelectModal;
 window.filterMaterials = filterMaterials;
-window.clearMaterialFilters = clearMaterialFilters;
 window.selectUnitPriceMaterial = selectUnitPriceMaterial;
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 자재 선택 기능 (CSS 스타일 포함)');

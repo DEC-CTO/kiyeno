@@ -52,18 +52,18 @@ Kiyeno.StandardMaterials = {
     // 표준 자재 데이터베이스에 삽입
     async insertStandardMaterials() {
         try {
-            if (typeof kiyenoDB === 'undefined') {
+            if (typeof window.KiyenoMaterialsDB === 'undefined') {
                 console.warn('🔄 데이터베이스가 준비되지 않음. 표준 자재 삽입을 건너뜁니다.');
                 return false;
             }
 
-            const existingCount = await kiyenoDB.materials.count();
+            const existingCount = await window.KiyenoMaterialsDB.materials.count();
             if (existingCount > 0) {
                 console.log(`📊 기존 자재 ${existingCount}개 발견. 표준 자재 삽입을 건너뜁니다.`);
                 return true;
             }
 
-            await kiyenoDB.materials.bulkAdd(this.MATERIALS);
+            await window.KiyenoMaterialsDB.materials.bulkAdd(this.MATERIALS);
             console.log(`✅ 표준 자재 ${this.MATERIALS.length}개가 데이터베이스에 삽입되었습니다.`);
             return true;
         } catch (error) {
@@ -342,8 +342,8 @@ Kiyeno.Calculator = {
             }
 
             // 3단계: 데이터베이스에서 검색
-            if (kiyenoDB) {
-                const dbMaterials = await kiyenoDB.materials
+            if (window.KiyenoMaterialsDB) {
+                const dbMaterials = await window.KiyenoMaterialsDB.materials
                     .where('name')
                     .startsWithIgnoreCase(componentName)
                     .toArray();
@@ -453,15 +453,15 @@ Kiyeno.MigrationHelper = {
     // 마이그레이션 상태 확인
     async checkMigrationStatus() {
         const status = {
-            databaseReady: typeof kiyenoDB !== 'undefined',
+            databaseReady: typeof window.KiyenoMaterialsDB !== 'undefined',
             standardMaterialsReady: false,
             mappingSystemReady: true,
             calculatorReady: false
         };
 
         try {
-            if (kiyenoDB) {
-                const materialCount = await kiyenoDB.materials.count();
+            if (window.KiyenoMaterialsDB) {
+                const materialCount = await window.KiyenoMaterialsDB.materials.count();
                 status.standardMaterialsReady = materialCount > 0;
             }
 

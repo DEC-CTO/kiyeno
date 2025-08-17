@@ -232,9 +232,9 @@ Kiyeno.MaterialService = {
     // 자재 데이터베이스에서 자재 조회
     async getMaterialsByName(name) {
         try {
-            if (!kiyenoDB) return [];
+            if (!window.KiyenoMaterialsDB) return [];
             
-            const materials = await kiyenoDB.materials
+            const materials = await window.KiyenoMaterialsDB.materials
                 .where('name')
                 .startsWithIgnoreCase(name)
                 .toArray();
@@ -249,8 +249,8 @@ Kiyeno.MaterialService = {
     // 모든 자재 조회
     async getAllMaterials() {
         try {
-            if (!kiyenoDB) return [];
-            return await kiyenoDB.materials.toArray();
+            if (!window.KiyenoMaterialsDB) return [];
+            return await window.KiyenoMaterialsDB.materials.toArray();
         } catch (error) {
             console.error('전체 자재 조회 실패:', error);
             return [];
@@ -260,7 +260,7 @@ Kiyeno.MaterialService = {
     // 자재 추가
     async addMaterial(materialData) {
         try {
-            if (!kiyenoDB) return null;
+            if (!window.KiyenoMaterialsDB) return null;
             
             const material = {
                 ...materialData,
@@ -268,7 +268,7 @@ Kiyeno.MaterialService = {
                 updated: new Date().toISOString()
             };
             
-            const id = await kiyenoDB.materials.add(material);
+            const id = await window.KiyenoMaterialsDB.materials.add(material);
             return { ...material, id };
         } catch (error) {
             console.error('자재 추가 실패:', error);
@@ -279,14 +279,14 @@ Kiyeno.MaterialService = {
     // 자재 수정
     async updateMaterial(id, updates) {
         try {
-            if (!kiyenoDB) return false;
+            if (!window.KiyenoMaterialsDB) return false;
             
             const updateData = {
                 ...updates,
                 updated: new Date().toISOString()
             };
             
-            await kiyenoDB.materials.update(id, updateData);
+            await window.KiyenoMaterialsDB.materials.update(id, updateData);
             return true;
         } catch (error) {
             console.error('자재 수정 실패:', error);
@@ -297,8 +297,8 @@ Kiyeno.MaterialService = {
     // 자재 삭제
     async deleteMaterial(id) {
         try {
-            if (!kiyenoDB) return false;
-            await kiyenoDB.materials.delete(id);
+            if (!window.KiyenoMaterialsDB) return false;
+            await window.KiyenoMaterialsDB.materials.delete(id);
             return true;
         } catch (error) {
             console.error('자재 삭제 실패:', error);
@@ -1681,7 +1681,8 @@ async function saveCurrentState() {
     try {
         const savedState = await window.priceDB.saveCurrentState();
         if (savedState) {
-            showToast('현재 상태가 저장되었습니다. (localStorage + IndexedDB)', 'success');
+            // 성공 모달 표시
+            showSaveSuccessModal(savedState);
             
             // 자재 관리 모달 새로고침
             const modal = document.querySelector('.modal');
@@ -1695,6 +1696,104 @@ async function saveCurrentState() {
     } catch (error) {
         console.error('상태 저장 실패:', error);
         showToast('저장 실패: ' + error.message, 'error');
+    }
+}
+
+// 저장 성공 모달 표시
+function showSaveSuccessModal(savedState) {
+    const totalItems = (savedState.lightweightComponents?.length || 0) + (savedState.gypsumBoards?.length || 0);
+    
+    const modalHTML = `
+        <div class="save-success-modal" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); z-index: 99999; display: flex; 
+            align-items: center; justify-content: center;
+        ">
+            <div class="save-success-content" style="
+                background: white; border-radius: 12px; padding: 30px; 
+                max-width: 500px; width: 90%; text-align: center;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            ">
+                <!-- 성공 아이콘 -->
+                <div style="
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                    border-radius: 50%; width: 80px; height: 80px; 
+                    margin: 0 auto 20px; display: flex; align-items: center; 
+                    justify-content: center; color: white; font-size: 40px;
+                ">
+                    ✓
+                </div>
+                
+                <!-- 제목 -->
+                <h3 style="
+                    color: #10b981; margin: 0 0 15px 0; 
+                    font-size: 24px; font-weight: 600;
+                ">저장 완료!</h3>
+                
+                <!-- 메시지 -->
+                <p style="
+                    color: #6b7280; margin: 0 0 20px 0; 
+                    font-size: 16px; line-height: 1.5;
+                ">
+                    자재 데이터가 성공적으로 저장되었습니다.<br>
+                    일위대가 관리에서 최신 데이터를 사용할 수 있습니다.
+                </p>
+                
+                <!-- 저장 정보 -->
+                <div style="
+                    background: #f9fafb; border-radius: 8px; 
+                    padding: 15px; margin: 20px 0; text-align: left;
+                ">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #374151; font-weight: 500;">저장된 자재 수:</span>
+                        <span style="color: #10b981; font-weight: 600;">${totalItems}개</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #374151; font-weight: 500;">경량자재:</span>
+                        <span style="color: #6b7280;">${savedState.lightweightComponents?.length || 0}개</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #374151; font-weight: 500;">석고보드:</span>
+                        <span style="color: #6b7280;">${savedState.gypsumBoards?.length || 0}개</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #374151; font-weight: 500;">저장 위치:</span>
+                        <span style="color: #6b7280;">IndexedDB + localStorage</span>
+                    </div>
+                </div>
+                
+                <!-- 확인 버튼 -->
+                <button onclick="closeSaveSuccessModal()" style="
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+                    color: white; border: none; border-radius: 8px; 
+                    padding: 12px 30px; font-size: 16px; font-weight: 600; 
+                    cursor: pointer; transition: transform 0.2s;
+                " onmouseover="this.style.transform='translateY(-2px)'" 
+                   onmouseout="this.style.transform='translateY(0)'">
+                    확인
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // 3초 후 자동 닫기
+    setTimeout(() => {
+        closeSaveSuccessModal();
+    }, 5000);
+}
+
+// 저장 성공 모달 닫기
+function closeSaveSuccessModal() {
+    const modal = document.querySelector('.save-success-modal');
+    if (modal) {
+        modal.style.opacity = '0';
+        modal.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            modal.remove();
+        }, 200);
     }
 }
 
@@ -3447,6 +3546,7 @@ window.showModificationsSummary = showModificationsSummary;
 window.resetToOriginal = resetToOriginal;
 window.createSubModal = createSubModal;
 window.closeSubModal = closeSubModal;
+window.closeSaveSuccessModal = closeSaveSuccessModal;
 
 // 노무비 보할 업데이트 함수
 function updateLaborCompensation(materialId, value) {
@@ -3480,6 +3580,7 @@ function updateLaborCompensation(materialId, value) {
 }
 
 window.updateLaborCompensation = updateLaborCompensation;
+window.closeSaveSuccessModal = closeSaveSuccessModal;
 
 // Revit 연동 함수들
 window.showRevitIntegrationModal = showRevitIntegrationModal;

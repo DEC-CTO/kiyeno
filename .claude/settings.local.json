@@ -42,7 +42,9 @@
       "Bash(git commit:*)",
       "Bash(git branch:*)",
       "Bash(git checkout:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(git restore:*)",
+      "Bash(start http://localhost:3000)"
     ],
     "deny": []
   }
