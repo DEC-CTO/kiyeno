@@ -1797,15 +1797,62 @@ function createMaterialSelectModal() {
                 
                 <!-- 필터 영역 -->
                 <div style="padding: 20px; border-bottom: 1px solid #e2e8f0;">
+                    <!-- 필터 칩 버튼들 -->
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">🔍 품명별 필터</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            <button class="material-filter-chip active" data-filter="all" onclick="setMaterialFilter('all')" style="
+                                padding: 6px 12px; border: 2px solid #3b82f6; background: #3b82f6; color: white; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                                font-weight: 500;
+                            ">전체</button>
+                            <button class="material-filter-chip" data-filter="스터드" onclick="setMaterialFilter('스터드')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">스터드</button>
+                            <button class="material-filter-chip" data-filter="런너" onclick="setMaterialFilter('런너')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">런너</button>
+                            <button class="material-filter-chip" data-filter="피스" onclick="setMaterialFilter('피스')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">피스</button>
+                            <button class="material-filter-chip" data-filter="타정총알" onclick="setMaterialFilter('타정총알')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">타정총알</button>
+                            <button class="material-filter-chip" data-filter="용접봉" onclick="setMaterialFilter('용접봉')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">용접봉</button>
+                            <button class="material-filter-chip" data-filter="석고보드" onclick="setMaterialFilter('석고보드')" 
+                                onmouseover="this.style.background='#f3f4f6'" onmouseout="if(!this.classList.contains('active')) this.style.background='white'" style="
+                                padding: 6px 12px; border: 2px solid #6b7280; background: white; color: #6b7280; 
+                                border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+                            ">석고보드</button>
+                        </div>
+                    </div>
+                    <!-- 검색창 -->
                     <div style="display: flex; align-items: center;">
                         <div style="flex: 1;">
-                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">품명 검색</label>
-                            <input type="text" id="materialSearchInput" placeholder="품명으로 검색하세요" 
+                            <label style="display: block; margin-bottom: 4px; font-weight: 500; font-size: 14px;">추가 검색</label>
+                            <input type="text" id="materialSearchInput" placeholder="품명으로 추가 검색하세요" 
                                    oninput="filterMaterials()" style="
                                 width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; 
                                 border-radius: 6px; font-size: 14px;
                             ">
                         </div>
+                        <button onclick="clearMaterialFilters()" style="
+                            margin-left: 10px; margin-top: 20px; padding: 8px 12px; 
+                            background: #ef4444; color: white; border: none; border-radius: 6px; 
+                            font-size: 12px; cursor: pointer;
+                        " title="필터 초기화">초기화</button>
                     </div>
                 </div>
                 
@@ -2088,9 +2135,12 @@ function renderMaterialsList(materials) {
     container.innerHTML = tableHTML;
 }
 
-// 자재 필터링 (품명 검색만)
+// 현재 선택된 필터 (전역 변수)
+let currentMaterialFilter = 'all';
+
+// 자재 필터링 (품명 검색 + 필터 칩)
 function filterMaterials() {
-    console.log('🔍 자재 필터링 시작 (품명 검색)');
+    console.log('🔍 자재 필터링 시작 (품명 검색 + 필터 칩)');
     
     // 원본 데이터 사용 (필터링으로 인한 데이터 손실 방지)
     const originalData = window.originalMaterialsData || window.currentMaterialsData;
@@ -2101,10 +2151,17 @@ function filterMaterials() {
     
     const searchText = document.getElementById('materialSearchInput')?.value.toLowerCase() || '';
     
-    console.log('🔍 검색어:', searchText);
+    console.log('🔍 검색어:', searchText, '| 필터:', currentMaterialFilter);
     
     const filteredMaterials = originalData.filter(material => {
-        // 품명 검색만 (품명 위주로 강화)
+        // 1. 필터 칩 조건 확인
+        let filterMatch = true;
+        if (currentMaterialFilter !== 'all') {
+            const materialName = (material.품명 || material.name || '').toLowerCase();
+            filterMatch = materialName.includes(currentMaterialFilter.toLowerCase());
+        }
+        
+        // 2. 품명 검색 조건 확인
         const materialName = (material.품명 || material.name || '').toLowerCase();
         const materialSpec = (material.규격 || material.spec || '').toLowerCase();
         const materialUnit = (material.단위 || material.unit || '').toLowerCase();
@@ -2114,7 +2171,7 @@ function filterMaterials() {
             materialSpec.includes(searchText) ||
             materialUnit.includes(searchText);
         
-        if (searchText && searchMatch) {
+        if (searchText && searchMatch && filterMatch) {
             console.log('🎯 검색 매치:', {
                 품명: material.품명,
                 searchText,
@@ -2123,7 +2180,7 @@ function filterMaterials() {
             });
         }
         
-        return searchMatch;
+        return filterMatch && searchMatch;
     });
     
     console.log(`✅ 필터링 완료: ${filteredMaterials.length}/${originalData.length}개`);
@@ -2132,6 +2189,50 @@ function filterMaterials() {
     window.currentMaterialsData = filteredMaterials;
     
     renderMaterialsList(filteredMaterials);
+}
+
+// 필터 칩 선택 함수
+function setMaterialFilter(filterType) {
+    console.log('🔍 필터 칩 선택:', filterType);
+    
+    // 현재 필터 업데이트
+    currentMaterialFilter = filterType;
+    
+    // 모든 필터 칩 버튼의 스타일 초기화
+    const allChips = document.querySelectorAll('.material-filter-chip');
+    allChips.forEach(chip => {
+        chip.style.background = 'white';
+        chip.style.color = '#6b7280';
+        chip.style.borderColor = '#6b7280';
+        chip.classList.remove('active');
+    });
+    
+    // 선택된 필터 칩 활성화
+    const selectedChip = document.querySelector(`[data-filter="${filterType}"]`);
+    if (selectedChip) {
+        selectedChip.style.background = '#3b82f6';
+        selectedChip.style.color = 'white';
+        selectedChip.style.borderColor = '#3b82f6';
+        selectedChip.style.fontWeight = '500';
+        selectedChip.classList.add('active');
+    }
+    
+    // 필터링 실행
+    filterMaterials();
+}
+
+// 필터 초기화 함수
+function clearMaterialFilters() {
+    console.log('🔄 자재 필터 초기화');
+    
+    // 검색창 초기화
+    const searchInput = document.getElementById('materialSearchInput');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+    
+    // 필터 칩을 '전체'로 설정
+    setMaterialFilter('all');
 }
 
 
