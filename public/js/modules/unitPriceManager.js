@@ -439,8 +439,8 @@ function addComponentRow(componentData = null) {
     row.innerHTML = `
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <div style="display: flex; gap: 4px; align-items: center;">
-                <input type="text" class="component-name" value="${data.name}" placeholder="품명 입력" 
-                       style="flex: 1; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+                <input type="text" class="component-name" value="${data.name}" placeholder="자재 선택 버튼을 사용해주세요" readonly
+                       style="flex: 1; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
                 <button type="button" class="material-select-btn" onclick="openMaterialSelector(this)" 
                         style="padding: 4px 6px; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; white-space: nowrap;"
                         title="자재 선택">
@@ -449,12 +449,12 @@ function addComponentRow(componentData = null) {
             </div>
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
-            <input type="text" class="component-spec" value="${data.spec}" placeholder="싸이즈 입력"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center;">
+            <input type="text" class="component-spec" value="${data.spec}" placeholder="자재 선택으로 입력됩니다" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
-            <input type="text" class="component-unit" value="${data.unit}" placeholder="단위"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center;">
+            <input type="text" class="component-unit" value="${data.unit}" placeholder="자재 선택으로 입력됩니다" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: center; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <input type="number" class="component-quantity" value="${data.quantity}" min="0" step="0.01"
@@ -462,15 +462,13 @@ function addComponentRow(componentData = null) {
                    style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
-            <input type="number" class="material-price" value="${data.materialPrice}" min="0"
-                   oninput="calculateRowTotal(this)"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+            <input type="number" class="material-price" value="${data.materialPrice}" min="0" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="material-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
-            <input type="number" class="labor-price" value="${data.laborPrice}" min="0"
-                   oninput="calculateRowTotal(this)"
-                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
+            <input type="number" class="labor-price" value="${data.laborPrice}" min="0" readonly
+                   style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: #f9fafb; color: #6b7280; cursor: not-allowed;">
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
@@ -1765,15 +1763,21 @@ function fillComponentRowWithMaterial(row, material) {
         if (materialPriceInput) materialPriceInput.value = material.재료비단가 || material.materialPrice || material.price || 0;
         if (laborPriceInput) laborPriceInput.value = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
+        // 수량을 기본값 1로 설정 (자재 선택 시에만)
+        const quantityInput = row.querySelector('.component-quantity');
+        if (quantityInput && (!quantityInput.value || quantityInput.value == 0)) {
+            quantityInput.value = 1;
+        }
+        
         console.log('🔧 입력된 값들:');
         console.log('  - 품명:', material.품명 || material.name || '');
         console.log('  - 싸이즈:', material.규격 || material.size || material.spec || '');
         console.log('  - 단위:', material.단위 || material.unit || '');
         console.log('  - 재료비단가:', material.재료비단가 || material.materialPrice || material.price || 0);
         console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || material.laborCost || 0);
+        console.log('  - 수량:', quantityInput?.value || 1);
         
         // 행 총계 다시 계산
-        const quantityInput = row.querySelector('.component-quantity');
         if (quantityInput) {
             calculateRowTotal(quantityInput);
         }
