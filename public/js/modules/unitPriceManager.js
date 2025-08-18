@@ -537,6 +537,9 @@ function createDetailModalHTML(itemSummary) {
                 <button class="btn btn-success btn-sm" onclick="addComponentRow()">
                     <i class="fas fa-plus"></i> 구성품 추가
                 </button>
+                <button class="btn btn-primary btn-sm" onclick="openBulkQuantityCalculator()" style="margin-left: 8px;">
+                    <i class="fas fa-calculator"></i> 소요량 계산
+                </button>
             </div>
             
             <!-- 세부 아이템 테이블 (석고보드 스타일) -->
@@ -3017,8 +3020,491 @@ async function syncUnitPriceWithLatestData() {
     return updatedCount;
 }
 
+// =============================================================================
+// 수량 계산기 기능
+// =============================================================================
+
+// 현재 계산기가 열린 행을 저장하는 변수
+let currentQuantityCalculatorRow = null;
+
+// 일괄 소요량 계산기 모달 열기
+function openBulkQuantityCalculator() {
+    console.log('📐 일괄 소요량 계산기 모달 열기');
+    
+    // 일괄 계산 모달 생성
+    createBulkQuantityCalculatorModal();
+}
+
+// 일괄 소요량 계산기 모달 생성
+function createBulkQuantityCalculatorModal() {
+    console.log('🏗️ 일괄 소요량 계산기 모달 생성');
+    
+    const modalHTML = `
+        <div class="bulk-quantity-calc-modal" style="
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 99999; display: flex; 
+            align-items: center; justify-content: center;
+        ">
+            <div class="bulk-quantity-calc-content" style="
+                background: white; border-radius: 12px; width: 95%; max-width: 1400px; 
+                max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            ">
+                <!-- 헤더 -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; color: white; font-size: 20px; font-weight: 600;">
+                        <i class="fas fa-calculator" style="margin-right: 8px;"></i>
+                        6개 자재 소요량 일괄 계산기 (5개 기본 + 석고피스)
+                    </h3>
+                    <button onclick="closeBulkQuantityCalculatorModal()" style="
+                        background: none; border: none; color: white; font-size: 24px; 
+                        cursor: pointer; padding: 0; width: 30px; height: 30px; 
+                        display: flex; align-items: center; justify-content: center;
+                    ">&times;</button>
+                </div>
+                
+
+                <!-- 6개 자재 계산 -->
+                <div style="padding: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px;">
+                        
+                        <!-- 1. 스터드 -->
+                        <div style="background: #fff; border: 2px solid #dc2626; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #dc2626; font-weight: 600; text-align: center; font-size: 14px;">
+                                🔧 스터드
+                            </h5>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">간격</label>
+                                <select id="studSpacing" onchange="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                                    <option value="0.300">@300</option>
+                                    <option value="0.400" selected>@400</option>
+                                    <option value="0.450">@450</option>
+                                    <option value="0.600">@600</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
+                                <input type="number" id="studPremium" value="1.05" min="1" max="2" step="0.01" 
+                                       oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                            </div>
+                            <div style="background: #fef2f2; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="studFormula" style="font-size: 8px; font-family: monospace; color: #dc2626;">-</div>
+                            </div>
+                            <div style="text-align: center; padding: 6px; background: #dc2626; border-radius: 4px;">
+                                <strong style="color: white; font-size: 14px;" id="studResult">0</strong>
+                                <div style="font-size: 9px; color: #fecaca;">개</div>
+                            </div>
+                        </div>
+
+                        <!-- 2. 런너 -->
+                        <div style="background: #fff; border: 2px solid #ea580c; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #ea580c; font-weight: 600; text-align: center; font-size: 14px;">
+                                🔗 런너
+                            </h5>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">타입</label>
+                                <select id="runnerType" onchange="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                                    <option value="single">일반 (0.68)</option>
+                                    <option value="double">더블 (1.36)</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
+                                <input type="number" id="runnerPremium" value="0.34" min="0.1" max="2" step="0.01" 
+                                       oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                            </div>
+                            <div style="background: #fff7ed; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="runnerFormula" style="font-size: 8px; font-family: monospace; color: #ea580c;">-</div>
+                            </div>
+                            <div style="text-align: center; padding: 6px; background: #ea580c; border-radius: 4px;">
+                                <strong style="color: white; font-size: 14px;" id="runnerResult">0</strong>
+                                <div style="font-size: 9px; color: #fed7aa;">개</div>
+                            </div>
+                        </div>
+
+                        <!-- 3. 피스 -->
+                        <div style="background: #fff; border: 2px solid #ca8a04; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #ca8a04; font-weight: 600; text-align: center; font-size: 14px;">
+                                📌 피스
+                            </h5>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">간격</label>
+                                <select id="pieceSpacing" onchange="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                                    <option value="400">@400</option>
+                                    <option value="450" selected>@450</option>
+                                    <option value="500">@500</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">기본값</label>
+                                <input type="number" id="pieceBase" value="12" min="1" step="1" 
+                                       oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                            </div>
+                            <div style="background: #fffbeb; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="pieceFormula" style="font-size: 8px; font-family: monospace; color: #ca8a04;">-</div>
+                            </div>
+                            <div style="text-align: center; padding: 6px; background: #ca8a04; border-radius: 4px;">
+                                <strong style="color: white; font-size: 14px;" id="pieceResult">0</strong>
+                                <div style="font-size: 9px; color: #fef3c7;">개</div>
+                            </div>
+                        </div>
+
+                        <!-- 4. 타정총알 -->
+                        <div style="background: #fff; border: 2px solid #65a30d; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #65a30d; font-weight: 600; text-align: center; font-size: 14px;">
+                                🔨🔩 타정총알
+                            </h5>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">간격 선택</label>
+                                <select id="nailBulletSpacing" onchange="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                                    <option value="400">@400</option>
+                                    <option value="450" selected>@450</option>
+                                    <option value="500">@500</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
+                                <input type="number" id="nailBulletPremium" value="1.00" min="1" max="2" step="0.01" 
+                                       oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                            </div>
+                            <div style="background: #f7fee7; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="nailBulletFormula" style="font-size: 8px; font-family: monospace; color: #65a30d;">-</div>
+                            </div>
+                            <div style="text-align: center; padding: 6px; background: #65a30d; border-radius: 4px;">
+                                <strong style="color: white; font-size: 14px;" id="nailBulletResult">0</strong>
+                                <div style="font-size: 9px; color: #dcfce7;">SET</div>
+                            </div>
+                        </div>
+
+                        <!-- 5. 용접봉 -->
+                        <div style="background: #fff; border: 2px solid #7c3aed; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #7c3aed; font-weight: 600; text-align: center; font-size: 14px;">
+                                ⚡ 용접봉
+                            </h5>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">간격 선택</label>
+                                <select id="weldingSpacing" onchange="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                                    <option value="400">@400</option>
+                                    <option value="450" selected>@450</option>
+                                    <option value="500">@500</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
+                                <input type="number" id="weldingPremium" value="1.00" min="1" max="2" step="0.01" 
+                                       oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
+                            </div>
+                            <div style="background: #faf5ff; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="weldingFormula" style="font-size: 8px; font-family: monospace; color: #7c3aed;">-</div>
+                            </div>
+                            <div style="text-align: center; padding: 6px; background: #7c3aed; border-radius: 4px;">
+                                <strong style="color: white; font-size: 14px;" id="weldingResult">0</strong>
+                                <div style="font-size: 9px; color: #ede9fe;">KG</div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- 6. 석고피스 (하단 전체 너비) -->
+                    <div style="background: #fff; border: 2px solid #be185d; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h5 style="margin: 0 0 20px 0; color: #be185d; font-weight: 600; text-align: center; font-size: 16px;">
+                            🧱 석고피스 계산기
+                        </h5>
+                        
+                        <!-- 석고피스 계산 영역 -->
+                        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+                            <!-- 입력 섹션 -->
+                            <div>
+                                <h6 style="margin: 0 0 15px 0; color: #be185d; font-size: 14px; font-weight: 600;">📝 입력값</h6>
+                                <div style="display: grid; gap: 12px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 6px; font-size: 12px; color: #374151; font-weight: 500;">가로 (mm)</label>
+                                        <input type="number" id="gypsumWidth" value="900" min="1" step="1" 
+                                               oninput="calculateGypsumPiece()" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 6px; font-size: 12px; color: #374151; font-weight: 500;">세로 (mm)</label>
+                                        <input type="number" id="gypsumHeight" value="1800" min="1" step="1" 
+                                               oninput="calculateGypsumPiece()" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 계산 결과 섹션 -->
+                            <div>
+                                <h6 style="margin: 0 0 15px 0; color: #be185d; font-size: 14px; font-weight: 600;">📊 계산 결과</h6>
+                                
+                                <!-- 계산 테이블 -->
+                                <div style="background: #fdf2f8; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+                                        <thead>
+                                            <tr style="background: #be185d; color: white;">
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">사이즈</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">가로</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">세로</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">가로갯수</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">세로갯수</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">합계</th>
+                                                <th style="padding: 8px; text-align: center; font-weight: 600;">M2개수</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr style="background: white;">
+                                                <td style="padding: 8px; text-align: center; font-weight: 500;" id="gypsumSize">-</td>
+                                                <td style="padding: 8px; text-align: center;" id="gypsumWidthDisplay">-</td>
+                                                <td style="padding: 8px; text-align: center;" id="gypsumHeightDisplay">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #059669;" id="gypsumWidthCount">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #059669;" id="gypsumHeightCount">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: 600;" id="gypsumTotal">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #be185d; font-weight: 600;" id="gypsumM2Count">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- 최종 결과 -->
+                                <div style="background: #be185d; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="color: #fce7f3; font-size: 12px; margin-bottom: 5px;">최종 석고피스 소요량</div>
+                                    <div style="color: white; font-size: 18px; font-weight: 700;" id="gypsumPieceResult">0</div>
+                                    <div style="color: #fce7f3; font-size: 11px;">개</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 하단 버튼 -->
+                <div style="padding: 20px; border-top: 1px solid #e2e8f0; background: #f8fafc; text-align: right; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button onclick="closeBulkQuantityCalculatorModal()" style="
+                        padding: 12px 24px; background: #6b7280; color: white; border: none; 
+                        border-radius: 6px; cursor: pointer; font-weight: 500;
+                    ">취소</button>
+                    <button onclick="applyBulkCalculatedQuantities()" style="
+                        padding: 12px 24px; background: #10b981; color: white; border: none; 
+                        border-radius: 6px; cursor: pointer; font-weight: 600;
+                    ">일괄 적용</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // 초기 계산 실행
+    calculateAllQuantities();
+}
+
+// 일괄 계산 모달 닫기
+function closeBulkQuantityCalculatorModal() {
+    const modal = document.querySelector('.bulk-quantity-calc-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 7개 자재 전체 수량 계산
+function calculateAllQuantities() {
+    
+    // 1. 스터드 계산: 1 ÷ 간격값 × 할증률
+    const studSpacing = parseFloat(document.getElementById('studSpacing')?.value) || 0.4;
+    const studPremium = parseFloat(document.getElementById('studPremium')?.value) || 1.05;
+    const studQuantity = studSpacing > 0 ? (1 / studSpacing * studPremium) : 0;
+    const studFormula = `1 ÷ ${studSpacing} × ${studPremium}`;
+    document.getElementById('studFormula').textContent = studFormula;
+    document.getElementById('studResult').textContent = studQuantity.toFixed(3);
+    
+    // 2. 런너 계산: 일반일 때 0.34×2, 더블일 때 0.34×4
+    const runnerType = document.getElementById('runnerType')?.value || 'single';
+    const runnerPremium = parseFloat(document.getElementById('runnerPremium')?.value) || 0.34;
+    const multiplier = runnerType === 'double' ? 4 : 2;
+    const runnerQuantity = runnerPremium * multiplier;
+    const runnerFormula = `${runnerPremium} × ${multiplier}`;
+    const displayValue = runnerType === 'double' ? '1.36' : '0.68';
+    document.getElementById('runnerFormula').textContent = runnerFormula;
+    document.getElementById('runnerResult').textContent = displayValue;
+    
+    // 3. 피스 계산: @450 기본값, @400은 1.125배, @500은 0.9배, 나머지 버림
+    const pieceSpacing = document.getElementById('pieceSpacing')?.value || '450';
+    const pieceBase = parseFloat(document.getElementById('pieceBase')?.value) || 12;
+    let pieceQuantity, pieceFormula;
+    
+    if (pieceSpacing === '400') {
+        const calculated = pieceBase * 1.125;
+        pieceQuantity = Math.floor(calculated);
+        pieceFormula = `${pieceBase} × 1.125 = ${calculated.toFixed(3)} → ${pieceQuantity}`;
+    } else if (pieceSpacing === '500') {
+        const calculated = pieceBase * 0.9;
+        pieceQuantity = Math.floor(calculated);
+        pieceFormula = `${pieceBase} × 0.9 = ${calculated.toFixed(3)} → ${pieceQuantity}`;
+    } else { // @450 기본값
+        pieceQuantity = pieceBase;
+        pieceFormula = `${pieceBase} (기본값)`;
+    }
+    
+    document.getElementById('pieceFormula').textContent = pieceFormula;
+    document.getElementById('pieceResult').textContent = pieceQuantity;
+    
+    // 4. 타정총알 계산: 기본값 4, 간격 선택 지원
+    const nailBulletSpacing = document.getElementById('nailBulletSpacing')?.value || '450';
+    const nailBulletPremium = parseFloat(document.getElementById('nailBulletPremium')?.value) || 1.00;
+    const nailBulletQuantity = 4; // 기본값 4 (간격과 관계없이)
+    const nailBulletFormula = `4 (기본값, 간격: @${nailBulletSpacing})`;
+    document.getElementById('nailBulletFormula').textContent = nailBulletFormula;
+    document.getElementById('nailBulletResult').textContent = nailBulletQuantity.toFixed(0);
+    
+    // 5. 용접봉 계산: 피스와 동일 방식, 기본값 0.08, 셋째자리 버림
+    const weldingSpacing = document.getElementById('weldingSpacing')?.value || '450';
+    const weldingPremium = parseFloat(document.getElementById('weldingPremium')?.value) || 1.00;
+    const weldingBase = 0.08; // 기본값 0.08
+    let weldingQuantity, weldingFormula;
+    
+    if (weldingSpacing === '400') {
+        const calculated = weldingBase * 1.125;
+        weldingQuantity = Math.floor(calculated * 100) / 100; // 셋째자리 버림
+        weldingFormula = `${weldingBase} × 1.125 = ${calculated.toFixed(3)} → ${weldingQuantity.toFixed(2)}`;
+    } else if (weldingSpacing === '500') {
+        const calculated = weldingBase * 0.9;
+        weldingQuantity = Math.floor(calculated * 100) / 100; // 셋째자리 버림
+        weldingFormula = `${weldingBase} × 0.9 = ${calculated.toFixed(3)} → ${weldingQuantity.toFixed(2)}`;
+    } else { // @450 기본값
+        weldingQuantity = weldingBase;
+        weldingFormula = `${weldingBase} (기본값, 간격: @${weldingSpacing})`;
+    }
+    
+    document.getElementById('weldingFormula').textContent = weldingFormula;
+    document.getElementById('weldingResult').textContent = weldingQuantity.toFixed(2);
+    
+    // 6. 석고피스 계산
+    const gypsumPieceQuantity = calculateGypsumPiece();
+    
+    
+    console.log('📊 6개 자재 계산 완료 (타정총알 통합):', {
+        스터드: `${studQuantity.toFixed(3)} (할증률: ${studPremium})`,
+        런너: `${displayValue} (타입: ${runnerType})`,
+        피스: `${pieceQuantity} (간격: @${pieceSpacing})`,
+        타정총알: `${nailBulletQuantity.toFixed(0)} (기본값, 간격: @${nailBulletSpacing})`,
+        용접봉: `${weldingQuantity.toFixed(2)} (간격: @${weldingSpacing})`,
+        석고피스: `${gypsumPieceQuantity.toFixed(0)} (복잡계산)`
+    });
+}
+
+// 석고피스 복잡 계산 함수
+function calculateGypsumPiece() {
+    const width = parseFloat(document.getElementById('gypsumWidth')?.value) || 900;
+    const height = parseFloat(document.getElementById('gypsumHeight')?.value) || 1800;
+    
+    // 계산식 구현
+    // 1. 가로갯수 = (가로/450) + 1
+    const widthCount = (width / 450) + 1;
+    
+    // 2. 세로갯수 = (세로/250) + 1  
+    const heightCount = (height / 250) + 1;
+    
+    // 3. 합계 = 가로갯수 + 세로갯수
+    const total = widthCount + heightCount;
+    
+    // 4. M2개수 = 합계 ÷ (가로/1000 × 세로/1000), 라운드업
+    const area = (width / 1000) * (height / 1000); // m² 계산
+    const m2Count = Math.ceil(total / area);
+    
+    // 5. 최종 결과 = M2개수
+    const finalResult = m2Count;
+    
+    // 사이즈 계산 (3*6, 4*8 형식)
+    const widthInM = Math.round(width / 300);
+    const heightInM = Math.round(height / 300);
+    const sizeLabel = `${widthInM}*${heightInM}`;
+    
+    // UI 업데이트
+    document.getElementById('gypsumSize').textContent = sizeLabel;
+    document.getElementById('gypsumWidthDisplay').textContent = width;
+    document.getElementById('gypsumHeightDisplay').textContent = height;
+    document.getElementById('gypsumWidthCount').textContent = widthCount.toFixed(2);
+    document.getElementById('gypsumHeightCount').textContent = heightCount.toFixed(2);
+    document.getElementById('gypsumTotal').textContent = total.toFixed(2);
+    document.getElementById('gypsumM2Count').textContent = m2Count.toFixed(0);
+    document.getElementById('gypsumPieceResult').textContent = finalResult.toFixed(0);
+    
+    console.log('🧱 석고피스 계산:', {
+        입력: `${width}×${height}mm`,
+        가로갯수: widthCount.toFixed(2),
+        세로갯수: heightCount.toFixed(2),
+        합계: total.toFixed(2),
+        면적: `${area.toFixed(3)}m²`,
+        M2개수: m2Count,
+        최종결과: finalResult
+    });
+    
+    return finalResult;
+}
+
+// 일괄 계산 결과 적용
+function applyBulkCalculatedQuantities() {
+    // 현재 구성품 테이블의 모든 행 가져오기
+    const tbody = document.getElementById('componentsTable');
+    if (!tbody) {
+        alert('구성품 테이블을 찾을 수 없습니다.');
+        return;
+    }
+    
+    const rows = tbody.querySelectorAll('tr');
+    if (rows.length === 0) {
+        alert('적용할 구성품이 없습니다. 먼저 구성품을 추가해주세요.');
+        return;
+    }
+    
+    // 계산된 결과 수집
+    const calculatedResults = {
+        '스터드': parseFloat(document.getElementById('studResult')?.textContent) || 0,
+        '런너': parseFloat(document.getElementById('runnerResult')?.textContent) || 0,
+        '피스': parseFloat(document.getElementById('pieceResult')?.textContent) || 0,
+        '타정': parseFloat(document.getElementById('nailResult')?.textContent) || 0,
+        '총알': parseFloat(document.getElementById('bulletResult')?.textContent) || 0,
+        '용접봉': parseFloat(document.getElementById('weldingResult')?.textContent) || 0,
+        '석고피스': parseFloat(document.getElementById('gypsumPieceResult')?.textContent) || 0
+    };
+    
+    let appliedCount = 0;
+    
+    // 각 행의 자재명을 확인하고 해당하는 계산 결과 적용
+    rows.forEach(row => {
+        const nameElement = row.querySelector('.component-name');
+        const quantityInput = row.querySelector('.component-quantity');
+        
+        if (!nameElement || !quantityInput) return;
+        
+        const materialName = nameElement.textContent.trim();
+        
+        // 자재명 매칭 (부분 매칭)
+        for (const [calcName, calcValue] of Object.entries(calculatedResults)) {
+            if (materialName.includes(calcName) || calcName.includes(materialName)) {
+                quantityInput.value = calcValue.toFixed(3);
+                calculateRowTotal(quantityInput);
+                appliedCount++;
+                console.log(`✅ ${materialName} → ${calcName}: ${calcValue.toFixed(3)}`);
+                break;
+            }
+        }
+    });
+    
+    if (appliedCount > 0) {
+        alert(`${appliedCount}개 자재의 수량이 적용되었습니다.`);
+        console.log(`📊 일괄 적용 완료: ${appliedCount}개 자재`);
+    } else {
+        alert('매칭되는 자재를 찾을 수 없습니다.\n자재명이 스터드, 런너, 피스, 타정, 총알, 용접봉, 석고피스 중 하나를 포함하는지 확인해주세요.');
+    }
+    
+    // 모달 닫기
+    closeBulkQuantityCalculatorModal();
+}
+
 // 데이터 동기화 전역 함수 등록
 window.syncMainModalData = syncMainModalData;
 window.syncUnitPriceWithLatestData = syncUnitPriceWithLatestData;
 
-console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈 및 자재 선택 기능 (CSS 스타일 포함)');
+console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기 포함');
