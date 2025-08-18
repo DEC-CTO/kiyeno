@@ -2454,11 +2454,15 @@ function fillComponentRowWithMaterial(row, material) {
         console.log('  - laborAmountElement:', !!laborAmountElement);
         
         // 노무비 입력 가능한 모든 필드 확인
-        const allLaborInputs = row.querySelectorAll('input[placeholder*="노무비"], input[class*="labor"], .labor-amount input');
+        const allLaborInputs = row.querySelectorAll('input[placeholder*="노무비"], input[class*="labor"], .labor-amount input, .labor-amount-input');
         console.log('  - 노무비 관련 입력 필드 개수:', allLaborInputs.length);
         allLaborInputs.forEach((input, index) => {
             console.log(`    ${index}: class="${input.className}", tag="${input.tagName}"`);
         });
+        
+        // 현재 .labor-amount 영역 상태 확인
+        const laborAmountContainer = row.querySelector('.labor-amount');
+        console.log('  - .labor-amount 영역 HTML:', laborAmountContainer?.innerHTML?.substring(0, 100));
         
         // span 요소인지 input 요소인지 확인하여 적절히 처리
         if (nameElement) {
@@ -2529,6 +2533,12 @@ function fillComponentRowWithMaterial(row, material) {
                     `;
                     
                     console.log(`💼 노무비 금액 필드 생성: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+                    
+                    // 생성 후 확인
+                    setTimeout(() => {
+                        const createdInput = row.querySelector('.labor-amount-input');
+                        console.log('  ✅ 생성된 입력 필드:', !!createdInput, createdInput?.value);
+                    }, 10);
                 }
                 // 3순위: 노무비 단가 필드에 입력 (기존 방식)
                 else if (laborPriceElement) {
