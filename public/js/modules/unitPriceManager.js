@@ -2401,6 +2401,13 @@ function fillComponentRowWithMaterial(row, material) {
         console.log('  - laborPriceElement:', !!laborPriceElement);
         console.log('  - laborAmountElement:', !!laborAmountElement);
         
+        // 노무비 입력 가능한 모든 필드 확인
+        const allLaborInputs = row.querySelectorAll('input[placeholder*="노무비"], input[class*="labor"], .labor-amount input');
+        console.log('  - 노무비 관련 입력 필드 개수:', allLaborInputs.length);
+        allLaborInputs.forEach((input, index) => {
+            console.log(`    ${index}: class="${input.className}", tag="${input.tagName}"`);
+        });
+        
         // span 요소인지 input 요소인지 확인하여 적절히 처리
         if (nameElement) {
             const materialName = material.품명 || material.name || '';
@@ -2438,7 +2445,7 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        // 노무비 처리: 노무비는 금액 필드에 입력 (단가 × 수량)
+        // 노무비 처리: 노무비 데이터가 있으면 적절한 필드에 입력
         const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
         if (laborPrice > 0) {
@@ -2446,21 +2453,38 @@ function fillComponentRowWithMaterial(row, material) {
             const quantity = parseFloat(quantityInput?.value) || 1;
             const laborAmount = laborPrice * quantity;
             
-            // 노무비 금액 필드가 있으면 금액에 입력
+            // 1순위: 노무비 금액 입력 필드 (component-labor-amount)
             if (laborAmountElement) {
                 laborAmountElement.value = laborAmount;
-                // 금액 입력 후 단가 자동계산을 위해 input 이벤트 트리거
                 laborAmountElement.dispatchEvent(new Event('input', { bubbles: true }));
-                console.log(`💼 노무비 금액 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+                console.log(`💼 노무비 금액 입력 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
             }
-            // 노무비 단가 필드가 있으면 단가에 입력 (기존 방식)
-            else if (laborPriceElement) {
-                if (laborPriceElement.tagName === 'SPAN') {
-                    laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
-                } else {
-                    laborPriceElement.value = laborPrice;
+            // 2순위: .labor-amount 영역 내의 입력 필드 찾기
+            else {
+                const laborAmountContainer = row.querySelector('.labor-amount');
+                const laborAmountInput = laborAmountContainer?.querySelector('input');
+                
+                if (laborAmountInput) {
+                    laborAmountInput.value = laborAmount;
+                    laborAmountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    console.log(`💼 노무비 금액 컨테이너 내 입력 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
                 }
-                console.log(`💼 노무비 단가 필드에 입력: ${laborPrice}`);
+                // 3순위: 노무비 단가 필드에 입력 (기존 방식)
+                else if (laborPriceElement) {
+                    if (laborPriceElement.tagName === 'SPAN') {
+                        laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
+                    } else {
+                        laborPriceElement.value = laborPrice;
+                    }
+                    console.log(`💼 노무비 단가 필드에 입력: ${laborPrice}`);
+                }
+                // 모든 필드가 없으면 디버깅 정보 출력
+                else {
+                    console.log(`⚠️ 노무비 입력 가능한 필드를 찾을 수 없음`);
+                    console.log(`   - laborAmountElement: ${!!laborAmountElement}`);
+                    console.log(`   - laborAmountContainer: ${!!laborAmountContainer}`);
+                    console.log(`   - laborPriceElement: ${!!laborPriceElement}`);
+                }
             }
         }
         
