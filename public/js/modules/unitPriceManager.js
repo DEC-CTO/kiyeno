@@ -506,6 +506,26 @@ function openUnitPriceDetailModal(isEdit = false) {
         maxWidth: '1400px'
     });
     
+    // 편집 모드일 때 고정 비율 복원
+    if (isEdit && currentUnitPriceData.fixedRates) {
+        setTimeout(() => {
+            const materialLossInput = document.querySelector('.material-loss-row .fixed-quantity');
+            const transportCostInput = document.querySelector('.transport-cost-row .fixed-quantity');
+            const materialProfitInput = document.querySelector('.material-profit-row .fixed-quantity');
+            const toolExpenseInput = document.querySelector('.tool-expense-row .fixed-quantity');
+            
+            if (materialLossInput) materialLossInput.value = currentUnitPriceData.fixedRates.materialLoss || 3;
+            if (transportCostInput) transportCostInput.value = currentUnitPriceData.fixedRates.transportCost || 1.5;
+            if (materialProfitInput) materialProfitInput.value = currentUnitPriceData.fixedRates.materialProfit || 15;
+            if (toolExpenseInput) toolExpenseInput.value = currentUnitPriceData.fixedRates.toolExpense || 2;
+            
+            console.log('✅ 편집 모드 고정 비율 복원:', currentUnitPriceData.fixedRates);
+            
+            // 값 변경 후 계산 다시 실행
+            calculateGrandTotal();
+        }, 100);
+    }
+    
     if (modal) {
         setTimeout(async () => {
             // 기존 구성품이 있다면 로드
@@ -2551,6 +2571,14 @@ function saveUnitPriceSession() {
                 grandTotal: 0
             },
             
+            // 고정 비율 정보
+            fixedRates: {
+                materialLoss: parseFloat(document.querySelector('.material-loss-row .fixed-quantity')?.value) || 3,
+                transportCost: parseFloat(document.querySelector('.transport-cost-row .fixed-quantity')?.value) || 1.5,
+                materialProfit: parseFloat(document.querySelector('.material-profit-row .fixed-quantity')?.value) || 15,
+                toolExpense: parseFloat(document.querySelector('.tool-expense-row .fixed-quantity')?.value) || 2
+            },
+            
             // 메타데이터
             savedAt: new Date().toISOString(),
             modalWasOpen: true
@@ -2626,6 +2654,21 @@ function restoreUnitPriceSession() {
         }
         if (document.getElementById('unitPriceNote')) {
             document.getElementById('unitPriceNote').value = sessionData.note || '';
+        }
+
+        // 고정 비율 복원
+        if (sessionData.fixedRates) {
+            const materialLossInput = document.querySelector('.material-loss-row .fixed-quantity');
+            const transportCostInput = document.querySelector('.transport-cost-row .fixed-quantity');
+            const materialProfitInput = document.querySelector('.material-profit-row .fixed-quantity');
+            const toolExpenseInput = document.querySelector('.tool-expense-row .fixed-quantity');
+            
+            if (materialLossInput) materialLossInput.value = sessionData.fixedRates.materialLoss || 3;
+            if (transportCostInput) transportCostInput.value = sessionData.fixedRates.transportCost || 1.5;
+            if (materialProfitInput) materialProfitInput.value = sessionData.fixedRates.materialProfit || 15;
+            if (toolExpenseInput) toolExpenseInput.value = sessionData.fixedRates.toolExpense || 2;
+            
+            console.log('✅ 고정 비율 복원:', sessionData.fixedRates);
         }
 
         // 기존 구성품 행 제거
