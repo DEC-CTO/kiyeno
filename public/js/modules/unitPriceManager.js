@@ -2391,6 +2391,7 @@ function fillComponentRowWithMaterial(row, material) {
         const unitElement = row.querySelector('.component-unit');
         const materialPriceElement = row.querySelector('.component-material-price');
         const laborPriceElement = row.querySelector('.component-labor-price');
+        const laborAmountElement = row.querySelector('.component-labor-amount');
         
         console.log('🔧 DOM 요소 확인:');
         console.log('  - nameElement:', !!nameElement);
@@ -2398,6 +2399,7 @@ function fillComponentRowWithMaterial(row, material) {
         console.log('  - unitElement:', !!unitElement);
         console.log('  - materialPriceElement:', !!materialPriceElement);
         console.log('  - laborPriceElement:', !!laborPriceElement);
+        console.log('  - laborAmountElement:', !!laborAmountElement);
         
         // span 요소인지 input 요소인지 확인하여 적절히 처리
         if (nameElement) {
@@ -2436,33 +2438,29 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        // 노무비 처리 개선: 노무비 항목의 경우 금액 필드에 입력하고 단가는 자동계산
-        const itemName = material.품명 || material.name || '';
-        const isLaborItem = isLaborCost(itemName);
+        // 노무비 처리: 노무비는 금액 필드에 입력 (단가 × 수량)
+        const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
-        if (isLaborItem) {
-            // 노무비 항목: 금액 필드에 입력 (단가 * 수량)
-            const laborAmountElement = row.querySelector('.component-labor-amount');
+        if (laborPrice > 0) {
             const quantityInput = row.querySelector('.component-quantity');
             const quantity = parseFloat(quantityInput?.value) || 1;
-            const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
             const laborAmount = laborPrice * quantity;
             
+            // 노무비 금액 필드가 있으면 금액에 입력
             if (laborAmountElement) {
                 laborAmountElement.value = laborAmount;
-                // 금액 입력 후 단가 자동계산을 위해 change 이벤트 트리거
+                // 금액 입력 후 단가 자동계산을 위해 input 이벤트 트리거
                 laborAmountElement.dispatchEvent(new Event('input', { bubbles: true }));
-                console.log(`💼 노무비 항목 처리: ${itemName} - 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+                console.log(`💼 노무비 금액 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
             }
-        } else {
-            // 일반 항목: 단가 필드에 입력
-            if (laborPriceElement) {
-                const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
+            // 노무비 단가 필드가 있으면 단가에 입력 (기존 방식)
+            else if (laborPriceElement) {
                 if (laborPriceElement.tagName === 'SPAN') {
                     laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
                 } else {
                     laborPriceElement.value = laborPrice;
                 }
+                console.log(`💼 노무비 단가 필드에 입력: ${laborPrice}`);
             }
         }
         
