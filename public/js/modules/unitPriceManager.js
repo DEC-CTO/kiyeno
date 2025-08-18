@@ -2470,7 +2470,7 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        // 노무비 처리: 노무비는 금액 칸에 표시하고 단가는 별도 처리
+        // 노무비 처리: 노무비는 금액칸에 들어가고 단가는 금액/수량으로 자동 계산
         const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
         if (laborPrice > 0) {
@@ -2478,32 +2478,32 @@ function fillComponentRowWithMaterial(row, material) {
             const quantity = parseFloat(quantityInput?.value) || 1;
             const laborAmount = laborPrice * quantity;
             
-            // 노무비 금액을 .labor-amount 영역에 표시
-            const laborAmountContainer = row.querySelector('.labor-amount');
-            if (laborAmountContainer) {
-                laborAmountContainer.textContent = `${Math.round(laborAmount).toLocaleString()}원`;
-                console.log(`💼 노무비 금액 표시: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
-                
-                // 노무비 단가를 단가 필드에 별도 저장 (내부 계산용)
-                if (laborPriceElement) {
-                    if (laborPriceElement.tagName === 'SPAN') {
-                        laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
-                    } else {
-                        laborPriceElement.value = laborPrice;
-                    }
-                    console.log(`💼 노무비 단가 저장: ${laborPrice}원`);
-                }
+            // 1. 노무비 금액을 금액 칸에 입력 (laborAmountElement 사용)
+            const laborAmountElement = row.querySelector('.labor-amount input') || row.querySelector('[data-field="laborAmount"]');
+            if (laborAmountElement) {
+                laborAmountElement.value = laborAmount;
+                console.log(`💼 노무비 금액 입력: ${laborAmount}원 (금액칸)`);
             } else {
-                console.log(`⚠️ .labor-amount 영역을 찾을 수 없어 단가 필드에 입력`);
-                // 금액 영역을 찾을 수 없으면 기존 방식대로 단가에 입력
-                if (laborPriceElement) {
-                    if (laborPriceElement.tagName === 'SPAN') {
-                        laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
-                    } else {
-                        laborPriceElement.value = laborPrice;
+                // 백업: 다른 방식으로 금액 필드 찾기
+                const laborAmountContainer = row.querySelector('.labor-amount');
+                if (laborAmountContainer) {
+                    const amountInput = laborAmountContainer.querySelector('input');
+                    if (amountInput) {
+                        amountInput.value = laborAmount;
+                        console.log(`💼 노무비 금액 입력 (백업): ${laborAmount}원`);
                     }
-                    console.log(`💼 노무비 단가 필드에 입력: ${laborPrice}`);
                 }
+            }
+            
+            // 2. 노무비 단가를 단가 칸에 자동 계산하여 입력 (금액/수량)
+            const calculatedUnitPrice = quantity > 0 ? laborAmount / quantity : 0;
+            if (laborPriceElement) {
+                if (laborPriceElement.tagName === 'SPAN') {
+                    laborPriceElement.textContent = `${Math.round(calculatedUnitPrice).toLocaleString()}원`;
+                } else {
+                    laborPriceElement.value = Math.round(calculatedUnitPrice);
+                }
+                console.log(`💼 노무비 단가 자동계산: 금액(${laborAmount}) ÷ 수량(${quantity}) = 단가(${calculatedUnitPrice})`);
             }
         }
         

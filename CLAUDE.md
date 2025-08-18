@@ -1,4 +1,4 @@
-# CLAUDE.md
+# CLAUDE.md - Kiyeno 벽체 관리 시스템
 
 이 파일은 Claude Code (claude.ai/code)가 이 저장소의 코드를 작업할 때 지침을 제공합니다.
 
@@ -6,78 +6,237 @@
 
 ## 프로젝트 개요
 
-이 프로젝트는 한국 건설업계를 위한 벽체 관리 시스템("Kiyeno")입니다. Node.js Express 서버를 기반으로 하며, 다양한 벽체 유형에 대한 자재 소요량을 계산하고, Revit과 연동하여 건축 데이터를 관리하며, 건설 프로젝트를 위한 상세 자재 내역을 관리합니다.
+**Kiyeno 벽체 관리 시스템**은 한국 건설업계를 위한 종합적인 벽체 관리 솔루션입니다. Node.js Express 서버를 기반으로 하며, 다음과 같은 핵심 기능을 제공합니다:
 
-## 주요 아키텍처 구성 요소
-
-### 서버 구조 (Node.js Express + WebSocket)
-
-- **server.js**: 메인 서버 파일, 미들웨어 설정, 라우팅, WebSocket 서버
-- **api/**: REST API 엔드포인트 관리
-  - `index.js`: API 라우트 통합 관리
-  - `walls.js`: 벽체 데이터 API
-  - `materials.js`: 자재 데이터 API
-  - `revit.js`: Revit 연동 API (HTTP + WebSocket)
-- **services/**: 비즈니스 로직 서비스
-  - `wallService.js`: 벽체 관리 로직
-  - `materialService.js`: 자재 관리 로직
-  - `revitService.js`: Revit 연동 로직
-  - `dataService.js`: 데이터 관리 로직
-
-### 클라이언트 구조 (public/)
-
-- **public/**: 정적 파일 (클라이언트 사이드)
-  - `index.html`: 메인 웹 페이지
-  - `js/`: JavaScript 모듈
-    - `main.js`: ES6 모듈 시스템 진입점
-    - `app-core.js`: 핵심 애플리케이션 로직
-    - `app-calculator.js`: 계산 엔진
-    - `app-services.js`: 서비스 계층
-    - `app-ui.js`: UI 렌더링 및 상호작용
-    - `bridge.js`: 기존 시스템과 새 시스템 연결
-    - `debug.js`: 디버깅 및 로그 관리
-    - `display-system.js`: 디스플레이 시스템 관리
-    - **`revit-wall-handler.js`**: Revit 벽체 데이터 처리 및 객체 선택 기능
-    - **`revit-type-matching.js`**: Revit 타입 매칭 기능
-    - `services/`: 클라이언트 사이드 서비스
-      - `apiService.js`: API 통신
-      - `materialService.js`: 자재 관리
-      - `wallService.js`: 벽체 관리
-      - **`revitService.js`**: Revit 연동 (WebSocket)
-      - **`socketService.js`**: WebSocket 통신 관리
-    - `modules/`: 독립 모듈
-      - `priceDatabase.js`: 가격 데이터베이스
-    - `utils/`: 유틸리티 함수들
-      - `constants.js`: 상수 정의
-      - `helpers.js`: 도우미 함수
-      - `validators.js`: 유효성 검사
-  - `css/`: 스타일시트 파일들
-    - `styles.css`: 메인 스타일시트
-    - `breakdown-styles.css`: 내역서 스타일
-    - `display-system.css`: 디스플레이 시스템 스타일
-    - `logger-styles.css`: 로그 표시 스타일
-    - `material-management.css`: 자재 관리 모달 스타일
-    - `material-selector.css`: 자재 선택기 스타일
-    - `revit-responsive.css`: Revit 탭 반응형 스타일
-
-### 데이터 관리
-
-- **벽체 데이터**: `wallData` 배열 (동적 JSON 형태)
-- **자재 데이터**: 하이브리드 시스템
-  - **기본 데이터**: `priceDatabase.js`에 하드코딩 (55개 경량자재 + 49개 석고보드)
-  - **사용자 데이터**: IndexedDB 저장
-  - **백업/이동**: Excel/JSON 파일 내보내기/가져오기
+### 🏗️ 주요 기능
+- **벽체 타입 관리**: 다양한 벽체 유형별 자재 소요량 계산
 - **Revit 연동**: Autodesk Revit과 양방향 데이터 교환 (WebSocket + HTTP)
-- **저장소**:
-  - 서버: JSON 파일 기반 데이터 저장
-  - 클라이언트: 하드코딩 기본 데이터 + IndexedDB (사용자 데이터) + 파일 백업/복원
+- **자재 데이터베이스**: 55개 경량자재 + 49개 석고보드 기본 데이터 + 사용자 커스터마이징
+- **일위대가 관리**: 세부 아이템별 구성품 관리 및 소요량 계산
+- **실시간 계산**: 6가지 자재 동시 소요량 계산 (스터드, 런너, 피스, 타정총알, 용접봉, 석고피스)
+- **데이터 백업/복원**: Excel/JSON 파일 내보내기/가져오기
+- **디스플레이 시스템**: 4가지 보기 모드 (기본값보기, 타입별보기, 재료별보기, 공종별보기)
 
-### WebSocket 통신 구조
+### 🎯 대상 사용자
+- 한국 건설업계 실무자
+- 건축 설계사무소
+- 시공사 견적 담당자
+- Revit 사용 설계자
 
-- **서버**: Socket.IO 서버 (포트 3000)
-- **Revit 애드인**: 순수 WebSocket 서버 (포트 3001)
-- **웹 클라이언트**: Socket.IO 클라이언트
-- **통신 흐름**: 웹 ↔ Node.js 서버 ↔ Revit 애드인
+## 🛠️ 기술 스택
+
+### Backend
+- **런타임**: Node.js 16.0.0+
+- **프레임워크**: Express.js 4.18.2
+- **WebSocket**: Socket.IO 4.8.1, WS 8.18.3
+- **데이터**: JSON 파일 기반 저장
+- **유틸리티**: fs-extra 11.1.1, UUID 9.0.0
+- **개발도구**: nodemon 3.0.1
+
+### Frontend  
+- **코어**: Vanilla JavaScript (ES6 모듈)
+- **UI**: Font Awesome 6.4.0
+- **데이터**: IndexedDB (Dexie.js latest)
+- **통신**: Socket.IO Client 4.7.4
+- **파일처리**: SheetJS 0.18.5
+- **스타일**: CSS3 (Grid, Flexbox)
+
+### Revit 연동
+- **프로토콜**: WebSocket (포트 3001)
+- **데이터 형식**: JSON
+- **C# 애드인**: Autodesk Revit API 호환
+
+## 시스템 아키텍처
+
+### 🖥️ 서버 계층 (Backend)
+
+#### 메인 서버 (`server.js`)
+- **플랫폼**: Node.js Express
+- **포트**: 3000 (기본값, 환경변수 PORT로 변경 가능)
+- **미들웨어**: CORS, Body Parser, Static File Serving
+- **WebSocket**: Socket.IO 서버 (Revit 연동용)
+- **로깅**: 타임스탬프 포함 HTTP 요청 로깅
+
+#### API 계층 (`api/`)
+```
+api/
+├── index.js           # API 라우트 통합 관리 및 문서화
+├── walls.js           # 벽체 데이터 CRUD API
+├── materials.js       # 자재 데이터 관리 API  
+└── revit.js          # Revit 연동 API (동기화, 타입매칭, 객체선택)
+```
+
+#### 서비스 계층 (`services/`)
+```
+services/
+├── dataService.js     # 파일 기반 데이터 관리 (JSON 저장/로드, 백업)
+├── wallService.js     # 벽체 비즈니스 로직
+├── materialService.js # 자재 관리 로직
+└── revitService.js   # Revit 연동 로직 (WebSocket 통신)
+```
+
+### 🌐 클라이언트 계층 (Frontend)
+
+#### 핵심 HTML (`public/index.html`)
+- **프레임워크**: Vanilla JavaScript (ES6 모듈)
+- **외부 라이브러리**: 
+  - Font Awesome 6.4.0 (아이콘)
+  - SheetJS 0.18.5 (Excel 처리)
+  - Dexie.js (IndexedDB)
+  - Socket.IO 4.7.4 (WebSocket)
+
+#### JavaScript 모듈 구조 (`public/js/`)
+
+**🎯 진입점 및 핵심**
+```
+├── main.js                  # ES6 모듈 시스템 진입점, KiyenoApp 클래스
+├── app-core.js             # 핵심 애플리케이션 로직
+├── app-calculator.js       # 계산 엔진 (소요량 계산)
+├── app-services.js         # 서비스 계층 (석고보드 관리 등)
+├── app-ui.js              # UI 렌더링 및 상호작용
+├── bridge.js              # 기존 시스템과 새 시스템 연결
+├── debug.js               # 디버깅 및 로그 관리
+├── display-system.js      # 4가지 보기 모드 시스템
+└── revit-wall-handler.js  # Revit 벽체 데이터 처리 및 객체 선택
+```
+
+**📦 모듈 (`modules/`)**
+```
+modules/
+├── priceDatabase.js       # IndexedDB 기반 가격 데이터베이스
+├── materialManager.js     # 자재 관리 모듈
+├── unitPriceManager.js    # 일위대가 관리 (핵심 모듈, 3400+ 라인)
+├── revitManager.js        # Revit 연동 관리
+├── revitTypeMatching.js   # Revit 타입 매칭
+└── revitUtilities.js     # Revit 유틸리티 함수
+```
+
+**🔧 서비스 (`services/`)**
+```
+services/
+├── apiService.js          # REST API 통신
+├── materialService.js     # 자재 데이터 서비스
+├── wallService.js         # 벽체 데이터 서비스
+├── revitService.js        # Revit 연동 서비스
+└── socketService.js       # WebSocket 통신 관리
+```
+
+**🛠️ 유틸리티 (`utils/`)**
+```
+utils/
+├── constants.js           # 상수 정의
+├── helpers.js            # 도우미 함수
+└── validators.js         # 유효성 검사
+```
+
+#### CSS 스타일시트 (`public/css/`)
+```
+css/
+├── styles.css                 # 메인 스타일시트
+├── breakdown-styles.css       # 내역서 스타일
+├── display-system.css         # 디스플레이 시스템 스타일
+├── logger-styles.css         # 로그 표시 스타일
+├── material-management.css    # 자재 관리 모달 스타일
+├── material-selector.css     # 자재 선택기 스타일
+└── revit-responsive.css      # Revit 탭 반응형 스타일
+```
+
+## 📊 데이터 시스템 구조
+
+### 3계층 하이브리드 데이터 관리
+현재 시스템은 로컬/오프라인 환경에 최적화된 **3계층 하이브리드 구조**를 사용합니다:
+
+#### 1️⃣ 기본 데이터 계층 (하드코딩)
+- **파일**: `priceDatabase.js`
+- **내용**: 55개 경량자재 + 49개 석고보드 기본 데이터
+- **특징**: 브라우저 설치 즉시 사용 가능, 절대 소실되지 않음
+- **카테고리**: 
+  - **경량자재**: STUD_KS, RUNNER_KS, STUD_BS, RUNNER_BS, CH_STUD_J_RUNNER, BEADS, FASTENERS
+  - **석고보드**: STANDARD, MOISTURE, FIRE, FIRE_MOISTURE, SOUND, ANTIBACTERIAL, INSULATION
+
+#### 2️⃣ 사용자 데이터 계층 (IndexedDB)
+- **저장소**: 브라우저 내장 IndexedDB (Dexie.js)
+- **내용**: 사용자가 추가/수정한 자재 데이터, 벽체 데이터, 일위대가 데이터
+- **특징**: 실시간 저장, 빠른 접근, 브라우저별 독립 관리
+- **위치**: `C:\Users\[사용자]\AppData\Local\Google\Chrome\User Data\Default\IndexedDB\`
+
+#### 3️⃣ 백업/복원 계층 (파일 시스템)
+- **기능**: Excel/JSON 파일 내보내기/가져오기
+- **용도**: 데이터 이동성, 백업, 브라우저 간 데이터 전송
+- **지원 형식**: .xlsx (Excel), .json (JSON)
+- **구현**: `revit-wall-handler.js`의 드롭다운 메뉴
+
+### 🔄 WebSocket 통신 구조
+```
+웹 클라이언트 (Socket.IO)
+        ↕
+Node.js 서버 (Socket.IO, 포트 3000)
+        ↕
+Revit C# 애드인 (WebSocket, 포트 3001)
+```
+
+**통신 프로토콜**:
+- **웹 ↔ 서버**: Socket.IO (HTTP Long Polling + WebSocket)
+- **서버 ↔ Revit**: 순수 WebSocket (JSON 메시지)
+
+### 🗂️ 서버 데이터 저장
+- **위치**: `data/` 디렉토리
+- **형식**: JSON 파일
+- **백업**: `data/backups/` 자동 백업
+- **캐싱**: 메모리 캐시 + 파일 수정시간 추적
+
+## ⚙️ 핵심 기능 모듈
+
+### 🏗️ 일위대가 관리 시스템 (`unitPriceManager.js`)
+**위치**: `public/js/modules/unitPriceManager.js` (3400+ 라인)
+
+**주요 기능**:
+- **세부아이템 생성/편집**: 복잡한 모달 UI with 동적 구성품 관리
+- **6가지 소요량 계산**: 스터드, 런너, 피스, 타정총알, 용접봉, 석고피스
+- **노무비 처리**: 금액칸 입력 + 단가 자동계산 (금액÷수량)
+- **자재 선택기**: IndexedDB 기반 실시간 검색
+- **Excel 내보내기**: 내역서 Excel 파일 생성
+
+**계산 공식**:
+```javascript
+// 스터드: 1 ÷ 간격값 × 할증률
+stud = 1 / spacing * premiumRate;
+
+// 런너: 일반(0.34×2), 더블(0.34×4)  
+runner = 0.34 * (type === '더블' ? 4 : 2);
+
+// 피스: @450=12, @400=1.125×12(버림), @500=12×0.9(버림)
+piece = spacing === 400 ? Math.floor(1.125 * 12) : 
+        spacing === 500 ? Math.floor(12 * 0.9) : 12;
+
+// 석고피스: 복잡한 테이블 계산 (3×6, 4×8 등)
+gypsumPiece = calculateGypsumPiece(width, height);
+```
+
+### 🔗 Revit 연동 시스템
+**파일들**: `revitService.js`, `revit-wall-handler.js`, `socketService.js`
+
+**기능**:
+- **양방향 데이터 동기화**: Revit ↔ 웹앱
+- **객체 선택**: 체크박스 → ElementID 수집 → Revit 선택
+- **타입 매칭**: Revit WallType ↔ 시스템 벽체타입
+- **Excel/JSON 관리**: 드롭다운 메뉴로 데이터 백업/복원
+
+### 🎨 디스플레이 시스템 (`display-system.js`)
+**4가지 보기 모드**:
+- **기본값보기**: 전체 내역서 형태
+- **타입별보기**: 벽체 타입별 그룹핑 + 소계
+- **재료별보기**: 자재별 집계 + 발주수량
+- **공종별보기**: 공종별 분류 + 소계
+
+### 📦 자재 관리 시스템
+**구성**: `materialManager.js`, `priceDatabase.js`, `materialService.js`
+
+**기능**:
+- **하이브리드 데이터**: 기본 104개 + 사용자 추가
+- **실시간 검색**: 품명, 규격, 카테고리 필터링
+- **가격 관리**: 재료비단가, 노무비단가 별도 관리
+- **카테고리 관리**: 경량자재 7종, 석고보드 7종
 
 ## 개발 명령어
 
@@ -154,35 +313,61 @@ npm run dev        # 개발 모드 (nodemon 사용)
   - 관련 UI 컴포넌트
 - **목적**: 인터페이스 단순화 및 데이터 관리 기능으로 대체
 
-## API 엔드포인트
+### 7. 6가지 소요량 일괄 계산 시스템 ✅
+- **위치**: 세부아이템 수정 → 구성품 추가 버튼 옆
+- **기능**: 
+  - 6개 자재 동시 계산 (스터드, 런너, 피스, 타정총알, 용접봉, 석고피스)
+  - 개별 할증률 적용 가능
+  - 가로형 모달 레이아웃
+  - 계산 결과 자동 적용
+- **계산 공식**:
+  - 스터드: `1 ÷ 간격값 × 할증률` (@400=0.4, @450=0.45, @500=0.5)
+  - 런너: 일반 `0.34×2`, 더블 `0.34×4`
+  - 피스: @450 기본값 12, @400는 `1.125×12` (버림), @500은 `12×0.9` (버림)
+  - 타정총알: 할증률 기본값 1, 단위 SET
+  - 용접봉: 피스와 동일하지만 기본값 0.08, 단위 KG, 셋째자리 버림
+  - 석고피스: 복잡한 테이블 계산 (3×6, 4×8 등)
+- **구현**: `unitPriceManager.js` 3038-3451라인
 
-### 벽체 관리 (/api/walls)
+### 8. 노무비 처리 로직 개선 ✅ (2025-01-20 수정)
+- **문제**: 자재 선택 시 노무비가 단가칸에 잘못 입력되는 문제
+- **수정 내용**:
+  - 노무비 금액이 **금액칸**에 정확히 입력됨
+  - 단가는 **금액÷수량**으로 자동 계산됨
+- **위치**: `unitPriceManager.js` 2473-2508라인
+- **구현**: `fillComponentRowWithMaterial` 함수 내 노무비 처리 로직 완전 재작성
+- **테스트**: 세부아이템 수정에서 노무비 포함 구성품 추가 시 정상 작동
 
-- `GET /api/walls`: 모든 벽체 조회
-- `GET /api/walls/:id`: 특정 벽체 조회
-- `POST /api/walls`: 새 벽체 생성
-- `PUT /api/walls/:id`: 벽체 수정
-- `DELETE /api/walls/:id`: 벽체 삭제
-- `POST /api/walls/reorder`: 벽체 순서 변경
-- `GET /api/walls/search/:query`: 벽체 검색
+## 📡 API 엔드포인트
 
-### 자재 관리 (/api/materials)
+### 벽체 관리 API (`/api/walls`)
+- `GET /api/walls` - 모든 벽체 조회
+- `GET /api/walls/:id` - 특정 벽체 조회
+- `POST /api/walls` - 새 벽체 생성
+- `PUT /api/walls/:id` - 벽체 수정
+- `DELETE /api/walls/:id` - 벽체 삭제
+- `POST /api/walls/reorder` - 벽체 순서 변경
+- `GET /api/walls/search/:query` - 벽체 검색
 
-- `GET /api/materials`: 모든 자재 조회
-- `GET /api/materials/:id`: 특정 자재 조회
-- `GET /api/materials/category/:category`: 카테고리별 자재 조회
-- `POST /api/materials`: 새 자재 생성
-- `PUT /api/materials/:id`: 자재 수정
-- `DELETE /api/materials/:id`: 자재 삭제
+### 자재 관리 API (`/api/materials`)
+- `GET /api/materials` - 모든 자재 조회
+- `GET /api/materials/:id` - 특정 자재 조회
+- `GET /api/materials/category/:category` - 카테고리별 자재 조회
+- `GET /api/materials/categories/list` - 모든 카테고리 조회
+- `POST /api/materials` - 새 자재 생성
+- `PUT /api/materials/:id` - 자재 수정
+- `DELETE /api/materials/:id` - 자재 삭제
+- `GET /api/materials/search/:query` - 자재 검색
+- `POST /api/materials/prices/update` - 가격 업데이트
 
-### Revit 연동 (/api/revit)
-
-- `POST /api/revit/sync`: Revit 데이터 동기화
-- `GET /api/revit/types`: Revit 타입 매핑 조회
-- `POST /api/revit/types`: Revit 타입 매핑 저장
-- `POST /api/revit/export`: Revit 데이터 내보내기
-- `GET /api/revit/status`: Revit 연결 상태 확인
-- **`POST /api/revit/selectElements`**: Revit 객체 선택 (새로 추가)
+### Revit 연동 API (`/api/revit`)
+- `POST /api/revit/sync` - Revit 데이터 동기화
+- `GET /api/revit/types` - Revit 타입 매핑 조회
+- `POST /api/revit/types` - Revit 타입 매핑 저장
+- `POST /api/revit/export` - Revit 데이터 내보내기
+- `POST /api/revit/import` - Revit 데이터 가져오기
+- `GET /api/revit/status` - Revit 연결 상태 확인
+- `POST /api/revit/selectElements` - Revit 객체 선택 (ElementID 배열 전송)
 
 ### WebSocket 이벤트
 
