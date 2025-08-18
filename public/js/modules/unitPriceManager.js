@@ -747,6 +747,30 @@ function calculateLaborFromAmount(amountInput) {
     console.log(`💼 노무비 계산: 금액(${amount}) ÷ 수량(${quantity}) = 단가(${unitPrice})`);
 }
 
+// 노무비 금액 입력 시 단가 자동계산 (새로 생성된 입력 필드용)
+function calculateLaborUnitPrice(amountInput) {
+    const row = amountInput.closest('tr');
+    if (!row) return;
+    
+    const quantityInput = row.querySelector('.component-quantity');
+    const quantity = parseFloat(quantityInput?.value) || 1;
+    const amount = parseFloat(amountInput.value) || 0;
+    const unitPrice = quantity > 0 ? amount / quantity : 0;
+    
+    // 단가 표시 업데이트
+    const unitPriceDisplay = row.querySelector('.calculated-unit-price');
+    if (unitPriceDisplay) {
+        unitPriceDisplay.textContent = Math.round(unitPrice).toLocaleString();
+    }
+    
+    // 행 총계 다시 계산
+    if (quantityInput) {
+        calculateRowTotal(quantityInput);
+    }
+    
+    console.log(`💼 노무비 단가 자동계산: 금액(${amount}) ÷ 수량(${quantity}) = 단가(${Math.round(unitPrice)})`);
+}
+
 // =============================================================================
 // 구성품 행 관리 함수들
 // =============================================================================
@@ -897,9 +921,17 @@ function calculateRowTotal(input) {
             laborCalculatedUnit.textContent = Math.round(laborPrice).toLocaleString();
         }
     } else {
-        // 일반 자재: 단가 × 수량 = 금액
-        laborPrice = getElementValue(row.querySelector('.component-labor-price'));
-        laborAmount = quantity * laborPrice;
+        // 일반 자재: 단가 × 수량 = 금액 또는 금액 입력 필드에서 직접 읽기
+        const laborAmountInput = row.querySelector('.labor-amount-input');
+        if (laborAmountInput) {
+            // 새로 생성된 노무비 금액 입력 필드가 있는 경우
+            laborAmount = parseFloat(laborAmountInput.value) || 0;
+            laborPrice = quantity > 0 ? laborAmount / quantity : 0;
+        } else {
+            // 기존 방식: 단가 × 수량 = 금액
+            laborPrice = getElementValue(row.querySelector('.component-labor-price'));
+            laborAmount = quantity * laborPrice;
+        }
     }
     
     const materialAmount = quantity * materialPrice;
@@ -2479,15 +2511,24 @@ function fillComponentRowWithMaterial(row, material) {
                 laborAmountElement.dispatchEvent(new Event('input', { bubbles: true }));
                 console.log(`💼 노무비 금액 입력 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
             }
-            // 2순위: .labor-amount 영역 내의 입력 필드 찾기
+            // 2순위: .labor-amount 영역을 입력 필드로 변환
             else {
                 const laborAmountContainer = row.querySelector('.labor-amount');
-                const laborAmountInput = laborAmountContainer?.querySelector('input');
                 
-                if (laborAmountInput) {
-                    laborAmountInput.value = laborAmount;
-                    laborAmountInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    console.log(`💼 노무비 금액 컨테이너 내 입력 필드에 입력: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+                if (laborAmountContainer) {
+                    // 기존 내용을 입력 필드로 교체
+                    laborAmountContainer.innerHTML = `
+                        <input type="number" class="labor-amount-input" value="${laborAmount}" min="0"
+                               oninput="calculateLaborUnitPrice(this)"
+                               style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; 
+                                      font-size: 12px; text-align: right; background: white; color: #1e40af; font-weight: 600;"
+                               placeholder="노무비 금액">
+                        <div class="labor-unit-display" style="font-size: 10px; color: #6b7280; margin-top: 2px;">
+                            단가: <span class="calculated-unit-price">${quantity > 0 ? Math.round(laborPrice).toLocaleString() : 0}</span>원
+                        </div>
+                    `;
+                    
+                    console.log(`💼 노무비 금액 필드 생성: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
                 }
                 // 3순위: 노무비 단가 필드에 입력 (기존 방식)
                 else if (laborPriceElement) {
@@ -3118,6 +3159,9 @@ window.updateComponentSubtotal = updateComponentSubtotal;
 // 세션 관리 전역 함수 등록
 window.saveUnitPriceSession = saveUnitPriceSession;
 window.restoreUnitPriceSession = restoreUnitPriceSession;
+
+// 노무비 계산 전역 함수 등록
+window.calculateLaborUnitPrice = calculateLaborUnitPrice;
 window.clearUnitPriceSession = clearUnitPriceSession;
 
 // =============================================================================
