@@ -949,7 +949,13 @@ function calculateRowTotal(input) {
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
     if (laborAmountElement) {
-        if (isLabor) {
+        // 노무비 금액 입력 필드가 있으면 textContent 업데이트 하지 않음
+        const hasLaborAmountInput = laborAmountElement.querySelector('.labor-amount-input');
+        
+        if (hasLaborAmountInput) {
+            // 이미 입력 필드가 있는 경우: textContent 업데이트 건너뛰기
+            console.log('🔒 노무비 입력 필드 보호: textContent 업데이트 건너뛰기');
+        } else if (isLabor) {
             // 노무비: 단가 정보 표시 (금액은 입력 필드에 있음)
             const laborUnitPrice = row.querySelector('.labor-unit-price');
             if (!laborUnitPrice) {
@@ -2518,6 +2524,20 @@ function fillComponentRowWithMaterial(row, material) {
             // 2순위: .labor-amount 영역을 입력 필드로 변환
             else {
                 const laborAmountContainer = row.querySelector('.labor-amount');
+                console.log(`🔍 .labor-amount 컨테이너 탐색: ${!!laborAmountContainer}`);
+                
+                // 모든 가능한 노무비 관련 셀렉터 시도
+                const allPossibleContainers = [
+                    row.querySelector('.labor-amount'),
+                    row.querySelector('td.labor-amount'),
+                    row.querySelector('[class*="labor-amount"]'),
+                    ...row.querySelectorAll('td')
+                ].filter(Boolean);
+                
+                console.log(`🔍 가능한 컨테이너들: ${allPossibleContainers.length}개`);
+                allPossibleContainers.forEach((container, index) => {
+                    console.log(`  ${index}: class="${container.className}", innerHTML="${container.innerHTML?.substring(0, 50)}..."`);
+                });
                 
                 if (laborAmountContainer) {
                     // 기존 내용을 입력 필드로 교체
@@ -2533,12 +2553,19 @@ function fillComponentRowWithMaterial(row, material) {
                     `;
                     
                     console.log(`💼 노무비 금액 필드 생성: 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+                    console.log(`   HTML 교체 후 컨테이너 내용: ${laborAmountContainer.innerHTML?.substring(0, 100)}...`);
                     
-                    // 생성 후 확인
+                    // 생성 후 즉시 확인
+                    const createdInput = laborAmountContainer.querySelector('.labor-amount-input');
+                    console.log('  🔎 즉시 생성 확인:', !!createdInput, createdInput?.value);
+                    
+                    // 약간의 지연 후 재확인
                     setTimeout(() => {
-                        const createdInput = row.querySelector('.labor-amount-input');
-                        console.log('  ✅ 생성된 입력 필드:', !!createdInput, createdInput?.value);
-                    }, 10);
+                        const delayedCheck = row.querySelector('.labor-amount-input');
+                        const containerContent = row.querySelector('.labor-amount')?.innerHTML;
+                        console.log('  ✅ 지연 후 확인:', !!delayedCheck, delayedCheck?.value);
+                        console.log('  📋 현재 컨테이너 내용:', containerContent?.substring(0, 100));
+                    }, 50);
                 }
                 // 3순위: 노무비 단가 필드에 입력 (기존 방식)
                 else if (laborPriceElement) {
