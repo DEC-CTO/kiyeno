@@ -2436,12 +2436,33 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        if (laborPriceElement) {
+        // 노무비 처리 개선: 노무비 항목의 경우 금액 필드에 입력하고 단가는 자동계산
+        const itemName = material.품명 || material.name || '';
+        const isLaborItem = isLaborCost(itemName);
+        
+        if (isLaborItem) {
+            // 노무비 항목: 금액 필드에 입력 (단가 * 수량)
+            const laborAmountElement = row.querySelector('.component-labor-amount');
+            const quantityInput = row.querySelector('.component-quantity');
+            const quantity = parseFloat(quantityInput?.value) || 1;
             const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
-            if (laborPriceElement.tagName === 'SPAN') {
-                laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
-            } else {
-                laborPriceElement.value = laborPrice;
+            const laborAmount = laborPrice * quantity;
+            
+            if (laborAmountElement) {
+                laborAmountElement.value = laborAmount;
+                // 금액 입력 후 단가 자동계산을 위해 change 이벤트 트리거
+                laborAmountElement.dispatchEvent(new Event('input', { bubbles: true }));
+                console.log(`💼 노무비 항목 처리: ${itemName} - 단가(${laborPrice}) × 수량(${quantity}) = 금액(${laborAmount})`);
+            }
+        } else {
+            // 일반 항목: 단가 필드에 입력
+            if (laborPriceElement) {
+                const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
+                if (laborPriceElement.tagName === 'SPAN') {
+                    laborPriceElement.textContent = `${Number(laborPrice).toLocaleString()}원`;
+                } else {
+                    laborPriceElement.value = laborPrice;
+                }
             }
         }
         
