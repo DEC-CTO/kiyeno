@@ -599,11 +599,11 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="3" step="0.1" oninput="calculateGrandTotal()" placeholder="3.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
@@ -615,11 +615,11 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="1.5" step="0.1" oninput="calculateGrandTotal()" placeholder="1.5" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
@@ -631,11 +631,11 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">자재비의</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="15" step="0.1" oninput="calculateGrandTotal()" placeholder="15.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-material-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
@@ -647,11 +647,11 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">노무비의</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="2" step="0.1" oninput="calculateGrandTotal()" placeholder="2.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;" class="fixed-expense-price">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-expense-price">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="fixed-expense-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
@@ -668,11 +668,11 @@ function createDetailModalHTML(itemSummary) {
                                 <option value="100" selected>100원</option>
                                 <option value="1000">1000원</option>
                             </select></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="rounding-material-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;" class="rounding-labor-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="rounding-expense-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="rounding-total-price">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="rounding-total-amount">0원</td>
@@ -698,54 +698,8 @@ function createDetailModalHTML(itemSummary) {
 }
 
 // =============================================================================
-// 노무비 식별 및 처리 함수들
+// 구성품 행 관리 함수들 
 // =============================================================================
-
-// 노무비 항목 판별 함수
-function isLaborCost(itemName, category = '') {
-    if (!itemName) return false;
-    
-    // 카테고리별 판별
-    if (category && (category.toUpperCase() === 'LABOR' || category === '노무비')) {
-        return true;
-    }
-    
-    // 항목명으로 판별
-    const laborKeywords = ['노무비', '인건비', '노임', '인건', '시공비', '설치비', '작업비'];
-    const name = itemName.toString().toLowerCase();
-    
-    return laborKeywords.some(keyword => name.includes(keyword));
-}
-
-// 노무비 항목 계산 방식 결정
-function getLaborCalculationMode(itemName, category = '') {
-    return isLaborCost(itemName, category) ? 'amount-to-unit' : 'unit-to-amount';
-}
-
-// 노무비 금액 입력 시 단가 자동계산
-function calculateLaborFromAmount(amountInput) {
-    const row = amountInput.closest('tr');
-    if (!row) return;
-    
-    const quantityInput = row.querySelector('.component-quantity');
-    const laborCalculatedUnit = row.querySelector('.labor-calculated-unit');
-    
-    const amount = parseFloat(amountInput.value) || 0;
-    const quantity = parseFloat(quantityInput?.value) || 1;
-    
-    // 단가 = 금액 ÷ 수량
-    const unitPrice = quantity > 0 ? Math.round(amount / quantity) : 0;
-    
-    // 계산된 단가 표시
-    if (laborCalculatedUnit) {
-        laborCalculatedUnit.textContent = unitPrice.toLocaleString();
-    }
-    
-    // 총합 계산 갱신
-    calculateGrandTotal();
-    
-    console.log(`💼 노무비 계산: 금액(${amount}) ÷ 수량(${quantity}) = 단가(${unitPrice})`);
-}
 
 
 // =============================================================================
@@ -771,8 +725,7 @@ function addComponentRow(componentData = null) {
         expensePrice: 0
     };
     
-    // 노무비 여부 판별
-    const isLabor = isLaborCost(data.name, data.category);
+    // 기본 행 생성 (노무비 특별 처리 제거)
     
     row.innerHTML = `
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
@@ -809,26 +762,11 @@ function addComponentRow(componentData = null) {
         </td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="material-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right;">
-            ${isLabor ? 
-                // 노무비: 금액 입력 → 단가 자동계산
-                `<input type="number" class="component-labor-amount" value="${data.laborPrice * data.quantity || 0}" min="0"
-                       oninput="calculateLaborFromAmount(this)"
-                       style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;"
-                       placeholder="노무비 금액">` :
-                // 일반 자재: 단가 표시 (읽기전용)
-                `<span class="component-labor-price" style="font-size: 12px; color: #374151;">
-                    ${data.laborPrice ? data.laborPrice.toLocaleString() + '원' : '0원'}
-                </span>`
-            }
+            <span class="component-labor-price" style="font-size: 12px; color: #374151;">
+                ${data.laborPrice ? data.laborPrice.toLocaleString() + '원' : '0원'}
+            </span>
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">
-            ${isLabor ? 
-                // 노무비: 단가 자동계산 표시
-                `<span class="labor-unit-price" style="font-size: 11px; color: #6b7280;">단가: <span class="labor-calculated-unit">0</span>원</span>` :
-                // 일반 자재: 금액 계산 표시  
-                `0원`
-            }
-        </td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <input type="number" class="expense-price" value="${data.expensePrice}" min="0"
                    oninput="calculateRowTotal(this)"
@@ -878,36 +816,15 @@ function calculateRowTotal(input) {
     const materialPrice = getElementValue(row.querySelector('.component-material-price'));
     const expensePrice = getElementValue(row.querySelector('.expense-price'));
     
-    // 노무비 계산 방식 판별
-    const nameElement = row.querySelector('.component-name');
-    const itemName = nameElement ? nameElement.textContent.trim() : '';
-    const isLabor = isLaborCost(itemName);
-    
-    let laborPrice = 0;
-    let laborAmount = 0;
-    
-    if (isLabor) {
-        // 노무비: 금액 입력 → 단가 계산
-        const laborAmountInput = row.querySelector('.component-labor-amount');
-        laborAmount = getElementValue(laborAmountInput);
-        laborPrice = quantity > 0 ? laborAmount / quantity : 0;
-        
-        // 계산된 단가 표시 업데이트
-        const laborCalculatedUnit = row.querySelector('.labor-calculated-unit');
-        if (laborCalculatedUnit) {
-            laborCalculatedUnit.textContent = Math.round(laborPrice).toLocaleString();
-        }
-    } else {
-        // 일반 자재: 단가 × 수량 = 금액
-        laborPrice = getElementValue(row.querySelector('.component-labor-price'));
-        laborAmount = quantity * laborPrice;
-    }
+    // 노무비 계산: 단가 ÷ 수량 = 금액 (사용자 요청에 따른 수정)
+    const laborPrice = getElementValue(row.querySelector('.component-labor-price'));
+    const laborAmount = quantity > 0 ? laborPrice / quantity : 0;
     
     const materialAmount = quantity * materialPrice;
     const expenseAmount = quantity * expensePrice;
     const totalAmount = materialAmount + laborAmount + expenseAmount;
     
-    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비(${laborPrice}) = ${laborAmount}`);
+    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비(${laborPrice} ÷ ${quantity}) = ${laborAmount}`);
     
     // 각 금액 업데이트
     const materialAmountElement = row.querySelector('.material-amount');
@@ -918,16 +835,7 @@ function calculateRowTotal(input) {
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
     if (laborAmountElement) {
-        if (isLabor) {
-            // 노무비: 단가 정보 표시 (금액은 입력 필드에 있음)
-            const laborUnitPrice = row.querySelector('.labor-unit-price');
-            if (!laborUnitPrice) {
-                laborAmountElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
-            }
-        } else {
-            // 일반 자재: 계산된 금액 표시
-            laborAmountElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
-        }
+        laborAmountElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
     }
     if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
     if (totalAmountElement) totalAmountElement.textContent = Math.round(totalAmount).toLocaleString() + '원';
@@ -1110,13 +1018,22 @@ function collectCurrentComponents() {
             }
         };
         
+        // 구성품 데이터 수집
+        const componentName = getElementValue(row.querySelector('.component-name')) || '';
+        const quantity = parseFloat(row.querySelector('.component-quantity')?.value) || 0;
+        
+        // 노무비 계산: 단가 ÷ 수량 = 금액
+        const laborPrice = parseFloat(getElementValue(row.querySelector('.labor-price')) || getElementValue(row.querySelector('.component-labor-price'))) || 0;
+        const laborAmount = quantity > 0 ? laborPrice / quantity : 0;
+        
         const component = {
-            name: getElementValue(row.querySelector('.component-name')) || '',
+            name: componentName,
             spec: getElementValue(row.querySelector('.component-spec')) || '',
             unit: getElementValue(row.querySelector('.component-unit')) || '',
-            quantity: parseFloat(row.querySelector('.component-quantity')?.value) || 0,
+            quantity: quantity,
             materialPrice: parseFloat(getElementValue(row.querySelector('.material-price')) || getElementValue(row.querySelector('.component-material-price'))) || 0,
-            laborPrice: parseFloat(getElementValue(row.querySelector('.labor-price')) || getElementValue(row.querySelector('.component-labor-price'))) || 0,
+            laborPrice: laborPrice,
+            laborAmount: laborAmount,
             expensePrice: parseFloat(getElementValue(row.querySelector('.expense-price'))) || 0
         };
         
@@ -1259,14 +1176,16 @@ function calculateItemTotalCosts(item) {
         item.components.forEach((component, index) => {
             const quantity = parseFloat(component.quantity) || 0;
             const materialPrice = parseFloat(component.materialPrice) || 0;
-            const laborPrice = parseFloat(component.laborPrice) || 0;
             const expensePrice = parseFloat(component.expensePrice) || 0;
             
             const componentMaterial = quantity * materialPrice;
-            const componentLabor = quantity * laborPrice;
             const componentExpense = quantity * expensePrice;
             
-            console.log(`  구성품 ${index + 1}: ${component.name || 'Unknown'} - 수량:${quantity}, 재료비:${materialPrice}, 노무비:${laborPrice} → 재료비합계:${componentMaterial}, 노무비합계:${componentLabor}`);
+            // 노무비 계산: 저장된 방식에 따라 처리
+            // 노무비 계산: 단가 ÷ 수량 = 금액
+            const laborPrice = parseFloat(component.laborPrice) || 0;
+            const componentLabor = quantity > 0 ? laborPrice / quantity : 0;
+            console.log(`  🔧 구성품 ${index + 1}: ${component.name} - 단가÷수량:${laborPrice}÷${quantity}=${componentLabor}`);
             
             materialTotal += componentMaterial;
             laborTotal += componentLabor;
@@ -2470,41 +2389,16 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        // 노무비 처리: 노무비는 금액칸에 들어가고 단가는 금액/수량으로 자동 계산
+        // 노무비 처리: 단가 설정
         const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
-        if (laborPrice > 0) {
-            const quantityInput = row.querySelector('.component-quantity');
-            const quantity = parseFloat(quantityInput?.value) || 1;
-            const laborAmount = laborPrice * quantity;
-            
-            // 1. 노무비 금액을 금액 칸에 입력 (laborAmountElement 사용)
-            const laborAmountElement = row.querySelector('.labor-amount input') || row.querySelector('[data-field="laborAmount"]');
-            if (laborAmountElement) {
-                laborAmountElement.value = laborAmount;
-                console.log(`💼 노무비 금액 입력: ${laborAmount}원 (금액칸)`);
+        if (laborPrice > 0 && laborPriceElement) {
+            if (laborPriceElement.tagName === 'SPAN') {
+                laborPriceElement.textContent = `${laborPrice.toLocaleString()}원`;
             } else {
-                // 백업: 다른 방식으로 금액 필드 찾기
-                const laborAmountContainer = row.querySelector('.labor-amount');
-                if (laborAmountContainer) {
-                    const amountInput = laborAmountContainer.querySelector('input');
-                    if (amountInput) {
-                        amountInput.value = laborAmount;
-                        console.log(`💼 노무비 금액 입력 (백업): ${laborAmount}원`);
-                    }
-                }
+                laborPriceElement.value = laborPrice;
             }
-            
-            // 2. 노무비 단가를 단가 칸에 자동 계산하여 입력 (금액/수량)
-            const calculatedUnitPrice = quantity > 0 ? laborAmount / quantity : 0;
-            if (laborPriceElement) {
-                if (laborPriceElement.tagName === 'SPAN') {
-                    laborPriceElement.textContent = `${Math.round(calculatedUnitPrice).toLocaleString()}원`;
-                } else {
-                    laborPriceElement.value = Math.round(calculatedUnitPrice);
-                }
-                console.log(`💼 노무비 단가 자동계산: 금액(${laborAmount}) ÷ 수량(${quantity}) = 단가(${calculatedUnitPrice})`);
-            }
+            console.log(`🔧 노무비 단가 설정: ${laborPrice}원`);
         }
         
         // 수량을 기본값 1로 설정 (자재 선택 시에만)

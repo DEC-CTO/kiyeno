@@ -85,7 +85,7 @@ class PriceDatabase extends EventEmitter {
    */
   async initIndexedDB() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('KiyenoMaterialsDB', 1);
+      const request = indexedDB.open('KiyenoMaterialsDB', 2);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
@@ -96,13 +96,18 @@ class PriceDatabase extends EventEmitter {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
 
-        // 자재 저장소 생성
+        // materials 테이블이 없으면 생성
         if (!db.objectStoreNames.contains('materials')) {
-          const materialsStore = db.createObjectStore('materials', {
-            keyPath: 'id',
-          });
-          materialsStore.createIndex('category', 'category', { unique: false });
+          const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
           materialsStore.createIndex('name', 'name', { unique: false });
+          materialsStore.createIndex('category', 'category', { unique: false });
+        }
+        
+        // unitPrices 테이블이 없으면 생성 (일위대가용)
+        if (!db.objectStoreNames.contains('unitPrices')) {
+          const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
+          unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
+          unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
 
         // 설정 저장소 생성
@@ -4384,13 +4389,20 @@ class PriceDatabase extends EventEmitter {
       this.lightweightItemsCache = null;
       this.gypsumItemsCache = null;
 
+      // 단일 트랜잭션으로 모든 데이터 저장
+      const transaction = db.transaction(['materials'], 'readwrite');
+      const store = transaction.objectStore('materials');
+      
+      // 기존 데이터 삭제
+      await store.clear();
+      console.log('🗑️ 기존 자재 데이터 삭제 완료');
+
       // 경량자재 저장
       if (currentState.lightweightComponents && currentState.lightweightComponents.length > 0) {
+        console.log(`📦 경량자재 ${currentState.lightweightComponents.length}개 저장 중...`);
+        
         for (const material of currentState.lightweightComponents) {
           try {
-            const transaction = db.transaction(['materials'], 'readwrite');
-            const store = transaction.objectStore('materials');
-            
             // v2 호환 형식으로 데이터 변환 - 테이블에서 실제 사용하는 필드만 저장
             const materialData = {
               // 테이블 필수 필드들 (12개)
@@ -4422,30 +4434,19 @@ class PriceDatabase extends EventEmitter {
             await store.put(materialData);
             savedCount++;
             
-            // 디버깅: 저장된 경량자재 데이터 확인 (총 17개 필드)
-            console.log(`💾 경량자재 저장 완료: ${material.name}`, {
-              필드개수: Object.keys(materialData).length,
-              핵심필드: {
-                name: materialData.name,
-                price: materialData.price,
-                laborCost: materialData.laborCost,
-                재료비단가: materialData.재료비단가,
-                노무비단가: materialData.노무비단가
-              }
-            });
           } catch (error) {
             console.warn(`경량자재 저장 실패 (${material.name}):`, error);
           }
         }
+        console.log(`✅ 경량자재 ${savedCount}개 저장 완료`);
       }
 
       // 석고보드 저장  
       if (currentState.gypsumBoards && currentState.gypsumBoards.length > 0) {
+        console.log(`📦 석고보드 ${currentState.gypsumBoards.length}개 저장 중...`);
+        
         for (const material of currentState.gypsumBoards) {
           try {
-            const transaction = db.transaction(['materials'], 'readwrite');
-            const store = transaction.objectStore('materials');
-            
             // v2 호환 형식으로 데이터 변환 - 테이블에서 실제 사용하는 필드만 저장
             const materialData = {
               // 테이블 필수 필드들 (18개)
@@ -4481,23 +4482,17 @@ class PriceDatabase extends EventEmitter {
             await store.put(materialData);
             savedCount++;
             
-            // 디버깅: 저장된 석고보드 데이터 확인 (총 23개 필드)
-            console.log(`💾 석고보드 저장 완료: ${material.name}`, {
-              필드개수: Object.keys(materialData).length,
-              핵심필드: {
-                name: materialData.name,
-                unitPrice: materialData.unitPrice,
-                materialCost: materialData.materialCost,
-                laborCost: materialData.laborCost,
-                재료비단가: materialData.재료비단가,
-                노무비단가: materialData.노무비단가
-              }
-            });
           } catch (error) {
             console.warn(`석고보드 저장 실패 (${material.name}):`, error);
           }
         }
       }
+
+      // 트랜잭션 완료 대기
+      await new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+      });
 
       db.close();
       console.log(`📦 IndexedDB v2 저장 완료: ${savedCount}개 자재`);
