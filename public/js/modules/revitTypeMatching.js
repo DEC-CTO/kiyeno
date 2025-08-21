@@ -168,13 +168,6 @@ function createProjectManagementPanel() {
                                 <i class="fas fa-copy"></i> 선택 복사
                             </div>
                             <div class="dropdown-divider"></div>
-                            <div class="dropdown-item" onclick="openUnitPriceManagement()">
-                                <i class="fas fa-calculator"></i> 일위대가 관리
-                            </div>
-                            <div class="dropdown-item" onclick="showUnitPriceSummary()">
-                                <i class="fas fa-list-alt"></i> 일위대가 연동 현황
-                            </div>
-                            <div class="dropdown-divider"></div>
                             <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
                                 <i class="fas fa-trash-alt"></i> 선택 삭제
                             </div>
@@ -214,7 +207,6 @@ function createProjectManagementPanel() {
                                 <th rowspan="2" class="header-main col-runner col-priority-low" title="러너">Runner</th>
                                 <th rowspan="2" class="header-main col-steel col-priority-low" title="아연도금 철판">Steel Plate<br/>(Galvanizing)</th>
                                 <th rowspan="2" class="header-main col-thickness col-priority-medium" title="벽체 두께 (밀리미터)">두께(mm)</th>
-                                <th rowspan="2" class="header-main col-unitprice col-priority-high" title="연결된 일위대가">일위대가</th>
                             </tr>
                             <tr class="header-sub-row">
                                 <th class="header-sub col-layer" title="레이어 3">Layer3</th>
@@ -227,7 +219,7 @@ function createProjectManagementPanel() {
                         </thead>
                         <tbody id="revit-wall-table-body">
                             <tr>
-                                <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
+                                <td colspan="16" style="text-align: center; padding: 20px; color: #6c757d;">
                                     벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
                                 </td>
                             </tr>
@@ -426,9 +418,6 @@ function createRevitWallTableRow(wall) {
                 ${wall.steelPlate || '<span style="color: #999;">클릭하여 선택</span>'}
             </td>
             <td style="text-align: center;" ondblclick="editRevitWallThickness(${wall.id})" class="col-thickness col-priority-medium">${wall.thickness || ''}</td>
-            <td style="text-align: center;" class="col-unitprice col-priority-high">
-                ${createUnitPriceDropdown(wall)}
-            </td>
         </tr>
     `;
 }
@@ -437,73 +426,6 @@ function createRevitWallTableRow(wall) {
 // 일위대가 연동 함수들
 // =============================================================================
 
-// 일위대가 드롭다운 생성
-function createUnitPriceDropdown(wall) {
-    // 로컬스토리지에서 일위대가 데이터 가져오기
-    let unitPriceItems = [];
-    try {
-        const savedData = localStorage.getItem('kiyeno_unitPriceItems');
-        if (savedData) {
-            unitPriceItems = JSON.parse(savedData);
-        }
-    } catch (error) {
-        console.error('일위대가 데이터 로드 실패:', error);
-    }
-    
-    const options = unitPriceItems.map(item => 
-        `<option value="${item.id}" ${wall.unitPriceId === item.id ? 'selected' : ''}>
-            ${item.name} (${item.unit || 'N/A'})
-        </option>`
-    ).join('');
-    
-    return `
-        <select onchange="assignUnitPriceToWall(${wall.id}, this.value)" style="width: 100%; font-size: 11px;">
-            <option value="">일위대가 선택</option>
-            ${options}
-        </select>
-    `;
-}
-
-// 벽체에 일위대가 할당
-function assignUnitPriceToWall(wallId, unitPriceId) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
-    if (!wall) return;
-    
-    wall.unitPriceId = unitPriceId;
-    saveRevitWallTypes();
-    
-    console.log(`✅ 벽체 ${wallId}에 일위대가 ${unitPriceId} 할당됨`);
-}
-
-// 일위대가 연동 현황 표시
-function showUnitPriceSummary() {
-    const linkedWalls = revitWallTypes.filter(wall => wall.unitPriceId);
-    const unlinkedWalls = revitWallTypes.filter(wall => !wall.unitPriceId);
-    
-    const summaryHTML = `
-        <div class="unit-price-summary">
-            <h4>일위대가 연동 현황</h4>
-            <div class="summary-stats">
-                <div class="stat-item">
-                    <span class="stat-label">전체 벽체 타입:</span>
-                    <span class="stat-value">${revitWallTypes.length}개</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">연동 완료:</span>
-                    <span class="stat-value">${linkedWalls.length}개</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">연동 필요:</span>
-                    <span class="stat-value">${unlinkedWalls.length}개</span>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const modal = createSubModal('📊 일위대가 연동 현황', summaryHTML, [
-        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) }
-    ]);
-}
 
 // =============================================================================
 // 드롭다운 관리
@@ -637,7 +559,6 @@ function createNewWallType(modal) {
         channel: '',
         runner: '',
         steelPlate: '',
-        unitPriceId: '',
         createdAt: new Date().toISOString(),
         source: 'manual'
     };
@@ -1296,27 +1217,6 @@ function addRevitTypeMappingStyles() {
             border-color: #0ea5e9 !important;
         }
 
-        /* 일위대가 컬럼 스타일 */
-        .col-unitprice {
-            min-width: 180px;
-            width: 180px;
-        }
-
-        .col-unitprice select {
-            width: 100% !important;
-            padding: 2px 4px;
-            border: 1px solid #cbd5e1;
-            border-radius: 4px;
-            font-size: 11px;
-            background: white;
-            color: #1e293b;
-        }
-
-        .col-unitprice select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-        }
 
         /* 드롭다운 스타일 */
         .dropdown-menu {
@@ -1477,10 +1377,6 @@ window.filterMaterialSelectionTable = filterMaterialSelectionTable;
 window.editRevitWallType = editRevitWallType;
 window.editRevitWallThickness = editRevitWallThickness;
 
-// 일위대가 연동 함수들
-window.createUnitPriceDropdown = createUnitPriceDropdown;
-window.assignUnitPriceToWall = assignUnitPriceToWall;
-window.showUnitPriceSummary = showUnitPriceSummary;
 
 // 데이터 내보내기/가져오기
 window.exportRevitWallTypesToJSON = exportRevitWallTypesToJSON;
