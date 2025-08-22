@@ -1200,6 +1200,9 @@ function createSubModal(title, content, buttons = [], options = {}) {
     return subModalOverlay;
 }
 
+// createSubModal 함수를 전역에 노출
+window.createSubModal = createSubModal;
+
 // 서브 모달 닫기 (배경 모달 복원)
 function closeSubModal(subModalOverlay) {
     // 배경 자재 관리 모달 복원
@@ -1214,6 +1217,9 @@ function closeSubModal(subModalOverlay) {
         subModalOverlay.remove();
     }
 }
+
+// closeSubModal 함수를 전역에 노출
+window.closeSubModal = closeSubModal;
 
 // =============================================================================
 // 상세내역 모달

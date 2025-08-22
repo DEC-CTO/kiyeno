@@ -3544,8 +3544,8 @@ window.performExportAllData = performExportAllData;
 window.performImportAllData = performImportAllData;
 window.showModificationsSummary = showModificationsSummary;
 window.resetToOriginal = resetToOriginal;
-window.createSubModal = createSubModal;
-window.closeSubModal = closeSubModal;
+// createSubModal은 app-ui.js에서 전역 노출됨
+// closeSubModal은 app-ui.js에서 전역 노출됨
 window.closeSaveSuccessModal = closeSaveSuccessModal;
 
 // 노무비 보할 업데이트 함수
