@@ -116,16 +116,6 @@ function createRevitTypeMappingModal() {
             <div class="project-content">
                 ${createProjectManagementPanel()}
             </div>
-
-            <!-- 하단 버튼들 -->
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeRevitTypeMatching()">
-                    <i class="fas fa-times"></i> 닫기
-                </button>
-                <button class="btn btn-primary" onclick="saveAllChanges()">
-                    <i class="fas fa-save"></i> 모든 변경사항 저장
-                </button>
-            </div>
         </div>
     `;
 }
@@ -154,7 +144,7 @@ function createProjectManagementPanel() {
             <!-- 기본 작업 드롭다운 -->
             <div class="action-section">
                 <h4><i class="fas fa-tools"></i> 기본 작업</h4>
-                <div class="dropdown-container">
+                <div class="dropdown-container" style="display: flex; align-items: center; gap: 10px;">
                     <div class="dropdown" style="position: relative;">
                         <button class="btn btn-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()">
                             <i class="fas fa-plus"></i> 벽체 작업
@@ -183,6 +173,16 @@ function createProjectManagementPanel() {
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- 모든 변경사항 저장 버튼을 드롭다운 옆으로 이동 -->
+                    <button class="btn btn-success" onclick="saveAllChanges()" style="margin-left: 5px;">
+                        <i class="fas fa-save"></i> 모든 변경사항 저장
+                    </button>
+                    
+                    <!-- 닫기 버튼 -->
+                    <button class="btn btn-secondary" onclick="closeRevitTypeMatching()">
+                        <i class="fas fa-times"></i> 닫기
+                    </button>
                 </div>
             </div>
 
