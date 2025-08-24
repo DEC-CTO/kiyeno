@@ -695,18 +695,21 @@ function toggleAllRevitWallSelection() {
 // 자재 선택 관리
 // =============================================================================
 
-function selectMaterial(wallId, fieldName) {
-    console.log(`🎯 자재 선택: 벽체 ${wallId}, 필드 ${fieldName}`);
+async function selectMaterial(wallId, fieldName) {
+    console.log(`🎯 일위대가 선택: 벽체 ${wallId}, 필드 ${fieldName}`);
     
-    const modal = createMaterialSelectionModal(wallId, fieldName);
-    if (modal) {
-        // 검색 필드에 포커스
-        setTimeout(() => {
-            const searchInput = document.getElementById('materialSearchInput');
-            if (searchInput) {
-                searchInput.focus();
-            }
-        }, 100);
+    try {
+        console.log('🔄 일위대가 선택 모달 생성 시작...');
+        const modal = await createUnitPriceSelectionModal(wallId, fieldName);
+        if (modal) {
+            console.log('✅ 일위대가 선택 모달 생성 완료');
+        } else {
+            console.error('❌ 일위대가 선택 모달 생성 실패');
+            alert('일위대가 선택 모달을 열 수 없습니다.');
+        }
+    } catch (error) {
+        console.error('❌ 일위대가 선택 중 오류:', error);
+        alert('일위대가 선택 중 오류가 발생했습니다: ' + error.message);
     }
 }
 
@@ -728,7 +731,7 @@ function getFieldDisplayName(fieldName) {
     return fieldNames[fieldName] || fieldName;
 }
 
-function createMaterialSelectionModal(wallId, fieldName) {
+async function createUnitPriceSelectionModal(wallId, fieldName) {
     const wall = revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
@@ -737,56 +740,175 @@ function createMaterialSelectionModal(wallId, fieldName) {
     
     const fieldDisplayName = getFieldDisplayName(fieldName);
     
+    // 일위대가 데이터를 먼저 로드
+    console.log('🔄 일위대가 선택 모달 생성 중...');
+    const tableRowsHTML = await generateUnitPriceTableRows();
+    
     const modalHTML = `
-        <div class="material-selection-container">
-            <div class="material-header mb-3">
-                <h5><i class="fas fa-cube"></i> ${wall.wallType} - ${fieldDisplayName} 자재 선택</h5>
-                <div class="input-group">
-                    <input type="text" id="materialSearchInput" class="form-control" 
-                           placeholder="자재명으로 검색..." 
-                           oninput="filterMaterialSelectionTable(this.value)">
-                    <div class="input-group-append">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    </div>
-                </div>
+        <div class="unitprice-selection-container">
+            <div class="unitprice-header">
+                <h4><i class="fas fa-calculator"></i> ${wall.wallType} - ${fieldDisplayName} 일위대가 선택</h4>
             </div>
             
-            <div class="material-table-container" style="max-height: 500px; overflow-y: auto;">
-                <table class="table table-sm table-hover" id="materialSelectionTable">
-                    <thead class="table-light">
+            <div class="unit-price-table-wrapper" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 500px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;" id="unitPriceSelectionTable">
+                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
                         <tr>
-                            <th>선택</th>
-                            <th>자재명</th>
-                            <th>카테고리</th>
-                            <th>단위</th>
-                            <th>단가</th>
-                            <th>규격</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">선택</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">재료비</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">노무비</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">경비</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600;">총계</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${generateMaterialTableRows()}
+                        ${tableRowsHTML}
                     </tbody>
                 </table>
             </div>
             
-            <div class="selected-material-info mt-3" id="selectedMaterialInfo" style="display: none;">
-                <div class="alert alert-info">
-                    <strong>선택된 자재:</strong> <span id="selectedMaterialName"></span>
+            <div class="selected-unitprice-info" id="selectedUnitPriceInfo" style="display: none;">
+                <div class="alert">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>선택된 일위대가:</strong><br>
+                            <div class="h6" id="selectedUnitPriceName">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>재료비:</strong><br>
+                            <div class="text-info" id="selectedUnitPriceMaterial">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>노무비:</strong><br>
+                            <div class="text-info" id="selectedUnitPriceLabor">-</div>
+                        </div>
+                        <div class="col-md-2">
+                            <strong>총계:</strong><br>
+                            <div class="text-primary" id="selectedUnitPriceTotal">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     `;
     
-    return createSubModal(`🎯 ${fieldDisplayName} 자재 선택`, modalHTML, [
+    return createSubModal(`💰 ${fieldDisplayName} 일위대가 선택`, modalHTML, [
         { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '선택된 자재 지우기', class: 'btn-warning', onClick: (modal) => clearMaterialFromModal(wallId, fieldName, modal) },
-        { text: '적용', class: 'btn-primary', onClick: (modal) => applySelectedMaterial(wallId, fieldName, modal) }
+        { text: '선택된 일위대가 지우기', class: 'btn-warning', onClick: (modal) => clearUnitPriceFromModal(wallId, fieldName, modal) },
+        { text: '적용', class: 'btn-primary', onClick: (modal) => applySelectedUnitPrice(wallId, fieldName, modal) }
     ], {
         disableBackgroundClick: false,
         disableEscapeKey: false
     });
 }
 
+async function generateUnitPriceTableRows() {
+    // unitPriceManager.js에서 일위대가 데이터 가져오기
+    let unitPrices = [];
+    
+    console.log('🚀 일위대가 데이터 로드 시작...');
+    console.log('🔍 사용 가능한 전역 함수들:', {
+        loadUnitPriceDataFromDB: typeof window.loadUnitPriceDataFromDB,
+        unitPriceDB: typeof window.unitPriceDB,
+        unitPriceItems: window.unitPriceItems ? window.unitPriceItems.length + '개' : 'undefined'
+    });
+    
+    try {
+        // 1순위: unitPriceDB에서 직접 로드 (가장 확실한 방법)
+        if (window.unitPriceDB && typeof window.unitPriceDB.getAllUnitPrices === 'function') {
+            console.log('🔄 unitPriceDB.getAllUnitPrices 직접 호출 중...');
+            unitPrices = await window.unitPriceDB.getAllUnitPrices();
+            console.log('✅ unitPriceDB 직접 로드 결과:', unitPrices?.length + '개');
+        }
+        // 2순위: 전역 unitPriceItems 배열 사용 (있는 경우)
+        else if (window.unitPriceItems && Array.isArray(window.unitPriceItems) && window.unitPriceItems.length > 0) {
+            console.log('🔄 전역 unitPriceItems 배열 사용 중...');
+            unitPrices = window.unitPriceItems;
+            console.log('✅ unitPriceItems 결과:', unitPrices.length + '개');
+        }
+        // 3순위: localStorage 직접 접근 (IndexedDB 키 사용)
+        else {
+            console.log('🔄 localStorage에서 일위대가 데이터 로드 시도...');
+            const storedData = localStorage.getItem('kiyeno_unitPriceItems');
+            if (storedData) {
+                unitPrices = JSON.parse(storedData);
+                console.log('✅ localStorage 결과:', unitPrices?.length + '개');
+            } else {
+                console.log('⚠️ localStorage에 일위대가 데이터가 없음');
+            }
+        }
+        
+        console.log('🔍 최종 일위대가 데이터:', unitPrices);
+        
+        // 데이터 검증
+        if (!Array.isArray(unitPrices)) {
+            console.warn('⚠️ 일위대가 데이터가 배열이 아님:', typeof unitPrices);
+            unitPrices = [];
+        }
+        
+    } catch (error) {
+        console.error('❌ 일위대가 데이터 로드 실패:', error);
+        unitPrices = [];
+    }
+    
+    if (!unitPrices || unitPrices.length === 0) {
+        return `
+            <tr>
+                <td colspan="13" style="text-align: center; padding: 40px; color: #64748b;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                    일위대가 데이터를 찾을 수 없습니다.<br>
+                    <small>일위대가 관리에서 데이터를 먼저 생성해주세요.</small>
+                </td>
+            </tr>
+        `;
+    }
+    
+    return unitPrices.map((item, index) => {
+        const totalCosts = item.totalCosts || {};
+        const materialCost = totalCosts.material || 0;
+        const laborCost = totalCosts.labor || 0;
+        const expenseCost = totalCosts.expense || 0;
+        const totalCost = totalCosts.total || (materialCost + laborCost + expenseCost);
+        
+        const basic = item.basic || {};
+        
+        // 일위대가 관리 모달과 동일한 스타일 적용
+        const rowStyle = index % 2 === 0 ? 'background-color: #f8fafc;' : 'background-color: white;';
+        
+        return `
+            <tr class="unit-price-row" onclick="selectUnitPriceRow(this, '${item.id}', '${basic.item || ''}', '${materialCost}', '${laborCost}', '${totalCost}')" 
+                style="cursor: pointer; transition: all 0.2s ease; ${rowStyle}" 
+                onmouseover="this.style.backgroundColor='#e2e8f0'; this.style.transform='scale(1.01)'" 
+                onmouseout="this.style.backgroundColor='${index % 2 === 0 ? '#f8fafc' : 'white'}'; this.style.transform='scale(1)'">
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px;">
+                    <input type="radio" name="selectedUnitPrice" value="${item.id}" style="transform: scale(1.2);">
+                </td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; font-weight: 500; color: #1e293b;">${basic.item || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.spacing || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.height || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.size || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.location || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.workType1 || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.workType2 || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.unit || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #059669; font-weight: 500;">₩${materialCost.toLocaleString()}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #dc2626; font-weight: 500;">₩${laborCost.toLocaleString()}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #7c3aed; font-weight: 500;">₩${expenseCost.toLocaleString()}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #1e293b; font-weight: 600; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);">₩${totalCost.toLocaleString()}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// 기존 자재 선택 함수 (호환성 유지)
 function generateMaterialTableRows() {
     // priceDatabase.js에서 자재 데이터 가져오기
     let materials = [];
@@ -834,6 +956,47 @@ function generateMaterialTableRows() {
     `).join('');
 }
 
+// 일위대가 행 선택 함수
+function selectUnitPriceRow(rowElement, unitPriceId, itemName, materialCost, laborCost, totalCost) {
+    // 기존 선택 해제
+    document.querySelectorAll('#unitPriceSelectionTable .unit-price-row').forEach(row => {
+        row.classList.remove('table-primary');
+    });
+    
+    // 현재 행 선택
+    rowElement.classList.add('table-primary');
+    const radio = rowElement.querySelector('input[type="radio"]');
+    if (radio) {
+        radio.checked = true;
+    }
+    
+    // 선택된 일위대가 정보 표시
+    selectedMaterialData = { 
+        id: unitPriceId, 
+        name: itemName,
+        materialCost: materialCost,
+        laborCost: laborCost,
+        totalCost: totalCost
+    };
+    
+    const infoDiv = document.getElementById('selectedUnitPriceInfo');
+    const nameSpan = document.getElementById('selectedUnitPriceName');
+    const materialSpan = document.getElementById('selectedUnitPriceMaterial');
+    const laborSpan = document.getElementById('selectedUnitPriceLabor');
+    const totalSpan = document.getElementById('selectedUnitPriceTotal');
+    
+    if (infoDiv && nameSpan && materialSpan && laborSpan && totalSpan) {
+        nameSpan.textContent = itemName;
+        materialSpan.textContent = `₩${parseInt(materialCost).toLocaleString()}`;
+        laborSpan.textContent = `₩${parseInt(laborCost).toLocaleString()}`;
+        totalSpan.textContent = `₩${parseInt(totalCost).toLocaleString()}`;
+        infoDiv.style.display = 'block';
+    }
+    
+    console.log('🎯 일위대가 선택됨:', itemName, `(ID: ${unitPriceId})`);
+}
+
+// 기존 자재 행 선택 함수 (호환성 유지)
 function selectMaterialRow(rowElement, materialId, materialName) {
     // 기존 선택 해제
     document.querySelectorAll('#materialSelectionTable .material-row').forEach(row => {
@@ -860,6 +1023,76 @@ function selectMaterialRow(rowElement, materialId, materialName) {
     console.log('🎯 자재 선택됨:', materialName);
 }
 
+// 일위대가 적용 함수
+function applySelectedUnitPrice(wallId, fieldName, modal) {
+    if (!selectedMaterialData) {
+        alert('일위대가를 선택해주세요.');
+        return;
+    }
+    
+    const wall = revitWallTypes.find(w => w.id === wallId);
+    if (!wall) {
+        alert('벽체를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 벽체에 일위대가 ID 할당 (ID 참조 방식)
+    wall[fieldName] = `unitPrice_${selectedMaterialData.id}`;
+    
+    saveRevitWallTypes();
+    updateRevitWallTable();
+    closeSubModal(modal);
+    
+    // 선택된 일위대가 데이터 초기화
+    selectedMaterialData = null;
+    
+    console.log(`✅ 일위대가 적용됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}: ${wall[fieldName]}`);
+}
+
+// 일위대가 지우기 함수
+function clearUnitPriceFromModal(wallId, fieldName, modal) {
+    const wall = revitWallTypes.find(w => w.id === wallId);
+    if (!wall) {
+        alert('벽체를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 해당 필드 값 지우기
+    wall[fieldName] = '';
+    
+    saveRevitWallTypes();
+    updateRevitWallTable();
+    closeSubModal(modal);
+    
+    console.log(`✅ 일위대가 지움: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
+}
+
+// 일위대가 검색 필터 함수
+function filterUnitPriceSelectionTable(searchValue) {
+    const table = document.getElementById('unitPriceSelectionTable');
+    const rows = table.querySelectorAll('tbody tr.unit-price-row');
+    const searchCount = document.getElementById('unitPriceSearchCount');
+    
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const itemName = row.querySelector('.item-name')?.textContent.toLowerCase() || '';
+        const shouldShow = searchValue === '' || itemName.includes(searchValue.toLowerCase());
+        
+        row.style.display = shouldShow ? '' : 'none';
+        if (shouldShow) visibleCount++;
+    });
+    
+    if (searchCount) {
+        if (searchValue === '') {
+            searchCount.textContent = '전체 목록 표시';
+        } else {
+            searchCount.textContent = `검색 결과: ${visibleCount}개`;
+        }
+    }
+}
+
+// 기존 자재 적용 함수 (호환성 유지)
 function applySelectedMaterial(wallId, fieldName, modal) {
     if (!selectedMaterialData) {
         alert('자재를 선택해주세요.');
@@ -1365,7 +1598,15 @@ window.clearRevitWallData = clearRevitWallData;
 window.toggleRevitWallSelection = toggleRevitWallSelection;
 window.toggleAllRevitWallSelection = toggleAllRevitWallSelection;
 
-// 자재 선택 함수들
+// 일위대가 선택 함수들 (새로 추가)
+window.createUnitPriceSelectionModal = createUnitPriceSelectionModal;
+window.generateUnitPriceTableRows = generateUnitPriceTableRows;
+window.selectUnitPriceRow = selectUnitPriceRow;
+window.applySelectedUnitPrice = applySelectedUnitPrice;
+window.clearUnitPriceFromModal = clearUnitPriceFromModal;
+window.filterUnitPriceSelectionTable = filterUnitPriceSelectionTable;
+
+// 자재 선택 함수들 (호환성 유지)
 window.selectMaterial = selectMaterial;
 window.selectMaterialRow = selectMaterialRow;
 window.applySelectedMaterial = applySelectedMaterial;

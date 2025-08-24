@@ -1,0 +1,419 @@
+/* =============================================================================
+   일위대가 선택 모달 전용 CSS
+   ============================================================================= */
+
+/* 일위대가 선택 컨테이너 */
+.unitprice-selection-container {
+    width: 95vw !important;
+    max-width: 1200px !important;
+    min-height: 70vh;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 헤더 스타일 */
+.unitprice-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 25px;
+    margin: 0;
+    border-radius: 12px 12px 0 0;
+}
+
+.unitprice-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.unitprice-header .badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.unitprice-header .row {
+    margin-top: 15px;
+}
+
+.unitprice-header .input-group {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.unitprice-header .input-group-prepend .input-group-text {
+    background: #f8fafc;
+    border: none;
+    color: #64748b;
+    padding: 10px 15px;
+}
+
+.unitprice-header #unitPriceSearchInput {
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    box-shadow: none;
+}
+
+.unitprice-header #unitPriceSearchInput:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border: none;
+    outline: none;
+}
+
+.unitprice-header .text-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.unitprice-header .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 13px;
+}
+
+/* 테이블 컨테이너 */
+.unitprice-table-container {
+    flex: 1;
+    margin: 20px 25px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: white;
+}
+
+/* 테이블 스타일 */
+.unitprice-selection-container .table {
+    margin: 0;
+    font-size: 13px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* 테이블 셀 정렬 */
+.unitprice-selection-container .text-center {
+    text-align: center;
+}
+
+.unitprice-selection-container .text-right {
+    text-align: right;
+}
+
+/* 아이템명 스타일 */
+.unitprice-selection-container .item-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 13px;
+}
+
+.unitprice-selection-container .item-description {
+    color: #64748b;
+    font-size: 11px;
+    display: block;
+    margin-top: 2px;
+}
+
+/* 구성품 리스트 스타일 */
+.unitprice-selection-container .components-list {
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* 생성일 스타일 */
+.unitprice-selection-container .created-date {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+/* 가격 스타일 */
+.unitprice-selection-container .price-material {
+    color: #059669;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.unitprice-selection-container .price-labor {
+    color: #dc2626;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+.unitprice-selection-container .price-total {
+    color: #0ea5e9 !important;
+    font-weight: 700 !important;
+    font-size: 13px;
+}
+
+/* 작업구분 배지 스타일 */
+.unitprice-selection-container .badge-outline-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* 테이블 헤더 2단 구조 */
+.unitprice-selection-container .table thead th {
+    vertical-align: middle;
+}
+
+.unitprice-selection-container .table thead tr:first-child th {
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.unitprice-selection-container .table thead tr:last-child th {
+    border-bottom: 2px solid #cbd5e1;
+    font-size: 11px;
+    padding: 8px 12px;
+}
+
+.unitprice-selection-container .table thead th {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #334155;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 15px 12px;
+    border-bottom: 2px solid #cbd5e1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.unitprice-selection-container .table tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+.unitprice-selection-container .table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.unitprice-selection-container .table tbody tr:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.unitprice-selection-container .table tbody tr.table-primary {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+.unitprice-selection-container .table tbody tr.table-primary td {
+    border-bottom-color: #bfdbfe;
+}
+
+/* 라디오 버튼 스타일 */
+.unitprice-selection-container input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+/* 배지 스타일 */
+.unitprice-selection-container .badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.unitprice-selection-container .badge-secondary {
+    background: #64748b;
+    color: white;
+}
+
+.unitprice-selection-container .badge-outline-primary {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.unitprice-selection-container .badge-info {
+    background: #0ea5e9;
+    color: white;
+}
+
+/* 금액 스타일 */
+.unitprice-selection-container .text-primary {
+    color: #0ea5e9 !important;
+    font-weight: 600;
+}
+
+/* 선택된 일위대가 정보 */
+.selected-unitprice-info {
+    margin: 0 25px 25px 25px;
+}
+
+.selected-unitprice-info .alert {
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+    border-left: 4px solid #0ea5e9;
+    padding: 20px;
+}
+
+.selected-unitprice-info .alert .row > div {
+    border-right: 1px solid rgba(14, 165, 233, 0.2);
+    padding-right: 15px;
+}
+
+.selected-unitprice-info .alert .row > div:last-child {
+    border-right: none;
+}
+
+.selected-unitprice-info strong {
+    color: #0c4a6e;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.selected-unitprice-info .h6 {
+    color: #0c4a6e;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 0;
+    margin-top: 5px;
+}
+
+.selected-unitprice-info .text-primary {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+
+.selected-unitprice-info .text-info {
+    color: #0ea5e9 !important;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 992px) {
+    .unitprice-selection-container {
+        width: 98vw !important;
+        max-width: none !important;
+        height: 95vh;
+    }
+    
+    .unitprice-header {
+        padding: 15px 20px;
+    }
+    
+    .unitprice-table-container {
+        margin: 15px 20px;
+    }
+    
+    .selected-unitprice-info {
+        margin: 0 20px 20px 20px;
+    }
+    
+    .unitprice-selection-container .table thead th {
+        font-size: 11px;
+        padding: 10px 8px;
+    }
+    
+    .unitprice-selection-container .table tbody td {
+        padding: 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 1200px) {
+    /* 작업구분, 수량, 주요구성품, 생성일 숨김 */
+    .unitprice-selection-container .table th:nth-child(4),
+    .unitprice-selection-container .table td:nth-child(4),
+    .unitprice-selection-container .table th:nth-child(6),
+    .unitprice-selection-container .table td:nth-child(6),
+    .unitprice-selection-container .table th:nth-child(11),
+    .unitprice-selection-container .table td:nth-child(11),
+    .unitprice-selection-container .table th:nth-child(12),
+    .unitprice-selection-container .table td:nth-child(12) {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .unitprice-header .row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .unitprice-header .text-right {
+        justify-content: flex-start;
+    }
+    
+    /* 추가로 재료비, 노무비 컬럼도 숨김 (합계만 표시) */
+    .unitprice-selection-container .table th:nth-child(7),
+    .unitprice-selection-container .table td:nth-child(7),
+    .unitprice-selection-container .table th:nth-child(8),
+    .unitprice-selection-container .table td:nth-child(8) {
+        display: none;
+    }
+    
+    .selected-unitprice-info .row {
+        flex-direction: column;
+    }
+    
+    .selected-unitprice-info .alert .row > div {
+        border-right: none;
+        border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .selected-unitprice-info .alert .row > div:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+}
+
+/* 스크롤바 스타일 */
+.unitprice-table-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.unitprice-table-container::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.unitprice-table-container::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.unitprice-table-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* 로딩 및 빈 상태 스타일 */
+.unitprice-selection-container .table tbody tr td[colspan] {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-style: italic;
+    background: #f8fafc;
+}
+
+.unitprice-selection-container .table tbody tr td[colspan]::before {
+    content: "📋";
+    display: block;
+    font-size: 24px;
+    margin-bottom: 10px;
+}
