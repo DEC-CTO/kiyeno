@@ -2011,7 +2011,8 @@ async function loadMaterialsForSelection() {
                     const material = {
                         id: item.id || 0,  // ID 추가
                         품명: item.name || item.품명 || '',
-                        규격: item.size || item.spec || item.규격 || '',
+                        규격: item.규격 || item.spec || item.specification || item.size || '',
+                        싸이즈: item.size || item.싸이즈 || '',
                         단위: item.unit || item.단위 || '',
                         재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
@@ -2054,7 +2055,8 @@ async function loadMaterialsForSelection() {
                     const material = {
                         id: item.id || 0,  // ID 추가
                         품명: item.name,
-                        규격: item.size || item.spec,
+                        규격: item.규격 || item.spec || item.specification || '',
+                        싸이즈: item.size || item.싸이즈 || '',
                         단위: item.unit,
                         재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
@@ -2070,7 +2072,8 @@ async function loadMaterialsForSelection() {
                     const material = {
                         id: item.id || 0,  // ID 추가
                         품명: item.name,
-                        규격: item.size || item.spec,
+                        규격: item.규격 || item.spec || item.specification || '',
+                        싸이즈: item.size || item.싸이즈 || '',
                         단위: item.unit,
                         재료비단가: item.재료비단가 || item.materialCost || item.materialPrice || item.price || 0,
                         노무비단가: item.노무비단가 || item.laborPrice || item.laborCost || 0,
@@ -2146,6 +2149,7 @@ function renderMaterialsList(materials) {
                 <thead style="background: #f9fafb; position: sticky; top: 0;">
                     <tr>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">품명</th>
+                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">규격</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">싸이즈</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">단위</th>
                         <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">재료비 단가</th>
@@ -2160,6 +2164,7 @@ function renderMaterialsList(materials) {
                                 <span style="color: #6b7280; font-size: 10px; font-weight: 400; margin-right: 8px;">[${material.id || 'N/A'}]</span>${material.품명 || material.name || ''}
                             </td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.규격 || material.spec || ''}</td>
+                            <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.싸이즈 || material.size || ''}</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">${material.단위 || material.unit || ''}</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialCost || material.materialPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.노무비단가 || material.laborPrice || 0).toLocaleString()}원</td>
@@ -2363,7 +2368,7 @@ function fillComponentRowWithMaterial(row, material) {
         }
         
         if (specElement) {
-            const materialSpec = material.규격 || material.size || material.spec || '';
+            const materialSpec = material.규격 || material.spec || material.specification || '';
             if (specElement.tagName === 'SPAN') {
                 specElement.textContent = materialSpec || '-';
             } else {
