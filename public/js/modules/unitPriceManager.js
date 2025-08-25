@@ -861,6 +861,7 @@ function calculateRowTotal(input) {
 // 전체 합계 계산 (구성품 + 고정 로우)
 function calculateGrandTotal() {
     let totalMaterial = 0, totalLabor = 0, totalExpense = 0, grandTotal = 0;
+    let totalMaterialPrice = 0, totalLaborPrice = 0, totalExpensePrice = 0; // 단가 합계 추가
     
     // 구성품 테이블 계산
     document.querySelectorAll('#componentsTable tr').forEach(row => {
@@ -869,10 +870,20 @@ function calculateGrandTotal() {
         const expenseElement = row.querySelector('.expense-amount');
         const totalElement = row.querySelector('.total-amount');
         
+        // 단가 요소들 추가
+        const materialPriceElement = row.querySelector('.material-price');
+        const laborPriceElement = row.querySelector('.labor-price');
+        const expensePriceElement = row.querySelector('.expense-price');
+        
         if (materialElement) totalMaterial += parseFloat(materialElement.textContent.replace(/[,원]/g, '') || 0);
         if (laborElement) totalLabor += parseFloat(laborElement.textContent.replace(/[,원]/g, '') || 0);
         if (expenseElement) totalExpense += parseFloat(expenseElement.textContent.replace(/[,원]/g, '') || 0);
         if (totalElement) grandTotal += parseFloat(totalElement.textContent.replace(/[,원]/g, '') || 0);
+        
+        // 단가 합계 계산
+        if (materialPriceElement) totalMaterialPrice += parseFloat(materialPriceElement.value || 0);
+        if (laborPriceElement) totalLaborPrice += parseFloat(laborPriceElement.value || 0);
+        if (expensePriceElement) totalExpensePrice += parseFloat(expensePriceElement.value || 0);
     });
     
     // 고정 로우 계산 (백분율 기반)
@@ -943,16 +954,25 @@ function calculateGrandTotal() {
         grandTotal = roundedGrandTotal;
     }
     
+    // 합계 단가 계산 (자재비 단가 + 노무비 단가 + 경비 단가)
+    const totalPrice = Math.round(totalMaterialPrice + totalLaborPrice + totalExpensePrice);
+    
     // 합계 표시 업데이트
     const totalMaterialElement = document.getElementById('totalMaterial');
     const totalLaborElement = document.getElementById('totalLabor');
     const totalExpenseElement = document.getElementById('totalExpense');
     const grandTotalElement = document.getElementById('grandTotal');
     
+    // 합계 단가 표시 요소 찾기
+    const totalPriceElement = document.querySelector('.total-price');
+    
     if (totalMaterialElement) totalMaterialElement.textContent = Math.round(totalMaterial).toLocaleString() + '원';
     if (totalLaborElement) totalLaborElement.textContent = Math.round(totalLabor).toLocaleString() + '원';
     if (totalExpenseElement) totalExpenseElement.textContent = Math.round(totalExpense).toLocaleString() + '원';
     if (grandTotalElement) grandTotalElement.textContent = Math.round(grandTotal).toLocaleString() + '원';
+    
+    // 합계 단가 표시 (새로 추가)
+    if (totalPriceElement) totalPriceElement.textContent = totalPrice.toLocaleString() + '원';
 }
 
 // 고정 로우 계산 (백분율 기반)
