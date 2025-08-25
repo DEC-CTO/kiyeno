@@ -411,6 +411,15 @@ function openUnitPriceBasicModal(editData = null) {
     // 현재 편집 중인 데이터 저장
     if (editData) {
         currentUnitPriceData = JSON.parse(JSON.stringify(editData));
+        console.log('🔧 currentUnitPriceData 설정 완료');
+        if (currentUnitPriceData.components) {
+            console.log('🔧 currentUnitPriceData.components:', currentUnitPriceData.components.length + '개');
+            currentUnitPriceData.components.forEach((comp, index) => {
+                if (comp.name && comp.name.includes('타정총알')) {
+                    console.log(`🎯 currentUnitPriceData 타정총알 [${index}]:`, comp);
+                }
+            });
+        }
     } else {
         currentUnitPriceData = {};
     }
@@ -1322,6 +1331,16 @@ function editUnitPriceItem(id) {
     }
     
     console.log('✏️ 일위대가 아이템 수정:', id);
+    console.log('🔍 DB에서 읽은 전체 아이템 데이터:', item);
+    
+    if (item.components && item.components.length > 0) {
+        console.log('🔍 구성품 개수:', item.components.length);
+        item.components.forEach((comp, index) => {
+            if (comp.name && comp.name.includes('타정총알')) {
+                console.log(`🎯 DB에서 읽은 타정총알 데이터 [${index}]:`, comp);
+            }
+        });
+    }
     
     // 현재 모달 닫기
     closeCurrentModal();
