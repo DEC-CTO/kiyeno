@@ -816,7 +816,7 @@ function calculateRowTotal(input) {
     const materialPrice = getElementValue(row.querySelector('.component-material-price'));
     const expensePrice = getElementValue(row.querySelector('.expense-price'));
     
-    // 노무비 계산: 단가 ÷ 수량 = 금액 (사용자 요청에 따른 수정)
+    // 노무비 계산: 단가 ÷ 수량 = 금액
     const laborPrice = getElementValue(row.querySelector('.component-labor-price'));
     const laborAmount = quantity > 0 ? laborPrice / quantity : 0;
     
@@ -828,14 +828,19 @@ function calculateRowTotal(input) {
     
     // 각 금액 업데이트
     const materialAmountElement = row.querySelector('.material-amount');
+    const laborPriceElement = row.querySelector('.component-labor-price');
     const laborAmountElement = row.querySelector('.labor-amount');
     const expenseAmountElement = row.querySelector('.expense-amount');
     const totalAmountElement = row.querySelector('.total-amount');
     
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
+    // 노무비: 단가 컬럼에는 계산된 단가(laborAmount), 금액 컬럼에는 입력된 금액(laborPrice) 표시
+    if (laborPriceElement) {
+        laborPriceElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
+    }
     if (laborAmountElement) {
-        laborAmountElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
+        laborAmountElement.textContent = Math.round(laborPrice).toLocaleString() + '원';
     }
     if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
     if (totalAmountElement) totalAmountElement.textContent = Math.round(totalAmount).toLocaleString() + '원';
