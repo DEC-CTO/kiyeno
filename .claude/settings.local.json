@@ -46,6 +46,9 @@
       "Bash(git restore:*)",
       "Bash(start http://localhost:3000)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "C:\\d C:\\MYCLAUDE_PROJECT"
+    ]
   }
 }

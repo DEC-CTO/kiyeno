@@ -900,11 +900,11 @@ function calculateGrandTotal() {
         grandTotal += amount;
     }
     
-    // 공구손료 및 기계경비 → 경비에 추가
+    // 공구손료 및 기계경비 → 노무비에 추가
     const toolExpenseRow = document.querySelector('.tool-expense-row');
     if (toolExpenseRow) {
-        const amount = parseFloat(toolExpenseRow.querySelector('.fixed-expense-amount')?.textContent.replace(/[,원]/g, '') || 0);
-        totalExpense += amount;
+        const amount = parseFloat(toolExpenseRow.querySelector('td:nth-child(8)')?.textContent.replace(/[,원]/g, '') || 0);
+        totalLabor += amount;
         grandTotal += amount;
     }
     
@@ -1009,17 +1009,19 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
     }
     
-    // 공구손료 및 기계경비 (노무비의 %)
+    // 공구손료 및 기계경비 (노무비의 %) - 노무비 컬럼에 표시
     const toolExpenseRow = document.querySelector('.tool-expense-row');
     if (toolExpenseRow) {
         const percentage = parseFloat(toolExpenseRow.querySelector('.fixed-quantity')?.value) || 0;
         const amount = Math.round(baseLabor * percentage / 100);
-        const amountElement = toolExpenseRow.querySelector('.fixed-expense-amount');
-        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
         
-        // 단가도 업데이트
-        const priceElement = toolExpenseRow.querySelector('.fixed-expense-price');
-        if (priceElement) priceElement.textContent = amount.toLocaleString();
+        // 노무비 단가 컬럼에 노무비 총합 표시
+        const priceElement = toolExpenseRow.querySelector('td:nth-child(7)'); // 노무비 단가 컬럼 (7번째)
+        if (priceElement) priceElement.textContent = Math.round(baseLabor).toLocaleString() + '원';
+        
+        // 노무비 금액 컬럼에 계산된 금액 표시  
+        const amountElement = toolExpenseRow.querySelector('td:nth-child(8)'); // 노무비 금액 컬럼 (8번째)
+        if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
     }
 }
 
