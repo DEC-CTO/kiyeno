@@ -822,33 +822,43 @@ function calculateRowTotal(input) {
     const materialPrice = getElementValue(row.querySelector('.component-material-price'));
     const expensePrice = getElementValue(row.querySelector('.expense-price'));
     
-    // 노무비 계산: 단가 ÷ 수량 = 금액
-    const laborPrice = getElementValue(row.querySelector('.component-labor-price'));
-    const laborAmount = quantity > 0 ? laborPrice / quantity : 0;
+    // 노무비 계산: 금액 ÷ 수량 = 단가
+    const laborPriceTotal = getElementValue(row.querySelector('.component-labor-price')); // 노무비 금액
+    const laborUnitPrice = quantity > 0 ? laborPriceTotal / quantity : 0; // 노무비 단가
     
     const materialAmount = quantity * materialPrice;
+    const laborAmount = laborPriceTotal; // 노무비는 입력된 금액을 그대로 사용
     const expenseAmount = quantity * expensePrice;
     const totalAmount = materialAmount + laborAmount + expenseAmount;
     
-    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비(${laborPrice} ÷ ${quantity}) = ${laborAmount}`);
+    // 합계 단가 계산: 자재비 단가 + 노무비 단가 + 경비 단가
+    const totalPrice = materialPrice + laborUnitPrice + expensePrice;
+    
+    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비 총액(${laborPriceTotal})`);
+    console.log(`💰 합계 단가: ${materialPrice} + ${laborUnitPrice} + ${expensePrice} = ${totalPrice}`);
+    console.log(`💰 합계 금액: ${materialAmount} + ${laborAmount} + ${expenseAmount} = ${totalAmount}`);
     
     // 각 금액 업데이트
     const materialAmountElement = row.querySelector('.material-amount');
     const laborPriceElement = row.querySelector('.component-labor-price');
     const laborAmountElement = row.querySelector('.labor-amount');
     const expenseAmountElement = row.querySelector('.expense-amount');
+    const totalPriceElement = row.querySelector('.total-price');
     const totalAmountElement = row.querySelector('.total-amount');
     
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
-    // 노무비: 단가 컬럼에는 계산된 단가(laborAmount), 금액 컬럼에는 입력된 금액(laborPrice) 표시
+    // 노무비: 단가 컬럼에는 계산된 단가(laborUnitPrice), 금액 컬럼에는 입력된 금액(laborPriceTotal) 표시
     if (laborPriceElement) {
-        laborPriceElement.textContent = Math.round(laborAmount).toLocaleString() + '원';
+        laborPriceElement.textContent = Math.round(laborUnitPrice).toLocaleString() + '원';
     }
     if (laborAmountElement) {
-        laborAmountElement.textContent = Math.round(laborPrice).toLocaleString() + '원';
+        laborAmountElement.textContent = Math.round(laborPriceTotal).toLocaleString() + '원';
     }
     if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
+    
+    // 합계 단가 표시 (새로 추가)
+    if (totalPriceElement) totalPriceElement.textContent = Math.round(totalPrice).toLocaleString() + '원';
     if (totalAmountElement) totalAmountElement.textContent = Math.round(totalAmount).toLocaleString() + '원';
     
     calculateGrandTotal();
