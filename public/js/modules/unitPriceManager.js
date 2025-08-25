@@ -343,7 +343,6 @@ function createUnitPriceManagementModal() {
 
 // 기본 정보 입력 모달 열기
 function openUnitPriceBasicModal(editData = null) {
-    console.log('📝 일위대가 기본 정보 입력 모달 열기');
     
     const isEdit = editData !== null;
     const modalTitle = isEdit ? '일위대가 수정' : '새 일위대가 추가';
@@ -486,7 +485,6 @@ function getFieldLabel(field) {
 
 // 세부 아이템 입력 모달 열기  
 function openUnitPriceDetailModal(isEdit = false) {
-    console.log('🔧 세부 아이템 입력 모달 열기');
     
     const basic = currentUnitPriceData.basic;
     const workTypeDisplay = basic.workType2 ? `${basic.workType1}/${basic.workType2}` : basic.workType1;
@@ -519,7 +517,6 @@ function openUnitPriceDetailModal(isEdit = false) {
             if (materialProfitInput) materialProfitInput.value = currentUnitPriceData.fixedRates.materialProfit || 15;
             if (toolExpenseInput) toolExpenseInput.value = currentUnitPriceData.fixedRates.toolExpense || 2;
             
-            console.log('✅ 편집 모드 고정 비율 복원:', currentUnitPriceData.fixedRates);
             
             // 값 변경 후 계산 다시 실행
             calculateGrandTotal();
@@ -539,7 +536,6 @@ function openUnitPriceDetailModal(isEdit = false) {
             // 세부 모달 component-row들의 최신 데이터 동기화
             setTimeout(async () => {
                 await syncUnitPriceWithLatestData();
-                console.log('✅ 세부 모달 데이터 동기화 완료');
             }, 200);
         }, 100);
     }
@@ -722,6 +718,7 @@ function addComponentRow(componentData = null) {
         quantity: 1,
         materialPrice: 0,
         laborPrice: 0,
+        laborAmount: 0,
         expensePrice: 0
     };
     
@@ -766,7 +763,7 @@ function addComponentRow(componentData = null) {
                 ${data.laborPrice ? data.laborPrice.toLocaleString() + '원' : '0원'}
             </span>
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">${data.laborAmount ? data.laborAmount.toLocaleString() + '원' : '0원'}</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <input type="number" class="expense-price" value="${data.expensePrice}" min="0"
                    oninput="calculateRowTotal(this)"
@@ -808,13 +805,32 @@ function calculateRowTotal(input) {
     const row = input.closest('tr');
     if (!row) return;
     
-    // span 요소와 input 요소를 모두 지원하는 값 읽기 함수
+    // span, td, input 요소를 모두 지원하는 값 읽기 함수
     const getElementValue = (element) => {
-        if (!element) return 0;
-        if (element.tagName === 'SPAN') {
-            return parseFloat(element.textContent.replace(/[,원]/g, '')) || 0;
+        console.log('🔧 getElementValue 디버깅 - element:', element);
+        if (!element) {
+            console.log('🔧 getElementValue 디버깅 - element가 null/undefined, 0 반환');
+            return 0;
+        }
+        
+        console.log('🔧 getElementValue 디버깅 - tagName:', element.tagName);
+        
+        // SPAN이나 TD 태그는 textContent 사용 (콤마와 "원" 제거)
+        if (element.tagName === 'SPAN' || element.tagName === 'TD') {
+            const textContent = element.textContent;
+            console.log('🔧 getElementValue 디버깅 - textContent (원본):', textContent);
+            const cleaned = textContent.replace(/[,원]/g, '');
+            console.log('🔧 getElementValue 디버깅 - 정리된 텍스트:', cleaned);
+            const result = parseFloat(cleaned) || 0;
+            console.log('🔧 getElementValue 디버깅 - parseFloat 결과:', result);
+            return result;
         } else {
-            return parseFloat(element.value) || 0;
+            // INPUT 등은 value 속성 사용
+            const value = element.value;
+            console.log('🔧 getElementValue 디버깅 - input value:', value);
+            const result = parseFloat(value) || 0;
+            console.log('🔧 getElementValue 디버깅 - parseFloat 결과:', result);
+            return result;
         }
     };
     
@@ -822,39 +838,44 @@ function calculateRowTotal(input) {
     const materialPrice = getElementValue(row.querySelector('.component-material-price'));
     const expensePrice = getElementValue(row.querySelector('.expense-price'));
     
-    // 노무비 계산: 금액 ÷ 수량 = 단가
-    const laborPriceTotal = getElementValue(row.querySelector('.component-labor-price')); // 노무비 금액
-    const laborUnitPrice = quantity > 0 ? laborPriceTotal / quantity : 0; // 노무비 단가
+    // 노무비 계산: 금액 컬럼에서 읽어와서 단가 계산
+    const laborAmountElement = row.querySelector('.labor-amount');
+    const laborAmount = getElementValue(laborAmountElement); // 노무비 금액 (고정값)
+    const laborUnitPrice = quantity > 0 ? laborAmount / quantity : 0; // 노무비 단가 = 노무비 금액 ÷ 수량
     
     const materialAmount = quantity * materialPrice;
-    const laborAmount = laborPriceTotal; // 노무비는 입력된 금액을 그대로 사용
     const expenseAmount = quantity * expensePrice;
     const totalAmount = materialAmount + laborAmount + expenseAmount;
     
     // 합계 단가 계산: 자재비 단가 + 노무비 단가 + 경비 단가
     const totalPrice = materialPrice + laborUnitPrice + expensePrice;
     
-    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비 총액(${laborPriceTotal})`);
+    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비 금액(${laborAmount})`);
+    console.log(`🧮 노무비 단가: ${laborAmount} ÷ ${quantity} = ${laborUnitPrice}`);
     console.log(`💰 합계 단가: ${materialPrice} + ${laborUnitPrice} + ${expensePrice} = ${totalPrice}`);
     console.log(`💰 합계 금액: ${materialAmount} + ${laborAmount} + ${expenseAmount} = ${totalAmount}`);
     
     // 각 금액 업데이트
     const materialAmountElement = row.querySelector('.material-amount');
     const laborPriceElement = row.querySelector('.component-labor-price');
-    const laborAmountElement = row.querySelector('.labor-amount');
+    // laborAmountElement는 이미 위에서 선언됨
     const expenseAmountElement = row.querySelector('.expense-amount');
     const totalPriceElement = row.querySelector('.total-price');
     const totalAmountElement = row.querySelector('.total-amount');
     
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
-    // 노무비: 단가 컬럼에는 계산된 단가(laborUnitPrice), 금액 컬럼에는 입력된 금액(laborPriceTotal) 표시
+    // 노무비: 단가 컬럼에는 계산된 단가(laborUnitPrice), 금액 컬럼은 고정값 유지
+    console.log('🔍 단가 표시 디버깅 - laborPriceElement:', laborPriceElement);
+    console.log('🔍 단가 표시 디버깅 - laborUnitPrice:', laborUnitPrice);
+    
     if (laborPriceElement) {
-        laborPriceElement.textContent = Math.round(laborUnitPrice).toLocaleString() + '원';
+        const displayValue = Math.round(laborUnitPrice).toLocaleString() + '원';
+        console.log('🔍 단가 표시 디버깅 - 표시할 값:', displayValue);
+        laborPriceElement.textContent = displayValue;
+        console.log('🔍 단가 표시 디버깅 - 설정 후 textContent:', laborPriceElement.textContent);
     }
-    if (laborAmountElement) {
-        laborAmountElement.textContent = Math.round(laborPriceTotal).toLocaleString() + '원';
-    }
+    // 노무비 금액은 이미 설정되어 있으므로 변경하지 않음 (고정값)
     if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
     
     // 합계 단가 표시 (새로 추가)
@@ -1076,13 +1097,25 @@ function collectCurrentComponents() {
     const rows = document.querySelectorAll('#componentsTable .component-row');
     
     rows.forEach(row => {
-        // span 요소와 input 요소를 모두 지원하는 데이터 읽기 함수
-        const getElementValue = (element) => {
-            if (!element) return '';
-            if (element.tagName === 'SPAN') {
-                return element.textContent.replace(/원$/, '').replace(/,/g, '').trim();
+        // span, td, input 요소를 모두 지원하는 데이터 읽기 함수
+        const getElementValue = (element, isNumeric = false) => {
+            if (!element) return isNumeric ? 0 : '';
+            // SPAN이나 TD 태그는 textContent 사용
+            if (element.tagName === 'SPAN' || element.tagName === 'TD') {
+                const textContent = element.textContent;
+                if (isNumeric) {
+                    const cleaned = textContent.replace(/[,원]/g, '');
+                    return parseFloat(cleaned) || 0;
+                } else {
+                    return textContent.trim();
+                }
             } else {
-                return element.value;
+                // INPUT 태그는 value 사용
+                if (isNumeric) {
+                    return parseFloat(element.value) || 0;
+                } else {
+                    return element.value;
+                }
             }
         };
         
@@ -1090,9 +1123,10 @@ function collectCurrentComponents() {
         const componentName = getElementValue(row.querySelector('.component-name')) || '';
         const quantity = parseFloat(row.querySelector('.component-quantity')?.value) || 0;
         
-        // 노무비 계산: 단가 ÷ 수량 = 금액
-        const laborPrice = parseFloat(getElementValue(row.querySelector('.labor-price')) || getElementValue(row.querySelector('.component-labor-price'))) || 0;
-        const laborAmount = quantity > 0 ? laborPrice / quantity : 0;
+        // 노무비 계산: 금액에서 단가 계산 
+        const laborAmountElementForSave = row.querySelector('.labor-amount');
+        const laborAmount = getElementValue(laborAmountElementForSave, true); // 노무비 금액 (고정값)
+        const laborPrice = quantity > 0 ? laborAmount / quantity : 0; // 노무비 단가 = 금액 ÷ 수량
         
         const component = {
             name: componentName,
@@ -1100,10 +1134,10 @@ function collectCurrentComponents() {
             spec: getElementValue(row.querySelector('.component-spec')) || '',
             unit: getElementValue(row.querySelector('.component-unit')) || '',
             quantity: quantity,
-            materialPrice: parseFloat(getElementValue(row.querySelector('.material-price')) || getElementValue(row.querySelector('.component-material-price'))) || 0,
+            materialPrice: getElementValue(row.querySelector('.material-price'), true) || getElementValue(row.querySelector('.component-material-price'), true) || 0,
             laborPrice: laborPrice,
             laborAmount: laborAmount,
-            expensePrice: parseFloat(getElementValue(row.querySelector('.expense-price'))) || 0
+            expensePrice: getElementValue(row.querySelector('.expense-price'), true) || 0
         };
         
         if (component.name.trim()) { // 품명이 있는 것만 저장
@@ -1251,10 +1285,18 @@ function calculateItemTotalCosts(item) {
             const componentExpense = quantity * expensePrice;
             
             // 노무비 계산: 저장된 방식에 따라 처리
-            // 노무비 계산: 단가 ÷ 수량 = 금액
-            const laborPrice = parseFloat(component.laborPrice) || 0;
-            const componentLabor = quantity > 0 ? laborPrice / quantity : 0;
-            console.log(`  🔧 구성품 ${index + 1}: ${component.name} - 단가÷수량:${laborPrice}÷${quantity}=${componentLabor}`);
+            // laborAmount가 있으면 새로운 방식(금액 고정), 없으면 기존 방식(단가 기반)
+            let componentLabor;
+            if (component.laborAmount !== undefined && component.laborAmount !== null) {
+                // 새로운 방식: 노무비 금액이 고정값으로 저장됨
+                componentLabor = parseFloat(component.laborAmount) || 0;
+                console.log(`  🔧 구성품 ${index + 1}: ${component.name} - 노무비금액(고정):${componentLabor}`);
+            } else {
+                // 기존 방식: 단가 ÷ 수량 = 금액 (하위 호환성)
+                const laborPrice = parseFloat(component.laborPrice) || 0;
+                componentLabor = quantity > 0 ? laborPrice / quantity : 0;
+                console.log(`  🔧 구성품 ${index + 1}: ${component.name} - 기존방식 단가÷수량:${laborPrice}÷${quantity}=${componentLabor}`);
+            }
             
             materialTotal += componentMaterial;
             laborTotal += componentLabor;
@@ -1386,7 +1428,6 @@ function editUnitPriceItem(id) {
         return;
     }
     
-    console.log('✏️ 일위대가 아이템 수정:', id);
     
     // 현재 모달 닫기
     closeCurrentModal();
@@ -1518,28 +1559,6 @@ function importUnitPriceData() {
 // 전역 함수 등록 (unitPriceManager.js)
 // =============================================================================
 
-// 일위대가 관리 메인 함수들
-window.openUnitPriceManagement = openUnitPriceManagement;
-window.openUnitPriceBasicModal = openUnitPriceBasicModal;
-window.proceedToDetailInput = proceedToDetailInput;
-window.openUnitPriceDetailModal = openUnitPriceDetailModal;
-
-// 구성품 관리 함수들
-window.addComponentRow = addComponentRow;
-window.removeComponentRow = removeComponentRow;
-window.calculateRowTotal = calculateRowTotal;
-window.calculateGrandTotal = calculateGrandTotal;
-
-// 데이터 관리 함수들
-window.saveUnitPriceItem = saveUnitPriceItem;
-window.loadUnitPriceItems = loadUnitPriceItems;
-window.saveUnitPriceItems = saveUnitPriceItems;
-window.renderUnitPriceItemsList = renderUnitPriceItemsList;
-window.editUnitPriceItem = editUnitPriceItem;
-window.deleteUnitPriceItem = deleteUnitPriceItem;
-window.exportUnitPriceData = exportUnitPriceData;
-window.importUnitPriceData = importUnitPriceData;
-
 // localStorage 정리 함수 (IndexedDB 마이그레이션 후 정리용)
 function cleanupLocalStorage() {
     try {
@@ -1551,7 +1570,6 @@ function cleanupLocalStorage() {
     }
 }
 
-window.cleanupLocalStorage = cleanupLocalStorage;
 
 // DB에서 일위대가 데이터 로드
 async function loadUnitPriceDataFromDB() {
@@ -1582,7 +1600,6 @@ async function loadUnitPriceDataFromDB() {
     }
 }
 
-window.loadUnitPriceDataFromDB = loadUnitPriceDataFromDB;
 
 // =============================================================================
 // CSS 스타일 추가 (원본에서 분리된 스타일)
@@ -2411,26 +2428,8 @@ function fillComponentRowWithMaterial(row, material) {
         const unitElement = row.querySelector('.component-unit');
         const materialPriceElement = row.querySelector('.component-material-price');
         const laborPriceElement = row.querySelector('.component-labor-price');
-        const laborAmountElement = row.querySelector('.component-labor-amount');
+        const laborAmountElement = row.querySelector('.labor-amount');
         
-        console.log('🔧 DOM 요소 확인:');
-        console.log('  - nameElement:', !!nameElement);
-        console.log('  - specElement:', !!specElement);
-        console.log('  - unitElement:', !!unitElement);
-        console.log('  - materialPriceElement:', !!materialPriceElement);
-        console.log('  - laborPriceElement:', !!laborPriceElement);
-        console.log('  - laborAmountElement:', !!laborAmountElement);
-        
-        // 노무비 입력 가능한 모든 필드 확인
-        const allLaborInputs = row.querySelectorAll('input[placeholder*="노무비"], input[class*="labor"], .labor-amount input, .labor-amount-input');
-        console.log('  - 노무비 관련 입력 필드 개수:', allLaborInputs.length);
-        allLaborInputs.forEach((input, index) => {
-            console.log(`    ${index}: class="${input.className}", tag="${input.tagName}"`);
-        });
-        
-        // 현재 .labor-amount 영역 상태 확인
-        const laborAmountContainer = row.querySelector('.labor-amount');
-        console.log('  - .labor-amount 영역 HTML:', laborAmountContainer?.innerHTML?.substring(0, 100));
         
         // span 요소인지 input 요소인지 확인하여 적절히 처리
         if (nameElement) {
@@ -2469,16 +2468,22 @@ function fillComponentRowWithMaterial(row, material) {
             }
         }
         
-        // 노무비 처리: 단가 설정
-        const laborPrice = material.노무비단가 || material.laborPrice || material.laborCost || 0;
+        // 노무비 처리: 금액 컬럼에 입력 (노무비단가 값을 금액 컬럼에 입력)
+        const laborCost = material.노무비단가 || material.laborPrice || material.laborCost || 0;
         
-        if (laborPrice > 0 && laborPriceElement) {
-            if (laborPriceElement.tagName === 'SPAN') {
-                laborPriceElement.textContent = `${laborPrice.toLocaleString()}원`;
-            } else {
-                laborPriceElement.value = laborPrice;
+        if (laborCost > 0 && laborAmountElement) {
+            // 노무비를 금액 컬럼에 설정 (단가가 아닌 금액으로)
+            laborAmountElement.textContent = `${laborCost.toLocaleString()}원`;
+            console.log(`🔧 노무비 금액 설정: ${laborCost}원 (금액 컬럼)`);
+            
+            // 단가 컬럼은 계산 후 자동 업데이트되도록 0으로 초기화
+            if (laborPriceElement) {
+                if (laborPriceElement.tagName === 'SPAN') {
+                    laborPriceElement.textContent = '0원';
+                } else {
+                    laborPriceElement.value = 0;
+                }
             }
-            console.log(`🔧 노무비 단가 설정: ${laborPrice}원`);
         }
         
         // 수량을 기본값 1로 설정 (자재 선택 시에만)
@@ -2492,12 +2497,15 @@ function fillComponentRowWithMaterial(row, material) {
         console.log('  - 싸이즈:', material.규격 || material.size || material.spec || '');
         console.log('  - 단위:', material.단위 || material.unit || '');
         console.log('  - 재료비단가:', material.재료비단가 || material.materialCost || material.materialPrice || material.price || 0);
-        console.log('  - 노무비단가:', material.노무비단가 || material.laborPrice || material.laborCost || 0);
+        console.log('  - 노무비금액:', material.노무비단가 || material.laborPrice || material.laborCost || 0, '(금액 컬럼에 입력)');
         console.log('  - 수량:', quantityInput?.value || 1);
         
         // 행 총계 다시 계산
         if (quantityInput) {
+            console.log('🔄 자재 선택 후 calculateRowTotal 호출');
             calculateRowTotal(quantityInput);
+        } else {
+            console.log('❌ quantityInput이 없어서 calculateRowTotal 호출 실패');
         }
         
         console.log('✅ 구성품 행에 자재 데이터 입력 완료');
@@ -3138,7 +3146,6 @@ window.addEventListener('materialDataUpdated', function(event) {
 });
 
 // 전역 함수 등록
-window.openMaterialSelector = openMaterialSelector;
 window.closeMaterialSelectModal = closeMaterialSelectModal;
 window.filterMaterials = filterMaterials;
 window.selectUnitPriceMaterial = selectUnitPriceMaterial;
@@ -3160,8 +3167,6 @@ window.clearUnitPriceSession = clearUnitPriceSession;
 
 // 메인 모달 데이터 동기화 (일위대가 목록의 저장된 데이터 업데이트)
 async function syncMainModalData() {
-    console.log('🔄 메인 모달 일위대가 목록 데이터 동기화 시작...');
-    
     // 저장된 일위대가 데이터에서 각 아이템의 가격 정보 업데이트
     const unitPriceData = JSON.parse(localStorage.getItem('unitPriceData') || '[]');
     let updatedItems = 0;
@@ -3179,7 +3184,6 @@ async function syncMainModalData() {
                             const newLaborPrice = latestMaterialData.노무비단가 || latestMaterialData.laborCost || latestMaterialData.laborPrice || 0;
                             
                             if (component.재료비단가 !== newMaterialPrice || component.노무비단가 !== newLaborPrice) {
-                                console.log(`💰 저장된 데이터 업데이트: ${component.자재명} - 재료비 ${component.재료비단가} → ${newMaterialPrice}, 노무비 ${component.노무비단가} → ${newLaborPrice}`);
                                 component.재료비단가 = newMaterialPrice;
                                 component.노무비단가 = newLaborPrice;
                                 itemUpdated = true;
@@ -3202,9 +3206,6 @@ async function syncMainModalData() {
         localStorage.setItem('unitPriceData', JSON.stringify(unitPriceData));
         // 목록 다시 렌더링
         renderUnitPriceItemsList();
-        console.log(`✅ 메인 모달 데이터 동기화 완료 (${updatedItems}개 일위대가 아이템 업데이트)`);
-    } else {
-        console.log('ℹ️ 메인 모달 - 업데이트할 데이터가 없습니다.');
     }
     
     return updatedItems;
@@ -3212,11 +3213,7 @@ async function syncMainModalData() {
 
 // 세부 모달 데이터 동기화 (component-row들의 실시간 가격 업데이트)
 async function syncUnitPriceWithLatestData() {
-    console.log('🔄 일위대가 관리 최신 데이터 동기화 시작...');
-    
     const componentRows = document.querySelectorAll('.component-row');
-    console.log(`📋 동기화 대상 행 수: ${componentRows.length}`);
-    
     let updatedCount = 0;
     
     // forEach 대신 for...of 사용하여 순차적 비동기 처리
@@ -3227,7 +3224,6 @@ async function syncUnitPriceWithLatestData() {
         
         if (materialName && materialName !== '자재 선택 버튼을 사용해주세요' && materialName !== '자재를 선택해주세요' && materialName.trim() !== '') {
             try {
-                console.log(`🔄 동기화 중: ${materialName}`);
                 await updateComponentPricing(row, materialName);
                 updatedCount++;
             } catch (error) {
@@ -3238,8 +3234,6 @@ async function syncUnitPriceWithLatestData() {
 
     // 모든 비동기 작업 완료 후 총합 재계산
     calculateGrandTotal();
-    console.log(`✅ 일위대가 관리 데이터 동기화 완료 (${updatedCount}개 항목 업데이트)`);
-    
     return updatedCount;
 }
 
@@ -3726,8 +3720,52 @@ function applyBulkCalculatedQuantities() {
     closeBulkQuantityCalculatorModal();
 }
 
+// =============================================================================
+// 전역 함수 등록 (window 객체에 할당)
+// =============================================================================
+
+// 일위대가 관리 메인 함수들
+window.openUnitPriceManagement = openUnitPriceManagement;
+window.openUnitPriceBasicModal = openUnitPriceBasicModal;
+window.proceedToDetailInput = proceedToDetailInput;
+window.openUnitPriceDetailModal = openUnitPriceDetailModal;
+
+// 구성품 관리 함수들
+window.addComponentRow = addComponentRow;
+window.removeComponentRow = removeComponentRow;
+window.fillComponentRowWithMaterial = fillComponentRowWithMaterial;
+
+// 계산 함수들
+window.calculateRowTotal = calculateRowTotal;
+window.calculateGrandTotal = calculateGrandTotal;
+
+// 데이터 관리 함수들
+window.saveUnitPriceItem = saveUnitPriceItem;
+window.loadUnitPriceItems = loadUnitPriceItems;
+window.saveUnitPriceItems = saveUnitPriceItems;
+window.renderUnitPriceItemsList = renderUnitPriceItemsList;
+window.editUnitPriceItem = editUnitPriceItem;
+window.deleteUnitPriceItem = deleteUnitPriceItem;
+window.exportUnitPriceData = exportUnitPriceData;
+window.importUnitPriceData = importUnitPriceData;
+window.cleanupLocalStorage = cleanupLocalStorage;
+window.loadUnitPriceDataFromDB = loadUnitPriceDataFromDB;
+
+// 6가지 소요량 계산 함수들
+window.openBulkQuantityCalculatorModal = openBulkQuantityCalculatorModal;
+window.closeBulkQuantityCalculatorModal = closeBulkQuantityCalculatorModal;
+window.applyBulkQuantityCalculations = applyBulkQuantityCalculations;
+
 // 데이터 동기화 전역 함수 등록
 window.syncMainModalData = syncMainModalData;
 window.syncUnitPriceWithLatestData = syncUnitPriceWithLatestData;
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기 포함');
+
+// 테스트: window 객체에 함수가 제대로 할당되었는지 확인
+console.log('🔍 테스트: window.openUnitPriceManagement 존재 여부:', typeof window.openUnitPriceManagement);
+if (typeof window.openUnitPriceManagement !== 'function') {
+    console.error('❌ openUnitPriceManagement 함수가 window 객체에 할당되지 않았습니다!');
+} else {
+    console.log('✅ openUnitPriceManagement 함수가 올바르게 할당되었습니다.');
+}
