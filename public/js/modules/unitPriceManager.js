@@ -681,7 +681,8 @@ function createDetailModalHTML(itemSummary) {
                             <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #ecfdf5; color: #065f46;">0원</td>
                             <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #eff6ff; color: #1e40af;">0원</td>
                             <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #fefbeb; color: #92400e;">0원</td>
-                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
+                            <td id="grandTotalPrice" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #f4f4f5; color: #52525b;">0원</td>
+                            <td id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
                             <td style="border: 1px solid #e2e8f0; background: #6366f1;"></td>
                         </tr>
                     </tfoot>
@@ -902,8 +903,8 @@ function calculateGrandTotal() {
         const totalElement = row.querySelector('.total-amount');
         
         // 단가 요소들 추가
-        const materialPriceElement = row.querySelector('.material-price');
-        const laborPriceElement = row.querySelector('.labor-price');
+        const materialPriceElement = row.querySelector('.component-material-price');
+        const laborPriceElement = row.querySelector('.component-labor-price');
         const expensePriceElement = row.querySelector('.expense-price');
         
         if (materialElement) totalMaterial += parseFloat(materialElement.textContent.replace(/[,원]/g, '') || 0);
@@ -994,8 +995,8 @@ function calculateGrandTotal() {
     const totalExpenseElement = document.getElementById('totalExpense');
     const grandTotalElement = document.getElementById('grandTotal');
     
-    // 합계 단가 표시 요소 찾기
-    const totalPriceElement = document.querySelector('.total-price');
+    // 합계 단가 표시 요소 찾기 (새로 추가한 grandTotalPrice ID 사용)
+    const totalPriceElement = document.getElementById('grandTotalPrice');
     
     if (totalMaterialElement) totalMaterialElement.textContent = Math.round(totalMaterial).toLocaleString() + '원';
     if (totalLaborElement) totalLaborElement.textContent = Math.round(totalLabor).toLocaleString() + '원';
