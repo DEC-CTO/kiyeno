@@ -681,8 +681,7 @@ function createDetailModalHTML(itemSummary) {
                             <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #ecfdf5; color: #065f46;">0원</td>
                             <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #eff6ff; color: #1e40af;">0원</td>
                             <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #fefbeb; color: #92400e;">0원</td>
-                            <td id="grandTotalPrice" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #f4f4f5; color: #52525b;">0원</td>
-                            <td id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
+                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
                             <td style="border: 1px solid #e2e8f0; background: #6366f1;"></td>
                         </tr>
                     </tfoot>
@@ -893,7 +892,6 @@ function calculateRowTotal(input) {
 // 전체 합계 계산 (구성품 + 고정 로우)
 function calculateGrandTotal() {
     let totalMaterial = 0, totalLabor = 0, totalExpense = 0, grandTotal = 0;
-    let totalMaterialPrice = 0, totalLaborPrice = 0, totalExpensePrice = 0; // 단가 합계 추가
     
     // 구성품 테이블 계산
     document.querySelectorAll('#componentsTable tr').forEach(row => {
@@ -902,20 +900,10 @@ function calculateGrandTotal() {
         const expenseElement = row.querySelector('.expense-amount');
         const totalElement = row.querySelector('.total-amount');
         
-        // 단가 요소들 추가
-        const materialPriceElement = row.querySelector('.component-material-price');
-        const laborPriceElement = row.querySelector('.component-labor-price');
-        const expensePriceElement = row.querySelector('.expense-price');
-        
         if (materialElement) totalMaterial += parseFloat(materialElement.textContent.replace(/[,원]/g, '') || 0);
         if (laborElement) totalLabor += parseFloat(laborElement.textContent.replace(/[,원]/g, '') || 0);
         if (expenseElement) totalExpense += parseFloat(expenseElement.textContent.replace(/[,원]/g, '') || 0);
         if (totalElement) grandTotal += parseFloat(totalElement.textContent.replace(/[,원]/g, '') || 0);
-        
-        // 단가 합계 계산
-        if (materialPriceElement) totalMaterialPrice += parseFloat(materialPriceElement.value || 0);
-        if (laborPriceElement) totalLaborPrice += parseFloat(laborPriceElement.value || 0);
-        if (expensePriceElement) totalExpensePrice += parseFloat(expensePriceElement.value || 0);
     });
     
     // 고정 로우 계산 (백분율 기반)
@@ -986,25 +974,16 @@ function calculateGrandTotal() {
         grandTotal = roundedGrandTotal;
     }
     
-    // 합계 단가 계산 (자재비 단가 + 노무비 단가 + 경비 단가)
-    const totalPrice = Math.round(totalMaterialPrice + totalLaborPrice + totalExpensePrice);
-    
     // 합계 표시 업데이트
     const totalMaterialElement = document.getElementById('totalMaterial');
     const totalLaborElement = document.getElementById('totalLabor');
     const totalExpenseElement = document.getElementById('totalExpense');
     const grandTotalElement = document.getElementById('grandTotal');
     
-    // 합계 단가 표시 요소 찾기 (새로 추가한 grandTotalPrice ID 사용)
-    const totalPriceElement = document.getElementById('grandTotalPrice');
-    
     if (totalMaterialElement) totalMaterialElement.textContent = Math.round(totalMaterial).toLocaleString() + '원';
     if (totalLaborElement) totalLaborElement.textContent = Math.round(totalLabor).toLocaleString() + '원';
     if (totalExpenseElement) totalExpenseElement.textContent = Math.round(totalExpense).toLocaleString() + '원';
     if (grandTotalElement) grandTotalElement.textContent = Math.round(grandTotal).toLocaleString() + '원';
-    
-    // 합계 단가 표시 (새로 추가)
-    if (totalPriceElement) totalPriceElement.textContent = totalPrice.toLocaleString() + '원';
 }
 
 // 고정 로우 계산 (백분율 기반)
@@ -1022,6 +1001,12 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         // 금액 컬럼에 계산된 금액 표시
         const amountElement = materialLossRow.querySelector('.fixed-material-amount');
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+        
+        // 합계 단가와 합계 금액 설정 (자재로스는 자재비 항목이므로 동일)
+        const totalPriceElement = materialLossRow.querySelector('.fixed-total-price');
+        const totalAmountElement = materialLossRow.querySelector('.fixed-total-amount');
+        if (totalPriceElement) totalPriceElement.textContent = Math.round(baseMaterial).toLocaleString() + '원';
+        if (totalAmountElement) totalAmountElement.textContent = amount.toLocaleString() + '원';
     }
     
     // 자재운반비 및 양중비 (자재비의 %)
@@ -1037,6 +1022,12 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         // 금액 컬럼에 계산된 금액 표시
         const amountElement = transportCostRow.querySelector('.fixed-material-amount');
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+        
+        // 합계 단가와 합계 금액 설정 (자재운반비는 자재비 항목이므로 동일)
+        const totalPriceElement = transportCostRow.querySelector('.fixed-total-price');
+        const totalAmountElement = transportCostRow.querySelector('.fixed-total-amount');
+        if (totalPriceElement) totalPriceElement.textContent = Math.round(baseMaterial).toLocaleString() + '원';
+        if (totalAmountElement) totalAmountElement.textContent = amount.toLocaleString() + '원';
     }
     
     // 자재비 이윤 ((자재비 + 자재로스 + 자재운반비)의 %)
@@ -1059,6 +1050,12 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         // 금액 컬럼에 계산된 금액 표시
         const amountElement = materialProfitRow.querySelector('.fixed-material-amount');
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+        
+        // 합계 단가와 합계 금액 설정 (자재비 이윤은 자재비 항목이므로 기준 금액 사용)
+        const totalPriceElement = materialProfitRow.querySelector('.fixed-total-price');
+        const totalAmountElement = materialProfitRow.querySelector('.fixed-total-amount');
+        if (totalPriceElement) totalPriceElement.textContent = Math.round(baseAmount).toLocaleString() + '원';
+        if (totalAmountElement) totalAmountElement.textContent = amount.toLocaleString() + '원';
     }
     
     // 공구손료 및 기계경비 (노무비의 %) - 노무비 컬럼에 표시
@@ -1074,6 +1071,12 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         // 노무비 금액 컬럼에 계산된 금액 표시  
         const amountElement = toolExpenseRow.querySelector('td:nth-child(8)'); // 노무비 금액 컬럼 (8번째)
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
+        
+        // 합계 단가와 합계 금액 설정 (공구손료는 노무비 항목이므로 노무비 총합 사용)
+        const totalPriceElement = toolExpenseRow.querySelector('.fixed-total-price');
+        const totalAmountElement = toolExpenseRow.querySelector('.fixed-total-amount');
+        if (totalPriceElement) totalPriceElement.textContent = Math.round(baseLabor).toLocaleString() + '원';
+        if (totalAmountElement) totalAmountElement.textContent = amount.toLocaleString() + '원';
     }
 }
 
