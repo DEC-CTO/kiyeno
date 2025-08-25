@@ -793,6 +793,13 @@ function addComponentRow(componentData = null) {
     `;
     
     tbody.appendChild(row);
+    
+    // 3단계: 저장된 materialId 복원 (정확한 자재 추적을 위함)
+    if (componentData && componentData.materialId) {
+        row.setAttribute('data-material-id', componentData.materialId);
+        console.log(`🔧 materialId 복원: ${componentData.materialId} for ${componentData.name}`);
+    }
+    
     calculateRowTotal(row.querySelector('.component-quantity'));
     calculateGrandTotal();
 }
@@ -1042,6 +1049,7 @@ function collectCurrentComponents() {
         
         const component = {
             name: componentName,
+            materialId: row.getAttribute('data-material-id') || null, // 2단계: materialId 수집
             spec: getElementValue(row.querySelector('.component-spec')) || '',
             unit: getElementValue(row.querySelector('.component-unit')) || '',
             quantity: quantity,
@@ -2354,6 +2362,14 @@ function fillComponentRowWithMaterial(row, material) {
     }
     
     try {
+        // 1단계: 자재 ID 저장 (정확한 자재 추적을 위함)
+        if (material.id) {
+            row.setAttribute('data-material-id', material.id);
+            console.log(`🔧 materialId 저장: ${material.id}`);
+        } else {
+            console.warn('⚠️ materialId가 없는 자재:', material);
+        }
+        
         // 각 필드별로 데이터 입력 (span 요소 지원)
         const nameElement = row.querySelector('.component-name');
         const specElement = row.querySelector('.component-spec');
@@ -2521,6 +2537,7 @@ function saveUnitPriceSession() {
             
             const componentData = {
                 name: getElementValue(row.querySelector('.component-name')) || '',
+                materialId: row.getAttribute('data-material-id') || null, // 5단계: 세션 저장 시 materialId 포함
                 size: getElementValue(row.querySelector('.component-size') || row.querySelector('.component-spec')) || '',
                 unit: getElementValue(row.querySelector('.component-unit')) || '',
                 quantity: row.querySelector('.component-quantity')?.value || '1',
@@ -2711,6 +2728,59 @@ function refreshActiveUnitPriceComponents() {
     }, 100);
 }
 
+// 4단계: ID 기반 정확한 자재 검색 (동일 이름 자재 혼동 방지)
+async function findMaterialById(materialId) {
+    try {
+        console.log(`🔍 KiyenoMaterialsDB를 사용한 ID 기반 검색: ${materialId}`);
+        
+        const materialsFromDB = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('KiyenoMaterialsDB', 2);
+            
+            request.onerror = () => {
+                console.error('❌ KiyenoMaterialsDB 열기 실패');
+                reject(request.error);
+            };
+            
+            request.onsuccess = () => {
+                const db = request.result;
+                const transaction = db.transaction(['materials'], 'readonly');
+                const store = transaction.objectStore('materials');
+                const getRequest = store.get(materialId); // ID로 직접 검색
+                
+                getRequest.onsuccess = () => {
+                    const material = getRequest.result;
+                    if (material) {
+                        console.log(`✅ KiyenoMaterialsDB에서 ID로 발견: ${material.name || material.품명}`, material);
+                        const materialPrice = material.materialCost || material.price || material.재료비단가 || 0;
+                        const laborPrice = material.laborCost || material.노무비단가 || 0;
+                        
+                        resolve({
+                            재료비단가: materialPrice,
+                            노무비단가: laborPrice,
+                            materialCost: materialPrice,
+                            laborCost: laborPrice
+                        });
+                    } else {
+                        console.warn(`❌ KiyenoMaterialsDB에서 ID로 찾을 수 없음: ${materialId}`);
+                        resolve(null);
+                    }
+                };
+                
+                getRequest.onerror = () => {
+                    console.error(`❌ ID 검색 실패: ${materialId}`);
+                    reject(getRequest.error);
+                };
+            };
+        });
+        
+        return materialsFromDB;
+        
+    } catch (error) {
+        console.error(`KiyenoMaterialsDB ID 검색 오류 (${materialId}):`, error);
+        return null;
+    }
+}
+
 // 자재선택 모달과 완전히 동일한 방법으로 DB 검색 (KiyenoMaterialsDB 직접 접근)
 async function findMaterialByNameDirect(materialName) {
     try {
@@ -2820,10 +2890,27 @@ async function updateComponentPricing(row, materialName) {
     try {
         console.log(`🔍 자재 가격 업데이트 중: ${materialName}`);
         
-        // 최신 자재 데이터 조회 - 직접 DB에서 검색
-        const materialData = await findMaterialByNameDirect(materialName);
+        // 4단계: ID 기반 정확한 검색 우선 사용 (호환성 유지)
+        const materialId = row.getAttribute('data-material-id');
+        let materialData = null;
+        
+        if (materialId) {
+            console.log(`🎯 materialId 발견, ID 기반 검색 우선: ${materialId}`);
+            materialData = await findMaterialById(materialId);
+        }
+        
+        // ID로 찾지 못했거나 materialId가 없으면 기존 이름 기반 검색 (호환성)
         if (!materialData) {
-            console.warn(`⚠️ 자재 정보를 찾을 수 없음: ${materialName}`);
+            if (materialId) {
+                console.warn(`⚠️ ID 검색 실패, 이름 기반 검색으로 대체: ${materialId} → ${materialName}`);
+            } else {
+                console.log(`📝 materialId 없음, 이름 기반 검색 사용: ${materialName}`);
+            }
+            materialData = await findMaterialByNameDirect(materialName);
+        }
+        
+        if (!materialData) {
+            console.warn(`⚠️ 자재 정보를 찾을 수 없음: ${materialName} (ID: ${materialId || 'N/A'})`);
             return;
         }
         
