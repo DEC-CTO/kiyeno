@@ -987,11 +987,24 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
     }
     
-    // 자재비 이윤 (자재비의 %)
+    // 자재비 이윤 ((자재비 + 자재로스 + 자재운반비)의 %)
     const materialProfitRow = document.querySelector('.material-profit-row');
     if (materialProfitRow) {
+        // 자재로스 금액 가져오기
+        const materialLossAmount = parseFloat(materialLossRow?.querySelector('.fixed-material-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        // 자재운반비 금액 가져오기  
+        const transportCostAmount = parseFloat(transportCostRow?.querySelector('.fixed-material-amount')?.textContent.replace(/[,원]/g, '') || 0);
+        
+        // 새로운 기준 금액 계산 (자재비 + 자재로스 + 자재운반비)
+        const baseAmount = baseMaterial + materialLossAmount + transportCostAmount;
         const percentage = parseFloat(materialProfitRow.querySelector('.fixed-quantity')?.value) || 0;
-        const amount = Math.round(baseMaterial * percentage / 100);
+        const amount = Math.round(baseAmount * percentage / 100);
+        
+        // 단가 컬럼에 기준 금액 표시
+        const priceElement = materialProfitRow.querySelector('.fixed-material-price');
+        if (priceElement) priceElement.textContent = Math.round(baseAmount).toLocaleString() + '원';
+        
+        // 금액 컬럼에 계산된 금액 표시
         const amountElement = materialProfitRow.querySelector('.fixed-material-amount');
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
     }
@@ -1230,8 +1243,9 @@ function calculateItemTotalCosts(item) {
         const materialLoss = Math.round(materialTotal * fixedRates.materialLoss / 100);
         // 자재운반비 (자재비의 %)
         const transportCost = Math.round(materialTotal * fixedRates.transportCost / 100);
-        // 자재비 이윤 (자재비의 %)
-        const materialProfit = Math.round(materialTotal * fixedRates.materialProfit / 100);
+        // 자재비 이윤 ((자재비 + 자재로스 + 자재운반비)의 %)
+        const materialProfitBase = materialTotal + materialLoss + transportCost;
+        const materialProfit = Math.round(materialProfitBase * fixedRates.materialProfit / 100);
         // 공구손료 (노무비의 %)
         const toolExpense = Math.round(laborTotal * fixedRates.toolExpense / 100);
         
