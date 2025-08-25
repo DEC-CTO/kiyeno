@@ -977,6 +977,12 @@ function calculateFixedRows(baseMaterial, baseLabor, baseExpense) {
     if (transportCostRow) {
         const percentage = parseFloat(transportCostRow.querySelector('.fixed-quantity')?.value) || 0;
         const amount = Math.round(baseMaterial * percentage / 100);
+        
+        // 단가 컬럼에 자재비 총합 표시
+        const priceElement = transportCostRow.querySelector('.fixed-material-price');
+        if (priceElement) priceElement.textContent = Math.round(baseMaterial).toLocaleString() + '원';
+        
+        // 금액 컬럼에 계산된 금액 표시
         const amountElement = transportCostRow.querySelector('.fixed-material-amount');
         if (amountElement) amountElement.textContent = amount.toLocaleString() + '원';
     }
