@@ -3308,8 +3308,8 @@ function createBulkQuantityCalculatorModal() {
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
                             <div style="background: #fef2f2; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
-                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="studFormula" style="font-size: 8px; font-family: monospace; color: #dc2626;">-</div>
+                                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="studFormula" style="font-size: 11px; font-family: monospace; color: #dc2626;">-</div>
                             </div>
                             <div style="text-align: center; padding: 6px; background: #dc2626; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="studResult">0</strong>
@@ -3335,8 +3335,8 @@ function createBulkQuantityCalculatorModal() {
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
                             <div style="background: #fff7ed; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
-                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="runnerFormula" style="font-size: 8px; font-family: monospace; color: #ea580c;">-</div>
+                                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="runnerFormula" style="font-size: 11px; font-family: monospace; color: #ea580c;">-</div>
                             </div>
                             <div style="text-align: center; padding: 6px; background: #ea580c; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="runnerResult">0</strong>
@@ -3363,8 +3363,8 @@ function createBulkQuantityCalculatorModal() {
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
                             <div style="background: #fffbeb; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
-                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="pieceFormula" style="font-size: 8px; font-family: monospace; color: #ca8a04;">-</div>
+                                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="pieceFormula" style="font-size: 11px; font-family: monospace; color: #ca8a04;">-</div>
                             </div>
                             <div style="text-align: center; padding: 6px; background: #ca8a04; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="pieceResult">0</strong>
@@ -3391,8 +3391,8 @@ function createBulkQuantityCalculatorModal() {
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
                             <div style="background: #f7fee7; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
-                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="nailBulletFormula" style="font-size: 8px; font-family: monospace; color: #65a30d;">-</div>
+                                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="nailBulletFormula" style="font-size: 11px; font-family: monospace; color: #65a30d;">-</div>
                             </div>
                             <div style="text-align: center; padding: 6px; background: #65a30d; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="nailBulletResult">0</strong>
@@ -3419,8 +3419,8 @@ function createBulkQuantityCalculatorModal() {
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
                             <div style="background: #faf5ff; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
-                                <div style="font-size: 9px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="weldingFormula" style="font-size: 8px; font-family: monospace; color: #7c3aed;">-</div>
+                                <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
+                                <div id="weldingFormula" style="font-size: 11px; font-family: monospace; color: #7c3aed;">-</div>
                             </div>
                             <div style="text-align: center; padding: 6px; background: #7c3aed; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="weldingResult">0</strong>
@@ -3684,8 +3684,7 @@ function applyBulkCalculatedQuantities() {
         '스터드': parseFloat(document.getElementById('studResult')?.textContent) || 0,
         '런너': parseFloat(document.getElementById('runnerResult')?.textContent) || 0,
         '피스': parseFloat(document.getElementById('pieceResult')?.textContent) || 0,
-        '타정': parseFloat(document.getElementById('nailResult')?.textContent) || 0,
-        '총알': parseFloat(document.getElementById('bulletResult')?.textContent) || 0,
+        '타정총알': parseFloat(document.getElementById('nailBulletResult')?.textContent) || 0,
         '용접봉': parseFloat(document.getElementById('weldingResult')?.textContent) || 0,
         '석고피스': parseFloat(document.getElementById('gypsumPieceResult')?.textContent) || 0
     };
@@ -3717,7 +3716,7 @@ function applyBulkCalculatedQuantities() {
         alert(`${appliedCount}개 자재의 수량이 적용되었습니다.`);
         console.log(`📊 일괄 적용 완료: ${appliedCount}개 자재`);
     } else {
-        alert('매칭되는 자재를 찾을 수 없습니다.\n자재명이 스터드, 런너, 피스, 타정, 총알, 용접봉, 석고피스 중 하나를 포함하는지 확인해주세요.');
+        alert('매칭되는 자재를 찾을 수 없습니다.\n자재명이 스터드, 런너, 피스, 타정총알, 용접봉, 석고피스 중 하나를 포함하는지 확인해주세요.');
     }
     
     // 모달 닫기
