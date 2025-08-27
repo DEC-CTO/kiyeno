@@ -3153,10 +3153,104 @@ window.updateComponentPricing = updateComponentPricing;
 window.findMaterialByName = findMaterialByName;
 window.updateComponentSubtotal = updateComponentSubtotal;
 
+// =============================================================================
+// DB 레벨 완전 동기화 시스템
+// =============================================================================
+
+// 자재 가격 변경 시 일위대가 DB의 모든 관련 항목 업데이트
+async function updateUnitPriceDatabaseByMaterial(materialId, materialName, newMaterialPrice, newLaborPrice) {
+    try {
+        console.log(`🗄️ DB 레벨 동기화 시작: ${materialName} (ID: ${materialId})`);
+        console.log(`  - 신규 재료비: ${newMaterialPrice}원, 신규 노무비: ${newLaborPrice}원`);
+        
+        // UnitPriceDB 인스턴스 생성 및 초기화
+        const unitPriceDB = new UnitPriceDB();
+        const db = await unitPriceDB.initDB();
+        
+        // 모든 일위대가 항목 조회
+        const transaction = db.transaction(['unitPrices'], 'readwrite');
+        const store = transaction.objectStore('unitPrices');
+        const getAllRequest = store.getAll();
+        
+        const allUnitPrices = await new Promise((resolve, reject) => {
+            getAllRequest.onsuccess = () => resolve(getAllRequest.result);
+            getAllRequest.onerror = () => reject(getAllRequest.error);
+        });
+        
+        let updatedCount = 0;
+        
+        // 각 일위대가 항목에서 해당 자재 사용하는 구성품 찾기 및 업데이트
+        for (const unitPrice of allUnitPrices) {
+            let unitPriceUpdated = false;
+            
+            if (unitPrice.components && Array.isArray(unitPrice.components)) {
+                for (const component of unitPrice.components) {
+                    // 자재 ID 또는 이름으로 매칭
+                    const isMatch = (
+                        (materialId && component.materialId === materialId) ||
+                        (materialName && component.name === materialName) ||
+                        (materialName && component.name && component.name.includes(materialName)) ||
+                        (materialName && component.name && materialName.includes(component.name))
+                    );
+                    
+                    if (isMatch) {
+                        // 가격 정보 업데이트
+                        if (newMaterialPrice !== undefined) {
+                            component.materialPrice = newMaterialPrice;
+                        }
+                        if (newLaborPrice !== undefined) {
+                            // 노무비는 금액으로 저장 (기존 수량 유지)
+                            component.laborAmount = newLaborPrice;
+                            // 단가는 자동 계산됨 (금액 ÷ 수량)
+                        }
+                        
+                        // materialId가 없었다면 설정
+                        if (materialId && !component.materialId) {
+                            component.materialId = materialId;
+                        }
+                        
+                        unitPriceUpdated = true;
+                        console.log(`  ✅ 구성품 업데이트: ${component.name} in ${unitPrice.basic?.itemName}`);
+                    }
+                }
+            }
+            
+            // 변경된 일위대가 항목 저장
+            if (unitPriceUpdated) {
+                // 수정 시간 업데이트
+                unitPrice.updatedAt = new Date().toISOString();
+                
+                // DB에 저장
+                const updateTransaction = db.transaction(['unitPrices'], 'readwrite');
+                const updateStore = updateTransaction.objectStore('unitPrices');
+                const updateRequest = updateStore.put(unitPrice);
+                
+                await new Promise((resolve, reject) => {
+                    updateRequest.onsuccess = () => resolve();
+                    updateRequest.onerror = () => reject(updateRequest.error);
+                });
+                
+                updatedCount++;
+                console.log(`  💾 DB 저장 완료: ${unitPrice.basic?.itemName}`);
+            }
+        }
+        
+        console.log(`🎯 DB 레벨 동기화 완료: ${updatedCount}개 일위대가 항목 업데이트`);
+        return updatedCount;
+        
+    } catch (error) {
+        console.error('❌ DB 레벨 동기화 실패:', error);
+        throw error;
+    }
+}
+
 // 세션 관리 전역 함수 등록
 window.saveUnitPriceSession = saveUnitPriceSession;
 window.restoreUnitPriceSession = restoreUnitPriceSession;
 window.clearUnitPriceSession = clearUnitPriceSession;
+
+// DB 동기화 전역 함수 등록
+window.updateUnitPriceDatabaseByMaterial = updateUnitPriceDatabaseByMaterial;
 
 // =============================================================================
 // 단순한 모달 데이터 동기화 시스템

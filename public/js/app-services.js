@@ -2891,7 +2891,7 @@ function addLightweightMaterial(modal = null) {
 }
 
 // 경량부품 업데이트 (편집)
-function updateLightweightMaterial(materialId, modal = null) {
+async function updateLightweightMaterial(materialId, modal = null) {
     try {
         const updateData = {
             name: document.getElementById('editMaterialName')?.value.trim() || '',
@@ -2969,21 +2969,38 @@ function updateLightweightMaterial(materialId, modal = null) {
             // 성공 메시지
             showToast(`경량부품이 수정되었습니다: ${updateData.name} (${materialId})`, 'success');
             
-            // 🔄 일위대가 관리 모달이 열려있으면 실시간 가격 업데이트 트리거
-            console.log('🔄 경량자재 수정 완료 - 일위대가 실시간 업데이트 확인 중...');
+            // 🗄️ DB 레벨 완전 동기화 시스템
+            console.log('🗄️ 경량자재 수정 완료 - DB 레벨 동기화 시작...');
+            
+            // 1. DB 레벨에서 일위대가 데이터 업데이트
+            if (typeof window.updateUnitPriceDatabaseByMaterial === 'function') {
+                try {
+                    const updatedCount = await window.updateUnitPriceDatabaseByMaterial(
+                        materialId,
+                        updateData.name,
+                        updateData.price,
+                        updateData.laborCost
+                    );
+                    console.log(`✅ DB 동기화 완료: ${updatedCount}개 일위대가 항목 업데이트`);
+                } catch (error) {
+                    console.error('❌ DB 동기화 실패:', error);
+                }
+            } else {
+                console.log('⚠️ updateUnitPriceDatabaseByMaterial 함수를 찾을 수 없음');
+            }
+            
+            // 2. UI 업데이트 (일위대가 모달 열려있을 때만)
             if (typeof window.refreshActiveUnitPriceComponents === 'function') {
                 const unitPriceModal = document.getElementById('unitPriceModal');
                 if (unitPriceModal && unitPriceModal.style.display !== 'none') {
-                    console.log('✅ 일위대가 모달이 열려있음 - 자동 가격 업데이트 실행');
+                    console.log('✅ 일위대가 모달 열려있음 - UI 자동 업데이트 실행');
                     setTimeout(() => {
                         window.refreshActiveUnitPriceComponents();
-                        console.log('🔄 경량자재 가격 변경으로 인한 일위대가 자동 업데이트 완료');
+                        console.log('🔄 경량자재 DB+UI 동기화 완료');
                     }, 100);
                 } else {
-                    console.log('ℹ️ 일위대가 모달이 닫혀있음 - 업데이트 건너뜀');
+                    console.log('ℹ️ 일위대가 모달 닫혀있음 - DB 동기화만 완료, 다음 열기 시 최신 데이터 자동 표시');
                 }
-            } else {
-                console.log('⚠️ refreshActiveUnitPriceComponents 함수를 찾을 수 없음');
             }
             
             // 서브 모달 닫기
@@ -3395,7 +3412,7 @@ function saveGypsumBoard(modal = null) {
 }
 
 // 석고보드 업데이트 (편집)
-function updateGypsumBoard(materialId, modal = null) {
+async function updateGypsumBoard(materialId, modal = null) {
     try {
         const materialData = {
             name: document.getElementById('editGypsumName')?.value.trim() || '',
@@ -3477,21 +3494,38 @@ function updateGypsumBoard(materialId, modal = null) {
             // 성공 메시지
             showToast(`석고보드가 수정되었습니다: ${materialData.name} (${materialId})`, 'success');
             
-            // 🔄 일위대가 관리 모달이 열려있으면 실시간 가격 업데이트 트리거
-            console.log('🔄 석고보드 수정 완료 - 일위대가 실시간 업데이트 확인 중...');
+            // 🗄️ DB 레벨 완전 동기화 시스템
+            console.log('🗄️ 석고보드 수정 완료 - DB 레벨 동기화 시작...');
+            
+            // 1. DB 레벨에서 일위대가 데이터 업데이트
+            if (typeof window.updateUnitPriceDatabaseByMaterial === 'function') {
+                try {
+                    const updatedCount = await window.updateUnitPriceDatabaseByMaterial(
+                        materialId,
+                        materialData.name,
+                        materialData.materialCost,
+                        materialData.laborCost
+                    );
+                    console.log(`✅ DB 동기화 완료: ${updatedCount}개 일위대가 항목 업데이트`);
+                } catch (error) {
+                    console.error('❌ DB 동기화 실패:', error);
+                }
+            } else {
+                console.log('⚠️ updateUnitPriceDatabaseByMaterial 함수를 찾을 수 없음');
+            }
+            
+            // 2. UI 업데이트 (일위대가 모달 열려있을 때만)
             if (typeof window.refreshActiveUnitPriceComponents === 'function') {
                 const unitPriceModal = document.getElementById('unitPriceModal');
                 if (unitPriceModal && unitPriceModal.style.display !== 'none') {
-                    console.log('✅ 일위대가 모달이 열려있음 - 자동 가격 업데이트 실행');
+                    console.log('✅ 일위대가 모달 열려있음 - UI 자동 업데이트 실행');
                     setTimeout(() => {
                         window.refreshActiveUnitPriceComponents();
-                        console.log('🔄 석고보드 가격 변경으로 인한 일위대가 자동 업데이트 완료');
+                        console.log('🔄 석고보드 DB+UI 동기화 완료');
                     }, 100);
                 } else {
-                    console.log('ℹ️ 일위대가 모달이 닫혀있음 - 업데이트 건너뜀');
+                    console.log('ℹ️ 일위대가 모달 닫혀있음 - DB 동기화만 완료, 다음 열기 시 최신 데이터 자동 표시');
                 }
-            } else {
-                console.log('⚠️ refreshActiveUnitPriceComponents 함수를 찾을 수 없음');
             }
         } else {
             throw new Error('석고보드를 찾을 수 없습니다.');
