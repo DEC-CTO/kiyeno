@@ -3007,25 +3007,18 @@ async function updateComponentPricing(row, materialName) {
             console.log(`🔍 노무비 비교: ${materialName} - 현재: ${currentLaborPrice}, 신규: ${newLaborPrice}`);
             
             if (currentLaborPrice !== newLaborPrice) {
-                // span 요소와 input 요소를 모두 지원하는 값 설정
-                if (laborPriceInput.tagName === 'SPAN') {
-                    laborPriceInput.textContent = `${Number(newLaborPrice).toLocaleString()}원`;
-                } else {
-                    // readonly 속성 임시 제거 후 값 변경
-                    const wasReadonly = laborPriceInput.hasAttribute('readonly');
-                    if (wasReadonly) {
-                        laborPriceInput.removeAttribute('readonly');
-                    }
+                // 💰 올바른 노무비 로직: 금액을 우선 설정, 단가는 calculateRowTotal()에서 자동계산
+                const laborAmountElement = row.querySelector('.labor-amount');
+                if (laborAmountElement) {
+                    // 1. 노무비 금액에 새로운 단가 값 직접 입력
+                    laborAmountElement.textContent = `${Number(newLaborPrice).toLocaleString()}원`;
+                    console.log(`💰 노무비 금액 업데이트: ${newLaborPrice.toLocaleString()}원 (금액에 직접 입력)`);
                     
-                    laborPriceInput.value = newLaborPrice;
-                    
-                    // readonly 속성 복원
-                    if (wasReadonly) {
-                        laborPriceInput.setAttribute('readonly', 'readonly');
-                    }
+                    // 2. 단가는 calculateRowTotal()에서 금액÷수량으로 자동계산됨
+                    console.log(`👷 노무비 단가는 calculateRowTotal()에서 자동계산: ${newLaborPrice.toLocaleString()} ÷ 수량`);
                 }
                 
-                console.log(`👷 노무비 업데이트: ${materialName} - ${currentLaborPrice} → ${newLaborPrice}`);
+                console.log(`✅ 노무비 업데이트: ${materialName} - ${currentLaborPrice} → ${newLaborPrice} (금액 우선)`);
             } else {
                 console.log(`ℹ️ 노무비 변경 없음: ${materialName} - ${currentLaborPrice}`);
             }

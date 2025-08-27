@@ -2969,6 +2969,23 @@ function updateLightweightMaterial(materialId, modal = null) {
             // 성공 메시지
             showToast(`경량부품이 수정되었습니다: ${updateData.name} (${materialId})`, 'success');
             
+            // 🔄 일위대가 관리 모달이 열려있으면 실시간 가격 업데이트 트리거
+            console.log('🔄 경량자재 수정 완료 - 일위대가 실시간 업데이트 확인 중...');
+            if (typeof window.refreshActiveUnitPriceComponents === 'function') {
+                const unitPriceModal = document.getElementById('unitPriceModal');
+                if (unitPriceModal && unitPriceModal.style.display !== 'none') {
+                    console.log('✅ 일위대가 모달이 열려있음 - 자동 가격 업데이트 실행');
+                    setTimeout(() => {
+                        window.refreshActiveUnitPriceComponents();
+                        console.log('🔄 경량자재 가격 변경으로 인한 일위대가 자동 업데이트 완료');
+                    }, 100);
+                } else {
+                    console.log('ℹ️ 일위대가 모달이 닫혀있음 - 업데이트 건너뜀');
+                }
+            } else {
+                console.log('⚠️ refreshActiveUnitPriceComponents 함수를 찾을 수 없음');
+            }
+            
             // 서브 모달 닫기
             if (modal) {
                 closeSubModal(modal);
@@ -3459,6 +3476,23 @@ function updateGypsumBoard(materialId, modal = null) {
             
             // 성공 메시지
             showToast(`석고보드가 수정되었습니다: ${materialData.name} (${materialId})`, 'success');
+            
+            // 🔄 일위대가 관리 모달이 열려있으면 실시간 가격 업데이트 트리거
+            console.log('🔄 석고보드 수정 완료 - 일위대가 실시간 업데이트 확인 중...');
+            if (typeof window.refreshActiveUnitPriceComponents === 'function') {
+                const unitPriceModal = document.getElementById('unitPriceModal');
+                if (unitPriceModal && unitPriceModal.style.display !== 'none') {
+                    console.log('✅ 일위대가 모달이 열려있음 - 자동 가격 업데이트 실행');
+                    setTimeout(() => {
+                        window.refreshActiveUnitPriceComponents();
+                        console.log('🔄 석고보드 가격 변경으로 인한 일위대가 자동 업데이트 완료');
+                    }, 100);
+                } else {
+                    console.log('ℹ️ 일위대가 모달이 닫혀있음 - 업데이트 건너뜀');
+                }
+            } else {
+                console.log('⚠️ refreshActiveUnitPriceComponents 함수를 찾을 수 없음');
+            }
         } else {
             throw new Error('석고보드를 찾을 수 없습니다.');
         }
