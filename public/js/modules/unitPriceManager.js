@@ -102,12 +102,19 @@ class UnitPriceDB {
             const request = store.put(unitPriceData);
 
             return new Promise((resolve, reject) => {
-                request.onsuccess = () => {
-                    console.log(`✅ 일위대가 저장 완료: ${unitPriceData.id}`);
+                // 트랜잭션 완료를 기다려야 함 (중요!)
+                transaction.oncomplete = () => {
+                    console.log(`✅ 일위대가 저장 완료 (트랜잭션 커밋됨): ${unitPriceData.id}`);
                     resolve(unitPriceData);
                 };
+                
+                transaction.onerror = () => {
+                    console.error('❌ 일위대가 저장 트랜잭션 실패:', transaction.error);
+                    reject(transaction.error);
+                };
+                
                 request.onerror = () => {
-                    console.error('❌ 일위대가 저장 실패:', request.error);
+                    console.error('❌ 일위대가 저장 요청 실패:', request.error);
                     reject(request.error);
                 };
             });
@@ -1377,6 +1384,18 @@ async function saveUnitPriceItem() {
         } else {
             unitPriceItems.push(currentUnitPriceData);
         }
+        
+        // 벽체 타입 관리 모달이 열려있다면 즉시 새로고침
+        setTimeout(() => {
+            const unitPriceSelectionTable = document.getElementById('unitPriceSelectionTable');
+            if (unitPriceSelectionTable) {
+                console.log('🔄 벽체 타입 관리 일위대가 선택 모달 감지 - 즉시 새로고침');
+                // 전역 함수로 새로고침 실행
+                if (typeof window.refreshUnitPriceSelectionTable === 'function') {
+                    window.refreshUnitPriceSelectionTable();
+                }
+            }
+        }, 100);
         
         // 모달 닫기
         closeCurrentModal();

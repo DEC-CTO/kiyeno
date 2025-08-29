@@ -1041,8 +1041,7 @@ async function editUnitPriceFromSelection(unitPriceId) {
             // 수정 모달 열기 - DB에서 직접 조회하므로 메모리 새로고침 불필요
             await window.editUnitPriceItem(unitPriceId);
             
-            // 수정 완료 후 콜백 설정 (모달이 닫힌 후 데이터 새로고침)
-            setupEditCompletionCallback();
+            // 수정 완료 후 자동 새로고침은 saveUnitPriceItem()에서 처리됨
             
         } else {
             console.error('❌ editUnitPriceItem 함수를 찾을 수 없습니다.');
@@ -1054,7 +1053,8 @@ async function editUnitPriceFromSelection(unitPriceId) {
     }
 }
 
-// 수정 완료 후 선택 모달 데이터 새로고침을 위한 콜백 설정
+// 수정 완료 후 선택 모달 데이터 새로고침을 위한 콜백 설정 (사용하지 않음 - saveUnitPriceItem()에서 직접 처리)
+/*
 function setupEditCompletionCallback() {
     // 주기적으로 수정 모달이 닫혔는지 확인
     let checkInterval = setInterval(() => {
@@ -1078,6 +1078,7 @@ function setupEditCompletionCallback() {
         console.log('⏰ 수정 완료 확인 타임아웃');
     }, 10000);
 }
+*/
 
 // 일위대가 선택 테이블 데이터 새로고침
 async function refreshUnitPriceSelectionTable() {
@@ -1092,11 +1093,20 @@ async function refreshUnitPriceSelectionTable() {
             return;
         }
         
+        // DB 트랜잭션이 완료된 후이므로 최신 데이터 로드
+        console.log('🔄 DB에서 최신 일위대가 데이터 로드...');
+        
         // 새 데이터로 테이블 내용 업데이트
         const newTableRowsHTML = await generateUnitPriceTableRows();
         tbody.innerHTML = newTableRowsHTML;
         
         console.log('✅ 일위대가 선택 테이블 새로고침 완료');
+        
+        // 새로고침 완료를 시각적으로 표시
+        tbody.style.backgroundColor = '#f0f9ff';
+        setTimeout(() => {
+            tbody.style.backgroundColor = '';
+        }, 1000);
         
     } catch (error) {
         console.error('❌ 테이블 새로고침 실패:', error);
