@@ -1424,31 +1424,29 @@ async function renderUnitPriceItemsList() {
     container.innerHTML = tableHTML;
 }
 
-// 일위대가 아이템 수정
-function editUnitPriceItem(id) {
-    console.log('🔍 editUnitPriceItem 호출됨:', id, '(타입:', typeof id, ')');
-    console.log('🔍 현재 메모리 데이터 개수:', unitPriceItems.length);
-    console.log('🔍 현재 메모리 데이터 ID들:', unitPriceItems.map(item => ({
-        id: item.id, 
-        type: typeof item.id,
-        itemName: item.basic?.itemName || 'No Name'
-    })));
+// 일위대가 아이템 수정 (DB 직접 조회 방식)
+async function editUnitPriceItem(id) {
+    console.log('🔍 editUnitPriceItem 호출됨 (DB 직접 조회):', id, '(타입:', typeof id, ')');
     
-    const item = unitPriceItems.find(item => item.id === id);
-    console.log('🔍 검색 결과:', item ? '찾음 ✅' : '못찾음 ❌');
+    let item;
     
-    if (!item) {
-        console.error('❌ 일위대가 아이템 검색 실패 - ID 매칭 안됨');
-        console.log('🔍 정확한 매칭 테스트:');
-        unitPriceItems.forEach((unitItem, index) => {
-            const matches = unitItem.id === id;
-            const strictMatches = unitItem.id === id && typeof unitItem.id === typeof id;
-            console.log(`  [${index}] ID: "${unitItem.id}" === "${id}" → ${matches} (strict: ${strictMatches})`);
-        });
-        alert('해당 아이템을 찾을 수 없습니다.');
+    try {
+        // DB에서 직접 조회 (단일 데이터 소스)
+        item = await unitPriceDB.getUnitPriceById(id);
+        
+        if (!item) {
+            console.error('❌ DB에서 일위대가 아이템을 찾을 수 없음:', id);
+            alert('해당 아이템을 찾을 수 없습니다.');
+            return;
+        }
+        
+        console.log('✅ DB에서 일위대가 아이템 조회 성공:', item.basic?.itemName || 'No Name');
+        
+    } catch (error) {
+        console.error('❌ DB 조회 중 오류 발생:', error);
+        alert('데이터베이스 조회 중 오류가 발생했습니다.');
         return;
     }
-    
     
     // 현재 모달 닫기
     closeCurrentModal();

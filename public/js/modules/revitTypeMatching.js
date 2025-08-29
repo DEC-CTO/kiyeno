@@ -955,18 +955,11 @@ async function editUnitPriceFromSelection(unitPriceId) {
     console.log('🔧 일위대가 수정 요청:', unitPriceId, '(타입:', typeof unitPriceId, ')');
     
     try {
-        // 먼저 메모리 데이터 새로고침 (중요!)
-        console.log('🔄 수정 전 메모리 데이터 새로고침...');
-        if (typeof window.loadUnitPriceItems === 'function') {
-            await window.loadUnitPriceItems();
-            console.log('✅ 메모리 데이터 새로고침 완료');
-        }
-        
-        // unitPriceManager.js의 editUnitPriceItem 함수 호출
+        // unitPriceManager.js의 editUnitPriceItem 함수 호출 (DB 직접 조회)
         if (typeof window.editUnitPriceItem === 'function') {
-            console.log('✅ editUnitPriceItem 함수 호출 중...');
+            console.log('✅ editUnitPriceItem 함수 호출 중 (DB 직접 조회 방식)...');
             
-            // 수정 모달 열기
+            // 수정 모달 열기 - DB에서 직접 조회하므로 메모리 새로고침 불필요
             await window.editUnitPriceItem(unitPriceId);
             
             // 수정 완료 후 콜백 설정 (모달이 닫힌 후 데이터 새로고침)
