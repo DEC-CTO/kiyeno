@@ -767,6 +767,7 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">노무비</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">경비</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600;">총계</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">편집</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -783,7 +784,9 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
         { text: '적용', class: 'btn-primary', onClick: (modal) => applySelectedUnitPrice(wallId, fieldName, modal) }
     ], {
         disableBackgroundClick: false,
-        disableEscapeKey: false
+        disableEscapeKey: false,
+        maxWidth: '95vw',
+        width: '1200px'
     });
 }
 
@@ -859,6 +862,15 @@ async function generateUnitPriceTableRows() {
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #dc2626; font-weight: 500;">₩${laborCost.toLocaleString()}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #7c3aed; font-weight: 500;">₩${expenseCost.toLocaleString()}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #1e293b; font-weight: 600; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);">₩${totalCost.toLocaleString()}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px;">
+                    <button onclick="event.stopPropagation(); editUnitPriceFromSelection('${item.id}')" 
+                            style="background: #3b82f6; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 11px; cursor: pointer; font-weight: 500; transition: background-color 0.2s;"
+                            onmouseover="this.style.backgroundColor='#2563eb'"
+                            onmouseout="this.style.backgroundColor='#3b82f6'"
+                            title="일위대가 수정">
+                        <i class="fas fa-edit" style="margin-right: 4px;"></i>수정
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -936,6 +948,87 @@ function selectUnitPriceRow(rowElement, unitPriceId, itemName, materialCost, lab
     };
     
     console.log('🎯 일위대가 선택됨:', itemName, `(ID: ${unitPriceId})`);
+}
+
+// 일위대가 선택 모달에서 수정 버튼 클릭 시 호출되는 함수
+async function editUnitPriceFromSelection(unitPriceId) {
+    console.log('🔧 일위대가 수정 요청:', unitPriceId, '(타입:', typeof unitPriceId, ')');
+    
+    try {
+        // 먼저 메모리 데이터 새로고침 (중요!)
+        console.log('🔄 수정 전 메모리 데이터 새로고침...');
+        if (typeof window.loadUnitPriceItems === 'function') {
+            await window.loadUnitPriceItems();
+            console.log('✅ 메모리 데이터 새로고침 완료');
+        }
+        
+        // unitPriceManager.js의 editUnitPriceItem 함수 호출
+        if (typeof window.editUnitPriceItem === 'function') {
+            console.log('✅ editUnitPriceItem 함수 호출 중...');
+            
+            // 수정 모달 열기
+            await window.editUnitPriceItem(unitPriceId);
+            
+            // 수정 완료 후 콜백 설정 (모달이 닫힌 후 데이터 새로고침)
+            setupEditCompletionCallback();
+            
+        } else {
+            console.error('❌ editUnitPriceItem 함수를 찾을 수 없습니다.');
+            alert('일위대가 수정 기능을 사용할 수 없습니다. unitPriceManager.js가 로드되었는지 확인해주세요.');
+        }
+    } catch (error) {
+        console.error('❌ 일위대가 수정 중 오류:', error);
+        alert('일위대가 수정 중 오류가 발생했습니다: ' + error.message);
+    }
+}
+
+// 수정 완료 후 선택 모달 데이터 새로고침을 위한 콜백 설정
+function setupEditCompletionCallback() {
+    // 주기적으로 수정 모달이 닫혔는지 확인
+    let checkInterval = setInterval(() => {
+        // 일위대가 수정 모달이 더 이상 존재하지 않으면 새로고침
+        const unitPriceModal = document.querySelector('.modal-overlay:has(.unitprice-management-modal)');
+        
+        if (!unitPriceModal) {
+            console.log('🔄 일위대가 수정 모달이 닫힘 - 선택 모달 데이터 새로고침');
+            
+            // 현재 선택 모달의 테이블 새로고침
+            refreshUnitPriceSelectionTable();
+            
+            // 주기적 확인 중지
+            clearInterval(checkInterval);
+        }
+    }, 500); // 0.5초마다 확인
+    
+    // 10초 후 자동으로 확인 중지 (메모리 누수 방지)
+    setTimeout(() => {
+        clearInterval(checkInterval);
+        console.log('⏰ 수정 완료 확인 타임아웃');
+    }, 10000);
+}
+
+// 일위대가 선택 테이블 데이터 새로고침
+async function refreshUnitPriceSelectionTable() {
+    console.log('🔄 일위대가 선택 테이블 새로고침 시작...');
+    
+    try {
+        const table = document.getElementById('unitPriceSelectionTable');
+        const tbody = table?.querySelector('tbody');
+        
+        if (!tbody) {
+            console.log('⚠️ 선택 테이블을 찾을 수 없음');
+            return;
+        }
+        
+        // 새 데이터로 테이블 내용 업데이트
+        const newTableRowsHTML = await generateUnitPriceTableRows();
+        tbody.innerHTML = newTableRowsHTML;
+        
+        console.log('✅ 일위대가 선택 테이블 새로고침 완료');
+        
+    } catch (error) {
+        console.error('❌ 테이블 새로고침 실패:', error);
+    }
 }
 
 // 기존 자재 행 선택 함수 (호환성 유지)
@@ -1547,6 +1640,8 @@ window.selectUnitPriceRow = selectUnitPriceRow;
 window.applySelectedUnitPrice = applySelectedUnitPrice;
 window.clearUnitPriceFromModal = clearUnitPriceFromModal;
 window.filterUnitPriceSelectionTable = filterUnitPriceSelectionTable;
+window.editUnitPriceFromSelection = editUnitPriceFromSelection;
+window.refreshUnitPriceSelectionTable = refreshUnitPriceSelectionTable;
 
 // 자재 선택 함수들 (호환성 유지)
 window.selectMaterial = selectMaterial;

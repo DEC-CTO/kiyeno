@@ -1426,8 +1426,25 @@ async function renderUnitPriceItemsList() {
 
 // 일위대가 아이템 수정
 function editUnitPriceItem(id) {
+    console.log('🔍 editUnitPriceItem 호출됨:', id, '(타입:', typeof id, ')');
+    console.log('🔍 현재 메모리 데이터 개수:', unitPriceItems.length);
+    console.log('🔍 현재 메모리 데이터 ID들:', unitPriceItems.map(item => ({
+        id: item.id, 
+        type: typeof item.id,
+        itemName: item.basic?.itemName || 'No Name'
+    })));
+    
     const item = unitPriceItems.find(item => item.id === id);
+    console.log('🔍 검색 결과:', item ? '찾음 ✅' : '못찾음 ❌');
+    
     if (!item) {
+        console.error('❌ 일위대가 아이템 검색 실패 - ID 매칭 안됨');
+        console.log('🔍 정확한 매칭 테스트:');
+        unitPriceItems.forEach((unitItem, index) => {
+            const matches = unitItem.id === id;
+            const strictMatches = unitItem.id === id && typeof unitItem.id === typeof id;
+            console.log(`  [${index}] ID: "${unitItem.id}" === "${id}" → ${matches} (strict: ${strictMatches})`);
+        });
         alert('해당 아이템을 찾을 수 없습니다.');
         return;
     }
