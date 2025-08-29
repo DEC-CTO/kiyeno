@@ -811,42 +811,21 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
 }
 
 async function generateUnitPriceTableRows() {
-    // unitPriceManager.js에서 일위대가 데이터 가져오기
+    // unitPriceManager.js의 전용 getter 함수를 사용하여 일관된 데이터 소스 접근
     let unitPrices = [];
     
-    console.log('🚀 일위대가 데이터 로드 시작...');
-    console.log('🔍 사용 가능한 전역 함수들:', {
-        loadUnitPriceDataFromDB: typeof window.loadUnitPriceDataFromDB,
-        unitPriceDB: typeof window.unitPriceDB,
-        unitPriceItems: window.unitPriceItems ? window.unitPriceItems.length + '개' : 'undefined'
-    });
+    console.log('🚀 일위대가 데이터 로드 시작 - 단일 데이터 소스 사용');
     
     try {
-        // 1순위: unitPriceDB에서 직접 로드 (가장 확실한 방법)
-        if (window.unitPriceDB && typeof window.unitPriceDB.getAllUnitPrices === 'function') {
-            console.log('🔄 unitPriceDB.getAllUnitPrices 직접 호출 중...');
-            unitPrices = await window.unitPriceDB.getAllUnitPrices();
-            console.log('✅ unitPriceDB 직접 로드 결과:', unitPrices?.length + '개');
+        // 유일한 데이터 소스: unitPriceManager.js의 전용 함수
+        if (typeof window.getAllUnitPricesForExternal === 'function') {
+            console.log('🔄 getAllUnitPricesForExternal 함수 호출 중...');
+            unitPrices = await window.getAllUnitPricesForExternal();
+            console.log('✅ 일위대가 데이터 로드 완료:', unitPrices?.length + '개');
+        } else {
+            console.error('❌ getAllUnitPricesForExternal 함수를 찾을 수 없습니다.');
+            console.log('💡 unitPriceManager.js가 먼저 로드되어야 합니다.');
         }
-        // 2순위: 전역 unitPriceItems 배열 사용 (있는 경우)
-        else if (window.unitPriceItems && Array.isArray(window.unitPriceItems) && window.unitPriceItems.length > 0) {
-            console.log('🔄 전역 unitPriceItems 배열 사용 중...');
-            unitPrices = window.unitPriceItems;
-            console.log('✅ unitPriceItems 결과:', unitPrices.length + '개');
-        }
-        // 3순위: localStorage 직접 접근 (IndexedDB 키 사용)
-        else {
-            console.log('🔄 localStorage에서 일위대가 데이터 로드 시도...');
-            const storedData = localStorage.getItem('kiyeno_unitPriceItems');
-            if (storedData) {
-                unitPrices = JSON.parse(storedData);
-                console.log('✅ localStorage 결과:', unitPrices?.length + '개');
-            } else {
-                console.log('⚠️ localStorage에 일위대가 데이터가 없음');
-            }
-        }
-        
-        console.log('🔍 최종 일위대가 데이터:', unitPrices);
         
         // 데이터 검증
         if (!Array.isArray(unitPrices)) {

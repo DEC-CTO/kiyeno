@@ -3842,13 +3842,26 @@ window.cleanupLocalStorage = cleanupLocalStorage;
 window.loadUnitPriceDataFromDB = loadUnitPriceDataFromDB;
 
 // 6가지 소요량 계산 함수들
-window.openBulkQuantityCalculatorModal = openBulkQuantityCalculatorModal;
+window.openBulkQuantityCalculator = openBulkQuantityCalculator;
 window.closeBulkQuantityCalculatorModal = closeBulkQuantityCalculatorModal;
-window.applyBulkQuantityCalculations = applyBulkQuantityCalculations;
 
 // 데이터 동기화 전역 함수 등록
 window.syncMainModalData = syncMainModalData;
 window.syncUnitPriceWithLatestData = syncUnitPriceWithLatestData;
+
+// 외부 모듈에서 일위대가 데이터에 접근하기 위한 전용 getter 함수
+async function getAllUnitPricesForExternal() {
+    try {
+        console.log('🔄 외부 모듈용 일위대가 데이터 로드 중...');
+        const unitPrices = await unitPriceDB.getAllUnitPrices();
+        console.log(`✅ 일위대가 데이터 로드 완료: ${unitPrices.length}개 항목`);
+        return unitPrices;
+    } catch (error) {
+        console.error('❌ 일위대가 데이터 로드 실패:', error);
+        return [];
+    }
+}
+window.getAllUnitPricesForExternal = getAllUnitPricesForExternal;
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기 포함');
 
