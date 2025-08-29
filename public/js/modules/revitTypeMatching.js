@@ -774,29 +774,6 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
                     </tbody>
                 </table>
             </div>
-            
-            <div class="selected-unitprice-info" id="selectedUnitPriceInfo" style="display: none;">
-                <div class="alert">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <strong>선택된 일위대가:</strong><br>
-                            <div class="h6" id="selectedUnitPriceName">-</div>
-                        </div>
-                        <div class="col-md-2">
-                            <strong>재료비:</strong><br>
-                            <div class="text-info" id="selectedUnitPriceMaterial">-</div>
-                        </div>
-                        <div class="col-md-2">
-                            <strong>노무비:</strong><br>
-                            <div class="text-info" id="selectedUnitPriceLabor">-</div>
-                        </div>
-                        <div class="col-md-2">
-                            <strong>총계:</strong><br>
-                            <div class="text-primary" id="selectedUnitPriceTotal">-</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     `;
     
@@ -949,7 +926,7 @@ function selectUnitPriceRow(rowElement, unitPriceId, itemName, materialCost, lab
         radio.checked = true;
     }
     
-    // 선택된 일위대가 정보 표시
+    // 선택된 일위대가 정보 저장
     selectedMaterialData = { 
         id: unitPriceId, 
         name: itemName,
@@ -957,20 +934,6 @@ function selectUnitPriceRow(rowElement, unitPriceId, itemName, materialCost, lab
         laborCost: laborCost,
         totalCost: totalCost
     };
-    
-    const infoDiv = document.getElementById('selectedUnitPriceInfo');
-    const nameSpan = document.getElementById('selectedUnitPriceName');
-    const materialSpan = document.getElementById('selectedUnitPriceMaterial');
-    const laborSpan = document.getElementById('selectedUnitPriceLabor');
-    const totalSpan = document.getElementById('selectedUnitPriceTotal');
-    
-    if (infoDiv && nameSpan && materialSpan && laborSpan && totalSpan) {
-        nameSpan.textContent = itemName;
-        materialSpan.textContent = `₩${parseInt(materialCost).toLocaleString()}`;
-        laborSpan.textContent = `₩${parseInt(laborCost).toLocaleString()}`;
-        totalSpan.textContent = `₩${parseInt(totalCost).toLocaleString()}`;
-        infoDiv.style.display = 'block';
-    }
     
     console.log('🎯 일위대가 선택됨:', itemName, `(ID: ${unitPriceId})`);
 }
