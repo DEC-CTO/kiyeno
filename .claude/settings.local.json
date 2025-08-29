@@ -44,7 +44,14 @@
       "Bash(git checkout:*)",
       "Bash(taskkill:*)",
       "Bash(git restore:*)",
-      "Bash(start http://localhost:3000)"
+      "Bash(start http://localhost:3000)",
+      "Bash(claude --version)",
+      "Bash(claude --debug)",
+      "Bash(claude config list)",
+      "Read(C:\\Users\\platu\\.claude/**)",
+      "Read(C:\\/**)",
+      "Read(C:\\/**)",
+      "Read(C:\\/**)"
     ],
     "deny": [],
     "additionalDirectories": [

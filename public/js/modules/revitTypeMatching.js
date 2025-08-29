@@ -843,14 +843,14 @@ async function generateUnitPriceTableRows() {
         const rowStyle = index % 2 === 0 ? 'background-color: #f8fafc;' : 'background-color: white;';
         
         return `
-            <tr class="unit-price-row" onclick="selectUnitPriceRow(this, '${item.id}', '${basic.item || ''}', '${materialCost}', '${laborCost}', '${totalCost}')" 
+            <tr class="unit-price-row" onclick="selectUnitPriceRow(this, '${item.id}', '${basic.itemName || ''}', '${materialCost}', '${laborCost}', '${totalCost}')" 
                 style="cursor: pointer; transition: all 0.2s ease; ${rowStyle}" 
                 onmouseover="this.style.backgroundColor='#e2e8f0'; this.style.transform='scale(1.01)'" 
                 onmouseout="this.style.backgroundColor='${index % 2 === 0 ? '#f8fafc' : 'white'}'; this.style.transform='scale(1)'">
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px;">
                     <input type="radio" name="selectedUnitPrice" value="${item.id}" style="transform: scale(1.2);">
                 </td>
-                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; font-weight: 500; color: #1e293b;">${basic.item || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; font-weight: 500; color: #1e293b;">${basic.itemName || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.spacing || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.height || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.size || '-'}</td>
