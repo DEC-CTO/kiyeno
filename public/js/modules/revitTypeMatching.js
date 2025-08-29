@@ -251,15 +251,94 @@ function initializeTypeMappingTabs() {
 // 데이터 관리 함수들
 // =============================================================================
 
-function saveAllChanges() {
+async function saveAllChanges() {
     console.log('💾 모든 변경사항 저장 중...');
     
-    const success = saveRevitWallTypes();
-    
-    if (success) {
-        alert('✅ 모든 변경사항이 저장되었습니다.');
-    } else {
-        alert('❌ 저장 중 오류가 발생했습니다.');
+    try {
+        // 1. LocalStorage 저장 (기존 방식 유지)
+        const localStorageSuccess = saveRevitWallTypes();
+        
+        // 2. IndexedDB wallTypeMasters 테이블에도 저장
+        const indexedDBSuccess = await saveToWallTypeMasters();
+        
+        if (localStorageSuccess && indexedDBSuccess) {
+            alert('✅ 모든 변경사항이 저장되었습니다.');
+        } else {
+            alert('❌ 저장 중 오류가 발생했습니다.');
+        }
+    } catch (error) {
+        console.error('❌ 저장 중 오류:', error);
+        alert('❌ 저장 중 오류가 발생했습니다: ' + error.message);
+    }
+}
+
+// IndexedDB wallTypeMasters 테이블에 저장
+async function saveToWallTypeMasters() {
+    try {
+        console.log('📦 wallTypeMasters 테이블에 벽체 타입 저장 중...');
+        
+        // UnitPriceDB 인스턴스가 있는지 확인
+        if (!window.unitPriceDB) {
+            console.log('🔧 UnitPriceDB 인스턴스 생성...');
+            window.unitPriceDB = new UnitPriceDB();
+        }
+        
+        // 데이터베이스가 제대로 초기화되었는지 확인
+        console.log('🔍 DB 상태 확인 중...');
+        const db = await window.unitPriceDB.initDB();
+        console.log('📋 사용 가능한 테이블:', [...db.objectStoreNames]);
+        
+        // wallTypeMasters 테이블이 존재하는지 확인
+        if (!db.objectStoreNames.contains('wallTypeMasters')) {
+            console.error('❌ wallTypeMasters 테이블이 존재하지 않습니다. DB 재생성이 필요합니다.');
+            
+            // 기존 DB 삭제 후 재생성 시도
+            db.close();
+            await new Promise((resolve, reject) => {
+                const deleteReq = indexedDB.deleteDatabase('KiyenoMaterialsDB');
+                deleteReq.onsuccess = () => {
+                    console.log('🗑️ 기존 KiyenoMaterialsDB 삭제 완료');
+                    resolve();
+                };
+                deleteReq.onerror = () => reject(deleteReq.error);
+            });
+            
+            // 새로운 DB 인스턴스 생성
+            window.unitPriceDB = new UnitPriceDB();
+            const newDb = await window.unitPriceDB.initDB();
+            console.log('✅ 새로운 DB 생성 완료. 사용 가능한 테이블:', [...newDb.objectStoreNames]);
+        }
+        
+        // 현재 벽체 타입 데이터를 wallTypeMasters 형식으로 변환
+        const wallTypeMasterData = {
+            id: `wallType_${Date.now()}`,
+            name: `벽체타입_집합_${new Date().toISOString().slice(0, 19).replace('T', '_')}`,
+            description: '벽체 타입 관리에서 저장된 데이터',
+            wallTypes: revitWallTypes || [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            source: 'revitTypeMatching',
+            metadata: {
+                totalCount: (revitWallTypes || []).length,
+                counter: revitWallTypeCounter || 0
+            }
+        };
+        
+        console.log('💾 저장할 데이터:', {
+            id: wallTypeMasterData.id,
+            name: wallTypeMasterData.name,
+            wallTypesCount: wallTypeMasterData.wallTypes.length
+        });
+        
+        // wallTypeMasters 테이블에 저장
+        const result = await window.unitPriceDB.saveWallTypeMaster(wallTypeMasterData);
+        
+        console.log('✅ wallTypeMasters 테이블 저장 완료:', result.id);
+        return true;
+        
+    } catch (error) {
+        console.error('❌ wallTypeMasters 저장 중 오류:', error);
+        return false;
     }
 }
 

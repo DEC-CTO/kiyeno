@@ -15,9 +15,10 @@ let currentUnitPriceData = {}; // 현재 편집 중인 일위대가 데이터
 
 class UnitPriceDB {
     constructor() {
-        this.dbName = 'KiyenoMaterialsDB';
-        this.dbVersion = 2; // v1에서 v2로 업그레이드
+        this.dbName = 'KiyenoMaterialsDB'; // 통합 DB 사용
+        this.dbVersion = 3; // v2 → v3 업그레이드
         this.unitPricesStore = 'unitPrices';
+        this.wallTypeMastersStore = 'wallTypeMasters';
     }
 
     // DB 초기화 및 업그레이드
@@ -37,12 +38,18 @@ class UnitPriceDB {
 
             request.onupgradeneeded = (event) => {
                 const db = event.target.result;
-                console.log(`🔧 UnitPriceDB 업그레이드: v${event.oldVersion} → v${event.newVersion}`);
+                console.log(`🔧 KiyenoMaterialsDB 통합 업그레이드: v${event.oldVersion} → v${event.newVersion}`);
 
-                // v1 → v2: unitPrices 테이블 추가
-                if (event.oldVersion < 2) {
-                    if (!db.objectStoreNames.contains(this.unitPricesStore)) {
-                        const unitPricesStore = db.createObjectStore(this.unitPricesStore, {
+                // v0 → v2: 기존 테이블들 (priceDatabase.js가 이미 처리)
+                // 여기서는 v2 → v3 업그레이드만 처리
+
+                // v2 → v3: 일위대가 및 벽체타입 테이블 추가
+                if (event.oldVersion < 3) {
+                    console.log('🔧 v3 업그레이드 시작: unitPrices와 wallTypeMasters 테이블 추가');
+                    
+                    // unitPrices 테이블 생성 (일위대가)
+                    if (!db.objectStoreNames.contains('unitPrices')) {
+                        const unitPricesStore = db.createObjectStore('unitPrices', {
                             keyPath: 'id',
                             autoIncrement: false
                         });
@@ -52,8 +59,27 @@ class UnitPriceDB {
                         unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
                         unitPricesStore.createIndex('workType1', 'basic.workType1', { unique: false });
 
-                        console.log('✅ unitPrices 테이블 생성 완료');
+                        console.log('✅ unitPrices 테이블 생성 완료 (v3 통합 DB)');
                     }
+
+                    // wallTypeMasters 테이블 생성 (벽체 타입 마스터)
+                    if (!db.objectStoreNames.contains('wallTypeMasters')) {
+                        const wallTypeStore = db.createObjectStore('wallTypeMasters', {
+                            keyPath: 'id',
+                            autoIncrement: false
+                        });
+
+                        // 인덱스 추가
+                        wallTypeStore.createIndex('name', 'name', { unique: false });
+                        wallTypeStore.createIndex('category', 'category', { unique: false });
+                        wallTypeStore.createIndex('thickness', 'thickness', { unique: false });
+                        wallTypeStore.createIndex('createdAt', 'createdAt', { unique: false });
+                        wallTypeStore.createIndex('isTemplate', 'isTemplate', { unique: false });
+
+                        console.log('✅ wallTypeMasters 테이블 생성 완료 (v3 통합 DB)');
+                    }
+                    
+                    console.log('✅ v3 업그레이드 완료');
                 }
             };
         });
@@ -235,6 +261,160 @@ class UnitPriceDB {
             console.log('🗑️ localStorage 일위대가 데이터 정리 완료');
         } catch (error) {
             console.error('localStorage 정리 실패:', error);
+        }
+    }
+
+    // =============================================================================
+    // 벽체 타입 마스터 관리 메서드들
+    // =============================================================================
+
+    // 벽체 타입 마스터 저장
+    async saveWallTypeMaster(wallTypeData) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.wallTypeMastersStore], 'readwrite');
+            const store = transaction.objectStore(this.wallTypeMastersStore);
+
+            // 타임스탬프 추가
+            const now = new Date().toISOString();
+            if (!wallTypeData.createdAt) {
+                wallTypeData.createdAt = now;
+            }
+            wallTypeData.updatedAt = now;
+
+            const request = store.put(wallTypeData);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 벽체 타입 마스터 저장 완료: ${wallTypeData.id}`);
+                    resolve(wallTypeData);
+                };
+                request.onerror = () => {
+                    console.error('❌ 벽체 타입 마스터 저장 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('벽체 타입 마스터 저장 오류:', error);
+            throw error;
+        }
+    }
+
+    // 모든 벽체 타입 마스터 조회
+    async getAllWallTypeMasters() {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.wallTypeMastersStore], 'readonly');
+            const store = transaction.objectStore(this.wallTypeMastersStore);
+            const request = store.getAll();
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 벽체 타입 마스터 조회 완료: ${request.result.length}개`);
+                    resolve(request.result);
+                };
+                request.onerror = () => {
+                    console.error('❌ 벽체 타입 마스터 조회 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('벽체 타입 마스터 조회 오류:', error);
+            throw error;
+        }
+    }
+
+    // 특정 벽체 타입 마스터 조회
+    async getWallTypeMasterById(id) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.wallTypeMastersStore], 'readonly');
+            const store = transaction.objectStore(this.wallTypeMastersStore);
+            const request = store.get(id);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 벽체 타입 마스터 조회 완료: ${id}`);
+                    resolve(request.result);
+                };
+                request.onerror = () => {
+                    console.error('❌ 벽체 타입 마스터 조회 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('벽체 타입 마스터 조회 오류:', error);
+            throw error;
+        }
+    }
+
+    // 이름으로 벽체 타입 마스터 검색
+    async getWallTypeMastersByName(name) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.wallTypeMastersStore], 'readonly');
+            const store = transaction.objectStore(this.wallTypeMastersStore);
+            const index = store.index('name');
+            const request = index.getAll(name);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 벽체 타입 마스터 이름 검색 완료: ${name} - ${request.result.length}개`);
+                    resolve(request.result);
+                };
+                request.onerror = () => {
+                    console.error('❌ 벽체 타입 마스터 검색 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('벽체 타입 마스터 검색 오류:', error);
+            throw error;
+        }
+    }
+
+    // 벽체 타입 마스터 삭제
+    async deleteWallTypeMaster(id) {
+        try {
+            const db = await this.initDB();
+            const transaction = db.transaction([this.wallTypeMastersStore], 'readwrite');
+            const store = transaction.objectStore(this.wallTypeMastersStore);
+            const request = store.delete(id);
+
+            return new Promise((resolve, reject) => {
+                request.onsuccess = () => {
+                    console.log(`✅ 벽체 타입 마스터 삭제 완료: ${id}`);
+                    resolve(true);
+                };
+                request.onerror = () => {
+                    console.error('❌ 벽체 타입 마스터 삭제 실패:', request.error);
+                    reject(request.error);
+                };
+            });
+        } catch (error) {
+            console.error('벽체 타입 마스터 삭제 오류:', error);
+            throw error;
+        }
+    }
+
+    // 벽체 타입 마스터 검색 (복합 조건)
+    async searchWallTypeMasters(query) {
+        try {
+            const allWallTypes = await this.getAllWallTypeMasters();
+            const filteredResults = allWallTypes.filter(item => {
+                return (
+                    item.name?.toLowerCase().includes(query.toLowerCase()) ||
+                    item.category?.toLowerCase().includes(query.toLowerCase()) ||
+                    item.description?.toLowerCase().includes(query.toLowerCase()) ||
+                    item.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+                );
+            });
+            
+            console.log(`✅ 벽체 타입 마스터 검색 완료: "${query}" - ${filteredResults.length}개`);
+            return filteredResults;
+        } catch (error) {
+            console.error('벽체 타입 마스터 검색 오류:', error);
+            throw error;
         }
     }
 }
@@ -2040,19 +2220,19 @@ function closeMaterialSelectModal() {
     currentMaterialSelectRow = null;
 }
 
-// 자재 데이터 로드 (KiyenoMaterialsDB v2 materials 테이블 직접 조회)
+// 자재 데이터 로드 (KiyenoMaterialsDB v3 materials 테이블 직접 조회)
 async function loadMaterialsForSelection() {
-    console.log('📦 자재 선택용 데이터 로드 시작 (KiyenoMaterialsDB v2 materials 테이블 직접 조회)');
+    console.log('📦 자재 선택용 데이터 로드 시작 (KiyenoMaterialsDB v3 materials 테이블 직접 조회)');
     
     try {
         let allMaterials = [];
         
-        // 1순위: KiyenoMaterialsDB v2의 materials 테이블에서 직접 데이터 로드
+        // 1순위: KiyenoMaterialsDB v3의 materials 테이블에서 직접 데이터 로드
         try {
-            console.log('🔍 KiyenoMaterialsDB v2 materials 테이블 직접 조회...');
+            console.log('🔍 KiyenoMaterialsDB v3 materials 테이블 직접 조회...');
             
             const materialsFromDB = await new Promise((resolve, reject) => {
-                const request = indexedDB.open('KiyenoMaterialsDB', 2);
+                const request = indexedDB.open('KiyenoMaterialsDB', 3);
                 
                 request.onerror = () => {
                     console.error('❌ KiyenoMaterialsDB 열기 실패');
@@ -2078,7 +2258,7 @@ async function loadMaterialsForSelection() {
                 };
                 
                 request.onupgradeneeded = (event) => {
-                    console.log('🔧 KiyenoMaterialsDB v2 구조 생성...');
+                    console.log('🔧 KiyenoMaterialsDB v3 구조 생성/업그레이드...');
                     const db = event.target.result;
                     
                     // materials 테이블이 없으면 생성
@@ -2088,11 +2268,26 @@ async function loadMaterialsForSelection() {
                         materialsStore.createIndex('category', 'category', { unique: false });
                     }
                     
+                    // gypsum 테이블이 없으면 생성
+                    if (!db.objectStoreNames.contains('gypsum')) {
+                        const gypsumStore = db.createObjectStore('gypsum', { keyPath: 'id' });
+                        gypsumStore.createIndex('name', 'name', { unique: false });
+                        gypsumStore.createIndex('category', 'category', { unique: false });
+                    }
+                    
                     // unitPrices 테이블이 없으면 생성 (일위대가용)
                     if (!db.objectStoreNames.contains('unitPrices')) {
                         const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
                         unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
                         unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+                    }
+                    
+                    // wallTypeMasters 테이블이 없으면 생성 (v3 신규 테이블)
+                    if (!db.objectStoreNames.contains('wallTypeMasters')) {
+                        const wallTypeMastersStore = db.createObjectStore('wallTypeMasters', { keyPath: 'id' });
+                        wallTypeMastersStore.createIndex('name', 'name', { unique: false });
+                        wallTypeMastersStore.createIndex('createdAt', 'createdAt', { unique: false });
+                        wallTypeMastersStore.createIndex('updatedAt', 'updatedAt', { unique: false });
                     }
                 };
             });
@@ -2794,7 +2989,7 @@ function refreshActiveUnitPriceComponents() {
 async function findMaterialById(materialId) {
     try {
         const materialsFromDB = await new Promise((resolve, reject) => {
-            const request = indexedDB.open('KiyenoMaterialsDB', 2);
+            const request = indexedDB.open('KiyenoMaterialsDB', 3);
             
             request.onerror = () => {
                 console.error('❌ KiyenoMaterialsDB 열기 실패');
@@ -2846,7 +3041,7 @@ async function findMaterialByNameDirect(materialName) {
         
         // 자재선택 모달과 동일한 방법: KiyenoMaterialsDB v2 materials 테이블 직접 조회
         const materialsFromDB = await new Promise((resolve, reject) => {
-            const request = indexedDB.open('KiyenoMaterialsDB', 2);
+            const request = indexedDB.open('KiyenoMaterialsDB', 3);
             
             request.onerror = () => {
                 console.error('❌ KiyenoMaterialsDB 열기 실패');
@@ -3878,7 +4073,191 @@ async function getAllUnitPricesForExternal() {
 }
 window.getAllUnitPricesForExternal = getAllUnitPricesForExternal;
 
-console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기 포함');
+// =============================================================================
+// 벽체 타입 마스터 마이그레이션 및 전역 함수
+// =============================================================================
+
+// LocalStorage → IndexedDB 벽체 타입 마이그레이션
+async function migrateWallTypesToIndexedDB() {
+    try {
+        console.log('🔄 LocalStorage → IndexedDB 벽체 타입 마이그레이션 시작...');
+        
+        // 1단계: LocalStorage 데이터 확인
+        const localData = localStorage.getItem('kiyeno_revit_wall_types');
+        if (!localData) {
+            console.log('ℹ️ LocalStorage에 마이그레이션할 벽체 타입 데이터가 없습니다.');
+            return { success: true, migratedCount: 0, message: 'LocalStorage에 데이터 없음' };
+        }
+
+        const { types, lastSaved } = JSON.parse(localData);
+        if (!types || !Array.isArray(types) || types.length === 0) {
+            console.log('ℹ️ 유효한 벽체 타입 데이터가 없습니다.');
+            return { success: true, migratedCount: 0, message: '유효한 데이터 없음' };
+        }
+
+        console.log(`📋 발견된 벽체 타입: ${types.length}개 (마지막 저장: ${lastSaved})`);
+
+        // 2단계: 기존 IndexedDB 벽체 타입 확인 (중복 방지)
+        const existingWallTypes = await unitPriceDB.getAllWallTypeMasters();
+        const existingIds = new Set(existingWallTypes.map(wt => wt.id));
+        
+        let migratedCount = 0;
+        const errors = [];
+
+        // 3단계: 각 벽체 타입을 IndexedDB 형식으로 변환 및 저장
+        for (const oldWallType of types) {
+            try {
+                // 중복 확인
+                if (existingIds.has(oldWallType.id)) {
+                    console.log(`⏩ 건너뜀 (이미 존재): ${oldWallType.id} - ${oldWallType.wallType}`);
+                    continue;
+                }
+
+                // IndexedDB 형식으로 변환
+                const newWallType = await convertToWallTypeMaster(oldWallType);
+                
+                // IndexedDB에 저장
+                await unitPriceDB.saveWallTypeMaster(newWallType);
+                migratedCount++;
+                
+                console.log(`✅ 마이그레이션 완료: ${newWallType.id} - ${newWallType.name}`);
+                
+            } catch (error) {
+                const errorMsg = `❌ 마이그레이션 실패: ${oldWallType.id} - ${error.message}`;
+                console.error(errorMsg);
+                errors.push(errorMsg);
+            }
+        }
+
+        // 4단계: 백업 생성 후 LocalStorage 정리
+        if (migratedCount > 0) {
+            // 백업 생성
+            const backupKey = `kiyeno_revit_wall_types_backup_${new Date().toISOString().slice(0, 10)}`;
+            localStorage.setItem(backupKey, localData);
+            
+            // 원본 데이터 삭제
+            localStorage.removeItem('kiyeno_revit_wall_types');
+            
+            console.log(`📦 LocalStorage 백업 생성: ${backupKey}`);
+            console.log(`🗑️ 원본 LocalStorage 데이터 정리 완료`);
+        }
+
+        const result = {
+            success: true,
+            migratedCount,
+            totalFound: types.length,
+            skippedCount: types.length - migratedCount - errors.length,
+            errors,
+            message: `${migratedCount}개 벽체 타입 마이그레이션 완료`
+        };
+
+        console.log('✅ 벽체 타입 마이그레이션 완료:', result);
+        return result;
+
+    } catch (error) {
+        console.error('❌ 벽체 타입 마이그레이션 실패:', error);
+        return {
+            success: false,
+            error: error.message,
+            migratedCount: 0,
+            message: '마이그레이션 중 오류 발생'
+        };
+    }
+}
+
+// LocalStorage 벽체 타입을 IndexedDB 형식으로 변환
+async function convertToWallTypeMaster(oldWallType) {
+    // 일위대가 참조 변환 함수
+    async function convertUnitPriceReference(unitPriceField) {
+        if (!unitPriceField) return null;
+        
+        // 이미 unitPrice_ 형태인 경우
+        if (typeof unitPriceField === 'string' && unitPriceField.startsWith('unitPrice_')) {
+            const unitPriceId = unitPriceField.replace('unitPrice_', '');
+            
+            // 해당 일위대가 정보 조회하여 displayName 추가
+            try {
+                const unitPrice = await unitPriceDB.getUnitPriceById(unitPriceId);
+                if (unitPrice && unitPrice.basic) {
+                    return {
+                        unitPriceId: unitPriceId,
+                        displayName: unitPrice.basic.itemName || 'Unknown Item',
+                        unitCost: unitPrice.totalCosts?.total || 0,
+                        unit: unitPrice.basic?.unit || 'EA',
+                        lastUpdated: new Date().toISOString(),
+                        cacheVersion: 1
+                    };
+                }
+            } catch (error) {
+                console.warn(`⚠️ 일위대가 정보 조회 실패 (${unitPriceId}):`, error.message);
+            }
+        }
+        
+        // 일반 텍스트인 경우 (기존 자재명 등)
+        return {
+            unitPriceId: null,
+            displayName: unitPriceField || 'Unknown',
+            unitCost: 0,
+            unit: 'EA',
+            lastUpdated: new Date().toISOString(),
+            cacheVersion: 1,
+            isLegacy: true  // 기존 데이터임을 표시
+        };
+    }
+
+    // 새로운 벽체 타입 마스터 객체 생성
+    const wallTypeMaster = {
+        // 기본 정보
+        id: oldWallType.id || `wt_${Date.now()}`,
+        name: oldWallType.wallType || `벽체타입_${oldWallType.no || 'Unknown'}`,
+        description: oldWallType.description || '',
+        
+        // 물리적 속성
+        thickness: oldWallType.thickness || 200,
+        category: 'migrated',  // 마이그레이션된 데이터 표시
+        
+        // 일위대가 참조들 (하이브리드 방식)
+        unitPrices: {
+            stud: await convertUnitPriceReference(oldWallType.studPrice),
+            runner: await convertUnitPriceReference(oldWallType.runnerPrice),
+            gypsumBoard1: await convertUnitPriceReference(oldWallType.gypsumBoard1Price),
+            gypsumBoard2: await convertUnitPriceReference(oldWallType.gypsumBoard2Price),
+            insulation: await convertUnitPriceReference(oldWallType.insulationPrice),
+            finishing: await convertUnitPriceReference(oldWallType.finishingPrice)
+        },
+        
+        // 메타데이터
+        createdAt: oldWallType.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: 1,
+        isTemplate: true,
+        tags: ['마이그레이션', oldWallType.wallType || ''].filter(Boolean),
+        
+        // 마이그레이션 정보
+        migratedFrom: 'localStorage',
+        originalData: {
+            no: oldWallType.no,
+            elementId: oldWallType.elementId,
+            area: oldWallType.area,
+            source: oldWallType.source
+        }
+    };
+
+    return wallTypeMaster;
+}
+
+// 벽체 타입 마스터 전역 함수들
+window.migrateWallTypesToIndexedDB = migrateWallTypesToIndexedDB;
+window.getAllWallTypeMasters = () => unitPriceDB.getAllWallTypeMasters();
+window.getWallTypeMasterById = (id) => unitPriceDB.getWallTypeMasterById(id);
+window.saveWallTypeMaster = (wallTypeData) => unitPriceDB.saveWallTypeMaster(wallTypeData);
+window.deleteWallTypeMaster = (id) => unitPriceDB.deleteWallTypeMaster(id);
+window.searchWallTypeMasters = (query) => unitPriceDB.searchWallTypeMasters(query);
+
+console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기, 벽체 타입 마스터 포함');
+
+// UnitPriceDB 클래스를 전역으로 노출 (revitTypeMatching.js에서 사용)
+window.UnitPriceDB = UnitPriceDB;
 
 // 테스트: window 객체에 함수가 제대로 할당되었는지 확인
 console.log('🔍 테스트: window.openUnitPriceManagement 존재 여부:', typeof window.openUnitPriceManagement);

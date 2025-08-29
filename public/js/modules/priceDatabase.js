@@ -85,7 +85,7 @@ class PriceDatabase extends EventEmitter {
    */
   async initIndexedDB() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('KiyenoMaterialsDB', 2);
+      const request = indexedDB.open('KiyenoMaterialsDB', 3);
 
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
@@ -96,11 +96,12 @@ class PriceDatabase extends EventEmitter {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
 
-        // materials 테이블이 없으면 생성
+        // materials 테이블이 없으면 생성 (경량자재 + 석고보드 통합 저장)
         if (!db.objectStoreNames.contains('materials')) {
           const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
           materialsStore.createIndex('name', 'name', { unique: false });
           materialsStore.createIndex('category', 'category', { unique: false });
+          console.log('✅ materials 테이블 생성 완료 (priceDatabase.js)');
         }
         
         // unitPrices 테이블이 없으면 생성 (일위대가용)
@@ -108,11 +109,18 @@ class PriceDatabase extends EventEmitter {
           const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
           unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
           unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+          console.log('✅ unitPrices 테이블 생성 완료 (priceDatabase.js)');
         }
 
-        // 설정 저장소 생성
-        if (!db.objectStoreNames.contains('settings')) {
-          db.createObjectStore('settings', { keyPath: 'key' });
+        // wallTypeMasters 테이블이 없으면 생성 (벽체 타입 마스터용)
+        if (!db.objectStoreNames.contains('wallTypeMasters')) {
+          const wallTypeStore = db.createObjectStore('wallTypeMasters', { keyPath: 'id' });
+          wallTypeStore.createIndex('name', 'name', { unique: false });
+          wallTypeStore.createIndex('category', 'category', { unique: false });
+          wallTypeStore.createIndex('thickness', 'thickness', { unique: false });
+          wallTypeStore.createIndex('createdAt', 'createdAt', { unique: false });
+          wallTypeStore.createIndex('isTemplate', 'isTemplate', { unique: false });
+          console.log('✅ wallTypeMasters 테이블 생성 완료 (priceDatabase.js)');
         }
       };
     });
@@ -422,7 +430,7 @@ class PriceDatabase extends EventEmitter {
     return {
       isInitialized: this.isInitialized,
       materialsCount: this.cache.size,
-      dbVersion: '1.0.0',
+      dbVersion: '3.0.0', // v2→v3 통합 업그레이드
       lastUpdated: new Date().toISOString(),
       status: this.isInitialized ? 'ready' : 'loading',
       summary: {
@@ -4510,7 +4518,7 @@ class PriceDatabase extends EventEmitter {
   // v2 데이터베이스 직접 열기
   async openDatabaseV2() {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open('KiyenoMaterialsDB', 2);
+      const request = indexedDB.open('KiyenoMaterialsDB', 3);
       
       request.onerror = () => {
         console.error('❌ KiyenoMaterialsDB v2 열기 실패');
