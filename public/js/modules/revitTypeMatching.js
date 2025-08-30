@@ -309,18 +309,19 @@ async function saveToWallTypeMasters() {
             console.log('✅ 새로운 DB 생성 완료. 사용 가능한 테이블:', [...newDb.objectStoreNames]);
         }
         
-        // 현재 벽체 타입 데이터를 wallTypeMasters 형식으로 변환
+        // 현재 벽체 타입 데이터를 wallTypeMasters 형식으로 변환 (고정 ID 사용)
         const wallTypeMasterData = {
-            id: `wallType_${Date.now()}`,
-            name: `벽체타입_집합_${new Date().toISOString().slice(0, 19).replace('T', '_')}`,
-            description: '벽체 타입 관리에서 저장된 데이터',
+            id: 'wallType_master', // 고정 ID로 변경 - 항상 같은 레코드 업데이트
+            name: '벽체 타입 관리 마스터',
+            description: '벽체 타입 관리에서 저장된 데이터 (고정 레코드)',
             wallTypes: revitWallTypes || [],
-            createdAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(), // put 메서드에서 기존값 유지 처리
             updatedAt: new Date().toISOString(),
             source: 'revitTypeMatching',
             metadata: {
                 totalCount: (revitWallTypes || []).length,
-                counter: revitWallTypeCounter || 0
+                counter: revitWallTypeCounter || 0,
+                lastSaved: new Date().toISOString()
             }
         };
         

@@ -282,10 +282,21 @@ class UnitPriceDB {
             const transaction = db.transaction([this.wallTypeMastersStore], 'readwrite');
             const store = transaction.objectStore(this.wallTypeMastersStore);
 
-            // 타임스탬프 추가
+            // 기존 레코드 확인 (createdAt 보존용)
+            const existingRecord = await new Promise((resolve, reject) => {
+                const getRequest = store.get(wallTypeData.id);
+                getRequest.onsuccess = () => resolve(getRequest.result);
+                getRequest.onerror = () => resolve(null); // 에러 시 null 반환
+            });
+
+            // 타임스탬프 처리 (기존 createdAt 보존)
             const now = new Date().toISOString();
-            if (!wallTypeData.createdAt) {
-                wallTypeData.createdAt = now;
+            if (existingRecord && existingRecord.createdAt) {
+                wallTypeData.createdAt = existingRecord.createdAt; // 기존 생성일시 보존
+                console.log(`🔄 기존 레코드 업데이트: ${wallTypeData.id} (생성일시 보존: ${existingRecord.createdAt})`);
+            } else {
+                wallTypeData.createdAt = now; // 새 레코드
+                console.log(`🆕 새 레코드 생성: ${wallTypeData.id}`);
             }
             wallTypeData.updatedAt = now;
 
