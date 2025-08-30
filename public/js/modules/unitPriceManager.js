@@ -4187,7 +4187,72 @@ function calculateGypsumPiece() {
     return finalResult;
 }
 
-// 일괄 계산 결과 적용
+// 자재 카테고리 지능형 매칭 함수 (품명 + 규격 결합 검색)
+function intelligentMaterialMatching(materialName, calculatedResults, row) {
+    // 추가 정보 수집: 규격/사이즈 필드
+    const specElement = row.querySelector('.component-spec, .component-size');
+    const specification = specElement ? specElement.textContent.trim() : '';
+    
+    // 품명 + 규격을 결합한 전체 텍스트
+    const combinedText = `${materialName} ${specification}`.trim();
+    const upperCombinedText = combinedText.toUpperCase();
+    
+    console.log(`🔍 자재 분류 검사: "${materialName}" + 규격: "${specification}"`);
+    console.log(`🔍 결합된 텍스트: "${combinedText}"`);
+    
+    // 1단계: 석고보드 관련 키워드 확인 (품명 + 규격에서 검색)
+    const gypsumKeywords = [
+        '석고보드', '석고판', '석고패널', 'GYPSUM', '보드', '패널',
+        '석고취부용', '석고', '석고전용', '보드용', '석고보드용'
+    ];
+    const isGypsumMaterial = gypsumKeywords.some(keyword => 
+        upperCombinedText.includes(keyword.toUpperCase())
+    );
+    
+    // 2단계: 경량자재 관련 키워드 확인 (품명 + 규격에서 검색)
+    const lightweightKeywords = [
+        '스터드', '런너', 'STUD', 'RUNNER', '경량', 'LIGHT',
+        '경량취부용', '경량용', '경량자재용', '메거진피스'
+    ];
+    const isLightweightMaterial = lightweightKeywords.some(keyword => 
+        upperCombinedText.includes(keyword.toUpperCase())
+    );
+    
+    // 3단계: 피스 포함 자재 지능형 분류
+    if (materialName.includes('피스') || upperCombinedText.includes('PIECE')) {
+        if (isGypsumMaterial) {
+            console.log(`🧱 석고보드 피스로 분류: ${materialName} (규격: ${specification})`);
+            return calculatedResults['석고피스'];
+        } else if (isLightweightMaterial) {
+            console.log(`🔧 경량자재 피스로 분류: ${materialName} (규격: ${specification})`);
+            return calculatedResults['피스'];
+        } else {
+            // 명확하지 않은 경우 기본값 (경량피스) 사용
+            console.log(`❓ 불분명한 피스, 경량피스로 기본 분류: ${materialName} (규격: ${specification})`);
+            return calculatedResults['피스'];
+        }
+    }
+    
+    // 4단계: 기타 자재 매칭 (품명 + 규격에서 검색)
+    const materialMappings = [
+        { keywords: ['스터드', 'STUD'], result: '스터드' },
+        { keywords: ['런너', 'RUNNER'], result: '런너' }, 
+        { keywords: ['타정총알', '총알', '타정', 'NAIL'], result: '타정총알' },
+        { keywords: ['용접봉', '용접', 'WELDING'], result: '용접봉' }
+    ];
+    
+    for (const mapping of materialMappings) {
+        if (mapping.keywords.some(keyword => upperCombinedText.includes(keyword.toUpperCase()))) {
+            console.log(`📝 일반 자재 매칭: ${materialName} → ${mapping.result} (규격: ${specification})`);
+            return calculatedResults[mapping.result];
+        }
+    }
+    
+    console.log(`❌ 매칭 실패: ${materialName} (규격: ${specification}) - 지원되지 않는 자재`);
+    return null;
+}
+
+// 일괄 계산 결과 적용 (지능형 매칭 적용)
 function applyBulkCalculatedQuantities() {
     // 현재 구성품 테이블의 모든 행 가져오기
     const tbody = document.getElementById('componentsTable');
@@ -4212,9 +4277,12 @@ function applyBulkCalculatedQuantities() {
         '석고피스': parseFloat(document.getElementById('gypsumPieceResult')?.textContent) || 0
     };
     
-    let appliedCount = 0;
+    console.log('📊 계산된 결과:', calculatedResults);
     
-    // 각 행의 자재명을 확인하고 해당하는 계산 결과 적용
+    let appliedCount = 0;
+    const matchingResults = [];
+    
+    // 각 행의 자재명을 확인하고 지능형 매칭으로 계산 결과 적용
     rows.forEach(row => {
         const nameElement = row.querySelector('.component-name');
         const quantityInput = row.querySelector('.component-quantity');
@@ -4223,23 +4291,32 @@ function applyBulkCalculatedQuantities() {
         
         const materialName = nameElement.textContent.trim();
         
-        // 자재명 매칭 (부분 매칭)
-        for (const [calcName, calcValue] of Object.entries(calculatedResults)) {
-            if (materialName.includes(calcName) || calcName.includes(materialName)) {
-                quantityInput.value = calcValue.toFixed(3);
-                calculateRowTotal(quantityInput);
-                appliedCount++;
-                console.log(`✅ ${materialName} → ${calcName}: ${calcValue.toFixed(3)}`);
-                break;
-            }
+        // 지능형 매칭 시도 (row 매개변수 추가로 규격 정보도 함께 전달)
+        const matchedValue = intelligentMaterialMatching(materialName, calculatedResults, row);
+        
+        if (matchedValue !== null && matchedValue > 0) {
+            quantityInput.value = matchedValue.toFixed(3);
+            calculateRowTotal(quantityInput);
+            appliedCount++;
+            
+            // 규격 정보도 함께 표시
+            const specElement = row.querySelector('.component-spec, .component-size');
+            const specification = specElement ? specElement.textContent.trim() : '';
+            const displayText = specification ? `${materialName} (${specification})` : materialName;
+            
+            matchingResults.push(`${displayText}: ${matchedValue.toFixed(3)}`);
+            console.log(`✅ 지능형 매칭 성공: ${displayText} → ${matchedValue.toFixed(3)}`);
+        } else {
+            console.log(`❌ 매칭 실패: ${materialName} (지원되지 않는 자재)`);
         }
     });
     
     if (appliedCount > 0) {
-        alert(`${appliedCount}개 자재의 수량이 적용되었습니다.`);
-        console.log(`📊 일괄 적용 완료: ${appliedCount}개 자재`);
+        const resultMessage = `${appliedCount}개 자재의 수량이 적용되었습니다.\n\n적용된 자재:\n${matchingResults.join('\n')}`;
+        alert(resultMessage);
+        console.log(`📊 지능형 일괄 적용 완료: ${appliedCount}개 자재`);
     } else {
-        alert('매칭되는 자재를 찾을 수 없습니다.\n자재명이 스터드, 런너, 피스, 타정총알, 용접봉, 석고피스 중 하나를 포함하는지 확인해주세요.');
+        alert('매칭되는 자재를 찾을 수 없습니다.\n\n지원되는 자재:\n- 스터드 (경량자재)\n- 런너 (경량자재)\n- 피스 (경량/석고보드 구분)\n- 타정총알\n- 용접봉\n- 석고피스 (석고보드 전용)');
     }
     
     // 모달 닫기
