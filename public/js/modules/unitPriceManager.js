@@ -705,6 +705,15 @@ function openUnitPriceDetailModal(isEdit = false) {
     
     const detailModalHTML = createDetailModalHTML(itemSummary);
     
+    // 기존 세부아이템 수정 모달들 제거 (중복 방지)
+    const existingDetailModals = document.querySelectorAll('.sub-modal-overlay');
+    existingDetailModals.forEach(modal => {
+        const modalContent = modal.querySelector('.sub-modal-content');
+        if (modalContent && (modalContent.innerHTML.includes('세부 아이템 수정') || modalContent.innerHTML.includes('세부 아이템 설정'))) {
+            modal.remove();
+        }
+    });
+    
     // 세부 입력 모달 표시 (취소 및 저장 버튼)
     const modal = createSubModal(modalTitle, detailModalHTML, [
         { 
@@ -712,31 +721,19 @@ function openUnitPriceDetailModal(isEdit = false) {
             class: 'btn-secondary', 
             onClick: (modal) => {
                 closeSubModal(modal);
-                // 자재선택 모달이 열려있다면 세부아이템에서 온 것이므로 일위대가 관리로 돌아가기
-                const materialSelectModal = document.querySelector('.material-select-modal');
-                if (materialSelectModal) {
-                    setTimeout(() => {
-                        // 자재선택 모달 닫기
-                        materialSelectModal.remove();
-                        console.log('🗑️ 자재선택 모달 제거됨');
-                        
-                        // 일위대가 관리 모달 다시 열기
-                        console.log('🔍 함수 확인:', typeof window.openUnitPriceManagement);
-                        console.log('🔍 함수 내용:', window.openUnitPriceManagement);
-                        
-                        if (typeof window.openUnitPriceManagement === 'function') {
-                            console.log('🔄 세부아이템에서 닫기 - 일위대가 관리로 돌아가기');
-                            try {
-                                window.openUnitPriceManagement();
-                                console.log('✅ openUnitPriceManagement 호출 성공');
-                            } catch (error) {
-                                console.error('❌ openUnitPriceManagement 호출 오류:', error);
-                            }
-                        } else {
-                            console.error('❌ openUnitPriceManagement 함수를 찾을 수 없음');
-                        }
-                    }, 100);
-                }
+                
+                // 간단하고 직관적인 방식: 항상 일위대가 관리로 돌아가기
+                setTimeout(() => {
+                    // 혹시 있을 수 있는 자재선택 모달 제거
+                    const materialSelectModal = document.querySelector('.material-select-modal');
+                    if (materialSelectModal) materialSelectModal.remove();
+                    
+                    // 항상 일위대가 관리 모달 열기
+                    if (typeof window.openUnitPriceManagement === 'function') {
+                        window.openUnitPriceManagement();
+                        console.log('✅ 닫기 → 일위대가 관리 복귀');
+                    }
+                }, 100);
             }
         },
         { text: isEdit ? '수정 완료' : '저장', class: 'btn-primary', onClick: (modal) => saveUnitPriceItem() }
@@ -1453,37 +1450,20 @@ async function saveUnitPriceItem() {
             }
         }, 100);
         
-        // 모달 닫기 - 자재관리에서 온 경우 특별 처리
-        const materialSelectModal = document.querySelector('.material-select-modal');
-        if (materialSelectModal) {
-            // 자재관리 경로에서 온 경우: 모든 모달 닫고 일위대가 관리로 돌아가기
-            console.log('🔄 자재관리 경로에서 저장 완료 - 일위대가 관리로 돌아가기');
-            closeCurrentModal();
-            setTimeout(() => {
-                // 자재선택 모달도 닫기
-                materialSelectModal.remove();
-                console.log('🗑️ 자재선택 모달 제거됨');
-                
-                // 일위대가 관리 모달 다시 열기
-                console.log('🔍 수정완료 - 함수 확인:', typeof window.openUnitPriceManagement);
-                console.log('🔍 수정완료 - 함수 내용:', window.openUnitPriceManagement);
-                
-                if (typeof window.openUnitPriceManagement === 'function') {
-                    console.log('🔄 수정완료 - 일위대가 관리 모달로 돌아가기');
-                    try {
-                        window.openUnitPriceManagement();
-                        console.log('✅ 수정완료 - openUnitPriceManagement 호출 성공');
-                    } catch (error) {
-                        console.error('❌ 수정완료 - openUnitPriceManagement 호출 오류:', error);
-                    }
-                } else {
-                    console.error('❌ 수정완료 - openUnitPriceManagement 함수를 찾을 수 없음');
-                }
-            }, 200);
-        } else {
-            // 일반적인 경우: 기존 방식
-            closeCurrentModal();
-        }
+        // 간단하고 직관적인 방식: 항상 일위대가 관리로 돌아가기
+        closeCurrentModal();
+        
+        setTimeout(() => {
+            // 혹시 있을 수 있는 자재선택 모달 제거
+            const materialSelectModal = document.querySelector('.material-select-modal');
+            if (materialSelectModal) materialSelectModal.remove();
+            
+            // 항상 일위대가 관리 모달 열기
+            if (typeof window.openUnitPriceManagement === 'function') {
+                window.openUnitPriceManagement();
+                console.log('✅ 수정완료 → 일위대가 관리 복귀');
+            }
+        }, 200);
         
         // 목록 새로고침
         setTimeout(async () => {

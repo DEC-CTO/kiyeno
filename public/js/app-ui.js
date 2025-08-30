@@ -1167,7 +1167,9 @@ function createSubModal(title, content, buttons = [], options = {}) {
             `;
             
             if (buttonConfig.onClick) {
-                button.addEventListener('click', () => {
+                button.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
                     buttonConfig.onClick(subModalOverlay);
                 });
             }
