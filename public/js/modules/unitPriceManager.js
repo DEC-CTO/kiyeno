@@ -439,7 +439,6 @@ async function openUnitPriceManagement() {
     console.log('📊 현재 DOM 상태 - 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
     
     // 모달 열기 시 최신 자재 데이터 캐시 강제 로드
-    console.log('🔄 자재 데이터 캐시 강제 갱신...');
     if (window.priceDatabase) {
         // 캐시 무효화
         window.priceDatabase.lightweightItemsCache = null;
@@ -1047,30 +1046,16 @@ function calculateRowTotal(input) {
     
     // span, td, input 요소를 모두 지원하는 값 읽기 함수
     const getElementValue = (element) => {
-        console.log('🔧 getElementValue 디버깅 - element:', element);
-        if (!element) {
-            console.log('🔧 getElementValue 디버깅 - element가 null/undefined, 0 반환');
-            return 0;
-        }
-        
-        console.log('🔧 getElementValue 디버깅 - tagName:', element.tagName);
+        if (!element) return 0;
         
         // SPAN이나 TD 태그는 textContent 사용 (콤마와 "원" 제거)
         if (element.tagName === 'SPAN' || element.tagName === 'TD') {
             const textContent = element.textContent;
-            console.log('🔧 getElementValue 디버깅 - textContent (원본):', textContent);
             const cleaned = textContent.replace(/[,원]/g, '');
-            console.log('🔧 getElementValue 디버깅 - 정리된 텍스트:', cleaned);
-            const result = parseFloat(cleaned) || 0;
-            console.log('🔧 getElementValue 디버깅 - parseFloat 결과:', result);
-            return result;
+            return parseFloat(cleaned) || 0;
         } else {
             // INPUT 등은 value 속성 사용
-            const value = element.value;
-            console.log('🔧 getElementValue 디버깅 - input value:', value);
-            const result = parseFloat(value) || 0;
-            console.log('🔧 getElementValue 디버깅 - parseFloat 결과:', result);
-            return result;
+            return parseFloat(element.value) || 0;
         }
     };
     
@@ -1090,10 +1075,6 @@ function calculateRowTotal(input) {
     // 합계 단가 계산: 자재비 단가 + 노무비 단가 + 경비 단가
     const totalPrice = materialPrice + laborUnitPrice + expensePrice;
     
-    console.log(`🧮 행 계산: 수량(${quantity}) × 재료비(${materialPrice}) = ${materialAmount}, 노무비 금액(${laborAmount})`);
-    console.log(`🧮 노무비 단가: ${laborAmount} ÷ ${quantity} = ${laborUnitPrice}`);
-    console.log(`💰 합계 단가: ${materialPrice} + ${laborUnitPrice} + ${expensePrice} = ${totalPrice}`);
-    console.log(`💰 합계 금액: ${materialAmount} + ${laborAmount} + ${expenseAmount} = ${totalAmount}`);
     
     // 각 금액 업데이트
     const materialAmountElement = row.querySelector('.material-amount');
@@ -1106,14 +1087,9 @@ function calculateRowTotal(input) {
     if (materialAmountElement) materialAmountElement.textContent = Math.round(materialAmount).toLocaleString() + '원';
     
     // 노무비: 단가 컬럼에는 계산된 단가(laborUnitPrice), 금액 컬럼은 고정값 유지
-    console.log('🔍 단가 표시 디버깅 - laborPriceElement:', laborPriceElement);
-    console.log('🔍 단가 표시 디버깅 - laborUnitPrice:', laborUnitPrice);
-    
     if (laborPriceElement) {
         const displayValue = Math.round(laborUnitPrice).toLocaleString() + '원';
-        console.log('🔍 단가 표시 디버깅 - 표시할 값:', displayValue);
         laborPriceElement.textContent = displayValue;
-        console.log('🔍 단가 표시 디버깅 - 설정 후 textContent:', laborPriceElement.textContent);
     }
     // 노무비 금액은 이미 설정되어 있으므로 변경하지 않음 (고정값)
     if (expenseAmountElement) expenseAmountElement.textContent = Math.round(expenseAmount).toLocaleString() + '원';
@@ -3396,7 +3372,6 @@ async function findMaterialByNameDirect(materialName) {
 // 개별 컴포넌트 가격 업데이트
 async function updateComponentPricing(row, materialName) {
     try {
-        console.log(`🔍 자재 가격 업데이트 중: ${materialName}`);
         
         // ID 기반 정확한 검색 우선 사용 (호환성 유지)
         const materialId = row.getAttribute('data-material-id');
@@ -3477,15 +3452,11 @@ async function updateComponentPricing(row, materialName) {
                 if (laborAmountElement) {
                     // 1. 노무비 금액에 새로운 단가 값 직접 입력
                     laborAmountElement.textContent = `${Number(newLaborPrice).toLocaleString()}원`;
-                    console.log(`💰 노무비 금액 업데이트: ${newLaborPrice.toLocaleString()}원 (금액에 직접 입력)`);
                     
                     // 2. 단가는 calculateRowTotal()에서 금액÷수량으로 자동계산됨
-                    console.log(`👷 노무비 단가는 calculateRowTotal()에서 자동계산: ${newLaborPrice.toLocaleString()} ÷ 수량`);
                 }
                 
-                console.log(`✅ 노무비 업데이트: ${materialName} - ${currentLaborPrice} → ${newLaborPrice} (금액 우선)`);
             } else {
-                console.log(`ℹ️ 노무비 변경 없음: ${materialName} - ${currentLaborPrice}`);
             }
         }
         
@@ -3815,7 +3786,7 @@ function createBulkQuantityCalculatorModal() {
     const modalHTML = `
         <div class="bulk-quantity-calc-modal" style="
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 99999; display: flex; 
+            background: rgba(0,0,0,0.8); z-index: 999999999; display: flex; 
             align-items: center; justify-content: center;
         ">
             <div class="bulk-quantity-calc-content" style="
