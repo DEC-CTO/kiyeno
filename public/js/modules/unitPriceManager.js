@@ -435,7 +435,8 @@ const unitPriceDB = new UnitPriceDB();
 
 // 일위대가 관리 모달 열기
 async function openUnitPriceManagement() {
-    console.log('💰 일위대가 관리 모달 열기');
+    console.log('💰 일위대가 관리 모달 열기 시작');
+    console.log('📊 현재 DOM 상태 - 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
     
     // 모달 열기 시 최신 자재 데이터 캐시 강제 로드
     console.log('🔄 자재 데이터 캐시 강제 갱신...');
@@ -459,9 +460,12 @@ async function openUnitPriceManagement() {
     }
     
     // 모달 HTML 생성
+    console.log('🏗️ 모달 HTML 생성 중...');
     const modalHTML = createUnitPriceManagementModal();
+    console.log('✅ 모달 HTML 생성 완료');
     
     // 모달 표시 (닫기 버튼 추가)
+    console.log('🖼️ createSubModal 호출 시작...');
     const modal = createSubModal('💰 일위대가 관리', modalHTML, [
         { text: '닫기', class: 'btn-secondary', onClick: (modal) => {
             // 모달 닫기 전 세션 저장
@@ -473,7 +477,11 @@ async function openUnitPriceManagement() {
         disableEscapeKey: true
     });
     
+    console.log('🔍 createSubModal 완료 - modal 객체:', modal);
+    console.log('📊 createSubModal 완료 후 DOM 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
+    
     if (modal) {
+        console.log('✅ 모달 객체가 생성됨');
         // 모달이 DOM에 추가된 후 초기화
         setTimeout(async () => {
             await loadUnitPriceItems();
@@ -492,7 +500,11 @@ async function openUnitPriceManagement() {
                 }
             }, 200);
         }, 100);
+    } else {
+        console.error('❌ 모달 객체가 생성되지 않음');
     }
+    
+    console.log('🏁 openUnitPriceManagement 함수 완료');
 }
 
 // 일위대가 관리 모달 HTML 생성
@@ -530,7 +542,20 @@ function createUnitPriceManagementModal() {
 
 // 기본 정보 입력 모달 열기
 function openUnitPriceBasicModal(editData = null) {
+    // 현재 일위대가 관리 모달 닫기
+    if (!editData) { // 새 일위대가 추가인 경우만 (수정은 이미 editUnitPriceItem에서 닫음)
+        closeCurrentModal();
+        // 딜레이를 주고 새 모달 열기
+        setTimeout(() => {
+            showUnitPriceBasicModal(editData);
+        }, 300);
+        return;
+    }
     
+    showUnitPriceBasicModal(editData);
+}
+
+function showUnitPriceBasicModal(editData = null) {
     const isEdit = editData !== null;
     const modalTitle = isEdit ? '일위대가 수정' : '새 일위대가 추가';
     
@@ -682,7 +707,38 @@ function openUnitPriceDetailModal(isEdit = false) {
     
     // 세부 입력 모달 표시 (취소 및 저장 버튼)
     const modal = createSubModal(modalTitle, detailModalHTML, [
-        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
+        { 
+            text: '닫기', 
+            class: 'btn-secondary', 
+            onClick: (modal) => {
+                closeSubModal(modal);
+                // 자재선택 모달이 열려있다면 세부아이템에서 온 것이므로 일위대가 관리로 돌아가기
+                const materialSelectModal = document.querySelector('.material-select-modal');
+                if (materialSelectModal) {
+                    setTimeout(() => {
+                        // 자재선택 모달 닫기
+                        materialSelectModal.remove();
+                        console.log('🗑️ 자재선택 모달 제거됨');
+                        
+                        // 일위대가 관리 모달 다시 열기
+                        console.log('🔍 함수 확인:', typeof window.openUnitPriceManagement);
+                        console.log('🔍 함수 내용:', window.openUnitPriceManagement);
+                        
+                        if (typeof window.openUnitPriceManagement === 'function') {
+                            console.log('🔄 세부아이템에서 닫기 - 일위대가 관리로 돌아가기');
+                            try {
+                                window.openUnitPriceManagement();
+                                console.log('✅ openUnitPriceManagement 호출 성공');
+                            } catch (error) {
+                                console.error('❌ openUnitPriceManagement 호출 오류:', error);
+                            }
+                        } else {
+                            console.error('❌ openUnitPriceManagement 함수를 찾을 수 없음');
+                        }
+                    }, 100);
+                }
+            }
+        },
         { text: isEdit ? '수정 완료' : '저장', class: 'btn-primary', onClick: (modal) => saveUnitPriceItem() }
     ], {
         disableBackgroundClick: true,
@@ -1397,8 +1453,37 @@ async function saveUnitPriceItem() {
             }
         }, 100);
         
-        // 모달 닫기
-        closeCurrentModal();
+        // 모달 닫기 - 자재관리에서 온 경우 특별 처리
+        const materialSelectModal = document.querySelector('.material-select-modal');
+        if (materialSelectModal) {
+            // 자재관리 경로에서 온 경우: 모든 모달 닫고 일위대가 관리로 돌아가기
+            console.log('🔄 자재관리 경로에서 저장 완료 - 일위대가 관리로 돌아가기');
+            closeCurrentModal();
+            setTimeout(() => {
+                // 자재선택 모달도 닫기
+                materialSelectModal.remove();
+                console.log('🗑️ 자재선택 모달 제거됨');
+                
+                // 일위대가 관리 모달 다시 열기
+                console.log('🔍 수정완료 - 함수 확인:', typeof window.openUnitPriceManagement);
+                console.log('🔍 수정완료 - 함수 내용:', window.openUnitPriceManagement);
+                
+                if (typeof window.openUnitPriceManagement === 'function') {
+                    console.log('🔄 수정완료 - 일위대가 관리 모달로 돌아가기');
+                    try {
+                        window.openUnitPriceManagement();
+                        console.log('✅ 수정완료 - openUnitPriceManagement 호출 성공');
+                    } catch (error) {
+                        console.error('❌ 수정완료 - openUnitPriceManagement 호출 오류:', error);
+                    }
+                } else {
+                    console.error('❌ 수정완료 - openUnitPriceManagement 함수를 찾을 수 없음');
+                }
+            }, 200);
+        } else {
+            // 일반적인 경우: 기존 방식
+            closeCurrentModal();
+        }
         
         // 목록 새로고침
         setTimeout(async () => {
@@ -1420,10 +1505,23 @@ function generateUnitPriceId(basic) {
 
 // 현재 모달 닫기 (유틸리티 함수)
 function closeCurrentModal() {
-    const modal = document.querySelector('.modal.show') || document.querySelector('.modal');
-    if (modal && typeof closeSubModal === 'function') {
-        closeSubModal(modal);
+    // 서브 모달 오버레이 찾기 (일위대가 관리 모달)
+    const subModalOverlay = document.querySelector('.sub-modal-overlay');
+    if (subModalOverlay && typeof closeSubModal === 'function') {
+        console.log('🔄 일위대가 관리 모달 닫기');
+        closeSubModal(subModalOverlay);
+        return;
     }
+    
+    // 일반 모달 오버레이 찾기
+    const modalOverlay = document.querySelector('.modal-overlay');
+    if (modalOverlay) {
+        console.log('🔄 일반 모달 닫기');
+        modalOverlay.remove();
+        return;
+    }
+    
+    console.warn('⚠️ 닫을 모달을 찾을 수 없습니다.');
 }
 
 // =============================================================================
@@ -2125,13 +2223,14 @@ function createMaterialSelectModal() {
     
     const modalHTML = `
         <div class="material-select-modal" style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); z-index: 99999; display: flex; 
+            position: fixed !important; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5) !important; z-index: 100000 !important; display: flex !important; 
             align-items: center; justify-content: center;
         ">
             <div class="material-select-content" style="
-                background: white; border-radius: 12px; width: 90%; max-width: 1000px; 
+                background: white !important; border-radius: 12px; width: 90%; max-width: 1000px; 
                 max-height: 80vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                z-index: 100001 !important; position: relative !important;
             ">
                 <!-- 헤더 -->
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
@@ -2223,8 +2322,56 @@ function createMaterialSelectModal() {
         </div>
     `;
     
-    // 모달 추가
+    // 기존 자재선택 모달이 있다면 제거
+    const existingModal = document.querySelector('.material-select-modal');
+    if (existingModal) {
+        existingModal.remove();
+        console.log('🗑️ 기존 자재선택 모달 제거');
+    }
+    
+    // 모달 추가 (body 마지막에 확실히 추가)
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+    console.log('📄 자재선택 모달 DOM 추가됨');
+    
+    // DOM 추가 후 z-index 강제 적용 (모든 모달 위에 표시)
+    setTimeout(() => {
+        const modal = document.querySelector('.material-select-modal');
+        if (modal) {
+            // 다른 모든 모달들보다 높은 z-index로 설정
+            modal.style.zIndex = '100000';
+            modal.style.position = 'fixed';
+            // 추가로 CSS 속성들 강제 적용
+            modal.style.display = 'flex';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            
+            // 내부 content도 z-index 재설정
+            const content = modal.querySelector('.material-select-content');
+            if (content) {
+                content.style.zIndex = '100001';
+                content.style.position = 'relative';
+            }
+            
+            console.log('🔝 자재선택 모달 z-index 강제 적용: 100000');
+            console.log('📊 현재 DOM 내 모달들:', document.querySelectorAll('[class*="modal"]').length, '개');
+            
+            // 다른 모든 모달들의 z-index를 확인하고 낮춤
+            const allModals = document.querySelectorAll('.modal-overlay, .sub-modal-overlay');
+            allModals.forEach((m, index) => {
+                if (!m.classList.contains('material-select-modal')) {
+                    const currentZ = parseInt(m.style.zIndex) || 0;
+                    if (currentZ >= 100000) {
+                        m.style.zIndex = Math.min(currentZ, 99000);
+                        console.log(`📉 다른 모달 z-index 조정: ${currentZ} → ${m.style.zIndex}`);
+                    }
+                }
+            });
+        } else {
+            console.error('❌ 자재선택 모달을 DOM에서 찾을 수 없음');
+        }
+    }, 10);
     
     // 자재 데이터 로드
     loadMaterialsForSelection();
@@ -2489,12 +2636,20 @@ function renderMaterialsList(materials) {
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.재료비단가 || material.materialCost || material.materialPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: right;">${(material.노무비단가 || material.laborPrice || 0).toLocaleString()}원</td>
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
-                                <button onclick="selectUnitPriceMaterial(${index})" style="
-                                    padding: 4px 8px; background: #10b981; color: white; border: none; 
-                                    border-radius: 4px; cursor: pointer; font-size: 11px;
-                                " title="이 자재 선택">
-                                    <i class="fas fa-check"></i> 선택
-                                </button>
+                                <div style="display: flex; gap: 4px; justify-content: center;">
+                                    <button onclick="selectUnitPriceMaterial(${index})" style="
+                                        padding: 4px 8px; background: #10b981; color: white; border: none; 
+                                        border-radius: 4px; cursor: pointer; font-size: 11px;
+                                    " title="이 자재 선택">
+                                        <i class="fas fa-check"></i> 선택
+                                    </button>
+                                    <button onclick="editMaterialFromSelector(${index})" style="
+                                        padding: 4px 8px; background: #f59e0b; color: white; border: none; 
+                                        border-radius: 4px; cursor: pointer; font-size: 11px;
+                                    " title="이 자재 수정">
+                                        <i class="fas fa-edit"></i> 수정
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `).join('')}
@@ -2749,9 +2904,110 @@ function fillComponentRowWithMaterial(row, material) {
     }
 }
 
+// 자재 선택기에서 수정 버튼 클릭 시 자재 관리 모달 열기
+function editMaterialFromSelector(materialIndex) {
+    console.log('🔧 자재 수정 요청 - 인덱스:', materialIndex);
+    
+    if (!window.currentMaterialsData || materialIndex >= window.currentMaterialsData.length) {
+        console.error('❌ 유효하지 않은 자재 인덱스:', materialIndex);
+        alert('유효하지 않은 자재입니다.');
+        return;
+    }
+    
+    const selectedMaterial = window.currentMaterialsData[materialIndex];
+    console.log('🔧 수정할 자재:', selectedMaterial);
+    
+    // 자재선택 모달은 닫지 않고 유지 (자재관리 모달이 위에 표시됨)
+    console.log('📌 자재선택 모달 유지, 자재관리 모달을 위에 표시');
+    
+    // 자재 관리 모달 열기 (자재선택 모달 위에) - 안정성을 위한 재시도 로직 포함
+    function tryOpenMaterialManagementModal(retryCount = 0) {
+        if (typeof window.showMaterialManagementModal === 'function') {
+            console.log('✅ 자재관리 모달 열기 (자재선택 모달 위에)');
+            try {
+                window.showMaterialManagementModal();
+                console.log('✅ showMaterialManagementModal 호출 완료');
+                
+                // 모달이 열린 후 해당 자재를 찾아서 수정 모드로 전환
+                setTimeout(() => {
+                    searchAndEditMaterial(selectedMaterial);
+                }, 500);
+            } catch (error) {
+                console.error('❌ showMaterialManagementModal 호출 중 오류:', error);
+                alert('자재관리 모달을 열 수 없습니다: ' + error.message);
+            }
+        } else if (retryCount < 3) {
+            // 함수가 아직 로드되지 않은 경우 재시도 (최대 3회)
+            console.log(`⏳ 함수 로딩 대기 중... (재시도 ${retryCount + 1}/3)`);
+            setTimeout(() => {
+                tryOpenMaterialManagementModal(retryCount + 1);
+            }, 100);
+        } else {
+            console.error('❌ showMaterialManagementModal 함수를 찾을 수 없습니다.');
+            alert('자재관리 모달 함수를 찾을 수 없습니다. 페이지를 새로고침해 주세요.');
+        }
+    }
+    
+    tryOpenMaterialManagementModal();
+}
+
+// 자재 관리 모달에서 특정 자재 찾아서 수정 모드로 전환
+function searchAndEditMaterial(material) {
+    console.log('🔍 자재 검색 및 수정 모드 전환:', material);
+    
+    try {
+        // 자재 검색어로 자재명 사용
+        const searchTerm = material.품명 || material.name || '';
+        if (!searchTerm) {
+            console.warn('⚠️ 검색할 자재명이 없습니다.');
+            return;
+        }
+        
+        // 검색 입력창 찾기 및 검색어 입력
+        const searchInput = document.querySelector('#materialSearchInput, .search-input, input[placeholder*="검색"]');
+        if (searchInput) {
+            searchInput.value = searchTerm;
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+            console.log('✅ 검색어 설정:', searchTerm);
+        }
+        
+        // 토스트 메시지로 사용자에게 안내
+        if (typeof showToast === 'function') {
+            showToast(`"${searchTerm}" 자재를 검색했습니다. 해당 자재를 찾아 수정하세요.`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('❌ 자재 검색 중 오류:', error);
+    }
+}
+
 // =============================================================================
 // 자재 데이터 업데이트 이벤트 리스너 (자재 관리에서 저장 시 캐시 무효화)
 // =============================================================================
+
+// 자재 데이터 업데이트 이벤트 리스너 설정
+window.addEventListener('materialDataUpdated', function(event) {
+    console.log('📡 자재 데이터 업데이트 이벤트 수신:', event.detail);
+    
+    // 자재 선택용 캐시 무효화
+    if (window.priceDatabase) {
+        console.log('🔄 자재 선택용 캐시 무효화...');
+        window.priceDatabase.lightweightItemsCache = null;
+        window.priceDatabase.gypsumItemsCache = null;
+        console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
+    }
+    
+    // 현재 자재선택 모달이 열려있다면 데이터 새로고침
+    const materialSelectModal = document.querySelector('.material-select-modal');
+    if (materialSelectModal && materialSelectModal.style.display !== 'none') {
+        console.log('🔄 자재선택 모달 데이터 새로고침...');
+        setTimeout(() => {
+            loadMaterialsForSelection(); // 자재 데이터 다시 로드
+        }, 300);
+    }
+    
+    console.log('✅ 자재 데이터 업데이트 이벤트 처리 완료');
+});
 
 // =============================================================================
 // 세션 상태 보존 시스템

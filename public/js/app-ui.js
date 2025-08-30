@@ -993,7 +993,7 @@ function createModal(title, content, buttons = []) {
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
     modalOverlay.style.cssText = `
-        position: fixed;
+        position: fixed !important;
         top: 0;
         left: 0;
         width: 100%;
@@ -1002,7 +1002,7 @@ function createModal(title, content, buttons = []) {
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 10000;
+        z-index: 9999999 !important;
     `;
     
     const modal = document.createElement('div');
@@ -1077,18 +1077,23 @@ function createModal(title, content, buttons = []) {
 // =============================================================================
 
 function createSubModal(title, content, buttons = [], options = {}) {
-    // 기존 자재 관리 모달을 흐리게 처리
+    // 기존 자재 관리 모달을 비활성화 처리 (blur 대신 투명도 조절)
     const materialModal = document.querySelector('.modal-overlay .modal');
     if (materialModal) {
-        materialModal.style.filter = 'blur(3px)';
+        materialModal.style.opacity = '0.3';
         materialModal.style.pointerEvents = 'none';
+        // stacking context 문제를 방지하기 위해 blur 효과 제거
+        const modalOverlay = materialModal.closest('.modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.style.zIndex = '8000';
+        }
     }
     
     // 서브 모달 오버레이 생성
     const subModalOverlay = document.createElement('div');
     subModalOverlay.className = 'sub-modal-overlay';
     subModalOverlay.style.cssText = `
-        position: fixed;
+        position: fixed !important;
         top: 0;
         left: 0;
         width: 100%;
@@ -1097,7 +1102,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 10001;
+        z-index: 99999999 !important;
     `;
     
     // 서브 모달 생성
@@ -1208,8 +1213,13 @@ function closeSubModal(subModalOverlay) {
     // 배경 자재 관리 모달 복원
     const materialModal = document.querySelector('.modal-overlay .modal');
     if (materialModal) {
-        materialModal.style.filter = 'none';
+        materialModal.style.opacity = '1';
         materialModal.style.pointerEvents = 'auto';
+        // z-index도 원래대로 복원
+        const modalOverlay = materialModal.closest('.modal-overlay');
+        if (modalOverlay) {
+            modalOverlay.style.zIndex = '9999999';
+        }
     }
     
     // 서브 모달 제거
