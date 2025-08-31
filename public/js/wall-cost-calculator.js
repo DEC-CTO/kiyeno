@@ -267,56 +267,47 @@ async function findMaterialInUnitPriceDB(materialName) {
             console.log(`🔧 접두사 제거: "${materialName}" → "${searchName}"`);
         }
         
-        // 일위대가 DB에서 구성품으로 등록된 자재 검색
+        // 일위대가 DB에서 ID로 아이템 검색 (완전 변경된 로직)
         if (window.unitPriceDB) {
             console.log('📊 일위대가 DB 검색 중...');
             console.log('🔧 unitPriceDB 객체 상태:', typeof window.unitPriceDB);
-            const unitPriceItems = await window.unitPriceDB.getAllUnitPriceItems();
+            const unitPriceItems = await window.unitPriceDB.getAllUnitPrices();
             console.log(`📋 일위대가 아이템 수: ${unitPriceItems.length}개`);
             
-            // 디버깅: 첫 번째 아이템 구조 확인
-            if (unitPriceItems.length > 0) {
-                console.log('🔍 첫 번째 일위대가 아이템 구조:', unitPriceItems[0]);
-                if (unitPriceItems[0].components) {
-                    console.log('🔍 첫 번째 아이템의 구성품들:', unitPriceItems[0].components.slice(0, 3));
+            // ID로 일위대가 아이템 직접 검색
+            const foundItem = unitPriceItems.find(item => 
+                item.id && item.id.trim() === searchName.trim()
+            );
+            
+            if (foundItem) {
+                console.log(`✅ 일위대가 아이템 발견: ${foundItem.id}`);
+                console.log('🔍 아이템 기본정보:', foundItem.basic);
+                console.log('💰 총 비용:', foundItem.totalCosts);
+                
+                // 일위대가 아이템 전체의 단가 정보 반환 (M2 기준)
+                return {
+                    name: foundItem.basic?.itemName || foundItem.id,
+                    materialPrice: parseFloat(foundItem.totalCosts?.material) || 0,
+                    laborPrice: parseFloat(foundItem.totalCosts?.labor) || 0,
+                    workType1: foundItem.basic?.workType1 || '',
+                    workType2: foundItem.basic?.workType2 || '',
+                    unit: foundItem.basic?.unit || 'M2',
+                    source: 'unitPriceDB',
+                    itemId: foundItem.id,
+                    totalCosts: foundItem.totalCosts
+                };
+            } else {
+                console.log('❌ 일위대가 DB에서 해당 ID를 찾지 못함:', searchName);
+                
+                // 디버깅: 유사한 ID들 찾기
+                const similarIds = unitPriceItems
+                    .map(item => item.id)
+                    .filter(id => id && (id.includes('석고보드') || id.includes('STUD')))
+                    .slice(0, 5);
+                
+                if (similarIds.length > 0) {
+                    console.log('🔍 유사한 ID들 (샘플):', similarIds);
                 }
-            }
-            
-            // 검색하려는 자재명과 유사한 이름들 찾기
-            const similarNames = [];
-            
-            for (const item of unitPriceItems) {
-                if (item.components && Array.isArray(item.components)) {
-                    // 정확히 일치하는 구성품 찾기
-                    const component = item.components.find(comp => 
-                        comp.name && comp.name.trim() === searchName.trim()
-                    );
-                    
-                    if (component) {
-                        console.log(`✅ 일위대가 DB에서 발견: ${component.name}, 재료비: ${component.materialPrice}, 노무비: ${component.laborPrice}`);
-                        return {
-                            name: component.name,
-                            materialPrice: parseFloat(component.materialPrice) || 0,
-                            laborPrice: parseFloat(component.laborPrice) || 0,
-                            workType1: component.workType1 || '',
-                            workType2: component.workType2 || '',
-                            unit: component.unit || 'M2',
-                            source: 'unitPriceDB'
-                        };
-                    }
-                    
-                    // 유사한 이름들 수집 (디버깅용)
-                    item.components.forEach(comp => {
-                        if (comp.name && (comp.name.includes('석고보드') || comp.name.includes('STUD'))) {
-                            similarNames.push(comp.name);
-                        }
-                    });
-                }
-            }
-            
-            console.log('❌ 일위대가 DB에서 찾지 못함');
-            if (similarNames.length > 0) {
-                console.log('🔍 유사한 자재명들 (샘플):', similarNames.slice(0, 5));
             }
         } else {
             console.log('❌ unitPriceDB 사용 불가능');
