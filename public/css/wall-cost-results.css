@@ -1,0 +1,471 @@
+/**
+ * 벽체 계산 결과 하단 슬라이드 패널 스타일
+ */
+
+/* 패널 기본 구조 */
+.wall-cost-results-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border-top: 3px solid #007bff;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(calc(100% - 60px));
+    transition: transform 0.3s ease-in-out;
+    z-index: 10000;
+    max-height: 80vh;
+    display: none;
+}
+
+.wall-cost-results-panel.show {
+    display: block;
+}
+
+.wall-cost-results-panel.expanded {
+    transform: translateY(0);
+}
+
+.wall-cost-results-panel.minimized {
+    transform: translateY(calc(100% - 60px));
+}
+
+/* 패널 헤더 */
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    cursor: pointer;
+    user-select: none;
+}
+
+.panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.calculation-summary {
+    font-size: 14px;
+    font-weight: normal;
+    opacity: 0.9;
+    margin-left: 15px;
+}
+
+.panel-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.panel-controls .btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.panel-controls .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.panel-controls .btn-danger {
+    background: rgba(220, 53, 69, 0.8);
+}
+
+.panel-controls .btn-danger:hover {
+    background: rgba(220, 53, 69, 1);
+}
+
+/* 패널 콘텐츠 */
+.panel-content {
+    height: calc(80vh - 60px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 탭 네비게이션 */
+.panel-tabs {
+    display: flex;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0 20px;
+}
+
+.panel-tab {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6c757d;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.panel-tab:hover {
+    color: #007bff;
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.panel-tab.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+/* 탭 콘텐츠 */
+.tab-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* 벽체별 상세 결과 */
+.wall-results-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+}
+
+.wall-result-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s;
+}
+
+.wall-result-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.wall-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.wall-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.wall-card-area {
+    font-size: 14px;
+    color: #6c757d;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.wall-card-layers {
+    margin-bottom: 15px;
+}
+
+.layer-section {
+    margin-bottom: 12px;
+}
+
+.layer-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.layer-items {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 8px;
+    font-size: 13px;
+    color: #6c757d;
+    padding-left: 20px;
+}
+
+.layer-item {
+    padding: 4px 0;
+}
+
+.layer-item.material-name {
+    color: #495057;
+    font-weight: 500;
+}
+
+.layer-item.cost {
+    text-align: right;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.wall-card-total {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid #007bff;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.total-row:last-child {
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    border-top: 1px solid #dee2e6;
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+.wall-card-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* 집계 현황 */
+.summary-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.summary-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.summary-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #495057;
+}
+
+.summary-charts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.chart-container {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.chart-container h4 {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    text-align: center;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+
+/* 비교 분석 */
+.comparison-container {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.comparison-table-container {
+    overflow-x: auto;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.comparison-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.comparison-table tbody tr:hover {
+    background: rgba(0, 123, 255, 0.05);
+}
+
+.comparison-table .text-right {
+    text-align: right;
+}
+
+.comparison-table .cost-cell {
+    font-weight: 500;
+    color: #28a745;
+}
+
+/* 패널 오버레이 */
+.panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.panel-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .wall-cost-results-panel {
+        max-height: 90vh;
+    }
+    
+    .panel-content {
+        height: calc(90vh - 60px);
+    }
+    
+    .wall-results-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .summary-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .panel-tabs {
+        padding: 0 10px;
+    }
+    
+    .panel-tab {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .panel-header {
+        padding: 12px 15px;
+    }
+    
+    .panel-title {
+        font-size: 14px;
+    }
+    
+    .calculation-summary {
+        display: none;
+    }
+    
+    .panel-controls .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+    
+    .wall-card-layers {
+        font-size: 12px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* 애니메이션 */
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(calc(100% - 60px));
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(calc(100% - 60px));
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.wall-cost-results-panel.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+.wall-cost-results-panel.slide-down {
+    animation: slideDown 0.3s ease-out;
+}

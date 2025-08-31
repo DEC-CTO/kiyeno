@@ -8,6 +8,19 @@ let revitWallData = [];
 let filteredRevitWallData = []; // 필터링된 데이터
 let pendingWallData = null; // 실명 입력 대기 중인 벽체 데이터
 
+// 전역 변수로 노출 (다른 모듈에서 접근 가능)
+window.filteredRevitWallData = filteredRevitWallData;
+console.log('🚀 revit-wall-handler.js 로드됨. 초기 filteredRevitWallData:', filteredRevitWallData.length);
+
+/**
+ * filteredRevitWallData 업데이트 및 전역 변수 동기화 헬퍼 함수
+ */
+function updateFilteredData(newData) {
+    filteredRevitWallData = newData;
+    window.filteredRevitWallData = filteredRevitWallData;
+    console.log('📊 filteredRevitWallData 업데이트됨:', filteredRevitWallData.length, '개');
+}
+
 /**
  * Revit에서 전송된 벽체 데이터 처리
  * CS에서 전송되는 새로운 WallInfo 구조에 맞게 수정됨
@@ -204,7 +217,7 @@ function addWallsToRevitTable(wallDataArray) {
                 showProcessingResult(addedCount, updatedCount, skippedCount);
                 
                 // 필터링된 데이터 리셋
-                filteredRevitWallData = [...revitWallData];
+                updateFilteredData([...revitWallData]);
                 
                 // 테이블 업데이트
                 updateRevitDataTable();
@@ -217,7 +230,7 @@ function addWallsToRevitTable(wallDataArray) {
             showProcessingResult(addedCount, 0, 0);
             
             // 필터링된 데이터 리셋
-            filteredRevitWallData = [...revitWallData];
+            updateFilteredData([...revitWallData]);
             
             updateRevitDataTable();
             openRevitDataSection();
@@ -480,7 +493,7 @@ function updateRevitDataTable() {
     
     // 필터링된 데이터가 초기화되지 않았다면 전체 데이터로 설정
     if (filteredRevitWallData.length === 0 && revitWallData.length > 0) {
-        filteredRevitWallData = [...revitWallData];
+        updateFilteredData([...revitWallData]);
     }
     
     // 선택 정보 업데이트
@@ -624,7 +637,7 @@ window.clearRevitData = function() {
     
     if (confirm(`정말로 ${revitWallData.length}개의 Revit 벽체 데이터를 모두 삭제하시겠습니까?`)) {
         revitWallData = [];
-        filteredRevitWallData = [];
+        updateFilteredData([]);
         updateRevitDataTable();
         showToast('Revit 데이터가 모두 삭제되었습니다.', 'success');
     }
@@ -843,7 +856,7 @@ function processImportedData(importedData) {
         }
         
         // 필터링된 데이터 리셋
-        filteredRevitWallData = [...revitWallData];
+        updateFilteredData([...revitWallData]);
         
         // 테이블 업데이트
         updateRevitDataTable();
@@ -982,11 +995,12 @@ window.applyRevitFilters = function() {
     const selectedLevel = levelFilter.value;
     
     // 필터링 적용
-    filteredRevitWallData = revitWallData.filter(wall => {
+    const filteredData = revitWallData.filter(wall => {
         const nameMatch = !selectedName || wall.Name === selectedName;
         const levelMatch = !selectedLevel || wall.Level === selectedLevel;
         return nameMatch && levelMatch;
     });
+    updateFilteredData(filteredData);
     
     // 테이블 업데이트
     updateRevitDataTable();
@@ -1005,7 +1019,7 @@ window.clearRevitFilters = function() {
     if (levelFilter) levelFilter.value = '';
     
     // 필터링된 데이터를 전체 데이터로 리셋
-    filteredRevitWallData = [...revitWallData];
+    updateFilteredData([...revitWallData]);
     
     // 테이블 업데이트
     updateRevitDataTable();

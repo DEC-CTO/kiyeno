@@ -6,10 +6,23 @@
 // =============================================================================
 // 전역 변수
 // =============================================================================
-let revitWallTypes = [];
+
+// window 객체에 직접 배열을 생성하여 참조 공유
+if (!window.revitWallTypes) {
+    window.revitWallTypes = [];
+}
+
 let revitWallTypeCounter = 0;
 let selectedRevitWalls = new Set();
 let selectedMaterialData = null;
+
+/**
+ * revitWallTypes 업데이트 및 전역 변수 동기화 헬퍼 함수
+ * 이제 window.revitWallTypes를 직접 사용하므로 동기화 불필요
+ */
+function syncRevitWallTypes() {
+    console.log('🔄 revitWallTypes 상태 확인:', window.revitWallTypes.length, '개');
+}
 
 // =============================================================================
 // 메인 모달 열기/닫기
@@ -59,7 +72,7 @@ function openRevitTypeMatching() {
                     console.log('✅ DOM 요소 발견, 초기화 진행...');
                     
                     // 데이터 로드 및 초기화
-                    loadRevitWallTypes();
+                    loadRevitWallTypes(); // 이 함수 내에서 동기화됨
                     updateRevitWallTable();
                     initializeTypeMappingTabs();
                     
@@ -373,27 +386,34 @@ function loadRevitWallTypes() {
         
         if (savedData) {
             const parsedData = JSON.parse(savedData);
-            revitWallTypes = parsedData.types || [];
+            const loadedTypes = parsedData.types || [];
             revitWallTypeCounter = parsedData.counter || 0;
-            console.log(`✅ Revit 벽체 타입 로드: ${revitWallTypes.length}개`);
+            
+            // window.revitWallTypes 배열을 직접 업데이트 (참조 유지)
+            window.revitWallTypes.length = 0; // 기존 항목 제거
+            window.revitWallTypes.push(...loadedTypes); // 새 항목 추가
+            
+            console.log(`✅ Revit 벽체 타입 로드: ${window.revitWallTypes.length}개`);
         } else {
-            revitWallTypes = [];
+            window.revitWallTypes.length = 0; // 배열 초기화 (참조 유지)
             revitWallTypeCounter = 0;
             console.log('📝 새로운 Revit 벽체 타입 목록 시작');
         }
         
         // ID가 누락된 항목 수정
-        revitWallTypes.forEach((wall, index) => {
+        window.revitWallTypes.forEach((wall, index) => {
             if (!wall.id) {
                 wall.id = ++revitWallTypeCounter;
             }
             wall.no = index + 1;
         });
         
+        console.log('🌐 window.revitWallTypes 로드 완료:', window.revitWallTypes.length, '개');
+        
         return true;
     } catch (error) {
         console.error('❌ 벽체 타입 데이터 로드 실패:', error);
-        revitWallTypes = [];
+        window.revitWallTypes.length = 0; // 배열 초기화 (참조 유지)
         revitWallTypeCounter = 0;
         return false;
     }
@@ -403,12 +423,12 @@ function loadRevitWallTypes() {
 function saveRevitWallTypes() {
     try {
         const dataToSave = {
-            types: revitWallTypes,
+            types: window.revitWallTypes,
             counter: revitWallTypeCounter,
             lastSaved: new Date().toISOString()
         };
         localStorage.setItem('kiyeno_revit_wall_types', JSON.stringify(dataToSave));
-        console.log('✅ Revit 벽체 타입 데이터 저장됨');
+        console.log('✅ Revit 벽체 타입 데이터 저장됨:', window.revitWallTypes.length, '개');
         return true;
     } catch (error) {
         console.error('❌ 벽체 타입 데이터 저장 실패:', error);
@@ -421,7 +441,7 @@ function updateRevitWallTable() {
     const tableBody = document.getElementById('revit-wall-table-body');
     if (!tableBody) return;
     
-    if (!revitWallTypes || revitWallTypes.length === 0) {
+    if (!window.revitWallTypes || window.revitWallTypes.length === 0) {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
@@ -433,7 +453,7 @@ function updateRevitWallTable() {
     }
     
     // 벽체 데이터를 테이블 행으로 변환
-    const tableRows = revitWallTypes.map(wall => createRevitWallTableRow(wall)).join('');
+    const tableRows = window.revitWallTypes.map(wall => createRevitWallTableRow(wall)).join('');
     tableBody.innerHTML = tableRows;
 }
 
@@ -614,7 +634,7 @@ function createNewWallType(modal) {
     }
     
     // 중복 이름 확인
-    const isDuplicate = revitWallTypes.some(wall => wall.wallType && wall.wallType.toLowerCase() === wallName.toLowerCase());
+    const isDuplicate = window.revitWallTypes.some(wall => wall.wallType && wall.wallType.toLowerCase() === wallName.toLowerCase());
     if (isDuplicate) {
         alert('이미 존재하는 벽체 타입명입니다.');
         nameInput.focus();
@@ -624,7 +644,7 @@ function createNewWallType(modal) {
     // 새 벽체 타입 생성
     const newWallType = {
         id: ++revitWallTypeCounter,
-        no: revitWallTypes.length + 1,
+        no: window.revitWallTypes.length + 1,
         wallType: wallName,
         thickness: wallThickness,
         layer3_1: '',
@@ -643,7 +663,8 @@ function createNewWallType(modal) {
         source: 'manual'
     };
     
-    revitWallTypes.push(newWallType);
+    window.revitWallTypes.push(newWallType);
+    syncRevitWallTypes(); // 상태 확인
     saveRevitWallTypes();
     updateRevitWallTable();
     
@@ -674,28 +695,29 @@ function duplicateRevitWall() {
     let duplicatedCount = 0;
     
     selectedIds.forEach(wallId => {
-        const originalWall = revitWallTypes.find(w => w.id === wallId);
+        const originalWall = window.revitWallTypes.find(w => w.id === wallId);
         if (originalWall) {
             const duplicatedWall = {
                 ...originalWall,
                 id: ++revitWallTypeCounter,
-                no: revitWallTypes.length + 1,
+                no: window.revitWallTypes.length + 1,
                 wallType: originalWall.wallType + ' (복사본)',
                 createdAt: new Date().toISOString(),
                 source: 'duplicated'
             };
             
-            revitWallTypes.push(duplicatedWall);
+            window.revitWallTypes.push(duplicatedWall);
             duplicatedCount++;
         }
     });
     
     if (duplicatedCount > 0) {
         // 번호 재정렬
-        revitWallTypes.forEach((wall, index) => {
+        window.revitWallTypes.forEach((wall, index) => {
             wall.no = index + 1;
         });
         
+        syncRevitWallTypes(); // 전역 변수 동기화
         saveRevitWallTypes();
         updateRevitWallTable();
         selectedRevitWalls.clear();
@@ -717,13 +739,17 @@ function deleteSelectedRevitWalls() {
     }
     
     // 선택된 벽체 타입들 삭제
-    revitWallTypes = revitWallTypes.filter(wall => !selectedIds.includes(wall.id));
+    const filteredWalls = window.revitWallTypes.filter(wall => !selectedIds.includes(wall.id));
+    window.revitWallTypes.length = 0; // 기존 배열 초기화
+    window.revitWallTypes.push(...filteredWalls); // 필터된 결과 추가
     selectedRevitWalls.clear();
     
     // 번호 재정렬
-    revitWallTypes.forEach((wall, index) => {
+    window.revitWallTypes.forEach((wall, index) => {
         wall.no = index + 1;
     });
+    
+    syncRevitWallTypes(); // 상태 확인
     
     saveRevitWallTypes();
     updateRevitWallTable();
@@ -737,9 +763,10 @@ function clearRevitWallData() {
         return;
     }
     
-    revitWallTypes = [];
+    window.revitWallTypes.length = 0; // 배열 초기화 (참조 유지)
     revitWallTypeCounter = 0;
     selectedRevitWalls.clear();
+    syncRevitWallTypes(); // 상태 확인
     
     saveRevitWallTypes();
     updateRevitWallTable();
@@ -812,7 +839,7 @@ function getFieldDisplayName(fieldName) {
 }
 
 async function createUnitPriceSelectionModal(wallId, fieldName) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return null;
@@ -1088,7 +1115,7 @@ function applySelectedUnitPrice(wallId, fieldName, modal) {
         return;
     }
     
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return;
@@ -1109,7 +1136,7 @@ function applySelectedUnitPrice(wallId, fieldName, modal) {
 
 // 일위대가 지우기 함수
 function clearUnitPriceFromModal(wallId, fieldName, modal) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return;
@@ -1157,7 +1184,7 @@ function applySelectedMaterial(wallId, fieldName, modal) {
         return;
     }
     
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return;
@@ -1166,6 +1193,8 @@ function applySelectedMaterial(wallId, fieldName, modal) {
     // 벽체에 자재 할당
     wall[fieldName] = selectedMaterialData.name;
     
+    // 참조는 같지만 데이터가 변경되었음을 알리기 위해 동기화
+    syncRevitWallTypes();
     saveRevitWallTypes();
     updateRevitWallTable();
     closeSubModal(modal);
@@ -1179,7 +1208,7 @@ function applySelectedMaterial(wallId, fieldName, modal) {
 function clearMaterial(event, wallId, fieldName) {
     event.stopPropagation();
     
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) return;
     
     wall[fieldName] = '';
@@ -1190,7 +1219,7 @@ function clearMaterial(event, wallId, fieldName) {
 }
 
 function clearMaterialFromModal(wallId, fieldName, modal) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return;
@@ -1209,7 +1238,7 @@ function clearMaterialFromModal(wallId, fieldName, modal) {
 // =============================================================================
 
 function editRevitWallType(wallId) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) {
         alert('벽체를 찾을 수 없습니다.');
         return;
@@ -1242,7 +1271,7 @@ function editRevitWallType(wallId) {
 }
 
 function editRevitWallThickness(wallId) {
-    const wall = revitWallTypes.find(w => w.id === wallId);
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) return;
     
     const newThickness = prompt('벽체 두께를 입력하세요 (mm):', wall.thickness || '');
@@ -1289,7 +1318,7 @@ function filterMaterialSelectionTable(searchValue) {
 // =============================================================================
 
 function exportRevitWallTypesToJSON() {
-    if (revitWallTypes.length === 0) {
+    if (window.revitWallTypes.length === 0) {
         alert('내보낼 벽체 타입 데이터가 없습니다.');
         return;
     }
@@ -1297,8 +1326,8 @@ function exportRevitWallTypesToJSON() {
     const exportData = {
         version: '1.0',
         exportDate: new Date().toISOString(),
-        wallTypesCount: revitWallTypes.length,
-        wallTypes: revitWallTypes,
+        wallTypesCount: window.revitWallTypes.length,
+        wallTypes: window.revitWallTypes,
         counter: revitWallTypeCounter
     };
     
@@ -1337,15 +1366,18 @@ function importRevitWallTypesFromJSON() {
                 const confirmMessage = `${importData.wallTypes.length}개의 벽체 타입을 가져오시겠습니까?\n(기존 데이터는 모두 교체됩니다)`;
                 
                 if (confirm(confirmMessage)) {
-                    revitWallTypes = importData.wallTypes;
-                    revitWallTypeCounter = importData.counter || Math.max(...revitWallTypes.map(w => w.id), 0);
+                    // window.revitWallTypes 배열을 직접 업데이트 (참조 유지)
+                    window.revitWallTypes.length = 0; // 기존 항목 제거
+                    window.revitWallTypes.push(...importData.wallTypes); // 새 항목 추가
+                    revitWallTypeCounter = importData.counter || Math.max(...window.revitWallTypes.map(w => w.id), 0);
                     selectedRevitWalls.clear();
                     
                     // 번호 재정렬
-                    revitWallTypes.forEach((wall, index) => {
+                    window.revitWallTypes.forEach((wall, index) => {
                         wall.no = index + 1;
                     });
                     
+                    syncRevitWallTypes(); // 전역 변수 동기화
                     saveRevitWallTypes();
                     updateRevitWallTable();
                     
@@ -1688,3 +1720,17 @@ window.saveAllChanges = saveAllChanges;
 window.initializeTypeMappingTabs = initializeTypeMappingTabs;
 
 console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 (원본 복원) 및 전역 함수 등록됨');
+
+// 페이지 로드 시 초기 데이터 동기화
+document.addEventListener('DOMContentLoaded', function() {
+    // 초기 데이터가 있을 수도 있으므로 동기화 수행
+    setTimeout(() => {
+        if (window.revitWallTypes.length === 0) {
+            // 저장된 데이터가 있는지 확인하고 로드
+            loadRevitWallTypes();
+        } else {
+            // 이미 데이터가 있으면 상태 확인만 수행
+            syncRevitWallTypes();
+        }
+    }, 100);
+});

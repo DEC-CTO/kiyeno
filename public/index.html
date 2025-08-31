@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="css/material-management.css" />
     <link rel="stylesheet" href="css/material-selector.css" />
     <link rel="stylesheet" href="css/revit-responsive.css" />
+    <link rel="stylesheet" href="css/wall-cost-results.css" />
     <link rel="stylesheet" href="css/display-system.css" />
     <link rel="stylesheet" href="css/logger-styles.css" />
 
@@ -23,6 +24,9 @@
 
     <!-- Socket.IO Client for WebSocket communication -->
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    
+    <!-- Chart.js 라이브러리 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -246,6 +250,11 @@
                 <i class="fas fa-crosshairs"></i> Revit 객체 선택
               </button>
             </div>
+            <div class="filter-group">
+              <button class="btn btn-sm btn-success" onclick="calculateWallCosts()">
+                <i class="fas fa-calculator"></i> 계산하기
+              </button>
+            </div>
           </div>
 
           <div class="revit-table-container">
@@ -355,6 +364,7 @@
     <script src="js/app-services.js"></script>
     <script src="js/app-ui.js"></script>
     <script src="js/revit-wall-handler.js"></script>
+    <script src="js/wall-cost-calculator.js"></script>
     <script src="js/display-system.js"></script>
 
     <!-- 통합 JavaScript 초기화 시스템 -->
@@ -1145,5 +1155,110 @@
         toggleRevitSelection: typeof window.toggleRevitSelection,
       });
     </script>
+    <!-- 하단 슬라이드 패널 (계산 결과) -->
+    <div id="wallCostResultsPanel" class="wall-cost-results-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i class="fas fa-calculator"></i>
+          <span>벽체 계산 결과</span>
+          <span id="calculationSummary" class="calculation-summary"></span>
+        </div>
+        <div class="panel-controls">
+          <button class="btn btn-sm btn-secondary" onclick="toggleResultsPanel()">
+            <i class="fas fa-chevron-down" id="panelToggleIcon"></i>
+          </button>
+          <button class="btn btn-sm btn-primary" onclick="exportCalculationResults()">
+            <i class="fas fa-download"></i> Excel 내보내기
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="closeResultsPanel()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="panel-content">
+        <!-- 탭 네비게이션 -->
+        <div class="panel-tabs">
+          <button class="panel-tab active" onclick="switchResultTab('individual')">
+            <i class="fas fa-list"></i> 벽체별 상세
+          </button>
+          <button class="panel-tab" onclick="switchResultTab('summary')">
+            <i class="fas fa-chart-pie"></i> 집계 현황
+          </button>
+          <button class="panel-tab" onclick="switchResultTab('comparison')">
+            <i class="fas fa-balance-scale"></i> 비교 분석
+          </button>
+        </div>
+        
+        <!-- 벽체별 상세 결과 탭 -->
+        <div id="individualTab" class="tab-content active">
+          <div class="wall-results-container">
+            <!-- 벽체별 계산 결과 카드들이 동적으로 생성됩니다 -->
+          </div>
+        </div>
+        
+        <!-- 집계 현황 탭 -->
+        <div id="summaryTab" class="tab-content">
+          <div class="summary-dashboard">
+            <div class="summary-cards">
+              <div class="summary-card">
+                <h4>총 면적</h4>
+                <div class="summary-value" id="totalArea">0 m²</div>
+              </div>
+              <div class="summary-card">
+                <h4>총 재료비</h4>
+                <div class="summary-value" id="totalMaterialCost">₩0</div>
+              </div>
+              <div class="summary-card">
+                <h4>총 노무비</h4>
+                <div class="summary-value" id="totalLaborCost">₩0</div>
+              </div>
+              <div class="summary-card">
+                <h4>총 공사비</h4>
+                <div class="summary-value" id="totalProjectCost">₩0</div>
+              </div>
+            </div>
+            
+            <div class="summary-charts">
+              <div class="chart-container">
+                <h4>공종별 비용 분포</h4>
+                <canvas id="workTypeChart"></canvas>
+              </div>
+              <div class="chart-container">
+                <h4>벽체 타입별 비교</h4>
+                <canvas id="wallTypeChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 비교 분석 탭 -->
+        <div id="comparisonTab" class="tab-content">
+          <div class="comparison-container">
+            <div class="comparison-table-container">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>벽체명</th>
+                    <th>면적 (m²)</th>
+                    <th>단가 (₩/m²)</th>
+                    <th>재료비</th>
+                    <th>노무비</th>
+                    <th>총계</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                  <!-- 동적으로 생성 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 패널 배경 오버레이 -->
+    <div id="panelOverlay" class="panel-overlay"></div>
+
   </body>
 </html>

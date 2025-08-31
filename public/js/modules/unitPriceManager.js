@@ -4573,6 +4573,9 @@ console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 
 // UnitPriceDB 클래스를 전역으로 노출 (revitTypeMatching.js에서 사용)
 window.UnitPriceDB = UnitPriceDB;
 
+// unitPriceDB 인스턴스를 전역으로 노출 (wall-cost-calculator.js에서 사용)
+window.unitPriceDB = unitPriceDB;
+
 // 테스트: window 객체에 함수가 제대로 할당되었는지 확인
 console.log('🔍 테스트: window.openUnitPriceManagement 존재 여부:', typeof window.openUnitPriceManagement);
 if (typeof window.openUnitPriceManagement !== 'function') {
