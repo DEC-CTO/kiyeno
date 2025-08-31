@@ -414,7 +414,6 @@ function hideCalculationProgress() {
  */
 function showResultsPanel() {
     const panel = document.getElementById('wallCostResultsPanel');
-    const overlay = document.getElementById('panelOverlay');
     
     if (panel) {
         panel.classList.add('show', 'expanded');
@@ -424,9 +423,7 @@ function showResultsPanel() {
         updateCalculationSummary();
     }
     
-    if (overlay) {
-        overlay.classList.add('show');
-    }
+    // 모드리스 패널에서는 오버레이 사용하지 않음 - 상단 요소들의 클릭을 차단하지 않음
 }
 
 /**
@@ -454,16 +451,13 @@ window.toggleResultsPanel = function() {
  */
 window.closeResultsPanel = function() {
     const panel = document.getElementById('wallCostResultsPanel');
-    const overlay = document.getElementById('panelOverlay');
     
     if (panel) {
         panel.classList.remove('show', 'expanded', 'minimized');
         isResultsPanelOpen = false;
     }
     
-    if (overlay) {
-        overlay.classList.remove('show');
-    }
+    // 모드리스 패널에서는 오버레이 사용하지 않음
 };
 
 /**

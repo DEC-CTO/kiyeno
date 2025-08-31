@@ -363,23 +363,15 @@
     color: #28a745;
 }
 
-/* 패널 오버레이 */
+/* 패널 오버레이 - 모드리스 패널용으로 비활성화 */
 .panel-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 9999;
-    display: none;
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
+    /* 모드리스 패널에서는 오버레이 불필요 - 상단 요소들의 클릭을 차단하지 않음 */
+    display: none !important;
 }
 
 .panel-overlay.show {
-    display: block;
-    opacity: 1;
+    /* 모드리스 패널에서는 오버레이 비활성화 */
+    display: none !important;
 }
 
 /* 반응형 */
