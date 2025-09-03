@@ -55,28 +55,28 @@
             <div class="display-mode-dropdown-menu" id="displayModeDropdown">
               <div
                 class="display-mode-dropdown-item active"
-                onclick="DisplaySystem.setMode('default'); toggleDisplayModeDropdown()"
+                onclick="openDefaultViewModal(); toggleDisplayModeDropdown()"
               >
                 <i class="fas fa-list-alt"></i>
                 기본값보기
               </div>
               <div
                 class="display-mode-dropdown-item"
-                onclick="DisplaySystem.setMode('type'); toggleDisplayModeDropdown()"
+                onclick="openTypeViewModal(); toggleDisplayModeDropdown()"
               >
                 <i class="fas fa-layer-group"></i>
                 타입별보기
               </div>
               <div
                 class="display-mode-dropdown-item"
-                onclick="DisplaySystem.setMode('material'); toggleDisplayModeDropdown()"
+                onclick="openMaterialViewModal(); toggleDisplayModeDropdown()"
               >
                 <i class="fas fa-box"></i>
                 재료별보기
               </div>
               <div
                 class="display-mode-dropdown-item"
-                onclick="DisplaySystem.setMode('workType'); toggleDisplayModeDropdown()"
+                onclick="openWorkTypeViewModal(); toggleDisplayModeDropdown()"
               >
                 <i class="fas fa-hard-hat"></i>
                 공종별보기
@@ -111,176 +111,165 @@
             <i class="fas fa-calculator"></i> 일위대가 관리
           </button>
 
-          <!-- Revit 연동 메뉴 -->
-          <div class="dropdown">
-            <button
-              class="btn btn-purple dropdown-toggle"
-              onclick="toggleDropdown('revitIntegration')"
-            >
-              <i class="fas fa-cube"></i> Revit 연동
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="dropdown-menu" id="revitIntegration">
-              <div
-                class="dropdown-item wall-selection-button"
-                onclick="selectSingleWallFromRevit()"
-              >
-                <i class="fas fa-mouse-pointer"></i> 벽체 선택 (단일)
-              </div>
-              <div
-                class="dropdown-item wall-selection-button"
-                onclick="selectMultipleWallsFromRevit()"
-              >
-                <i class="fas fa-hand-pointer"></i> 벽체 선택 (다중)
-              </div>
-              <div
-                class="dropdown-item wall-selection-button"
-                onclick="selectWallsByRoomFromRevit()"
-              >
-                <i class="fas fa-home"></i> 룸으로 벽체선택
-              </div>
-              <div class="dropdown-divider"></div>
-              <div class="dropdown-item" onclick="createWallTypesInRevit()">
-                <i class="fas fa-hammer"></i> WallType 생성
-              </div>
-              <div class="dropdown-divider"></div>
-              <div
-                class="dropdown-item"
-                onclick="toggleRevitDataSection()"
-                id="revitToggleBtn"
-              >
-                <i class="fas fa-table"></i> Revit 데이터 열기/닫기
-              </div>
-            </div>
+        </div>
+
+        <!-- Revit 데이터 확인 테이블 (항상 표시) -->
+        <div
+          id="revitDataSection"
+          class="revit-data-section"
+        >
+          <div class="revit-header">
+            <h2><i class="fas fa-cube"></i> Revit 벽체 데이터 확인</h2>
           </div>
-        </div>
 
-        <!-- 디스플레이 컨테이너 -->
-        <div class="display-container" id="displayContainer">
-          <!-- 디스플레이 내용이 여기에 렌더링됩니다 -->
-        </div>
-      </div>
-      <!-- main-content 닫기 -->
+          <!-- 파일 불러오기를 위한 숨겨진 input -->
+          <input
+            type="file"
+            id="fileImportInput"
+            accept=".json,.xlsx,.xls"
+            style="display: none"
+            onchange="handleFileImport(event)"
+          />
 
-      <!-- Revit 데이터 확인 테이블 (숨김 상태로 시작) -->
-      <div
-        id="revitDataSection"
-        class="revit-data-section"
-        style="display: none"
-      >
-        <div class="revit-header">
-          <h2><i class="fas fa-cube"></i> Revit 벽체 데이터 확인</h2>
-        </div>
+          <div class="revit-table-wrapper">
 
-        <!-- 파일 불러오기를 위한 숨겨진 input -->
-        <input
-          type="file"
-          id="fileImportInput"
-          accept=".json,.xlsx,.xls"
-          style="display: none"
-          onchange="handleFileImport(event)"
-        />
-
-        <div class="revit-table-wrapper">
-
-          <!-- 필터 컨트롤 -->
-          <div class="revit-filters">
-            <div class="filter-group">
-              <label for="nameFilter"
-                ><i class="fas fa-filter"></i> Name 필터:</label
-              >
-              <select id="nameFilter" onchange="applyRevitFilters()">
-                <option value="">전체</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label for="levelFilter"
-                ><i class="fas fa-filter"></i> Level 필터:</label
-              >
-              <select id="levelFilter" onchange="applyRevitFilters()">
-                <option value="">전체</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <button
-                class="btn btn-sm btn-secondary"
-                onclick="clearRevitFilters()"
-              >
-                <i class="fas fa-times"></i> 필터 초기화
-              </button>
-            </div>
-            <div class="filter-group">
-              <div class="dropdown">
-                <button
-                  class="btn btn-sm btn-primary dropdown-toggle"
-                  type="button"
-                  id="exportImportDropdown"
-                  data-toggle="dropdown"
-                  aria-haspopup="true"
-                  aria-expanded="false"
+            <!-- 필터 컨트롤 -->
+            <div class="revit-filters">
+              <div class="filter-group">
+                <label for="nameFilter"
+                  ><i class="fas fa-filter"></i> Name 필터:</label
                 >
-                  <i class="fas fa-download"></i> 데이터 관리
+                <select id="nameFilter" onchange="applyRevitFilters()">
+                  <option value="">전체</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="levelFilter"
+                  ><i class="fas fa-filter"></i> Level 필터:</label
+                >
+                <select id="levelFilter" onchange="applyRevitFilters()">
+                  <option value="">전체</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <button
+                  class="btn btn-sm btn-secondary"
+                  onclick="clearRevitFilters()"
+                >
+                  <i class="fas fa-times"></i> 필터 초기화
                 </button>
-                <div class="dropdown-menu" aria-labelledby="exportImportDropdown">
-                  <a class="dropdown-item" href="#" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> Excel로 내보내기
-                  </a>
-                  <a class="dropdown-item" href="#" onclick="exportToJSON()">
-                    <i class="fas fa-file-code"></i> JSON으로 내보내기
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#" onclick="importFromFile()">
-                    <i class="fas fa-upload"></i> 파일에서 불러오기
-                  </a>
+              </div>
+              <!-- Revit 연동 메뉴 -->
+              <div class="filter-group">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-sm btn-purple dropdown-toggle"
+                    onclick="toggleDropdown('revitIntegration')"
+                  >
+                    <i class="fas fa-cube"></i> Revit 연동
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                  <div class="dropdown-menu" id="revitIntegration">
+                    <div
+                      class="dropdown-item wall-selection-button"
+                      onclick="selectSingleWallFromRevit()"
+                    >
+                      <i class="fas fa-mouse-pointer"></i> 벽체 선택 (단일)
+                    </div>
+                    <div
+                      class="dropdown-item wall-selection-button"
+                      onclick="selectMultipleWallsFromRevit()"
+                    >
+                      <i class="fas fa-hand-pointer"></i> 벽체 선택 (다중)
+                    </div>
+                    <div
+                      class="dropdown-item wall-selection-button"
+                      onclick="selectWallsByRoomFromRevit()"
+                    >
+                      <i class="fas fa-home"></i> 룸으로 벽체선택
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item" onclick="createWallTypesInRevit()">
+                      <i class="fas fa-hammer"></i> WallType 생성
+                    </div>
+                  </div>
                 </div>
               </div>
+              <div class="filter-group">
+                <div class="dropdown">
+                  <button
+                    class="btn btn-sm btn-primary dropdown-toggle"
+                    type="button"
+                    id="exportImportDropdown"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                  >
+                    <i class="fas fa-download"></i> 데이터 관리
+                  </button>
+                  <div class="dropdown-menu" aria-labelledby="exportImportDropdown">
+                    <a class="dropdown-item" href="#" onclick="exportToExcel()">
+                      <i class="fas fa-file-excel"></i> Excel로 내보내기
+                    </a>
+                    <a class="dropdown-item" href="#" onclick="exportToJSON()">
+                      <i class="fas fa-file-code"></i> JSON으로 내보내기
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="#" onclick="importFromFile()">
+                      <i class="fas fa-upload"></i> 파일에서 불러오기
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-sm btn-danger" onclick="clearRevitData()">
+                  <i class="fas fa-trash"></i> 데이터 지우기
+                </button>
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-sm btn-info" onclick="selectInRevit()">
+                  <i class="fas fa-crosshairs"></i> Revit 객체 선택
+                </button>
+              </div>
+              <div class="filter-group">
+                <button class="btn btn-sm btn-success" onclick="calculateWallCosts()">
+                  <i class="fas fa-calculator"></i> 계산하기
+                </button>
+              </div>
             </div>
-            <div class="filter-group">
-              <button class="btn btn-sm btn-danger" onclick="clearRevitData()">
-                <i class="fas fa-trash"></i> 데이터 지우기
-              </button>
-            </div>
-            <div class="filter-group">
-              <button class="btn btn-sm btn-info" onclick="selectInRevit()">
-                <i class="fas fa-crosshairs"></i> Revit 객체 선택
-              </button>
-            </div>
-            <div class="filter-group">
-              <button class="btn btn-sm btn-success" onclick="calculateWallCosts()">
-                <i class="fas fa-calculator"></i> 계산하기
-              </button>
-            </div>
-          </div>
 
-          <div class="revit-table-container">
-            <table class="revit-table">
-              <thead>
-                <tr>
-                  <th class="col-select">
-                    <input
-                      type="checkbox"
-                      id="revitSelectAll"
-                      onchange="toggleAllRevitSelection()"
-                    />
-                  </th>
-                  <th class="col-revit-id">Revit ID</th>
-                  <th class="col-revit-name">Name</th>
-                  <th class="col-revit-length">Length (m)</th>
-                  <th class="col-revit-area">Area (m²)</th>
-                  <th class="col-revit-height">Height (m)</th>
-                  <th class="col-revit-thickness">Thickness (m)</th>
-                  <th class="col-revit-level">Level</th>
-                  <th class="col-revit-category">Category</th>
-                  <th class="col-revit-roomname">실명 (Room)</th>
-                </tr>
-              </thead>
-              <tbody id="revitTableBody">
-                <!-- Revit 데이터가 여기에 표시됩니다 -->
-              </tbody>
-            </table>
+            <div class="revit-table-container">
+              <table class="revit-table">
+                <thead>
+                  <tr>
+                    <th class="col-select">
+                      <input
+                        type="checkbox"
+                        id="revitSelectAll"
+                        onchange="toggleAllRevitSelection()"
+                      />
+                    </th>
+                    <th class="col-revit-id">Revit ID</th>
+                    <th class="col-revit-name">Name</th>
+                    <th class="col-revit-length">Length (m)</th>
+                    <th class="col-revit-area">Area (m²)</th>
+                    <th class="col-revit-height">Height (m)</th>
+                    <th class="col-revit-thickness">Thickness (m)</th>
+                    <th class="col-revit-level">Level</th>
+                    <th class="col-revit-category">Category</th>
+                    <th class="col-revit-roomname">실명 (Room)</th>
+                  </tr>
+                </thead>
+                <tbody id="revitTableBody">
+                  <!-- Revit 데이터가 여기에 표시됩니다 -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+
       </div>
+      <!-- main-content 닫기 -->
 
     </div>
     <!-- container 닫기 -->
@@ -1255,6 +1244,323 @@
 
     <!-- 패널 배경 오버레이 -->
     <div id="panelOverlay" class="panel-overlay"></div>
+
+    <!-- 기본값보기 모달 -->
+    <div id="defaultViewModal" class="modal-overlay" style="display: none;">
+      <div class="modal-container large-modal">
+        <div class="modal-header">
+          <h2><i class="fas fa-list-alt"></i> 기본값보기</h2>
+          <button class="modal-close-btn" onclick="closeDefaultViewModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-content">
+          <div class="display-table-container">
+            <div class="display-table-scroll">
+              <table class="display-table default-view">
+                <thead>
+                  <tr>
+                    <th rowspan="3">NO</th>
+                    <th rowspan="3">실</th>
+                    <th rowspan="3">부위</th>
+                    <th rowspan="3">공종</th>
+                    <th rowspan="3">품명</th>
+                    <th rowspan="3">규격</th>
+                    <th rowspan="3">단위</th>
+                    <th rowspan="3">수량</th>
+                    <th colspan="6">도급</th>
+                    <th colspan="6">실행</th>
+                  </tr>
+                  <tr>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                  </tr>
+                  <tr>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="20" style="text-align: center; padding: 40px; color: #666;">
+                      데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 타입별보기 모달 -->
+    <div id="typeViewModal" class="modal-overlay" style="display: none;">
+      <div class="modal-container large-modal">
+        <div class="modal-header">
+          <h2><i class="fas fa-layer-group"></i> 타입별보기</h2>
+          <button class="modal-close-btn" onclick="closeTypeViewModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-content">
+          <div class="display-table-container">
+            <div class="display-table-scroll">
+              <table class="display-table type-view">
+                <thead>
+                  <tr>
+                    <th rowspan="3">TYPE</th>
+                    <th rowspan="3">품명</th>
+                    <th rowspan="3">규격</th>
+                    <th rowspan="3">단위</th>
+                    <th rowspan="3">수량</th>
+                    <th colspan="6">도급</th>
+                    <th colspan="6">실행</th>
+                  </tr>
+                  <tr>
+                    <th colspan="2">자재</th>
+                    <th colspan="2">노무</th>
+                    <th colspan="2">합계</th>
+                    <th colspan="2">자재</th>
+                    <th colspan="2">노무</th>
+                    <th colspan="2">합계</th>
+                  </tr>
+                  <tr>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="17" style="text-align: center; padding: 40px; color: white;">
+                      데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 재료별보기 모달 -->
+    <div id="materialViewModal" class="modal-overlay" style="display: none;">
+      <div class="modal-container large-modal">
+        <div class="modal-header">
+          <h2><i class="fas fa-tools"></i> 재료별보기</h2>
+          <button class="modal-close-btn" onclick="closeMaterialViewModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-content">
+          <div class="display-table-container">
+            <div class="display-table-scroll">
+              <table class="display-table material-view">
+                <thead>
+                  <tr>
+                    <th rowspan="3">부위</th>
+                    <th rowspan="3">품명</th>
+                    <th rowspan="3">규격</th>
+                    <th rowspan="3">SPEC</th>
+                    <th rowspan="3">단위</th>
+                    <th rowspan="3">수량</th>
+                    <th colspan="2">발주수량</th>
+                    <th colspan="6">도급</th>
+                    <th colspan="6">실행</th>
+                  </tr>
+                  <tr>
+                    <th rowspan="2">단위</th>
+                    <th rowspan="2">수량</th>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                  </tr>
+                  <tr>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="20" style="text-align: center; padding: 40px; color: white;">
+                      데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 공종별보기 모달 -->
+    <div id="workTypeViewModal" class="modal-overlay" style="display: none;">
+      <div class="modal-container large-modal">
+        <div class="modal-header">
+          <h2><i class="fas fa-hard-hat"></i> 공종별보기</h2>
+          <button class="modal-close-btn" onclick="closeWorkTypeViewModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-content">
+          <div class="display-table-container">
+            <div class="display-table-scroll">
+              <table class="display-table work-type-view">
+                <thead>
+                  <tr>
+                    <th rowspan="3">공종</th>
+                    <th rowspan="3">부위</th>
+                    <th rowspan="3">품명</th>
+                    <th rowspan="3">규격</th>
+                    <th rowspan="3">단위</th>
+                    <th rowspan="3">수량</th>
+                    <th colspan="6">도급</th>
+                    <th colspan="6">실행</th>
+                  </tr>
+                  <tr>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                    <th colspan="2">자재비</th>
+                    <th colspan="2">노무비</th>
+                    <th colspan="2">합계</th>
+                  </tr>
+                  <tr>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colspan="18" style="text-align: center; padding: 40px; color: white;">
+                      데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모달 관련 JavaScript -->
+    <script>
+      // 기본값보기 모달 열기
+      function openDefaultViewModal() {
+        document.getElementById('defaultViewModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+      }
+
+      // 기본값보기 모달 닫기
+      function closeDefaultViewModal() {
+        document.getElementById('defaultViewModal').style.display = 'none';
+        document.body.style.overflow = 'auto'; // 배경 스크롤 복원
+      }
+
+      // 타입별보기 모달 열기
+      function openTypeViewModal() {
+        document.getElementById('typeViewModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+      // 타입별보기 모달 닫기
+      function closeTypeViewModal() {
+        document.getElementById('typeViewModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      // 재료별보기 모달 열기
+      function openMaterialViewModal() {
+        document.getElementById('materialViewModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+      // 재료별보기 모달 닫기
+      function closeMaterialViewModal() {
+        document.getElementById('materialViewModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      // 공종별보기 모달 열기
+      function openWorkTypeViewModal() {
+        document.getElementById('workTypeViewModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+      // 공종별보기 모달 닫기
+      function closeWorkTypeViewModal() {
+        document.getElementById('workTypeViewModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      // 모달 배경 클릭 시 닫기
+      document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('defaultViewModal');
+        if (modal) {
+          modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+              closeDefaultViewModal();
+            }
+          });
+        }
+      });
+
+      // ESC 키로 모달 닫기
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          if (document.getElementById('defaultViewModal').style.display === 'flex') {
+            closeDefaultViewModal();
+          }
+        }
+      });
+    </script>
 
   </body>
 </html>

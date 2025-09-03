@@ -1147,8 +1147,8 @@ body {
     border-top: 3px solid #8b5cf6;
     padding: 0;
     margin-top: 5px; /* 간격 축소 */
-    flex-shrink: 0; /* 크기 고정 */
-    max-height: 70vh; /* 최대 높이 증가 (viewport height의 70%) */
+    height: calc(100vh - 150px); /* 화면 높이에서 상단 여백 제외 */
+    max-height: 85vh; /* 최대 85% 높이 제한 */
     display: flex;
     flex-direction: column;
     overflow: hidden; /* 부모 컨테이너는 숨김으로 설정하여 자식에서 스크롤 처리 */
@@ -1373,13 +1373,14 @@ body {
     
     /* 모바일에서 테이블 컨테이너 높이 조정 */
     .revit-table-container {
-        height: calc(100vh - 300px); /* 모바일에서는 더 적은 여백 */
-        max-height: calc(100vh - 300px);
-        min-height: 250px;
+        height: calc(100vh - 250px); /* 모바일에서는 더 적은 여백 */
+        max-height: calc(100vh - 250px);
+        min-height: 300px;
     }
     
     .revit-data-section {
-        max-height: 80vh; /* 모바일에서는 더 큰 비율 사용 */
+        height: calc(100vh - 200px); /* 모바일에서 상단 여백 더 크게 */
+        max-height: 80vh;
     }
 }
 
@@ -1391,9 +1392,9 @@ body {
     border: 1px solid #e0e0e0;
     border-radius: 0 0 6px 6px; /* 필터와 연결되도록 상단 모서리 제거 */
     background: white;
-    min-height: 300px; /* 최소 높이 증가 - 더 많은 행을 보여줄 수 있도록 */
-    max-height: calc(100vh - 350px); /* 뷰포트 기준으로 동적 계산 */
-    height: calc(100vh - 350px); /* 고정된 계산 높이로 확실한 스크롤 영역 */
+    min-height: 400px; /* 최소 높이 더욱 증가 - 더 많은 행을 보여줄 수 있도록 */
+    max-height: calc(100vh - 250px); /* 뷰포트 기준으로 동적 계산 */
+    height: calc(100vh - 250px); /* 고정된 계산 높이로 확실한 스크롤 영역 */
     -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 */
     /* 스크롤 동작 강제 */
     scrollbar-width: thin; /* Firefox */
@@ -1522,7 +1523,8 @@ body {
     }
     
     .revit-data-section {
-        max-height: 40vh; /* 작은 화면에서 더 작게 */
+        height: calc(100vh - 230px); /* 작은 화면에서 적절한 높이 */
+        max-height: 75vh;
     }
 }
 
@@ -1538,12 +1540,13 @@ body {
     }
     
     .revit-data-section {
-        max-height: 35vh; /* 모바일에서 더욱 작게 */
+        height: calc(100vh - 250px); /* 모바일에서 적절한 높이 */
+        max-height: 70vh;
         margin-top: 3px;
     }
     
     .revit-table-container {
-        min-height: 150px; /* 모바일에서 최소 높이 축소 */
+        min-height: 200px; /* 모바일에서 최소 높이 증가 */
     }
 }
 
@@ -1843,3 +1846,153 @@ body {
     display: none; /* 설명란 제거됨 */
 }
 .col-mat-actions { width: 80px; }
+
+/* =============================================================================
+   보기 모달 스타일
+   ============================================================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(2px);
+}
+
+.modal-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+.large-modal {
+    width: 95%;
+    max-width: 1400px;
+}
+
+@keyframes modalFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header h2 i {
+    color: #007bff;
+    font-size: 22px;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+}
+
+.modal-close-btn:hover {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.modal-content {
+    padding: 20px;
+    max-height: calc(90vh - 80px);
+    overflow-y: auto;
+}
+
+/* 모달 내부 테이블 스타일 조정 */
+.modal-content .display-table-container {
+    max-height: calc(90vh - 120px);
+    overflow: auto;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.modal-content .display-table {
+    margin: 0;
+    color: white;
+}
+
+.modal-content .display-table th {
+    background: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    color: white;
+    border: 1px solid #6c757d;
+    font-weight: 600;
+}
+
+.modal-content .display-table td {
+    background: #6c757d;
+    color: white;
+    border: 1px solid #495057;
+}
+
+/* 메시지 셀 특별 스타일 */
+.modal-content .display-table td[colspan] {
+    background: #495057;
+    color: white;
+    font-weight: 500;
+}
+
+/* 반응형 모달 */
+@media (max-width: 768px) {
+    .large-modal {
+        width: 98%;
+        margin: 10px;
+    }
+    
+    .modal-header {
+        padding: 15px 20px 10px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+    
+    .modal-header h2 {
+        font-size: 18px;
+    }
+}

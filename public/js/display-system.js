@@ -78,108 +78,8 @@ window.DisplaySystem = {
 
     // 기본값보기 렌더링
     renderDefaultView() {
-        const sampleData = [
-            {
-                no: 1,
-                room: '회의실',
-                location: 'W',
-                workType: '경량',
-                itemName: 'C-STUD',
-                spec: '65형',
-                unit: 'M2',
-                qty: 100.00,
-                materialUnitPrice: 8500,
-                materialAmount: 850000,
-                contractLaborUnitPrice: 8000,
-                contractLaborAmount: 800000,
-                contractTotal: 1650000,
-                actualMaterialUnitPrice: 7500,
-                actualMaterialAmount: 750000,
-                actualLaborUnitPrice: 7000,
-                actualLaborAmount: 700000,
-                actualTotal: 1450000
-            },
-            {
-                no: 2,
-                room: '회의실',
-                location: 'W',
-                workType: '간자재',
-                itemName: '석고보드',
-                spec: '9.5T*2P',
-                unit: 'M2',
-                qty: 100.00,
-                materialUnitPrice: 7000,
-                materialAmount: 700000,
-                contractLaborUnitPrice: 0,
-                contractLaborAmount: 0,
-                contractTotal: 700000,
-                actualMaterialUnitPrice: 5000,
-                actualMaterialAmount: 500000,
-                actualLaborUnitPrice: 0,
-                actualLaborAmount: 0,
-                actualTotal: 500000
-            },
-            {
-                no: 3,
-                room: '회의실',
-                location: 'W',
-                workType: '경량',
-                itemName: '석고보드 취부',
-                spec: '9.5T*2P',
-                unit: 'M2',
-                qty: 100.00,
-                materialUnitPrice: 0,
-                materialAmount: 0,
-                contractLaborUnitPrice: 7200,
-                contractLaborAmount: 720000,
-                contractTotal: 720000,
-                actualMaterialUnitPrice: 0,
-                actualMaterialAmount: 0,
-                actualLaborUnitPrice: 5200,
-                actualLaborAmount: 520000,
-                actualTotal: 520000
-            },
-            {
-                no: 4,
-                room: '회의실',
-                location: 'W',
-                workType: '도장',
-                itemName: 'ALL PUTTY',
-                spec: '',
-                unit: 'M2',
-                qty: 100.00,
-                materialUnitPrice: 3400,
-                materialAmount: 340000,
-                contractLaborUnitPrice: 6600,
-                contractLaborAmount: 660000,
-                contractTotal: 1000000,
-                actualMaterialUnitPrice: 2400,
-                actualMaterialAmount: 240000,
-                actualLaborUnitPrice: 5600,
-                actualLaborAmount: 560000,
-                actualTotal: 800000
-            },
-            {
-                no: 5,
-                room: '회의실',
-                location: 'W',
-                workType: '도장',
-                itemName: '수성도장',
-                spec: '',
-                unit: 'M2',
-                qty: 100.00,
-                materialUnitPrice: 2800,
-                materialAmount: 280000,
-                contractLaborUnitPrice: 7200,
-                contractLaborAmount: 720000,
-                contractTotal: 1000000,
-                actualMaterialUnitPrice: 1800,
-                actualMaterialAmount: 180000,
-                actualLaborUnitPrice: 6200,
-                actualLaborAmount: 620000,
-                actualTotal: 800000
-            }
-        ];
+        // 하드코딩된 샘플 데이터 제거 - 실제 데이터는 일위대가 관리에서 생성
+        const sampleData = [];
 
         return `
             <div class="display-table-container">
@@ -222,7 +122,7 @@ window.DisplaySystem = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sampleData.map(item => `
+                            ${sampleData.length > 0 ? sampleData.map(item => `
                                 <tr>
                                     <td>${item.no}</td>
                                     <td>${item.room}</td>
@@ -245,7 +145,13 @@ window.DisplaySystem = {
                                     <td>₩${(item.actualMaterialUnitPrice + item.actualLaborUnitPrice).toLocaleString()}</td>
                                     <td>₩${item.actualTotal.toLocaleString()}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : `
+                                <tr>
+                                    <td colspan="20" style="text-align: center; padding: 40px; color: #666;">
+                                        데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                                    </td>
+                                </tr>
+                            `}
                         </tbody>
                     </table>
                 </div>
@@ -255,103 +161,8 @@ window.DisplaySystem = {
 
     // 타입별보기 렌더링
     renderTypeView() {
-        const sampleData = [
-            {
-                type: 'W-01',
-                items: [
-                    {
-                        itemName: 'C-STUD',
-                        spec: '65형',
-                        unit: 'M2',
-                        qty: 50.00,
-                        materialUnitPrice: 3000,
-                        materialAmount: 150000,
-                        laborUnitPrice: 3400,
-                        laborAmount: 170000,
-                        contractUnitPrice: 6400,
-                        contractAmount: 320000,
-                        actualMaterialUnitPrice: 7500,
-                        actualMaterialAmount: 375000,
-                        actualLaborUnitPrice: 7000,
-                        actualLaborAmount: 350000,
-                        actualUnitPrice: 14500,
-                        actualAmount: 725000
-                    },
-                    {
-                        itemName: '그라스울',
-                        spec: '24K50T',
-                        unit: 'M2',
-                        qty: 50.00,
-                        materialUnitPrice: 4200,
-                        materialAmount: 210000,
-                        laborUnitPrice: 0,
-                        laborAmount: 0,
-                        contractUnitPrice: 4200,
-                        contractAmount: 210000,
-                        actualMaterialUnitPrice: 3500,
-                        actualMaterialAmount: 175000,
-                        actualLaborUnitPrice: 0,
-                        actualLaborAmount: 0,
-                        actualUnitPrice: 3500,
-                        actualAmount: 175000
-                    },
-                    {
-                        itemName: '그라스울 취부',
-                        spec: '24K50T',
-                        unit: 'M2',
-                        qty: 50.00,
-                        materialUnitPrice: 0,
-                        materialAmount: 0,
-                        laborUnitPrice: 3600,
-                        laborAmount: 180000,
-                        contractUnitPrice: 3600,
-                        contractAmount: 180000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 3000,
-                        actualLaborAmount: 150000,
-                        actualUnitPrice: 3000,
-                        actualAmount: 150000
-                    },
-                    {
-                        itemName: '석고보드',
-                        spec: '9.5T*2P',
-                        unit: 'M2',
-                        qty: 50.00,
-                        materialUnitPrice: 6000,
-                        materialAmount: 300000,
-                        laborUnitPrice: 0,
-                        laborAmount: 0,
-                        contractUnitPrice: 6000,
-                        contractAmount: 300000,
-                        actualMaterialUnitPrice: 5000,
-                        actualMaterialAmount: 250000,
-                        actualLaborUnitPrice: 0,
-                        actualLaborAmount: 0,
-                        actualUnitPrice: 5000,
-                        actualAmount: 250000
-                    },
-                    {
-                        itemName: '석고보드 취부',
-                        spec: '9.5T*2P',
-                        unit: 'M2',
-                        qty: 50.00,
-                        materialUnitPrice: 0,
-                        materialAmount: 0,
-                        laborUnitPrice: 6240,
-                        laborAmount: 312000,
-                        contractUnitPrice: 6240,
-                        contractAmount: 312000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 5200,
-                        actualLaborAmount: 260000,
-                        actualUnitPrice: 5200,
-                        actualAmount: 260000
-                    }
-                ]
-            }
-        ];
+        // 하드코딩된 타입별 샘플 데이터 제거 - 실제 데이터는 일위대가 관리에서 생성
+        const sampleData = [];
 
         return `
             <div class="display-table-container">
@@ -391,7 +202,7 @@ window.DisplaySystem = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sampleData.map(typeData => {
+                            ${sampleData.length > 0 ? sampleData.map(typeData => {
                                 let totalContractAmount = 0;
                                 let totalActualAmount = 0;
                                 
@@ -441,7 +252,13 @@ window.DisplaySystem = {
                                 `;
                                 
                                 return itemRows + subtotalRow;
-                            }).join('')}
+                            }).join('') : `
+                                <tr>
+                                    <td colspan="17" style="text-align: center; padding: 40px; color: #666;">
+                                        데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                                    </td>
+                                </tr>
+                            `}
                         </tbody>
                     </table>
                 </div>
@@ -451,52 +268,7 @@ window.DisplaySystem = {
 
     // 재료별보기 렌더링
     renderMaterialView() {
-        const sampleData = [
-            {
-                category: 'W',
-                itemName: 'C-STUD',
-                spec: '65형',
-                specDetail: '',
-                unit: 'M2',
-                qty: 200.00,
-                usage: 'EA',
-                usageQty: 156.00,
-                contractMaterialUnitPrice: 8500,
-                contractMaterialAmount: 1700000,
-                contractLaborUnitPrice: 8000,
-                contractLaborAmount: 1600000,
-                contractTotalUnitPrice: 16500,
-                contractTotalAmount: 3300000,
-                actualMaterialUnitPrice: 7500,
-                actualMaterialAmount: 1500000,
-                actualLaborUnitPrice: 7000,
-                actualLaborAmount: 1400000,
-                actualTotalUnitPrice: 14500,
-                actualTotalAmount: 2900000
-            },
-            {
-                category: 'W',
-                itemName: '석고보드',
-                spec: '9.5T*2P',
-                specDetail: '',
-                unit: 'M2',
-                qty: 200.00,
-                usage: 'EA',
-                usageQty: 247.00,
-                contractMaterialUnitPrice: 7000,
-                contractMaterialAmount: 1400000,
-                contractLaborUnitPrice: 0,
-                contractLaborAmount: 0,
-                contractTotalUnitPrice: 7000,
-                contractTotalAmount: 1400000,
-                actualMaterialUnitPrice: 5000,
-                actualMaterialAmount: 1000000,
-                actualLaborUnitPrice: 0,
-                actualLaborAmount: 0,
-                actualTotalUnitPrice: 5000,
-                actualTotalAmount: 1000000
-            }
-        ];
+        const sampleData = [];
 
         return `
             <div class="display-table-container">
@@ -540,7 +312,7 @@ window.DisplaySystem = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sampleData.map(item => `
+                            ${sampleData.length > 0 ? sampleData.map(item => `
                                 <tr>
                                     <td>${item.category}</td>
                                     <td>${item.itemName}</td>
@@ -563,7 +335,13 @@ window.DisplaySystem = {
                                     <td>₩${item.actualTotalUnitPrice.toLocaleString()}</td>
                                     <td>₩${item.actualTotalAmount.toLocaleString()}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : `
+                                <tr>
+                                    <td colspan="20" style="text-align: center; padding: 40px; color: #666;">
+                                        데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                                    </td>
+                                </tr>
+                            `}
                         </tbody>
                     </table>
                 </div>
@@ -573,127 +351,7 @@ window.DisplaySystem = {
 
     // 공종별보기 렌더링
     renderWorkTypeView() {
-        const sampleData = [
-            {
-                workType: '경량',
-                items: [
-                    {
-                        category: 'W',
-                        itemName: 'C-STUD',
-                        spec: '65형',
-                        unit: 'M2',
-                        qty: 100.00,
-                        contractMaterialUnitPrice: 9000,
-                        contractMaterialAmount: 900000,
-                        contractLaborUnitPrice: 0,
-                        contractLaborAmount: 0,
-                        contractTotalUnitPrice: 17400,
-                        contractTotalAmount: 1740000,
-                        actualMaterialUnitPrice: 7500,
-                        actualMaterialAmount: 750000,
-                        actualLaborUnitPrice: 7000,
-                        actualLaborAmount: 700000,
-                        actualTotalUnitPrice: 14500,
-                        actualTotalAmount: 1450000
-                    },
-                    {
-                        category: 'W',
-                        itemName: '석고보드 취부',
-                        spec: '9.5T*1P',
-                        unit: 'M2',
-                        qty: 100.00,
-                        contractMaterialUnitPrice: 0,
-                        contractMaterialAmount: 0,
-                        contractLaborUnitPrice: 3120,
-                        contractLaborAmount: 312000,
-                        contractTotalUnitPrice: 3120,
-                        contractTotalAmount: 312000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 2600,
-                        actualLaborAmount: 260000,
-                        actualTotalUnitPrice: 2600,
-                        actualTotalAmount: 260000
-                    },
-                    {
-                        category: 'W',
-                        itemName: '그라스울 취부',
-                        spec: '24K50T',
-                        unit: 'M2',
-                        qty: 100.00,
-                        contractMaterialUnitPrice: 0,
-                        contractMaterialAmount: 0,
-                        contractLaborUnitPrice: 2640,
-                        contractLaborAmount: 264000,
-                        contractTotalUnitPrice: 2640,
-                        contractTotalAmount: 264000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 2200,
-                        actualLaborAmount: 220000,
-                        actualTotalUnitPrice: 2200,
-                        actualTotalAmount: 220000
-                    },
-                    {
-                        category: 'C',
-                        itemName: 'L.G.S',
-                        spec: 'M-BAR',
-                        unit: 'M2',
-                        qty: 50.00,
-                        contractMaterialUnitPrice: 9000,
-                        contractMaterialAmount: 450000,
-                        contractLaborUnitPrice: 8400,
-                        contractLaborAmount: 420000,
-                        contractTotalUnitPrice: 17400,
-                        contractTotalAmount: 870000,
-                        actualMaterialUnitPrice: 7500,
-                        actualMaterialAmount: 375000,
-                        actualLaborUnitPrice: 7000,
-                        actualLaborAmount: 350000,
-                        actualTotalUnitPrice: 14500,
-                        actualTotalAmount: 725000
-                    },
-                    {
-                        category: 'C',
-                        itemName: '석고보드 취부',
-                        spec: '9.5T*2P',
-                        unit: 'M2',
-                        qty: 50.00,
-                        contractMaterialUnitPrice: 0,
-                        contractMaterialAmount: 0,
-                        contractLaborUnitPrice: 6240,
-                        contractLaborAmount: 312000,
-                        contractTotalUnitPrice: 6240,
-                        contractTotalAmount: 312000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 5200,
-                        actualLaborAmount: 260000,
-                        actualTotalUnitPrice: 5200,
-                        actualTotalAmount: 260000
-                    },
-                    {
-                        category: 'C',
-                        itemName: '시트를 취부',
-                        spec: 'T자 골플',
-                        unit: 'M',
-                        qty: 20.00,
-                        contractMaterialUnitPrice: 0,
-                        contractMaterialAmount: 0,
-                        contractLaborUnitPrice: 1800,
-                        contractLaborAmount: 36000,
-                        contractTotalUnitPrice: 1800,
-                        contractTotalAmount: 36000,
-                        actualMaterialUnitPrice: 0,
-                        actualMaterialAmount: 0,
-                        actualLaborUnitPrice: 1500,
-                        actualLaborAmount: 30000,
-                        actualTotalUnitPrice: 1500,
-                        actualTotalAmount: 30000
-                    }
-                ]
-            }
-        ];
+        const sampleData = [];
 
         return `
             <div class="display-table-container">
@@ -734,7 +392,7 @@ window.DisplaySystem = {
                             </tr>
                         </thead>
                         <tbody>
-                            ${sampleData.map(workTypeData => {
+                            ${sampleData.length > 0 ? sampleData.map(workTypeData => {
                                 let totalContractMaterialAmount = 0;
                                 let totalContractLaborAmount = 0;
                                 let totalContractAmount = 0;
@@ -793,7 +451,13 @@ window.DisplaySystem = {
                                 `;
                                 
                                 return itemRows + subtotalRow;
-                            }).join('')}
+                            }).join('') : `
+                                <tr>
+                                    <td colspan="18" style="text-align: center; padding: 40px; color: #666;">
+                                        데이터가 없습니다. 일위대가 관리에서 세부아이템을 생성해주세요.
+                                    </td>
+                                </tr>
+                            `}
                         </tbody>
                     </table>
                 </div>
