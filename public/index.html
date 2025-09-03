@@ -170,35 +170,6 @@
       >
         <div class="revit-header">
           <h2><i class="fas fa-cube"></i> Revit 벽체 데이터 확인</h2>
-          <div class="revit-controls">
-            <div class="dropdown">
-              <button
-                class="btn btn-primary dropdown-toggle"
-                type="button"
-                id="exportImportDropdown"
-                data-toggle="dropdown"
-                aria-haspopup="true"
-                aria-expanded="false"
-              >
-                <i class="fas fa-download"></i> 데이터 관리
-              </button>
-              <div class="dropdown-menu" aria-labelledby="exportImportDropdown">
-                <a class="dropdown-item" href="#" onclick="exportToExcel()">
-                  <i class="fas fa-file-excel"></i> Excel로 내보내기
-                </a>
-                <a class="dropdown-item" href="#" onclick="exportToJSON()">
-                  <i class="fas fa-file-code"></i> JSON으로 내보내기
-                </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" onclick="importFromFile()">
-                  <i class="fas fa-upload"></i> 파일에서 불러오기
-                </a>
-              </div>
-            </div>
-            <button class="btn btn-secondary" onclick="clearRevitData()">
-              <i class="fas fa-trash"></i> Revit 데이터 지우기
-            </button>
-          </div>
         </div>
 
         <!-- 파일 불러오기를 위한 숨겨진 input -->
@@ -211,13 +182,6 @@
         />
 
         <div class="revit-table-wrapper">
-          <div class="revit-selection-info">
-            <span id="revitSelectionText">Revit 데이터가 없습니다.</span>
-            <div style="font-size: 10px; color: #666; margin-top: 5px">
-              <i class="fas fa-info-circle"></i> 선택 방법: 일반 클릭(단일),
-              Ctrl+클릭(다중), Shift+클릭(범위)
-            </div>
-          </div>
 
           <!-- 필터 컨트롤 -->
           <div class="revit-filters">
@@ -243,6 +207,37 @@
                 onclick="clearRevitFilters()"
               >
                 <i class="fas fa-times"></i> 필터 초기화
+              </button>
+            </div>
+            <div class="filter-group">
+              <div class="dropdown">
+                <button
+                  class="btn btn-sm btn-primary dropdown-toggle"
+                  type="button"
+                  id="exportImportDropdown"
+                  data-toggle="dropdown"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                >
+                  <i class="fas fa-download"></i> 데이터 관리
+                </button>
+                <div class="dropdown-menu" aria-labelledby="exportImportDropdown">
+                  <a class="dropdown-item" href="#" onclick="exportToExcel()">
+                    <i class="fas fa-file-excel"></i> Excel로 내보내기
+                  </a>
+                  <a class="dropdown-item" href="#" onclick="exportToJSON()">
+                    <i class="fas fa-file-code"></i> JSON으로 내보내기
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#" onclick="importFromFile()">
+                    <i class="fas fa-upload"></i> 파일에서 불러오기
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="filter-group">
+              <button class="btn btn-sm btn-danger" onclick="clearRevitData()">
+                <i class="fas fa-trash"></i> 데이터 지우기
               </button>
             </div>
             <div class="filter-group">
@@ -286,6 +281,7 @@
           </div>
         </div>
       </div>
+
     </div>
     <!-- container 닫기 -->
 
