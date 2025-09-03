@@ -1138,9 +1138,127 @@ async function sendElementIdsToRevit(elementIds) {
     }
 }
 
+/**
+ * RevitID로 테이블 행 하이라이트
+ */
+window.highlightRevitRow = function(revitId) {
+    console.log('🎯 RevitID로 행 하이라이트 요청:', revitId);
+    
+    if (!revitId) {
+        console.warn('RevitID가 제공되지 않았습니다.');
+        return false;
+    }
+    
+    // 기존 하이라이트 제거
+    clearRevitHighlights();
+    
+    // 테이블에서 해당 RevitID를 가진 행 찾기
+    const tableRows = document.querySelectorAll('#revitTableBody tr');
+    let highlightedCount = 0;
+    
+    tableRows.forEach((row, index) => {
+        const revitIdCell = row.querySelector('.col-revit-id');
+        if (revitIdCell && revitIdCell.textContent.trim() === revitId.toString()) {
+            // 하이라이트 적용
+            row.classList.add('revit-row-highlight');
+            highlightedCount++;
+            
+            // 스크롤하여 행이 보이도록 이동
+            setTimeout(() => {
+                row.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center'
+                });
+            }, 100);
+            
+            // 10초 후 하이라이트 자동 제거
+            setTimeout(() => {
+                row.classList.remove('revit-row-highlight');
+            }, 10000);
+            
+            console.log(`✅ RevitID ${revitId} 행이 하이라이트되었습니다 (인덱스: ${index})`);
+        }
+    });
+    
+    if (highlightedCount === 0) {
+        console.warn(`⚠️ RevitID ${revitId}에 해당하는 행을 찾을 수 없습니다.`);
+        showToast(`RevitID ${revitId}에 해당하는 데이터를 찾을 수 없습니다.`, 'warning');
+        return false;
+    } else {
+        showToast(`RevitID ${revitId} 행이 하이라이트되었습니다.`, 'success');
+        return true;
+    }
+};
+
+/**
+ * 여러 RevitID 동시 하이라이트
+ */
+window.highlightMultipleRevitRows = function(revitIds) {
+    console.log('🎯 다중 RevitID 하이라이트 요청:', revitIds);
+    
+    if (!Array.isArray(revitIds) || revitIds.length === 0) {
+        console.warn('유효한 RevitID 배열이 제공되지 않았습니다.');
+        return false;
+    }
+    
+    // 기존 하이라이트 제거
+    clearRevitHighlights();
+    
+    let highlightedCount = 0;
+    const tableRows = document.querySelectorAll('#revitTableBody tr');
+    
+    revitIds.forEach(revitId => {
+        tableRows.forEach((row, index) => {
+            const revitIdCell = row.querySelector('.col-revit-id');
+            if (revitIdCell && revitIdCell.textContent.trim() === revitId.toString()) {
+                row.classList.add('revit-row-highlight');
+                highlightedCount++;
+                console.log(`✅ RevitID ${revitId} 행 하이라이트 적용 (인덱스: ${index})`);
+            }
+        });
+    });
+    
+    if (highlightedCount > 0) {
+        // 첫 번째 하이라이트된 행으로 스크롤
+        const firstHighlighted = document.querySelector('.revit-row-highlight');
+        if (firstHighlighted) {
+            setTimeout(() => {
+                firstHighlighted.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center'
+                });
+            }, 100);
+        }
+        
+        // 10초 후 모든 하이라이트 제거
+        setTimeout(() => {
+            clearRevitHighlights();
+        }, 10000);
+        
+        showToast(`${highlightedCount}개 행이 하이라이트되었습니다.`, 'success');
+        return true;
+    } else {
+        console.warn('⚠️ 일치하는 RevitID를 찾을 수 없습니다.');
+        showToast('일치하는 데이터를 찾을 수 없습니다.', 'warning');
+        return false;
+    }
+};
+
+/**
+ * 모든 하이라이트 제거
+ */
+window.clearRevitHighlights = function() {
+    const highlightedRows = document.querySelectorAll('.revit-row-highlight');
+    highlightedRows.forEach(row => {
+        row.classList.remove('revit-row-highlight');
+    });
+    console.log(`🔄 ${highlightedRows.length}개 행의 하이라이트가 제거되었습니다.`);
+};
+
+
 // 페이지 로드 시 드롭다운 초기화
 document.addEventListener('DOMContentLoaded', function() {
     initializeDropdown();
 });
 
-console.log('✅ Revit 벽체 처리 핸들러 로드 완료');
+console.log('✅ Revit 벽체 처리 핸들러 로드 완료 (하이라이트 기능 포함)');

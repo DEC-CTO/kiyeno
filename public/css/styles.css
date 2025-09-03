@@ -1,6 +1,33 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* =============================================================================
+   Revit 선택 하이라이트 애니메이션
+   ============================================================================= */
+.revit-row-highlight {
+    background-color: #fff3cd !important;
+    border: 2px solid #ffc107 !important;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3) !important;
+    transition: all 0.3s ease-in-out !important;
+    animation: highlightPulse 2s ease-in-out 3;
+}
+
+@keyframes highlightPulse {
+    0%, 100% {
+        background-color: #fff3cd;
+        transform: scale(1);
+    }
+    50% {
+        background-color: #ffeaa7;
+        transform: scale(1.02);
+    }
+}
+
+.revit-row-highlight td {
+    border-color: #ffc107 !important;
+    font-weight: 600 !important;
+}
+
+/* =============================================================================
    실명 입력 모달 스타일 - 화면 중앙 고정
    ============================================================================= */
 #roomNameModal {

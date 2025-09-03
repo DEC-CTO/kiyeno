@@ -23,6 +23,9 @@ using static QTO.QTOForm;
 using System.Windows.Forms.VisualStyles;
 using System.Net.WebSockets;
 using System.Threading;
+using Autodesk.Revit.DB.Architecture;
+using Autodesk.Revit.DB.Structure;
+using Newtonsoft.Json.Linq;
 
 namespace QTO
 {
@@ -34,6 +37,9 @@ namespace QTO
         public static string m_behavior = "";
         public static string m_RecieveData = "";
         public static bool isExecuting = false;
+
+        //Revit 객체선택데이터
+        public static List<string> m_data = new List<string>();
 
         // 선택된 벽체 정보를 저장할 리스트
         public static List<WallInfo> selectedWalls = new List<WallInfo>();
@@ -240,7 +246,7 @@ namespace QTO
             {
                 UpdateStatus($"Revit 명령 수신: {command.Action}");
                 string nn = command.Action.ToUpper();
-
+                
                 switch (command.Action.ToUpper())
                 {
                     case "SELECTWALL":
@@ -253,11 +259,27 @@ namespace QTO
                         m_behavior = "SELECT_MULTIPLE_WALLS";
                         m_exEvent.Raise();
                         break;
-
-                    case "SELECTWALLROOM":
+                    case "SELECTWALLSBYROOM":
                         DozeOff();
                         m_behavior = "SELECT_WALLROOM";
                         m_exEvent.Raise();
+                        break;
+
+                    case "SELECTELEMENTS":
+                        m_data.Clear();
+                        DozeOff();
+                        m_behavior = "SELECT_ELEMENT";
+                        m_exEvent.Raise();
+                        if (command.Data != null)
+                        {
+                            var data = command.Data as JObject;
+                            if (data?["ElementIds"] != null)
+                            {
+                                var elementIds = data["ElementIds"].ToObject<List<string>>();
+                                m_data.AddRange(elementIds);
+                            }
+                        }
+                        //m_data.AddRange(command.Data.ElementIds);
                         break;
 
                     case "CREATE_WALL_TYPES":
@@ -479,7 +501,7 @@ namespace QTO
 
         public void DozeOff()
         {
-            if(this.InvokeRequired)
+            if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => DozeOff()));
             }
@@ -488,7 +510,7 @@ namespace QTO
 
         public void WakeUp()
         {
-            if(this.InvokeRequired)
+            if (this.InvokeRequired)
             {
                 this.Invoke(new Action(() => WakeUp()));
             }
@@ -1092,6 +1114,67 @@ namespace QTO
                 MessageBox.Show($"웹 연결 중 오류가 발생했습니다:\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        /// <summary>
+        /// 정보확인 버튼 - Revit에서 선택된 요소의 정보를 웹앱으로 전송
+        /// </summary>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                UpdateStatus("Revit 선택 요소 확인 중...");
+                
+                // 현재 선택된 요소들을 Revit에서 가져와서 웹으로 전송
+                DozeOff();
+                m_behavior = "SEND_SELECTION_TO_WEB";
+                m_exEvent.Raise();
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"선택 요소 확인 실패: {ex.Message}");
+                MessageBox.Show($"선택 요소 확인 중 오류가 발생했습니다:\n{ex.Message}", 
+                              "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 선택된 요소의 ElementID들을 WebSocket으로 웹앱에 전송
+        /// </summary>
+        public async void SendSelectedElementsToWeb(List<string> elementIds)
+        {
+            try
+            {
+                if (webSocket?.State == WebSocketState.Open && elementIds?.Count > 0)
+                {
+                    var message = new
+                    {
+                        type = "revit:elementSelected",
+                        data = new
+                        {
+                            elementIds = elementIds,
+                            timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            action = "elementSelected",
+                            count = elementIds.Count
+                        }
+                    };
+
+                    await SendWebSocketMessage(message);
+                    UpdateStatus($"{elementIds.Count}개 선택 요소 정보를 웹으로 전송했습니다.");
+                }
+                else if (elementIds?.Count == 0)
+                {
+                    UpdateStatus("선택된 요소가 없습니다.");
+                }
+                else
+                {
+                    UpdateStatus("WebSocket 연결이 없어 선택 요소 전송 실패");
+                }
+            }
+            catch (Exception ex)
+            {
+                UpdateStatus($"선택 요소 전송 실패: {ex.Message}");
+            }
+        }
     }
 
     // WebSocket 메시지 클래스들
@@ -1106,6 +1189,7 @@ namespace QTO
         public object Data { get; set; }
         public bool IsSimpleMode { get; set; }
         public string RequestId { get; set; }
+        public string[] ElementIds { get; set; }
     }
     // 벽체 정보 클래스 (간소화된 버전)
     public class WallInfo
@@ -1166,6 +1250,15 @@ namespace QTO
                 {
                     SelectROOMWalls(m_uidoc, m_doc);
                 }
+                else if (QTOForm.m_behavior == "SELECT_ELEMENT")
+                {
+                    SelectWalls(m_uidoc, m_doc);
+                }
+                else if (QTOForm.m_behavior == "SEND_SELECTION_TO_WEB")
+                {
+                    SendCurrentSelectionToWeb(m_uidoc, m_doc);
+                }
+
                 else if (QTOForm.m_behavior == "CREATE_WALL_TYPES")
                 {
                     //CreateWallTypes(m_doc, app);
@@ -1223,7 +1316,7 @@ namespace QTO
                         var wallInfo = ExtractWallInfo(wall, doc);
                         // 단일 벽체 선택 시 실명은 빈 문자열 (웹에서 입력받을 예정)
                         wallInfo.RoomName = "";
-                        
+
                         QTOForm.selectedWalls.Clear();
                         QTOForm.selectedWalls.Add(wallInfo);
 
@@ -1276,13 +1369,8 @@ namespace QTO
             try
             {
                 Selection selection = uidoc.Selection;
-                
                 // 1. 룸 선택
-                Reference roomRef = selection.PickObject(
-                    ObjectType.Element,
-                    new RoomSelectionFilter(),
-                    "룸을 선택하세요"
-                );
+                Reference roomRef = selection.PickObject( ObjectType.Element,new RoomSelectionFilter(), "룸을 선택하세요");
 
                 if (roomRef != null)
                 {
@@ -1290,14 +1378,14 @@ namespace QTO
                     if (selectedRoom != null)
                     {
                         string roomName = selectedRoom.Name;
-                        
+
                         // 2. 룸 경계의 벽체들 수집
                         var roomWalls = GetWallsFromRoom(selectedRoom, doc);
-                        
+
                         if (roomWalls.Count > 0)
                         {
                             QTOForm.selectedWalls.Clear();
-                            
+
                             // 3. 벽체 데이터 생성 (실명 포함)
                             foreach (Wall wall in roomWalls)
                             {
@@ -1305,11 +1393,10 @@ namespace QTO
                                 wallInfo.RoomName = roomName; // 실명 자동 설정
                                 QTOForm.selectedWalls.Add(wallInfo);
                             }
-                            
+
                             // 4. 웹으로 데이터 전송
                             form?.SendWallDataToWeb(QTOForm.selectedWalls);
-                            
-                            TaskDialog.Show("완료", $"룸 '{roomName}'에서 {roomWalls.Count}개의 벽체를 선택했습니다.");
+                            //TaskDialog.Show("완료", $"룸 '{roomName}'에서 {roomWalls.Count}개의 벽체를 선택했습니다.");
                         }
                         else
                         {
@@ -1328,6 +1415,37 @@ namespace QTO
             }
         }
 
+        private void SelectWalls(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                List<ElementId> idx = new List<ElementId>();
+                foreach (string item in m_data)
+                {
+                    int t = Convert.ToInt32(item);
+                    ElementId id = new ElementId(t);
+                    if(id != null)
+                    {
+                        idx.Add(id);
+                    }
+                }
+                if(idx.Count > 0)
+                {
+                    uidoc.Selection.SetElementIds(idx);
+                    uidoc.ShowElements(idx);
+                }
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                // 사용자가 선택 취소
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("오류", $"룸 벽체 선택 중 오류 발생: {ex.Message}");
+            }
+        }
+
+
         private WallInfo ExtractWallInfo(Wall wall, Document doc)
         {
             var wallInfo = new WallInfo
@@ -1344,12 +1462,12 @@ namespace QTO
             {
                 // 높이
                 wallInfo.Height = UnitUtils.ConvertFromInternalUnits(
-                    wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM)?.AsDouble() ?? 0, 
+                    wall.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM)?.AsDouble() ?? 0,
                     UnitTypeId.Meters);
-                
+
                 // 면적
                 wallInfo.Area = UnitUtils.ConvertFromInternalUnits(
-                    wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED)?.AsDouble() ?? 0, 
+                    wall.get_Parameter(BuiltInParameter.HOST_AREA_COMPUTED)?.AsDouble() ?? 0,
                     UnitTypeId.SquareMeters);
 
                 // 길이 계산
@@ -1357,13 +1475,13 @@ namespace QTO
                 if (locationCurve != null)
                 {
                     wallInfo.Length = UnitUtils.ConvertFromInternalUnits(
-                        locationCurve.Curve.Length, 
+                        locationCurve.Curve.Length,
                         UnitTypeId.Meters);
                 }
 
                 // 두께
                 wallInfo.Thickness = UnitUtils.ConvertFromInternalUnits(
-                    wall.Width, 
+                    wall.Width,
                     UnitTypeId.Meters);
             }
             catch (Exception ex)
@@ -1378,10 +1496,57 @@ namespace QTO
         /// <summary>
         /// 룸에서 경계 벽체들을 가져오는 메서드
         /// </summary>
+        /// <summary>
+        /// 현재 Revit에서 선택된 요소들의 ID를 웹앱으로 전송
+        /// </summary>
+        private void SendCurrentSelectionToWeb(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                // 현재 선택된 요소들 가져오기
+                Selection selection = uidoc.Selection;
+                ICollection<ElementId> selectedIds = selection.GetElementIds();
+                
+                if (selectedIds.Count == 0)
+                {
+                    TaskDialog.Show("알림", "선택된 요소가 없습니다.\n먼저 Revit에서 요소를 선택한 후 '정보확인' 버튼을 클릭하세요.");
+                    return;
+                }
+                
+                // ElementId를 문자열 리스트로 변환
+                List<string> elementIdStrings = new List<string>();
+                foreach (ElementId elementId in selectedIds)
+                {
+                    elementIdStrings.Add(elementId.ToString());
+                }
+                
+                // 선택된 요소들의 정보 로깅
+                System.Diagnostics.Debug.WriteLine($"선택된 요소 개수: {elementIdStrings.Count}");
+                foreach (string id in elementIdStrings)
+                {
+                    System.Diagnostics.Debug.WriteLine($"ElementID: {id}");
+                }
+                
+                // 웹앱으로 전송
+                form?.SendSelectedElementsToWeb(elementIdStrings);
+                
+                // 사용자에게 피드백
+                //TaskDialog.Show("완료", $"{elementIdStrings.Count}개의 선택된 요소 정보를 웹앱으로 전송했습니다.");
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("오류", $"선택 요소 전송 중 오류 발생: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"SendCurrentSelectionToWeb 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 룸에서 경계 벽체들을 가져오는 메서드
+        /// </summary>
         private List<Wall> GetWallsFromRoom(Room room, Document doc)
         {
             var walls = new List<Wall>();
-            
+
             try
             {
                 // 룸의 경계 세그먼트들을 가져옴
@@ -1397,7 +1562,7 @@ namespace QTO
                         {
                             // 경계 요소 가져오기
                             Element boundaryElement = doc.GetElement(segment.ElementId);
-                            
+
                             // 벽체인 경우만 리스트에 추가
                             if (boundaryElement is Wall wall)
                             {

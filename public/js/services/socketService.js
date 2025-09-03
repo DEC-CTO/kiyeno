@@ -125,6 +125,27 @@ class SocketService {
             this.emit('revit:wallTypeResult', data);
         });
 
+        // Revit 요소 선택 이벤트 (새로 추가)
+        this.socket.on('revit:elementSelected', (data) => {
+            console.log('🎯 Revit 요소 선택 이벤트 수신:', data);
+            this.emit('revit:elementSelected', data);
+            
+            // 자동으로 테이블 하이라이트 처리
+            if (data && data.elementId) {
+                if (window.highlightRevitRow) {
+                    window.highlightRevitRow(data.elementId);
+                } else {
+                    console.warn('highlightRevitRow 함수를 찾을 수 없습니다.');
+                }
+            } else if (data && data.elementIds && Array.isArray(data.elementIds)) {
+                if (window.highlightMultipleRevitRows) {
+                    window.highlightMultipleRevitRows(data.elementIds);
+                } else {
+                    console.warn('highlightMultipleRevitRows 함수를 찾을 수 없습니다.');
+                }
+            }
+        });
+
         // 일반 오류
         this.socket.on('error', (error) => {
             console.error('❌ Socket 오류:', error);

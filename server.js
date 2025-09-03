@@ -212,6 +212,14 @@ async function startServer() {
               client.emit('revit:info', message.data);
             });
             break;
+
+          case 'revit:elementSelected':
+            // Revit 요소 선택 이벤트를 웹 클라이언트들에게 전달
+            console.log('🎯 Revit 요소 선택 이벤트:', message.data);
+            webClients.forEach((client) => {
+              client.emit('revit:elementSelected', message.data);
+            });
+            break;
         }
       } catch (error) {
         console.error('❌ WebSocket 메시지 처리 오류:', error);
