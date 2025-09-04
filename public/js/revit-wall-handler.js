@@ -126,8 +126,10 @@ window.saveRoomName = function() {
         return;
     }
     
-    if (!pendingWallData) {
-        console.error('저장할 벽체 데이터가 없습니다.');
+    if (!pendingWallData || !Array.isArray(pendingWallData) || pendingWallData.length === 0) {
+        console.error('❌ 저장할 벽체 데이터가 없습니다. pendingWallData:', pendingWallData);
+        showToast('저장할 벽체 데이터가 없습니다.', 'error');
+        closeRoomNameModal();
         return;
     }
     
@@ -150,6 +152,7 @@ window.saveRoomName = function() {
     } catch (error) {
         console.error('❌ 실명 저장 실패:', error);
         showToast('실명 저장 중 오류가 발생했습니다.', 'error');
+        closeRoomNameModal();
     }
 };
 

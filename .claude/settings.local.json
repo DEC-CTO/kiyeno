@@ -51,7 +51,15 @@
       "Read(C:\\Users\\platu\\.claude/**)",
       "Read(C:\\/**)",
       "Read(C:\\/**)",
-      "Read(C:\\/**)"
+      "Read(C:\\/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)"
     ],
     "deny": [],
     "additionalDirectories": [
