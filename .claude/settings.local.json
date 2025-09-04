@@ -59,7 +59,16 @@
       "Read(/C:\\ClaudeProject\\ReReKiyeno\\public/**)",
       "Read(/C:\\ClaudeProject\\ReReKiyeno\\public/**)",
       "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
-      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)"
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)",
+      "Read(/C:\\ClaudeProject\\ReReKiyeno\\public\\js\\modules/**)"
     ],
     "deny": [],
     "additionalDirectories": [

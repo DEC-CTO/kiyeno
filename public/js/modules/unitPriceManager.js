@@ -4065,13 +4065,14 @@ function closeBulkQuantityCalculatorModal() {
 // 7개 자재 전체 수량 계산
 function calculateAllQuantities() {
     
-    // 1. 스터드 계산: 1 ÷ 간격값 × 할증률
+    // 1. 스터드 계산: 1 ÷ 간격값 × 할증률 (소수점 3째자리 반올림, 2자리 표시)
     const studSpacing = parseFloat(document.getElementById('studSpacing')?.value) || 0.4;
     const studPremium = parseFloat(document.getElementById('studPremium')?.value) || 1.05;
     const studQuantity = studSpacing > 0 ? (1 / studSpacing * studPremium) : 0;
+    const studQuantityRounded = Math.round(studQuantity * 1000) / 1000; // 소수점 3째자리 반올림
     const studFormula = `1 ÷ ${studSpacing} × ${studPremium}`;
     document.getElementById('studFormula').textContent = studFormula;
-    document.getElementById('studResult').textContent = studQuantity.toFixed(3);
+    document.getElementById('studResult').textContent = studQuantityRounded.toFixed(2); // 소수점 2자리 표시
     
     // 2. 런너 계산: 일반일 때 0.34×2, 더블일 때 0.34×4
     const runnerType = document.getElementById('runnerType')?.value || 'single';
@@ -4139,7 +4140,7 @@ function calculateAllQuantities() {
     
     
     console.log('📊 6개 자재 계산 완료 (타정총알 통합):', {
-        스터드: `${studQuantity.toFixed(3)} (할증률: ${studPremium})`,
+        스터드: `${studQuantityRounded.toFixed(2)} (할증률: ${studPremium})`,
         런너: `${displayValue} (타입: ${runnerType})`,
         피스: `${pieceQuantity} (간격: @${pieceSpacing})`,
         타정총알: `${nailBulletQuantity.toFixed(0)} (기본값, 간격: @${nailBulletSpacing})`,
