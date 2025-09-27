@@ -9,6 +9,7 @@
 **Kiyeno 벽체 관리 시스템**은 한국 건설업계를 위한 종합적인 벽체 관리 솔루션입니다. Node.js Express 서버를 기반으로 하며, 다음과 같은 핵심 기능을 제공합니다:
 
 ### 🏗️ 주요 기능
+
 - **벽체 타입 관리**: 다양한 벽체 유형별 자재 소요량 계산
 - **Revit 연동**: Autodesk Revit과 양방향 데이터 교환 (WebSocket + HTTP)
 - **자재 데이터베이스**: 55개 경량자재 + 49개 석고보드 기본 데이터 + 사용자 커스터마이징
@@ -18,6 +19,7 @@
 - **디스플레이 시스템**: 4가지 보기 모드 (기본값보기, 타입별보기, 재료별보기, 공종별보기)
 
 ### 🎯 대상 사용자
+
 - 한국 건설업계 실무자
 - 건축 설계사무소
 - 시공사 견적 담당자
@@ -26,6 +28,7 @@
 ## 🛠️ 기술 스택
 
 ### Backend
+
 - **런타임**: Node.js 16.0.0+
 - **프레임워크**: Express.js 4.18.2
 - **WebSocket**: Socket.IO 4.8.1, WS 8.18.3
@@ -33,7 +36,8 @@
 - **유틸리티**: fs-extra 11.1.1, UUID 9.0.0
 - **개발도구**: nodemon 3.0.1
 
-### Frontend  
+### Frontend
+
 - **코어**: Vanilla JavaScript (ES6 모듈)
 - **UI**: Font Awesome 6.4.0
 - **데이터**: IndexedDB (Dexie.js latest)
@@ -42,6 +46,7 @@
 - **스타일**: CSS3 (Grid, Flexbox)
 
 ### Revit 연동
+
 - **프로토콜**: WebSocket (포트 3001)
 - **데이터 형식**: JSON
 - **C# 애드인**: Autodesk Revit API 호환
@@ -51,6 +56,7 @@
 ### 🖥️ 서버 계층 (Backend)
 
 #### 메인 서버 (`server.js`)
+
 - **플랫폼**: Node.js Express
 - **포트**: 3000 (기본값, 환경변수 PORT로 변경 가능)
 - **미들웨어**: CORS, Body Parser, Static File Serving
@@ -58,15 +64,17 @@
 - **로깅**: 타임스탬프 포함 HTTP 요청 로깅
 
 #### API 계층 (`api/`)
+
 ```
 api/
 ├── index.js           # API 라우트 통합 관리 및 문서화
 ├── walls.js           # 벽체 데이터 CRUD API
-├── materials.js       # 자재 데이터 관리 API  
+├── materials.js       # 자재 데이터 관리 API
 └── revit.js          # Revit 연동 API (동기화, 타입매칭, 객체선택)
 ```
 
 #### 서비스 계층 (`services/`)
+
 ```
 services/
 ├── dataService.js     # 파일 기반 데이터 관리 (JSON 저장/로드, 백업)
@@ -78,8 +86,9 @@ services/
 ### 🌐 클라이언트 계층 (Frontend)
 
 #### 핵심 HTML (`public/index.html`)
+
 - **프레임워크**: Vanilla JavaScript (ES6 모듈)
-- **외부 라이브러리**: 
+- **외부 라이브러리**:
   - Font Awesome 6.4.0 (아이콘)
   - SheetJS 0.18.5 (Excel 처리)
   - Dexie.js (IndexedDB)
@@ -88,6 +97,7 @@ services/
 #### JavaScript 모듈 구조 (`public/js/`)
 
 **🎯 진입점 및 핵심**
+
 ```
 ├── main.js                  # ES6 모듈 시스템 진입점, KiyenoApp 클래스
 ├── app-core.js             # 핵심 애플리케이션 로직
@@ -101,6 +111,7 @@ services/
 ```
 
 **📦 모듈 (`modules/`)**
+
 ```
 modules/
 ├── priceDatabase.js       # IndexedDB 기반 가격 데이터베이스
@@ -112,6 +123,7 @@ modules/
 ```
 
 **🔧 서비스 (`services/`)**
+
 ```
 services/
 ├── apiService.js          # REST API 통신
@@ -122,6 +134,7 @@ services/
 ```
 
 **🛠️ 유틸리티 (`utils/`)**
+
 ```
 utils/
 ├── constants.js           # 상수 정의
@@ -130,6 +143,7 @@ utils/
 ```
 
 #### CSS 스타일시트 (`public/css/`)
+
 ```
 css/
 ├── styles.css                 # 메인 스타일시트
@@ -144,29 +158,34 @@ css/
 ## 📊 데이터 시스템 구조
 
 ### 3계층 하이브리드 데이터 관리
+
 현재 시스템은 로컬/오프라인 환경에 최적화된 **3계층 하이브리드 구조**를 사용합니다:
 
 #### 1️⃣ 기본 데이터 계층 (하드코딩)
+
 - **파일**: `priceDatabase.js`
 - **내용**: 55개 경량자재 + 49개 석고보드 기본 데이터
 - **특징**: 브라우저 설치 즉시 사용 가능, 절대 소실되지 않음
-- **카테고리**: 
+- **카테고리**:
   - **경량자재**: STUD_KS, RUNNER_KS, STUD_BS, RUNNER_BS, CH_STUD_J_RUNNER, BEADS, FASTENERS
   - **석고보드**: STANDARD, MOISTURE, FIRE, FIRE_MOISTURE, SOUND, ANTIBACTERIAL, INSULATION
 
 #### 2️⃣ 사용자 데이터 계층 (IndexedDB)
+
 - **저장소**: 브라우저 내장 IndexedDB (Dexie.js)
 - **내용**: 사용자가 추가/수정한 자재 데이터, 벽체 데이터, 일위대가 데이터
 - **특징**: 실시간 저장, 빠른 접근, 브라우저별 독립 관리
 - **위치**: `C:\Users\[사용자]\AppData\Local\Google\Chrome\User Data\Default\IndexedDB\`
 
 #### 3️⃣ 백업/복원 계층 (파일 시스템)
+
 - **기능**: Excel/JSON 파일 내보내기/가져오기
 - **용도**: 데이터 이동성, 백업, 브라우저 간 데이터 전송
 - **지원 형식**: .xlsx (Excel), .json (JSON)
 - **구현**: `revit-wall-handler.js`의 드롭다운 메뉴
 
 ### 🔄 WebSocket 통신 구조
+
 ```
 웹 클라이언트 (Socket.IO)
         ↕
@@ -176,10 +195,12 @@ Revit C# 애드인 (WebSocket, 포트 3001)
 ```
 
 **통신 프로토콜**:
+
 - **웹 ↔ 서버**: Socket.IO (HTTP Long Polling + WebSocket)
 - **서버 ↔ Revit**: 순수 WebSocket (JSON 메시지)
 
 ### 🗂️ 서버 데이터 저장
+
 - **위치**: `data/` 디렉토리
 - **형식**: JSON 파일
 - **백업**: `data/backups/` 자동 백업
@@ -188,9 +209,11 @@ Revit C# 애드인 (WebSocket, 포트 3001)
 ## ⚙️ 핵심 기능 모듈
 
 ### 🏗️ 일위대가 관리 시스템 (`unitPriceManager.js`)
+
 **위치**: `public/js/modules/unitPriceManager.js` (3400+ 라인)
 
 **주요 기능**:
+
 - **세부아이템 생성/편집**: 복잡한 모달 UI with 동적 구성품 관리
 - **6가지 소요량 계산**: 스터드, 런너, 피스, 타정총알, 용접봉, 석고피스
 - **노무비 처리**: 금액칸 입력 + 단가 자동계산 (금액÷수량)
@@ -198,41 +221,52 @@ Revit C# 애드인 (WebSocket, 포트 3001)
 - **Excel 내보내기**: 내역서 Excel 파일 생성
 
 **계산 공식**:
+
 ```javascript
 // 스터드: 1 ÷ 간격값 × 할증률
-stud = 1 / spacing * premiumRate;
+stud = (1 / spacing) * premiumRate;
 
-// 런너: 일반(0.34×2), 더블(0.34×4)  
+// 런너: 일반(0.34×2), 더블(0.34×4)
 runner = 0.34 * (type === '더블' ? 4 : 2);
 
 // 피스: @450=12, @400=1.125×12(버림), @500=12×0.9(버림)
-piece = spacing === 400 ? Math.floor(1.125 * 12) : 
-        spacing === 500 ? Math.floor(12 * 0.9) : 12;
+piece =
+  spacing === 400
+    ? Math.floor(1.125 * 12)
+    : spacing === 500
+    ? Math.floor(12 * 0.9)
+    : 12;
 
 // 석고피스: 복잡한 테이블 계산 (3×6, 4×8 등)
 gypsumPiece = calculateGypsumPiece(width, height);
 ```
 
 ### 🔗 Revit 연동 시스템
+
 **파일들**: `revitService.js`, `revit-wall-handler.js`, `socketService.js`
 
 **기능**:
+
 - **양방향 데이터 동기화**: Revit ↔ 웹앱
 - **객체 선택**: 체크박스 → ElementID 수집 → Revit 선택
 - **타입 매칭**: Revit WallType ↔ 시스템 벽체타입
 - **Excel/JSON 관리**: 드롭다운 메뉴로 데이터 백업/복원
 
 ### 🎨 디스플레이 시스템 (`display-system.js`)
+
 **4가지 보기 모드**:
+
 - **기본값보기**: 전체 내역서 형태
 - **타입별보기**: 벽체 타입별 그룹핑 + 소계
 - **재료별보기**: 자재별 집계 + 발주수량
 - **공종별보기**: 공종별 분류 + 소계
 
 ### 📦 자재 관리 시스템
+
 **구성**: `materialManager.js`, `priceDatabase.js`, `materialService.js`
 
 **기능**:
+
 - **하이브리드 데이터**: 기본 104개 + 사용자 추가
 - **실시간 검색**: 품명, 규격, 카테고리 필터링
 - **가격 관리**: 재료비단가, 노무비단가 별도 관리
@@ -257,6 +291,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 
 ### 디버깅 및 모니터링
 
+- ak
 - 서버 로그는 콘솔에 출력
 - 각 HTTP 요청이 타임스탬프와 함께 로깅
 - WebSocket 연결 상태 실시간 모니터링
@@ -265,11 +300,13 @@ npm run dev        # 개발 모드 (nodemon 사용)
 ## 최근 추가된 주요 기능
 
 ### 1. 일위대가 관리 버튼 추가 ✅
+
 - **위치**: 메인 페이지, 벽체 타입 관리와 Revit 연동 사이
 - **기능**: 일위대가 관리 모달창 열기
 - **구현**: `index.html`에 버튼 추가, `openUnitPriceManagement()` 함수 연결
 
 ### 2. 석고보드 테이블 구조 개선 ✅
+
 - **변경사항**:
   - 18개 컬럼에서 19개 컬럼으로 확장
   - "작업" 컬럼에 실제 데이터 값 표시 (기존 수정/삭제 버튼 대신)
@@ -277,12 +314,14 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **위치**: `app-services.js` 2060라인 ~ showGypsumBoards() 함수
 
 ### 3. 석고보드 필터 기능 개선 ✅
+
 - **필터 대상**: 품목, 품명, 규격 3개 필드만 필터링
 - **초기화 버튼**: 관리 컬럼 아래로 이동 (18번째 위치)
 - **실시간 검색**: 키 입력 시 즉시 필터링 적용
 - **구현**: `filterGypsumBoards()` 및 `clearGypsumFilters()` 함수 완전 재작성
 
 ### 4. Excel/JSON 데이터 관리 기능 ✅
+
 - **위치**: Revit 벽체 데이터 확인 탭
 - **기능**:
   - Excel (.xlsx) 파일 내보내기 (SheetJS 라이브러리 사용)
@@ -292,6 +331,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **구현 파일**: `revit-wall-handler.js`
 
 ### 5. Revit 객체 선택 기능 ✅
+
 - **위치**: 필터 초기화 버튼 옆
 - **기능**:
   - 체크박스로 선택된 벽체들의 ElementID 수집
@@ -301,12 +341,13 @@ npm run dev        # 개발 모드 (nodemon 사용)
   ```
   웹 체크박스 → ElementID 수집 → WebSocket 전송 → C# 애드인 → Revit 선택
   ```
-- **구현 파일**: 
+- **구현 파일**:
   - `revit-wall-handler.js`: 웹 클라이언트
   - `socketService.js`: WebSocket 통신
   - `revitService.js`: 서비스 계층
 
 ### 6. 면적 계산 기능 제거 ✅
+
 - **제거된 기능**:
   - 선택 목록 면적 계산 버튼
   - Revit 면적요약 기능
@@ -314,8 +355,9 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **목적**: 인터페이스 단순화 및 데이터 관리 기능으로 대체
 
 ### 7. 6가지 소요량 일괄 계산 시스템 ✅
+
 - **위치**: 세부아이템 수정 → 구성품 추가 버튼 옆
-- **기능**: 
+- **기능**:
   - 6개 자재 동시 계산 (스터드, 런너, 피스, 타정총알, 용접봉, 석고피스)
   - 개별 할증률 적용 가능
   - 가로형 모달 레이아웃
@@ -330,6 +372,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **구현**: `unitPriceManager.js` 3038-3451라인
 
 ### 8. 노무비 처리 로직 개선 ✅ (2025-01-20 수정)
+
 - **문제**: 자재 선택 시 노무비가 단가칸에 잘못 입력되는 문제
 - **수정 내용**:
   - 노무비 금액이 **금액칸**에 정확히 입력됨
@@ -341,6 +384,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 ## 📡 API 엔드포인트
 
 ### 벽체 관리 API (`/api/walls`)
+
 - `GET /api/walls` - 모든 벽체 조회
 - `GET /api/walls/:id` - 특정 벽체 조회
 - `POST /api/walls` - 새 벽체 생성
@@ -350,6 +394,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - `GET /api/walls/search/:query` - 벽체 검색
 
 ### 자재 관리 API (`/api/materials`)
+
 - `GET /api/materials` - 모든 자재 조회
 - `GET /api/materials/:id` - 특정 자재 조회
 - `GET /api/materials/category/:category` - 카테고리별 자재 조회
@@ -361,6 +406,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - `POST /api/materials/prices/update` - 가격 업데이트
 
 ### Revit 연동 API (`/api/revit`)
+
 - `POST /api/revit/sync` - Revit 데이터 동기화
 - `GET /api/revit/types` - Revit 타입 매핑 조회
 - `POST /api/revit/types` - Revit 타입 매핑 저장
@@ -372,14 +418,17 @@ npm run dev        # 개발 모드 (nodemon 사용)
 ### WebSocket 이벤트
 
 #### 클라이언트 → 서버
+
 - `revit:command`: Revit 명령 전송
 - `revit:checkConnection`: Revit 연결 상태 확인
 
 #### 서버 → 클라이언트
+
 - `revit:connectionStatus`: Revit 연결 상태 응답
 - `revit:response`: Revit 명령 실행 결과
 
 #### Revit 명령 유형
+
 - `selectWall`: 단일 벽체 선택
 - `selectMultipleWalls`: 다중 벽체 선택
 - **`selectElements`**: 지정된 ElementID 배열 객체 선택 (새로 추가)
@@ -460,11 +509,13 @@ npm run dev        # 개발 모드 (nodemon 사용)
 ## 배포 및 운영
 
 ### 개발 환경
+
 - `npm run dev` (nodemon 사용)
 - localhost:3000 (웹 서버)
 - localhost:3001 (Revit WebSocket)
 
 ### 프로덕션 환경 (권장: Render)
+
 - `npm start`
 - 포트 설정: 환경변수 PORT 또는 기본값 3000
 - 환경변수 설정:
@@ -476,6 +527,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - 데이터 파일: data/ 디렉토리에 저장
 
 ### 클라우드 배포 고려사항
+
 - **웹 앱**: 클라우드 플랫폼 (Render, Railway 등)
 - **Revit 애드인**: 항상 로컬 PC에서 실행
 - **통신**: 클라우드 웹앱 ↔ 로컬 Revit 애드인
@@ -484,6 +536,7 @@ npm run dev        # 개발 모드 (nodemon 사용)
 ## 파일 정리 상태
 
 ### 프로젝트 구조 정리 내역
+
 - ✅ 중복 파일 삭제: 루트 `css/`, `js/`, `index.html` 제거
 - ✅ Express 표준 구조 적용: `public/` 폴더만 정적 파일 서빙
 - ✅ 서버 설정 수정: `public/index.html` 사용
@@ -497,41 +550,48 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - ✅ 초기화 버튼 위치 조정 (관리 컬럼 아래)
 
 ### 불필요한 파일
+
 - `QTOForm.cs`: 루트 디렉토리에 있는 C# 파일 (이동 필요)
 - `server.log`, `server.pid`: 런타임 생성 파일 (.gitignore 추가 권장)
 
 ## 데이터 시스템 구조
 
 ### 하이브리드 데이터 관리 시스템
+
 현재 시스템은 로컬/오프라인 환경에 최적화된 **3계층 하이브리드 구조**를 사용합니다:
 
 #### 1계층: 기본 데이터 (하드코딩)
+
 - **파일**: `public/js/modules/priceDatabase.js`
 - **내용**: 55개 경량자재 + 49개 석고보드 기본 데이터
 - **특징**: 브라우저 설치 즉시 사용 가능, 절대 소실되지 않음
-- **카테고리**: 
+- **카테고리**:
   - 경량자재: STUD_KS, RUNNER_KS, STUD_BS, RUNNER_BS, CH_STUD_J_RUNNER, BEADS, FASTENERS
   - 석고보드: STANDARD, MOISTURE, FIRE, FIRE_MOISTURE, SOUND, ANTIBACTERIAL, INSULATION
 
 #### 2계층: 사용자 데이터 (IndexedDB)
+
 - **저장소**: 브라우저 내장 IndexedDB
 - **내용**: 사용자가 추가/수정한 자재 데이터, 벽체 데이터
 - **특징**: 실시간 저장, 빠른 접근, 브라우저별 독립 관리
 - **위치**: `C:\Users\[사용자]\AppData\Local\Google\Chrome\User Data\Default\IndexedDB\`
 
 #### 3계층: 백업/복원 (파일 시스템)
+
 - **기능**: Excel/JSON 파일 내보내기/가져오기
 - **용도**: 데이터 이동성, 백업, 브라우저 간 데이터 전송
 - **지원 형식**: .xlsx (Excel), .json (JSON)
 - **구현**: `revit-wall-handler.js`의 드롭다운 메뉴
 
 ### 데이터 안전성 보장
+
 1. **기본 데이터 항상 보장**: 하드코딩으로 기본 자재 데이터 항상 사용 가능
 2. **사용자 데이터 보호**: IndexedDB + 파일 백업으로 이중 보장
 3. **복구 시스템**: JSON 파일을 통한 완전한 데이터 복원 가능
 4. **오프라인 지원**: 인터넷 연결 없이 모든 기능 완전 동작
 
 ### 배포 및 운영 장점
+
 - ✅ **즉시 사용**: 설치 후 바로 기본 데이터로 작업 가능
 - ✅ **데이터 소실 방지**: 기본 데이터는 절대 사라지지 않음
 - ✅ **사용자 커스터마이징**: 개별 사용자 환경에 맞는 데이터 추가/수정
@@ -539,7 +599,8 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - ✅ **유지보수성**: 기본 데이터는 코드로, 사용자 데이터는 파일로 관리
 
 # important-instruction-reminders
+
 Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
