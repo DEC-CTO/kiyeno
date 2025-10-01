@@ -1723,22 +1723,180 @@ async function editUnitPriceItem(id) {
 
 // 일위대가 아이템 삭제
 async function deleteUnitPriceItem(id) {
+    console.log(`🗑️ 일위대가 삭제 요청: ID=${id}`);
+
     const item = unitPriceItems.find(item => item.id === id);
     if (!item) {
         alert('해당 아이템을 찾을 수 없습니다.');
         return;
     }
-    
+
+    console.log(`📋 삭제할 일위대가: ${item.basic?.itemName || 'Unknown'} (ID: ${id})`);
+
+    // 관련된 벽체 타입 찾기
+    console.log(`🔍 관련 벽체 타입 검색 시작...`);
+    const relatedWallTypes = findWallTypesUsingUnitPrice(id);
+    console.log(`🔍 검색 결과: ${relatedWallTypes.length}개 벽체 타입 발견`);
+
     const itemName = item.basic?.itemName || 'Unknown';
-    if (confirm(`"${itemName}" 일위대가를 삭제하시겠습니까?`)) {
+    let confirmMessage = `"${itemName}" 일위대가를 삭제하시겠습니까?`;
+
+    if (relatedWallTypes.length > 0) {
+        confirmMessage += `\n\n⚠️ 이 일위대가를 사용하는 벽체 타입 ${relatedWallTypes.length}개가 있습니다:`;
+        relatedWallTypes.forEach(wallType => {
+            confirmMessage += `\n- ${wallType.wallType}`;
+        });
+        confirmMessage += `\n\n관련된 벽체 타입들의 일위대가 연결도 함께 제거됩니다.`;
+    }
+
+    if (confirm(confirmMessage)) {
         const success = await unitPriceDB.deleteUnitPrice(id);
         if (success) {
             unitPriceItems = unitPriceItems.filter(item => item.id !== id);
+
+            // 관련된 벽체 타입들의 일위대가 참조 제거
+            if (relatedWallTypes.length > 0) {
+                const removedCount = removeUnitPriceFromWallTypes(id);
+                console.log(`✅ ${relatedWallTypes.length}개 벽체 타입에서 ${removedCount}개 필드의 일위대가 연결 제거됨`);
+
+                // 벽체 타입 관리 모달이 열려있다면 새로고침 시도
+                setTimeout(() => {
+                    if (window.updateRevitWallTable && typeof window.updateRevitWallTable === 'function') {
+                        window.updateRevitWallTable();
+                        console.log('🔄 벽체 타입 테이블 새로고침됨');
+                    } else {
+                        console.log('⚠️ updateRevitWallTable 함수를 찾을 수 없음');
+                    }
+                }, 100);
+            }
+
             await renderUnitPriceItemsList();
             console.log('✅ 일위대가 아이템 삭제됨:', id);
         } else {
             alert('삭제에 실패했습니다.');
         }
+    }
+}
+
+// =============================================================================
+// 벽체 타입 동기화 관련 함수들
+// =============================================================================
+
+// 특정 일위대가를 사용하는 벽체 타입들 찾기
+function findWallTypesUsingUnitPrice(unitPriceId) {
+    const unitPriceKey = `unitPrice_${unitPriceId}`;
+    console.log(`🔑 검색할 키: "${unitPriceKey}"`);
+    const relatedWallTypes = [];
+
+    try {
+        // window.revitWallTypes에서 벽체 타입 데이터 가져오기
+        if (!window.revitWallTypes) {
+            console.log('⚠️ window.revitWallTypes가 없음');
+            return relatedWallTypes;
+        }
+
+        const wallTypes = window.revitWallTypes;
+        if (!Array.isArray(wallTypes)) {
+            console.log('⚠️ revitWallTypes 데이터가 배열이 아님');
+            return relatedWallTypes;
+        }
+
+        console.log(`📊 검사할 벽체 타입 수: ${wallTypes.length}개`);
+
+        // 각 벽체 타입의 모든 필드에서 해당 일위대가 사용 여부 확인
+        wallTypes.forEach((wallType, index) => {
+            console.log(`🔍 벽체타입[${index}]: ${wallType.wallType}`);
+
+            const fields = [
+                'layer3_1', 'layer2_1', 'layer1_1',
+                'column1', 'infill', 'layer1_2', 'layer2_2', 'layer3_2', 'column2',
+                'structure', 'insulation', 'exterior', 'interior', 'etc'
+            ];
+
+            // 각 필드의 값 로깅
+            fields.forEach(field => {
+                if (wallType[field]) {
+                    console.log(`  📝 ${field}: "${wallType[field]}"`);
+                    if (wallType[field] === unitPriceKey) {
+                        console.log(`    ✅ 매치됨!`);
+                    }
+                }
+            });
+
+            const usesUnitPrice = fields.some(field => wallType[field] === unitPriceKey);
+
+            if (usesUnitPrice) {
+                console.log(`🎯 벽체타입 "${wallType.wallType}"에서 일위대가 사용됨`);
+                relatedWallTypes.push({
+                    wallType: wallType.wallType,
+                    elementId: wallType.elementId,
+                    fields: fields.filter(field => wallType[field] === unitPriceKey)
+                });
+            }
+        });
+
+    } catch (error) {
+        console.error('벽체 타입 검색 중 오류:', error);
+    }
+
+    return relatedWallTypes;
+}
+
+// 벽체 타입들에서 특정 일위대가 참조 제거
+function removeUnitPriceFromWallTypes(unitPriceId) {
+    const unitPriceKey = `unitPrice_${unitPriceId}`;
+    console.log(`🔄 일위대가 참조 제거 시작: ${unitPriceKey}`);
+
+    try {
+        // window.revitWallTypes에서 벽체 타입 데이터 가져오기
+        if (!window.revitWallTypes) {
+            console.log('⚠️ window.revitWallTypes가 없음');
+            return 0;
+        }
+
+        const wallTypes = window.revitWallTypes;
+        if (!Array.isArray(wallTypes)) {
+            console.log('⚠️ revitWallTypes 데이터가 배열이 아님');
+            return 0;
+        }
+
+        console.log(`📊 총 ${wallTypes.length}개 벽체 타입 검사 중...`);
+        let updatedCount = 0;
+
+        // 각 벽체 타입에서 해당 일위대가 참조 제거
+        wallTypes.forEach((wallType, index) => {
+            const fields = [
+                'layer3_1', 'layer2_1', 'layer1_1',
+                'column1', 'infill', 'layer1_2', 'layer2_2', 'layer3_2', 'column2',
+                'structure', 'insulation', 'exterior', 'interior', 'etc'
+            ];
+            fields.forEach(field => {
+                if (wallType[field] === unitPriceKey) {
+                    console.log(`🔧 벽체타입[${index}] ${wallType.wallType}의 ${field} 필드에서 제거: ${wallType[field]} → 빈값`);
+                    wallType[field] = ''; // 빈 문자열로 초기화
+                    updatedCount++;
+                }
+            });
+        });
+
+        // 업데이트된 데이터를 저장 (window.revitWallTypes는 이미 참조로 업데이트됨)
+        if (updatedCount > 0) {
+            // revitTypeMatching.js의 저장 함수 호출
+            if (typeof window.saveRevitWallTypes === 'function') {
+                window.saveRevitWallTypes();
+                console.log(`✅ 벽체 타입 데이터 저장 완료: ${updatedCount}개 필드 수정됨`);
+            } else {
+                console.log('⚠️ saveRevitWallTypes 함수를 찾을 수 없음');
+            }
+        } else {
+            console.log('ℹ️ 수정할 필드가 없음');
+        }
+
+        return updatedCount;
+
+    } catch (error) {
+        console.error('❌ 벽체 타입 업데이트 중 오류:', error);
+        return 0;
     }
 }
 
