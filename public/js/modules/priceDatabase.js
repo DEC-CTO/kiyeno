@@ -98,28 +98,44 @@ class PriceDatabase extends EventEmitter {
 
         // materials 테이블이 없으면 생성 (경량자재 + 석고보드 통합 저장)
         if (!db.objectStoreNames.contains('materials')) {
-          const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
+          const materialsStore = db.createObjectStore('materials', {
+            keyPath: 'id',
+          });
           materialsStore.createIndex('name', 'name', { unique: false });
           materialsStore.createIndex('category', 'category', { unique: false });
           console.log('✅ materials 테이블 생성 완료 (priceDatabase.js)');
         }
-        
+
         // unitPrices 테이블이 없으면 생성 (일위대가용)
         if (!db.objectStoreNames.contains('unitPrices')) {
-          const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
-          unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
-          unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+          const unitPricesStore = db.createObjectStore('unitPrices', {
+            keyPath: 'id',
+          });
+          unitPricesStore.createIndex('itemName', 'basic.itemName', {
+            unique: false,
+          });
+          unitPricesStore.createIndex('createdAt', 'createdAt', {
+            unique: false,
+          });
           console.log('✅ unitPrices 테이블 생성 완료 (priceDatabase.js)');
         }
 
         // wallTypeMasters 테이블이 없으면 생성 (벽체 타입 마스터용)
         if (!db.objectStoreNames.contains('wallTypeMasters')) {
-          const wallTypeStore = db.createObjectStore('wallTypeMasters', { keyPath: 'id' });
+          const wallTypeStore = db.createObjectStore('wallTypeMasters', {
+            keyPath: 'id',
+          });
           wallTypeStore.createIndex('name', 'name', { unique: false });
           wallTypeStore.createIndex('category', 'category', { unique: false });
-          wallTypeStore.createIndex('thickness', 'thickness', { unique: false });
-          wallTypeStore.createIndex('createdAt', 'createdAt', { unique: false });
-          wallTypeStore.createIndex('isTemplate', 'isTemplate', { unique: false });
+          wallTypeStore.createIndex('thickness', 'thickness', {
+            unique: false,
+          });
+          wallTypeStore.createIndex('createdAt', 'createdAt', {
+            unique: false,
+          });
+          wallTypeStore.createIndex('isTemplate', 'isTemplate', {
+            unique: false,
+          });
           console.log('✅ wallTypeMasters 테이블 생성 완료 (priceDatabase.js)');
         }
       };
@@ -493,7 +509,6 @@ class PriceDatabase extends EventEmitter {
 
   // 경량 자재 조회 (기존 코드 호환성)
   getLightweightComponents() {
-    // 기존 55개 경량 자재 데이터 사용
     const categories = {
       STUD_KS: { name: 'STUD - KS형', displayOrder: 1 },
       RUNNER_KS: { name: 'RUNNER - KS형', displayOrder: 2 },
@@ -516,16 +531,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*60*45',
           unit: 'M',
           price: 1160,
-          laborCost: 0,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -540,16 +553,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*60*45',
           unit: 'M',
           price: 1240,
-          laborCost: 0,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -564,16 +575,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*60*45',
           unit: 'M',
           price: 1280,
-          laborCost: 0,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -588,16 +597,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*70*45',
           unit: 'M',
           price: 1320,
-          laborCost: 0,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -612,16 +619,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*75*45',
           unit: 'M',
           price: 1350,
-          laborCost: 0,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -636,16 +641,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*80*45',
           unit: 'M',
           price: 1390,
-          laborCost: 0,
+          laborCost: 4225,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -660,16 +663,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*90*45',
           unit: 'M',
           price: 1480,
-          laborCost: 0,
+          laborCost: 4225,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -684,16 +685,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*100*45',
           unit: 'M',
           price: 1550,
-          laborCost: 0,
+          laborCost: 4225,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -708,16 +707,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*110*45',
           unit: 'M',
           price: 1630,
-          laborCost: 0,
+          laborCost: 4929,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -732,16 +729,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*120*45',
           unit: 'M',
           price: 1710,
-          laborCost: 0,
+          laborCost: 4929,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -756,16 +751,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*125*45',
           unit: 'M',
           price: 1740,
-          laborCost: 0,
+          laborCost: 4929,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -780,16 +773,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*130*45',
           unit: 'M',
           price: 1790,
-          laborCost: 0,
+          laborCost: 5915,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -804,16 +795,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*140*45',
           unit: 'M',
           price: 1860,
-          laborCost: 0,
+          laborCost: 5915,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -828,16 +817,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*150*45',
           unit: 'M',
           price: 1950,
-          laborCost: 0,
+          laborCost: 5915,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -852,16 +839,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*160*45',
           unit: 'M',
           price: 2020,
-          laborCost: 0,
+          laborCost: 7393,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -876,16 +861,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*200*45',
           unit: 'M',
           price: 2390,
-          laborCost: 0,
+          laborCost: 7393,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -895,28 +878,91 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'ST017',
           category: 'STUD_KS',
-          name: '스터드 펀칭비',
-          spec: '',
-          size: '',
-          unit: 'EA',
-          price: 50,
-          laborCost: 0,
+          name: 'CH-STUD 75형',
+          spec: '75형',
+          size: '0.8T*75*35',
+          unit: 'M',
+          price: 1740,
+          laborCost: 3696,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
           work: '',
         },
-
+        {
+          id: 'ST018',
+          category: 'STUD_KS',
+          name: 'CH-STUD 102형',
+          spec: '102형',
+          size: '0.8T*102*35',
+          unit: 'M',
+          price: 1960,
+          laborCost: 4225,
+          laborProductivity: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [{ type: '조공', cost: 0 }],
+            productivity: 0,
+            compensation: 0,
+          },
+          workType1: '경량',
+          workType2: '경량',
+          location: '벽체',
+          work: '',
+        },
+        {
+          id: 'ST019',
+          category: 'STUD_KS',
+          name: 'CH-STUD 127형',
+          spec: '127형',
+          size: '0.8T*127*35',
+          unit: 'M',
+          price: 2160,
+          laborCost: 4929,
+          laborProductivity: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [{ type: '조공', cost: 0 }],
+            productivity: 0,
+            compensation: 0,
+          },
+          workType1: '경량',
+          workType2: '경량',
+          location: '벽체',
+          work: '',
+        },
+        {
+          id: 'ST020',
+          category: 'STUD_KS',
+          name: 'CH-STUD 152형',
+          spec: '152형',
+          size: '0.8T*152*35',
+          unit: 'M',
+          price: 2350,
+          laborCost: 4929,
+          laborProductivity: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [{ type: '조공', cost: 0 }],
+            productivity: 0,
+            compensation: 0,
+          },
+          workType1: '경량',
+          workType2: '경량',
+          location: '벽체',
+          work: '',
+        },
         // RUNNER - KS형
         {
           id: 'RN001',
@@ -926,16 +972,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*52*40',
           unit: 'M',
           price: 990,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -950,16 +994,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*62*40',
           unit: 'M',
           price: 1070,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -974,16 +1016,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*67*40',
           unit: 'M',
           price: 1110,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -998,16 +1038,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*72*40',
           unit: 'M',
           price: 1150,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1022,16 +1060,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*77*40',
           unit: 'M',
           price: 1190,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1046,16 +1082,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*82*40',
           unit: 'M',
           price: 1220,
-          laborCost: 0,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1070,16 +1104,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*92*40',
           unit: 'M',
           price: 1300,
-          laborCost: 0,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1094,16 +1126,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*102*40',
           unit: 'M',
           price: 1380,
-          laborCost: 0,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1118,16 +1148,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*112*40',
           unit: 'M',
           price: 1460,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1142,16 +1170,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*122*40',
           unit: 'M',
           price: 1530,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1166,16 +1192,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*127*40',
           unit: 'M',
           price: 1570,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1190,16 +1214,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*132*40',
           unit: 'M',
           price: 1610,
-          laborCost: 0,
+          laborCost: 955,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1214,16 +1236,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*142*40',
           unit: 'M',
           price: 1700,
-          laborCost: 0,
+          laborCost: 955,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1238,16 +1258,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*152*40',
           unit: 'M',
           price: 1770,
-          laborCost: 0,
+          laborCost: 955,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1262,16 +1280,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*162*40',
           unit: 'M',
           price: 1840,
-          laborCost: 0,
+          laborCost: 1194,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1286,42 +1302,14 @@ class PriceDatabase extends EventEmitter {
           size: '0.8T*202*40',
           unit: 'M',
           price: 2350,
-          laborCost: 0,
+          laborCost: 1194,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-
-        // STUD - BS형
-        {
-          id: 'SB001',
-          category: 'STUD_BS',
-          name: '메탈 스터드 50형 (BS)',
-          spec: '50형',
-          size: '0.65T*50*45',
-          unit: 'M',
-          price: 990,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1329,339 +1317,21 @@ class PriceDatabase extends EventEmitter {
           work: '',
         },
         {
-          id: 'SB002',
-          category: 'STUD_BS',
-          name: '메탈 스터드 65형 (BS)',
-          spec: '65형',
-          size: '0.65T*65*45',
-          unit: 'M',
-          price: 1080,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'SB003',
-          category: 'STUD_BS',
-          name: '메탈 스터드 32형',
-          spec: '32형',
-          size: '0.65T*32*32',
-          unit: 'M',
-          price: 740,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'SB004',
-          category: 'STUD_BS',
-          name: '메탈 스터드 42형',
-          spec: '42형',
-          size: '0.65T*42*32',
-          unit: 'M',
-          price: 800,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'SB005',
-          category: 'STUD_BS',
-          name: '메탈 스터드 64형',
-          spec: '64형',
-          size: '0.65T*64*32',
-          unit: 'M',
-          price: 1020,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-
-        // RUNNER - BS형
-        {
-          id: 'RB001',
-          category: 'RUNNER_BS',
-          name: '메탈 런너 50형 (BS)',
-          spec: '50형',
-          size: '0.65T*52*40',
-          unit: 'M',
-          price: 840,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'RB002',
-          category: 'RUNNER_BS',
-          name: '메탈 런너 65형 (BS)',
-          spec: '65형',
-          size: '0.65T*67*40',
-          unit: 'M',
-          price: 940,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'RB003',
-          category: 'RUNNER_BS',
-          name: '메탈 런너 32형',
-          spec: '32형',
-          size: '0.65T*32*30',
-          unit: 'M',
-          price: 660,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'RB004',
-          category: 'RUNNER_BS',
-          name: '메탈 런너 42형',
-          spec: '42형',
-          size: '0.65T*42*30',
-          unit: 'M',
-          price: 730,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'RB005',
-          category: 'RUNNER_BS',
-          name: '메탈 런너 64형',
-          spec: '64형',
-          size: '0.65T*64*30',
-          unit: 'M',
-          price: 890,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-
-        // CH-STUD / J런너
-        {
-          id: 'CH001',
-          category: 'CH_STUD_J_RUNNER',
-          name: 'CH-STUD 75형',
-          spec: '75형',
-          size: '0.8*75*35',
-          unit: 'M',
-          price: 1740,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'CH002',
-          category: 'CH_STUD_J_RUNNER',
-          name: 'CH-STUD 102형',
-          spec: '102형',
-          size: '0.8*102*35',
-          unit: 'M',
-          price: 1960,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'CH003',
-          category: 'CH_STUD_J_RUNNER',
-          name: 'CH-STUD 127형',
-          spec: '127형',
-          size: '0.8*127*35',
-          unit: 'M',
-          price: 2160,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'CH004',
-          category: 'CH_STUD_J_RUNNER',
-          name: 'CH-STUD 152형',
-          spec: '152형',
-          size: '0.8*152*35',
-          unit: 'M',
-          price: 2350,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'JR001',
-          category: 'CH_STUD_J_RUNNER',
+          id: 'RN017',
+          category: 'RUNNER_KS',
           name: 'J-RUNNER 75형',
           spec: '75형',
-          size: '0.8*77*40',
+          size: '0.8T*77*40',
           unit: 'M',
           price: 1100,
-          laborCost: 0,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1669,23 +1339,21 @@ class PriceDatabase extends EventEmitter {
           work: '',
         },
         {
-          id: 'JR002',
-          category: 'CH_STUD_J_RUNNER',
+          id: 'RN018',
+          category: 'RUNNER_KS',
           name: 'J-RUNNER 102형',
           spec: '102형',
-          size: '0.8*104*40',
+          size: '0.8T*104*40',
           unit: 'M',
           price: 1310,
-          laborCost: 0,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1693,23 +1361,21 @@ class PriceDatabase extends EventEmitter {
           work: '',
         },
         {
-          id: 'JR003',
-          category: 'CH_STUD_J_RUNNER',
+          id: 'RN019',
+          category: 'RUNNER_KS',
           name: 'J-RUNNER 127형',
           spec: '127형',
-          size: '0.8*129*40',
+          size: '0.8T*129*40',
           unit: 'M',
           price: 1510,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1717,129 +1383,27 @@ class PriceDatabase extends EventEmitter {
           work: '',
         },
         {
-          id: 'JR004',
-          category: 'CH_STUD_J_RUNNER',
+          id: 'RN020',
+          category: 'RUNNER_KS',
           name: 'J-RUNNER 152형',
           spec: '152형',
-          size: '0.8*154*40',
+          size: '0.8T*154*40',
           unit: 'M',
           price: 1700,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
           location: '벽체',
           work: '',
         },
-
-        // 비드류
-        {
-          id: 'BD001',
-          category: 'BEADS',
-          name: '캐싱비드 9.5mm',
-          spec: '9.5mm',
-          size: '0.5*10*25',
-          unit: 'M',
-          price: 320,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'BD002',
-          category: 'BEADS',
-          name: '캐싱비드 12.5mm',
-          spec: '12.5mm',
-          size: '0.5*13*25',
-          unit: 'M',
-          price: 330,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'BD003',
-          category: 'BEADS',
-          name: '코너비드 32mm',
-          spec: '32mm',
-          size: '32mm',
-          unit: 'M',
-          price: 440,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-        {
-          id: 'BD004',
-          category: 'BEADS',
-          name: '코너비드 40mm',
-          spec: '40mm',
-          size: '40mm',
-          unit: 'M',
-          price: 510,
-          laborCost: 0,
-          laborProductivity: 0,
-          laborCompensation: 0,
-          baseLabor: 0,
-          laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
-            productivity: 0,
-            compensation: 0
-          },
-          workType1: '경량',
-          workType2: '경량',
-          location: '벽체',
-          work: '',
-        },
-
-        // 체결부품 (123.txt에서 추가)
         {
           id: 'FT001',
           category: 'FASTENERS',
@@ -1848,16 +1412,14 @@ class PriceDatabase extends EventEmitter {
           size: '3*21',
           unit: 'EA',
           price: 8,
-          laborCost: 0,
+          laborCost: 739,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1868,20 +1430,18 @@ class PriceDatabase extends EventEmitter {
           id: 'FT002',
           category: 'FASTENERS',
           name: '메거진피스 3*21 (양날)',
-          spec: '석고취부용',
+          spec: '구조틀용(80형-100형)',
           size: '3*21',
           unit: 'EA',
           price: 8,
-          laborCost: 0,
+          laborCost: 845,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1891,21 +1451,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT003',
           category: 'FASTENERS',
-          name: '메거진피스 6*25 (양날)',
-          spec: '구조틀용',
-          size: '6*25',
+          name: '메거진피스 3*21 (양날)',
+          spec: '구조틀용(110형-125형)',
+          size: '3*21',
           unit: 'EA',
-          price: 10,
-          laborCost: 0,
+          price: 8,
+          laborCost: 985,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1915,21 +1473,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT004',
           category: 'FASTENERS',
-          name: '메거진피스 6*32 (양날)',
-          spec: '구조틀용',
-          size: '6*32',
+          name: '메거진피스 3*21 (양날)',
+          spec: '구조틀용(130형-150형)',
+          size: '3*21',
           unit: 'EA',
-          price: 12,
-          laborCost: 0,
+          price: 8,
+          laborCost: 1183,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1939,21 +1495,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT005',
           category: 'FASTENERS',
-          name: '메거진피스 6*38 (양날)',
-          spec: '구조틀용',
-          size: '6*38',
+          name: '메거진피스 3*21 (양날)',
+          spec: '구조틀용(130형-150형)',
+          size: '3*21',
           unit: 'EA',
-          price: 14,
-          laborCost: 0,
+          price: 8,
+          laborCost: 1478,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1963,21 +1517,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT006',
           category: 'FASTENERS',
-          name: '메거진피스 6*41 (양날)',
-          spec: '구조틀용',
-          size: '6*41',
+          name: '메거진피스 3*21 (양날)',
+          spec: 'CH구조틀용(50형-75형)',
+          size: '3*21',
           unit: 'EA',
-          price: 16,
-          laborCost: 0,
+          price: 8,
+          laborCost: 739,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -1987,21 +1539,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT007',
           category: 'FASTENERS',
-          name: '메거진피스 6*50 (양날)',
-          spec: '구조틀용',
-          size: '6*50',
+          name: '메거진피스 3*21 (양날)',
+          spec: 'CH구조틀용(80형-102형)',
+          size: '3*21',
           unit: 'EA',
-          price: 20,
-          laborCost: 0,
+          price: 8,
+          laborCost: 845,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2011,21 +1561,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT008',
           category: 'FASTENERS',
-          name: '메거진피스 6*57 (양날)',
-          spec: '구조틀용',
-          size: '6*57',
+          name: '메거진피스 3*21 (양날)',
+          spec: 'CH구조틀용(100형-155형)',
+          size: '3*21',
           unit: 'EA',
-          price: 25,
-          laborCost: 0,
+          price: 8,
+          laborCost: 985,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2035,45 +1583,349 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT009',
           category: 'FASTENERS',
-          name: '메거진피스 6*25 (외날)',
-          spec: '구조틀용',
-          size: '6*25',
+          name: '메거진피스 3*21 (양날)',
+          spec: '석고취부용',
+          size: '3*21',
           unit: 'EA',
           price: 8,
-          laborCost: 0,
+          laborCost: 228,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
-          workType1: '경량',
+          workType1: '건자재',
           workType2: '경량',
           location: '벽체',
           work: '',
         },
+        // {
+        //   id: 'FT003',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*25 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*25',
+        //   unit: 'EA',
+        //   price: 10,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT004',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*32 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*32',
+        //   unit: 'EA',
+        //   price: 12,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT005',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*38 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*38',
+        //   unit: 'EA',
+        //   price: 14,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT006',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*41 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*41',
+        //   unit: 'EA',
+        //   price: 16,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT007',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*50 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*50',
+        //   unit: 'EA',
+        //   price: 20,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT008',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*57 (양날)',
+        //   spec: '구조틀용',
+        //   size: '6*57',
+        //   unit: 'EA',
+        //   price: 25,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT009',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*25 (외날)',
+        //   spec: '구조틀용',
+        //   size: '6*25',
+        //   unit: 'EA',
+        //   price: 8,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT010',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*32 (외날)',
+        //   spec: '구조틀용',
+        //   size: '6*32',
+        //   unit: 'EA',
+        //   price: 10,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT011',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*38 (외날)',
+        //   spec: '구조틀용',
+        //   size: '6*38',
+        //   unit: 'EA',
+        //   price: 13,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT012',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 6*25 (외날, 코팅)',
+        //   spec: '구조틀용',
+        //   size: '6*25',
+        //   unit: 'EA',
+        //   price: 10,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT013',
+        //   category: 'FASTENERS',
+        //   name: '메거진피스 3*21 (외날, 코팅)',
+        //   spec: '구조틀용',
+        //   size: '3*21',
+        //   unit: 'EA',
+        //   price: 10,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT010',
+        //   category: 'FASTENERS',
+        //   name: '타정총알',
+        //   spec: '구조틀용(50형-75형)',
+        //   size: 'DN22',
+        //   unit: 'EA',
+        //   price: 28,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT015',
+        //   category: 'FASTENERS',
+        //   name: '타정총알',
+        //   spec: '구조틀용',
+        //   size: 'DN27',
+        //   unit: 'EA',
+        //   price: 28,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
+        // {
+        //   id: 'FT016',
+        //   category: 'FASTENERS',
+        //   name: '타정총알',
+        //   spec: '구조틀용',
+        //   size: 'DN32',
+        //   unit: 'EA',
+        //   price: 30,
+        //   laborCost: 0,
+        //   laborProductivity: 0,
+        //   laborCompensation: 0,
+        //   baseLabor: 0,
+        //   laborSettings: {
+        //     workers: [{ type: '조공', cost: 0 }],
+        //     productivity: 0,
+        //     compensation: 0,
+        //   },
+        //   workType1: '경량',
+        //   workType2: '경량',
+        //   location: '벽체',
+        //   work: '',
+        // },
         {
           id: 'FT010',
           category: 'FASTENERS',
-          name: '메거진피스 6*32 (외날)',
-          spec: '구조틀용',
-          size: '6*32',
+          name: '타정총알',
+          spec: '구조틀용(50형-75형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 10,
-          laborCost: 0,
+          price: 35,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2083,21 +1935,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT011',
           category: 'FASTENERS',
-          name: '메거진피스 6*38 (외날)',
-          spec: '구조틀용',
-          size: '6*38',
+          name: '타정총알',
+          spec: '구조틀용(80형-100형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 13,
-          laborCost: 0,
+          price: 35,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2107,21 +1957,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT012',
           category: 'FASTENERS',
-          name: '메거진피스 6*25 (외날, 코팅)',
-          spec: '구조틀용',
-          size: '6*25',
+          name: '타정총알',
+          spec: '구조틀용(110형-125형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 10,
-          laborCost: 0,
+          price: 35,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2131,21 +1979,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT013',
           category: 'FASTENERS',
-          name: '메거진피스 3*21 (외날, 코팅)',
-          spec: '구조틀용',
-          size: '3*21',
+          name: '타정총알',
+          spec: '구조틀용(130형-150형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 10,
-          laborCost: 0,
+          price: 35,
+          laborCost: 955,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2156,20 +2002,18 @@ class PriceDatabase extends EventEmitter {
           id: 'FT014',
           category: 'FASTENERS',
           name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN22',
+          spec: '구조틀용(160형-200형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 28,
-          laborCost: 0,
+          price: 35,
+          laborCost: 1194,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2180,20 +2024,18 @@ class PriceDatabase extends EventEmitter {
           id: 'FT015',
           category: 'FASTENERS',
           name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN27',
+          spec: 'CH구조틀용(50형-75형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 28,
-          laborCost: 0,
+          price: 35,
+          laborCost: 597,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2204,20 +2046,18 @@ class PriceDatabase extends EventEmitter {
           id: 'FT016',
           category: 'FASTENERS',
           name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN32',
+          spec: 'CH구조틀용(80형-102형)',
+          size: 'DN37',
           unit: 'EA',
-          price: 30,
-          laborCost: 0,
+          price: 35,
+          laborCost: 682,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2228,20 +2068,18 @@ class PriceDatabase extends EventEmitter {
           id: 'FT017',
           category: 'FASTENERS',
           name: '타정총알',
-          spec: '구조틀용(50형-75형)',
+          spec: 'CH구조틀용(100형-155형)',
           size: 'DN37',
           unit: 'EA',
           price: 35,
-          laborCost: 0,
+          laborCost: 796,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2251,21 +2089,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT018',
           category: 'FASTENERS',
-          name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN42',
-          unit: 'EA',
-          price: 38,
-          laborCost: 0,
+          name: '용접봉',
+          spec: '구조틀용(50형-75형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 56,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2275,21 +2111,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT019',
           category: 'FASTENERS',
-          name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN47',
-          unit: 'EA',
-          price: 43,
-          laborCost: 0,
+          name: '용접봉',
+          spec: '구조틀용(80형-100형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 65,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2299,21 +2133,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT020',
           category: 'FASTENERS',
-          name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN52',
-          unit: 'EA',
-          price: 46,
-          laborCost: 0,
+          name: '용접봉',
+          spec: '구조틀용(110형-125형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 75,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2323,21 +2155,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT021',
           category: 'FASTENERS',
-          name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN62',
-          unit: 'EA',
-          price: 58,
-          laborCost: 0,
+          name: '용접봉',
+          spec: '구조틀용(130형-150형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 91,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2347,21 +2177,19 @@ class PriceDatabase extends EventEmitter {
         {
           id: 'FT022',
           category: 'FASTENERS',
-          name: '타정총알',
-          spec: '구조틀용',
-          size: 'DN72',
-          unit: 'EA',
-          price: 64,
-          laborCost: 0,
+          name: '용접봉',
+          spec: '구조틀용(160형-200형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 113,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2372,20 +2200,62 @@ class PriceDatabase extends EventEmitter {
           id: 'FT023',
           category: 'FASTENERS',
           name: '용접봉',
-          spec: '구조틀용(50형-75형)',
+          spec: 'CH구조틀용(50형-75형)',
           size: '',
           unit: 'KG',
           price: 3000,
-          laborCost: 0,
+          laborCost: 56,
           laborProductivity: 0,
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
+          },
+          workType1: '경량',
+          workType2: '경량',
+          location: '벽체',
+          work: '',
+        },
+        {
+          id: 'FT024',
+          category: 'FASTENERS',
+          name: '용접봉',
+          spec: 'CH구조틀용(80형-102형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 65,
+          laborProductivity: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [{ type: '조공', cost: 0 }],
+            productivity: 0,
+            compensation: 0,
+          },
+          workType1: '경량',
+          workType2: '경량',
+          location: '벽체',
+          work: '',
+        },
+        {
+          id: 'FT025',
+          category: 'FASTENERS',
+          name: '용접봉',
+          spec: 'CH구조틀용(100형-155형)',
+          size: '',
+          unit: 'KG',
+          price: 3000,
+          laborCost: 75,
+          laborProductivity: 0,
+          laborCompensation: 0,
+          baseLabor: 0,
+          laborSettings: {
+            workers: [{ type: '조공', cost: 0 }],
+            productivity: 0,
+            compensation: 0,
           },
           workType1: '경량',
           workType2: '경량',
@@ -2451,11 +2321,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2480,11 +2348,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2509,11 +2375,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2538,11 +2402,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2567,11 +2429,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2595,11 +2455,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2624,11 +2482,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2653,11 +2509,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2682,11 +2536,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2711,11 +2563,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2742,11 +2592,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2771,11 +2619,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2800,11 +2646,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2829,11 +2673,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2858,11 +2700,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2887,11 +2727,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2916,11 +2754,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2945,11 +2781,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -2976,11 +2810,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3005,11 +2837,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3034,11 +2864,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3063,11 +2891,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3092,11 +2918,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3121,11 +2945,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3150,11 +2972,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3179,11 +2999,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3208,11 +3026,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3237,11 +3053,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3268,11 +3082,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3297,11 +3109,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3326,11 +3136,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3355,11 +3163,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3384,11 +3190,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3413,11 +3217,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3442,11 +3244,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3471,11 +3271,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3500,11 +3298,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3531,11 +3327,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3560,11 +3354,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3589,11 +3381,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3618,11 +3408,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3647,11 +3435,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3676,11 +3462,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3707,11 +3491,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3736,11 +3518,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3765,11 +3545,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3794,11 +3572,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3825,11 +3601,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3855,11 +3629,9 @@ class PriceDatabase extends EventEmitter {
           laborCompensation: 0,
           baseLabor: 0,
           laborSettings: {
-            workers: [
-              {type: '조공', cost: 0}
-            ],
+            workers: [{ type: '조공', cost: 0 }],
             productivity: 0,
-            compensation: 0
+            compensation: 0,
           },
           workType1: '건자재',
           workType2: '경량',
@@ -3937,16 +3709,14 @@ class PriceDatabase extends EventEmitter {
         laborCompensation: 0,
         baseLabor: 0,
         laborSettings: {
-          workers: [
-            {type: '조공', cost: 0}
-          ],
+          workers: [{ type: '조공', cost: 0 }],
           productivity: 0,
-          compensation: 0
+          compensation: 0,
         },
         workType1: '경량',
         workType2: '경량',
         location: '벽체',
-        work: ''
+        work: '',
       };
 
       // 메모리 내 데이터에 추가
@@ -4129,11 +3899,9 @@ class PriceDatabase extends EventEmitter {
         laborCompensation: 0,
         baseLabor: 0,
         laborSettings: {
-          workers: [
-            {type: '조공', cost: 0}
-          ],
+          workers: [{ type: '조공', cost: 0 }],
           productivity: 0,
-          compensation: 0
+          compensation: 0,
         },
         workType1: '건자재',
         workType2: '경량',
@@ -4365,7 +4133,10 @@ class PriceDatabase extends EventEmitter {
 
     try {
       // 1. localStorage 백업 저장 (기존 방식)
-      localStorage.setItem('kiyeno_material_state', JSON.stringify(currentState));
+      localStorage.setItem(
+        'kiyeno_material_state',
+        JSON.stringify(currentState)
+      );
 
       // 2. IndexedDB 저장 (새로 추가)
       await this.saveToIndexedDB(currentState);
@@ -4374,7 +4145,9 @@ class PriceDatabase extends EventEmitter {
       console.log('📡 자재 데이터 저장 완료 이벤트 발생...');
       this.triggerMaterialDataUpdateEvent();
 
-      console.log('✅ 현재 상태 저장 완료 (localStorage + IndexedDB + 이벤트 발생)');
+      console.log(
+        '✅ 현재 상태 저장 완료 (localStorage + IndexedDB + 이벤트 발생)'
+      );
       return currentState;
     } catch (error) {
       console.error('❌ 상태 저장 실패:', error);
@@ -4387,11 +4160,11 @@ class PriceDatabase extends EventEmitter {
   async saveToIndexedDB(currentState) {
     console.log('📦 IndexedDB v2 저장 시작...');
     let savedCount = 0;
-    
+
     try {
       // v2 데이터베이스에 직접 연결
       const db = await this.openDatabaseV2();
-      
+
       // 저장 전 캐시 무효화 (자재 선택에서 최신 데이터 반영을 위해)
       console.log('🔄 저장 전 캐시 무효화...');
       this.lightweightItemsCache = null;
@@ -4400,15 +4173,20 @@ class PriceDatabase extends EventEmitter {
       // 단일 트랜잭션으로 모든 데이터 저장
       const transaction = db.transaction(['materials'], 'readwrite');
       const store = transaction.objectStore('materials');
-      
+
       // 기존 데이터 삭제
       await store.clear();
       console.log('🗑️ 기존 자재 데이터 삭제 완료');
 
       // 경량자재 저장
-      if (currentState.lightweightComponents && currentState.lightweightComponents.length > 0) {
-        console.log(`📦 경량자재 ${currentState.lightweightComponents.length}개 저장 중...`);
-        
+      if (
+        currentState.lightweightComponents &&
+        currentState.lightweightComponents.length > 0
+      ) {
+        console.log(
+          `📦 경량자재 ${currentState.lightweightComponents.length}개 저장 중...`
+        );
+
         for (const material of currentState.lightweightComponents) {
           try {
             // v2 호환 형식으로 데이터 변환 - 테이블에서 실제 사용하는 필드만 저장
@@ -4428,20 +4206,19 @@ class PriceDatabase extends EventEmitter {
               location: material.location || '',
               work: material.work || '',
               note: material.note || '',
-              
+
               // 일위대가 관리 호환성 필드 (2개)
               재료비단가: material.price,
               노무비단가: material.laborCost || 0,
-              
+
               // 최소 메타데이터 (3개)
               category: 'lightweight',
               originalCategory: material.category,
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             };
-            
+
             await store.put(materialData);
             savedCount++;
-            
           } catch (error) {
             console.warn(`경량자재 저장 실패 (${material.name}):`, error);
           }
@@ -4449,10 +4226,12 @@ class PriceDatabase extends EventEmitter {
         console.log(`✅ 경량자재 ${savedCount}개 저장 완료`);
       }
 
-      // 석고보드 저장  
+      // 석고보드 저장
       if (currentState.gypsumBoards && currentState.gypsumBoards.length > 0) {
-        console.log(`📦 석고보드 ${currentState.gypsumBoards.length}개 저장 중...`);
-        
+        console.log(
+          `📦 석고보드 ${currentState.gypsumBoards.length}개 저장 중...`
+        );
+
         for (const material of currentState.gypsumBoards) {
           try {
             // v2 호환 형식으로 데이터 변환 - 테이블에서 실제 사용하는 필드만 저장
@@ -4476,20 +4255,19 @@ class PriceDatabase extends EventEmitter {
               workType2: material.workType2 || '',
               location: material.location || '',
               work: material.work || '석고보드 설치',
-              
+
               // 일위대가 관리 호환성 필드 (2개)
               재료비단가: material.materialCost || 0,
               노무비단가: material.laborCost || 0,
-              
+
               // 최소 메타데이터 (3개)
               category: 'gypsum',
               originalCategory: material.category,
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
             };
-            
+
             await store.put(materialData);
             savedCount++;
-            
           } catch (error) {
             console.warn(`석고보드 저장 실패 (${material.name}):`, error);
           }
@@ -4504,11 +4282,10 @@ class PriceDatabase extends EventEmitter {
 
       db.close();
       console.log(`📦 IndexedDB v2 저장 완료: ${savedCount}개 자재`);
-      
+
       // 저장 완료 후 전역 캐시 무효화 이벤트 발생
       console.log('📡 자재 데이터 저장 완료 이벤트 발생...');
       this.triggerMaterialDataUpdateEvent();
-      
     } catch (error) {
       console.error('❌ IndexedDB v2 저장 실패:', error);
       throw error;
@@ -4519,44 +4296,52 @@ class PriceDatabase extends EventEmitter {
   async openDatabaseV2() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open('KiyenoMaterialsDB', 3);
-      
+
       request.onerror = () => {
         console.error('❌ KiyenoMaterialsDB v2 열기 실패');
         reject(request.error);
       };
-      
+
       request.onsuccess = () => {
         resolve(request.result);
       };
-      
+
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
-        
+
         // materials 테이블이 없으면 생성
         if (!db.objectStoreNames.contains('materials')) {
-          const materialsStore = db.createObjectStore('materials', { keyPath: 'id' });
+          const materialsStore = db.createObjectStore('materials', {
+            keyPath: 'id',
+          });
           materialsStore.createIndex('name', 'name', { unique: false });
           materialsStore.createIndex('category', 'category', { unique: false });
         }
-        
+
         // unitPrices 테이블이 없으면 생성 (일위대가용)
         if (!db.objectStoreNames.contains('unitPrices')) {
-          const unitPricesStore = db.createObjectStore('unitPrices', { keyPath: 'id' });
-          unitPricesStore.createIndex('itemName', 'basic.itemName', { unique: false });
-          unitPricesStore.createIndex('createdAt', 'createdAt', { unique: false });
+          const unitPricesStore = db.createObjectStore('unitPrices', {
+            keyPath: 'id',
+          });
+          unitPricesStore.createIndex('itemName', 'basic.itemName', {
+            unique: false,
+          });
+          unitPricesStore.createIndex('createdAt', 'createdAt', {
+            unique: false,
+          });
         }
       };
     });
   }
-  
+
   // 자재 데이터 업데이트 이벤트 발생 (다른 모듈에서 캐시 무효화를 위해)
   triggerMaterialDataUpdateEvent() {
     // 전역 이벤트 발생 (일위대가 관리 등에서 감지)
     const event = new CustomEvent('materialDataUpdated', {
       detail: {
         timestamp: new Date().toISOString(),
-        message: '자재 데이터가 업데이트되었습니다'
-      }
+        message: '자재 데이터가 업데이트되었습니다',
+      },
     });
     window.dispatchEvent(event);
     console.log('📡 materialDataUpdated 이벤트 발생됨');
