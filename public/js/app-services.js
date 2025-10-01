@@ -1681,15 +1681,8 @@ async function saveCurrentState() {
     try {
         const savedState = await window.priceDB.saveCurrentState();
         if (savedState) {
-            // 성공 모달 표시
+            // 성공 모달 표시 (충분히 높은 z-index로 모든 모달 위에 표시)
             showSaveSuccessModal(savedState);
-            
-            // 자재 관리 모달 새로고침
-            const modal = document.querySelector('.modal');
-            if (modal) {
-                modal.remove();
-                showMaterialManagementModal();
-            }
         } else {
             showToast('저장 중 오류가 발생했습니다.', 'error');
         }
@@ -1705,8 +1698,8 @@ function showSaveSuccessModal(savedState) {
     
     const modalHTML = `
         <div class="save-success-modal" style="
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); z-index: 99999; display: flex; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999999999 !important; display: flex;
             align-items: center; justify-content: center;
         ">
             <div class="save-success-content" style="
@@ -1764,11 +1757,11 @@ function showSaveSuccessModal(savedState) {
                 
                 <!-- 확인 버튼 -->
                 <button onclick="closeSaveSuccessModal()" style="
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
-                    color: white; border: none; border-radius: 8px; 
-                    padding: 12px 30px; font-size: 16px; font-weight: 600; 
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white; border: none; border-radius: 8px;
+                    padding: 12px 30px; font-size: 16px; font-weight: 600;
                     cursor: pointer; transition: transform 0.2s;
-                " onmouseover="this.style.transform='translateY(-2px)'" 
+                " onmouseover="this.style.transform='translateY(-2px)'"
                    onmouseout="this.style.transform='translateY(0)'">
                     확인
                 </button>
@@ -1778,14 +1771,9 @@ function showSaveSuccessModal(savedState) {
     
     // 모달 추가
     document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // 3초 후 자동 닫기
-    setTimeout(() => {
-        closeSaveSuccessModal();
-    }, 5000);
 }
 
-// 저장 성공 모달 닫기
+// 저장 성공 모달 닫기 (확인 버튼으로만 닫기)
 function closeSaveSuccessModal() {
     const modal = document.querySelector('.save-success-modal');
     if (modal) {
@@ -1793,6 +1781,25 @@ function closeSaveSuccessModal() {
         modal.style.transform = 'scale(0.95)';
         setTimeout(() => {
             modal.remove();
+
+            // 확인 버튼을 누르면 자재관리 모달 데이터만 새로고침 (모달 자체는 유지)
+            const materialModal = document.querySelector('.modal');
+            if (materialModal) {
+                // 현재 어떤 탭이 활성화되어 있는지 확인
+                const lightweightTab = materialModal.querySelector('[onclick*="showLightweightMaterials"]');
+                const gypsumTab = materialModal.querySelector('[onclick*="showGypsumBoards"]');
+
+                if (lightweightTab && lightweightTab.classList.contains('active')) {
+                    // 경량자재 탭이 활성화된 경우
+                    showLightweightMaterials();
+                } else if (gypsumTab && gypsumTab.classList.contains('active')) {
+                    // 석고보드 탭이 활성화된 경우
+                    showGypsumBoards();
+                } else {
+                    // 기본적으로 경량자재 표시
+                    showLightweightMaterials();
+                }
+            }
         }, 200);
     }
 }
