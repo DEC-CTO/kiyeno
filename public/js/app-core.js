@@ -582,8 +582,12 @@ window.generatePurchaseOrder = function() {
  */
 window.generatePriceComparison = function() {
     console.log('📊 단가비교표 생성 요청');
-    alert('단가비교표 생성 기능이 곧 추가됩니다.');
-    // TODO: 단가비교표 생성 로직 구현
+    if (typeof window.openPriceComparisonModal === 'function') {
+        window.openPriceComparisonModal();
+    } else {
+        console.error('❌ openPriceComparisonModal 함수를 찾을 수 없습니다.');
+        alert('단가비교표 모듈을 로드할 수 없습니다.');
+    }
 };
 
 /**

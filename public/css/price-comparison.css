@@ -1,0 +1,324 @@
+/* =============================================================================
+   단가비교표 모달 스타일
+   ============================================================================= */
+
+/* 모달 오버레이 */
+#priceComparisonModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    overflow-y: auto;
+}
+
+#priceComparisonModal.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 모달 컨테이너 */
+.price-comparison-modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    width: 95vw;
+    max-width: 1800px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+}
+
+/* 모달 헤더 */
+.price-comparison-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    border-bottom: 2px solid #e0e0e0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.price-comparison-modal-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.price-comparison-modal-header h2 i {
+    margin-right: 10px;
+}
+
+.price-comparison-header-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.price-comparison-project-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+}
+
+.price-comparison-project-name label {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.price-comparison-project-name input {
+    border: 1px solid #ddd;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 250px;
+}
+
+.price-comparison-close-btn {
+    background: white;
+    border: none;
+    color: #667eea;
+    font-size: 24px;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.price-comparison-close-btn:hover {
+    background: #f0f0f0;
+    transform: rotate(90deg);
+}
+
+/* 모달 바디 */
+.price-comparison-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 30px;
+}
+
+/* 컨트롤 버튼 영역 */
+.price-comparison-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.price-comparison-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.price-comparison-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.price-comparison-btn-primary:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.price-comparison-btn-success {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+}
+
+.price-comparison-btn-success:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.price-comparison-btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.price-comparison-btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+}
+
+.price-comparison-btn-info {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+
+.price-comparison-btn-info:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    transform: translateY(-2px);
+}
+
+/* 테이블 컨테이너 */
+.price-comparison-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+/* 테이블 스타일 */
+.price-comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: white;
+}
+
+.price-comparison-table th,
+.price-comparison-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 헤더 스타일 */
+.price-comparison-table thead tr:first-child th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 12px 8px;
+}
+
+.price-comparison-table thead tr:nth-child(2) th {
+    background: #e3f2fd;
+    color: #1976d2;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 10px 8px;
+}
+
+/* 본문 스타일 */
+.price-comparison-table tbody tr:nth-child(4n+1) {
+    background: #f8f9fa;
+}
+
+.price-comparison-table tbody tr:nth-child(4n+2) {
+    background: #e3f2fd;
+}
+
+.price-comparison-table tbody tr:nth-child(4n+3) {
+    background: #fff3cd;
+}
+
+.price-comparison-table tbody tr:nth-child(4n) {
+    background: #d1ecf1;
+    font-weight: 600;
+}
+
+/* 입력 필드 */
+.price-comparison-table input {
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 4px 6px;
+    text-align: center;
+    font-size: 12px;
+    background: white;
+    border-radius: 3px;
+}
+
+/* 모든 셀 중앙정렬 */
+.price-comparison-table td,
+.price-comparison-table td input {
+    text-align: center !important;
+    vertical-align: middle;
+}
+
+.price-comparison-table input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+/* 숫자 정렬 */
+.price-comparison-table .number-cell {
+    text-align: right;
+    font-family: 'Courier New', monospace;
+}
+
+/* 액션 버튼 */
+.price-comparison-action-btn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.price-comparison-action-btn:hover {
+    transform: scale(1.05);
+}
+
+.price-comparison-delete-btn {
+    background: #dc2626;
+    color: white;
+}
+
+.price-comparison-delete-btn:hover {
+    background: #b91c1c;
+}
+
+/* 컬럼 너비 조정 */
+.price-comparison-table th:nth-child(1),
+.price-comparison-table td:nth-child(1) {
+    width: 40px;
+}
+
+.price-comparison-table th:nth-child(2),
+.price-comparison-table td:nth-child(2) {
+    width: 200px;
+}
+
+.price-comparison-table th:nth-child(3),
+.price-comparison-table td:nth-child(3) {
+    width: 60px;
+}
+
+.price-comparison-table th:nth-child(4),
+.price-comparison-table td:nth-child(4) {
+    width: 60px;
+}
+
+/* 반응형 */
+@media (max-width: 1400px) {
+    .price-comparison-modal-content {
+        width: 98vw;
+    }
+
+    .price-comparison-table {
+        font-size: 11px;
+    }
+
+    .price-comparison-table th,
+    .price-comparison-table td {
+        padding: 6px 4px;
+    }
+}
