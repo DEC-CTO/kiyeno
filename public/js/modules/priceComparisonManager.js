@@ -7,20 +7,39 @@ let priceComparisonData = {
     siteName: '',  // 현장명 (첫 번째 행 품명 칸)
     summaryRow: {  // 2번째 행: 경량공사 요약
         itemName: '경량공사',
-        spec: '3*6*9.5T*2PLY/3600이하',
+        spec: '',
         unit: '식',
-        contractQty: 10000.00,
-        contractPrice: { unitPrice: 10000, amount: 5780000 },
+        contractQty: 1.00,
+        contractPrice: { unitPrice: '', amount: 5780000 },
         orderUnit: '식',
-        orderQuantity: 10000.00,
-        progressPrice: { unitPrice: 10000, amount: 4621000 },
-        progressQuantity: 10000.00,
-        orderPrice: { unitPrice: 10000, amount: 3981000 },
-        orderQuantity2: 10000.00,
+        orderQuantity: 1.00,
+        progressPrice: { unitPrice: '', amount: 4621000 },
+        progressQuantity: 1.00,
+        orderPrice: { unitPrice: '', amount: 3981000 },
+        orderQuantity2: 1.00,
         vendors: [
-            { name: '업체1', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
-            { name: '업체2', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
-            { name: '업체3', unitPrice: 10000, amount: 4277500 }
+            { name: '업체1', unitPrice: '', amount: 4277500, quantity: 1.00 },
+            { name: '업체2', unitPrice: '', amount: 4277500, quantity: 1.00 },
+            { name: '업체3', unitPrice: '', amount: 4277500 }
+        ],
+        remarks: ''
+    },
+    miscRow: {  // 3번째 행: 공과잡비
+        itemName: '공과잡비',
+        spec: '',
+        unit: '%',
+        contractQty: '',
+        contractPrice: { unitPrice: '', amount: '' },
+        orderUnit: '',
+        orderQuantity: '',
+        progressPrice: { unitPrice: '', amount: '' },
+        progressQuantity: '',
+        orderPrice: { unitPrice: '', amount: '' },
+        orderQuantity2: '',
+        vendors: [
+            { name: '업체1', unitPrice: '', amount: '', quantity: '' },
+            { name: '업체2', unitPrice: '', amount: '', quantity: '' },
+            { name: '업체3', unitPrice: '', amount: '' }
         ],
         remarks: ''
     },
@@ -47,20 +66,39 @@ function openPriceComparisonModal() {
         siteName: '',
         summaryRow: {
             itemName: '경량공사',
-            spec: '3*6*9.5T*2PLY/3600이하',
+            spec: '',
             unit: '식',
-            contractQty: 10000.00,
-            contractPrice: { unitPrice: 10000, amount: 5780000 },
+            contractQty: 1.00,
+            contractPrice: { unitPrice: '', amount: 5780000 },
             orderUnit: '식',
-            orderQuantity: 10000.00,
-            progressPrice: { unitPrice: 10000, amount: 4621000 },
-            progressQuantity: 10000.00,
-            orderPrice: { unitPrice: 10000, amount: 3981000 },
-            orderQuantity2: 10000.00,
+            orderQuantity: 1.00,
+            progressPrice: { unitPrice: '', amount: 4621000 },
+            progressQuantity: 1.00,
+            orderPrice: { unitPrice: '', amount: 3981000 },
+            orderQuantity2: 1.00,
             vendors: [
-                { name: '업체1', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
-                { name: '업체2', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
-                { name: '업체3', unitPrice: 10000, amount: 4277500 }
+                { name: '업체1', unitPrice: '', amount: 4277500, quantity: 1.00 },
+                { name: '업체2', unitPrice: '', amount: 4277500, quantity: 1.00 },
+                { name: '업체3', unitPrice: '', amount: 4277500 }
+            ],
+            remarks: ''
+        },
+        miscRow: {
+            itemName: '공과잡비',
+            spec: '',
+            unit: '%',
+            contractQty: '',
+            contractPrice: { unitPrice: '', amount: '' },
+            orderUnit: '',
+            orderQuantity: '',
+            progressPrice: { unitPrice: '', amount: '' },
+            progressQuantity: '',
+            orderPrice: { unitPrice: '', amount: '' },
+            orderQuantity2: '',
+            vendors: [
+                { name: '업체1', unitPrice: '', amount: '', quantity: '' },
+                { name: '업체2', unitPrice: '', amount: '', quantity: '' },
+                { name: '업체3', unitPrice: '', amount: '' }
             ],
             remarks: ''
         },
@@ -349,8 +387,38 @@ function renderTableBody() {
         </tr>
     `;
 
-    // 첫 번째 행 + 두 번째 행 + 데이터 행들 결합
-    tbody.innerHTML = firstRow + summaryRow + dataRows;
+    // 세 번째 행: 공과잡비 (NO는 빈칸)
+    const miscRow = `
+        <tr>
+            <td></td>
+            <td>${priceComparisonData.miscRow.itemName}</td>
+            <td>${priceComparisonData.miscRow.spec || ''}</td>
+            <td>${priceComparisonData.miscRow.unit}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.miscRow.contractQty)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.contractPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.contractPrice.amount)}</td>
+            <td>${priceComparisonData.miscRow.orderUnit || ''}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.miscRow.orderQuantity)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.progressPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.progressPrice.amount)}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.miscRow.progressQuantity)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.orderPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.miscRow.orderPrice.amount)}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.miscRow.orderQuantity2)}</td>
+            ${priceComparisonData.miscRow.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === priceComparisonData.miscRow.vendors.length - 1;
+                return `
+                    <td class="number-cell">${formatNumber(vendor.unitPrice)}</td>
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
+                    ${isLast ? '' : `<td class="number-cell">${formatQuantity(vendor.quantity)}</td>`}
+                `;
+            }).join('')}
+            <td>${priceComparisonData.miscRow.remarks || ''}</td>
+        </tr>
+    `;
+
+    // 첫 번째 행 + 두 번째 행 + 세 번째 행 + 데이터 행들 결합
+    tbody.innerHTML = firstRow + summaryRow + miscRow + dataRows;
 }
 
 // =============================================================================
@@ -458,9 +526,30 @@ function exportPriceComparisonToExcel() {
         <head>
             <meta charset="utf-8">
             <style>
+                * { font-family: Arial, sans-serif; }
                 table { border-collapse: collapse; width: 100%; }
-                th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 11px; }
-                th { background-color: #667eea; color: white; font-weight: bold; }
+                td {
+                    border: 0.5pt solid #000;
+                    padding: 4px;
+                    text-align: center;
+                    font-size: 11pt;
+                    mso-number-format: "@";
+                }
+                th {
+                    border: 0.5pt solid #000;
+                    padding: 4px;
+                    text-align: center;
+                    background-color: #d3d3d3 !important;
+                    color: black !important;
+                    font-weight: bold;
+                    font-size: 12pt !important;
+                    mso-pattern: gray-25 solid;
+                }
+                thead th {
+                    background-color: #d3d3d3 !important;
+                    font-size: 12pt !important;
+                }
+                h2 { font-size: 14pt; font-weight: bold; }
                 .supply-row { background-color: #e3f2fd; }
                 .expense-row { background-color: #fff3cd; }
                 .total-row { background-color: #d1ecf1; font-weight: bold; }
@@ -536,26 +625,57 @@ function exportPriceComparisonToExcel() {
             <td>${summary.itemName}</td>
             <td>${summary.spec}</td>
             <td>${summary.unit}</td>
-            <td class="number">${formatNumber(summary.contractQty)}</td>
+            <td class="number">${formatQuantity(summary.contractQty)}</td>
             <td class="number">${formatNumber(summary.contractPrice.unitPrice)}</td>
             <td class="number">${formatNumber(summary.contractPrice.amount)}</td>
             <td>${summary.orderUnit}</td>
-            <td class="number">${formatNumber(summary.orderQuantity)}</td>
+            <td class="number">${formatQuantity(summary.orderQuantity)}</td>
             <td class="number">${formatNumber(summary.progressPrice.unitPrice)}</td>
             <td class="number">${formatNumber(summary.progressPrice.amount)}</td>
-            <td class="number">${formatNumber(summary.progressQuantity)}</td>
+            <td class="number">${formatQuantity(summary.progressQuantity)}</td>
             <td class="number">${formatNumber(summary.orderPrice.unitPrice)}</td>
             <td class="number">${formatNumber(summary.orderPrice.amount)}</td>
-            <td class="number">${formatNumber(summary.orderQuantity2)}</td>
+            <td class="number">${formatQuantity(summary.orderQuantity2)}</td>
             ${summary.vendors.map((vendor, vIdx) => {
                 const isLast = vIdx === summary.vendors.length - 1;
                 return `
                     <td class="number">${formatNumber(vendor.unitPrice)}</td>
                     <td class="number">${formatNumber(vendor.amount)}</td>
-                    ${isLast ? '' : `<td class="number">${formatNumber(vendor.quantity)}</td>`}
+                    ${isLast ? '' : `<td class="number">${formatQuantity(vendor.quantity)}</td>`}
                 `;
             }).join('')}
             <td>${summary.remarks}</td>
+        </tr>
+    `;
+
+    // 세 번째 행: 공과잡비
+    const misc = priceComparisonData.miscRow;
+    htmlContent += `
+        <tr>
+            <td></td>
+            <td>${misc.itemName}</td>
+            <td>${misc.spec || ''}</td>
+            <td>${misc.unit}</td>
+            <td class="number">${formatQuantity(misc.contractQty)}</td>
+            <td class="number">${formatNumber(misc.contractPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(misc.contractPrice.amount)}</td>
+            <td>${misc.orderUnit || ''}</td>
+            <td class="number">${formatQuantity(misc.orderQuantity)}</td>
+            <td class="number">${formatNumber(misc.progressPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(misc.progressPrice.amount)}</td>
+            <td class="number">${formatQuantity(misc.progressQuantity)}</td>
+            <td class="number">${formatNumber(misc.orderPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(misc.orderPrice.amount)}</td>
+            <td class="number">${formatQuantity(misc.orderQuantity2)}</td>
+            ${misc.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === misc.vendors.length - 1;
+                return `
+                    <td class="number">${formatNumber(vendor.unitPrice)}</td>
+                    <td class="number">${formatNumber(vendor.amount)}</td>
+                    ${isLast ? '' : `<td class="number">${formatQuantity(vendor.quantity)}</td>`}
+                `;
+            }).join('')}
+            <td>${misc.remarks || ''}</td>
         </tr>
     `;
 
