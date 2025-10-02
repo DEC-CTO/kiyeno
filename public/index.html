@@ -111,6 +111,36 @@
             <i class="fas fa-calculator"></i> 일위대가 관리
           </button>
 
+          <!-- 구분선 -->
+          <div class="button-divider"></div>
+
+          <!-- 발주서 버튼 -->
+          <button
+            class="btn btn-blue"
+            id="purchaseOrderBtn"
+            onclick="generatePurchaseOrder()"
+          >
+            <i class="fas fa-file-invoice"></i> 발주서
+          </button>
+
+          <!-- 단가비교표 버튼 -->
+          <button
+            class="btn btn-cyan"
+            id="priceComparisonBtn"
+            onclick="generatePriceComparison()"
+          >
+            <i class="fas fa-chart-bar"></i> 단가비교표
+          </button>
+
+          <!-- 견적서 버튼 -->
+          <button
+            class="btn btn-blue"
+            id="estimateBtn"
+            onclick="generateEstimate()"
+          >
+            <i class="fas fa-receipt"></i> 견적서
+          </button>
+
         </div>
 
         <!-- Revit 데이터 확인 테이블 (항상 표시) -->

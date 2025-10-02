@@ -467,6 +467,33 @@ body {
     background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
 }
 
+/* 파란색 버튼 (문서 출력용) */
+.btn-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+.btn-blue:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+/* 청록색 버튼 (데이터 분석용) */
+.btn-cyan {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+}
+.btn-cyan:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+}
+
+/* 버튼 구분선 */
+.button-divider {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, #cbd5e1, transparent);
+    margin: 0 15px;
+    align-self: center;
+}
+
 /* Revit 타입 매칭 - 특별한 그라데이션 */
 .btn-revit {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
