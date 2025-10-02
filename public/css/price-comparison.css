@@ -26,12 +26,12 @@
     background: white;
     border-radius: 12px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    width: 95vw;
-    max-width: 1800px;
-    height: 90vh;
+    width: 98vw;
+    max-width: 2400px;
+    height: 95vh;
     display: flex;
     flex-direction: column;
-    margin: 20px;
+    margin: 10px;
 }
 
 /* 모달 헤더 */
@@ -186,8 +186,9 @@
 .price-comparison-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 11px;
     background: white;
+    table-layout: fixed;
 }
 
 .price-comparison-table th,
@@ -203,7 +204,7 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     padding: 12px 8px;
 }
 
@@ -211,7 +212,7 @@
     background: #e3f2fd;
     color: #1976d2;
     font-weight: 600;
-    font-size: 12px;
+    font-size: 11px;
     padding: 10px 8px;
 }
 
@@ -239,7 +240,7 @@
     border: 1px solid #ddd;
     padding: 4px 6px;
     text-align: center;
-    font-size: 12px;
+    font-size: 11px;
     background: white;
     border-radius: 3px;
 }
@@ -251,16 +252,16 @@
     vertical-align: middle;
 }
 
+/* 숫자 셀 오른쪽 정렬 (중앙정렬보다 우선) */
+.price-comparison-table td.number-cell {
+    text-align: right !important;
+    padding-right: 8px;
+}
+
 .price-comparison-table input:focus {
     outline: none;
     border-color: #667eea;
     background: #f0f4ff;
-}
-
-/* 숫자 정렬 */
-.price-comparison-table .number-cell {
-    text-align: right;
-    font-family: 'Courier New', monospace;
 }
 
 /* 액션 버튼 */
@@ -294,17 +295,199 @@
 
 .price-comparison-table th:nth-child(2),
 .price-comparison-table td:nth-child(2) {
-    width: 200px;
+    width: 180px;
+}
+
+/* 품명 컬럼(2번째) 왼쪽 정렬 */
+.price-comparison-table td:nth-child(2) {
+    text-align: left !important;
+    padding-left: 12px;
+}
+
+/* 품명 컬럼 내 입력 필드도 왼쪽 정렬 */
+.price-comparison-table td:nth-child(2) input {
+    text-align: left !important;
+    padding-left: 8px;
 }
 
 .price-comparison-table th:nth-child(3),
 .price-comparison-table td:nth-child(3) {
-    width: 60px;
+    width: 160px;
 }
 
 .price-comparison-table th:nth-child(4),
 .price-comparison-table td:nth-child(4) {
-    width: 60px;
+    width: 40px;
+}
+
+/* 수량 및 금액 컬럼 너비 */
+.price-comparison-table th:nth-child(5),
+.price-comparison-table td:nth-child(5) {
+    width: 90px; /* 계약도급수량 */
+}
+
+/* 헤더 1행의 colspan=2 셀들 (단가90+금액100=190) */
+.price-comparison-table thead tr:nth-child(1) th:nth-child(6) {
+    width: 190px; /* 계약도급 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+.price-comparison-table thead tr:nth-child(1) th:nth-child(9) {
+    width: 190px; /* 진행도급 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+.price-comparison-table thead tr:nth-child(1) th:nth-child(11) {
+    width: 190px; /* 발주단가 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+.price-comparison-table thead tr:nth-child(1) th:nth-child(13) {
+    width: 190px; /* 업체1 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+.price-comparison-table thead tr:nth-child(1) th:nth-child(15) {
+    width: 190px; /* 업체2 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+.price-comparison-table thead tr:nth-child(1) th:nth-child(17) {
+    width: 190px; /* 업체3 */
+    min-width: 190px;
+    max-width: 190px;
+}
+
+/* 헤더 2행의 1,2번째가 계약도급 단가/금액 */
+.price-comparison-table thead tr:nth-child(2) th:nth-child(1) {
+    width: 90px; /* 계약도급 단가 */
+    min-width: 90px;
+    max-width: 90px;
+}
+
+.price-comparison-table thead tr:nth-child(2) th:nth-child(2) {
+    width: 100px; /* 계약도급 금액 */
+    min-width: 100px;
+    max-width: 100px;
+}
+
+/* 데이터 행의 6,7번째가 계약도급 단가/금액 */
+.price-comparison-table tbody td:nth-child(6) {
+    width: 90px; /* 계약도급 단가 */
+    min-width: 90px;
+    max-width: 90px;
+}
+
+.price-comparison-table tbody td:nth-child(7) {
+    width: 100px; /* 계약도급 금액 */
+    min-width: 100px;
+    max-width: 100px;
+}
+
+/* 헤더에서는 7번째가 단위, 8번째가 발주수량 */
+.price-comparison-table thead th:nth-child(7) {
+    width: 40px; /* 단위 */
+    min-width: 40px;
+    max-width: 40px;
+}
+
+.price-comparison-table thead th:nth-child(8) {
+    width: 90px; /* 발주수량 */
+    min-width: 90px;
+    max-width: 90px;
+}
+
+/* 데이터 행에서는 8번째가 단위, 9번째가 발주수량 */
+.price-comparison-table tbody td:nth-child(8) {
+    width: 40px; /* 단위 */
+    min-width: 40px;
+    max-width: 40px;
+}
+
+.price-comparison-table tbody td:nth-child(9) {
+    width: 90px; /* 발주수량 */
+    min-width: 90px;
+    max-width: 90px;
+}
+
+.price-comparison-table th:nth-child(10),
+.price-comparison-table td:nth-child(10) {
+    width: 90px; /* 진행도급 단가 */
+}
+
+.price-comparison-table th:nth-child(11),
+.price-comparison-table td:nth-child(11) {
+    width: 100px; /* 진행도급 금액 */
+}
+
+.price-comparison-table th:nth-child(12),
+.price-comparison-table td:nth-child(12) {
+    width: 90px; /* 수량 */
+}
+
+.price-comparison-table th:nth-child(13),
+.price-comparison-table td:nth-child(13) {
+    width: 90px; /* 발주단가 단가 */
+}
+
+.price-comparison-table th:nth-child(14),
+.price-comparison-table td:nth-child(14) {
+    width: 100px; /* 발주단가 금액 */
+}
+
+.price-comparison-table th:nth-child(15),
+.price-comparison-table td:nth-child(15) {
+    width: 90px; /* 수량 */
+}
+
+.price-comparison-table th:nth-child(16),
+.price-comparison-table td:nth-child(16) {
+    width: 90px; /* 업체1 단가 */
+}
+
+.price-comparison-table th:nth-child(17),
+.price-comparison-table td:nth-child(17) {
+    width: 100px; /* 업체1 금액 */
+}
+
+.price-comparison-table th:nth-child(18),
+.price-comparison-table td:nth-child(18) {
+    width: 90px; /* 수량 */
+}
+
+.price-comparison-table th:nth-child(19),
+.price-comparison-table td:nth-child(19) {
+    width: 90px; /* 업체2 단가 */
+}
+
+.price-comparison-table th:nth-child(20),
+.price-comparison-table td:nth-child(20) {
+    width: 100px; /* 업체2 금액 */
+}
+
+.price-comparison-table th:nth-child(21),
+.price-comparison-table td:nth-child(21) {
+    width: 90px; /* 수량 */
+}
+
+.price-comparison-table th:nth-child(22),
+.price-comparison-table td:nth-child(22) {
+    width: 90px; /* 업체3 단가 */
+}
+
+.price-comparison-table th:nth-child(23),
+.price-comparison-table td:nth-child(23) {
+    width: 100px; /* 업체3 금액 */
+}
+
+.price-comparison-table th:nth-child(24),
+.price-comparison-table td:nth-child(24) {
+    width: 120px; /* 비고 */
 }
 
 /* 반응형 */

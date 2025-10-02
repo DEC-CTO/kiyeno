@@ -4,6 +4,26 @@
 
 // 전역 데이터 (IndexedDB 사용 안 함, 메모리만 사용)
 let priceComparisonData = {
+    siteName: '',  // 현장명 (첫 번째 행 품명 칸)
+    summaryRow: {  // 2번째 행: 경량공사 요약
+        itemName: '경량공사',
+        spec: '3*6*9.5T*2PLY/3600이하',
+        unit: '식',
+        contractQty: 10000.00,
+        contractPrice: { unitPrice: 10000, amount: 5780000 },
+        orderUnit: '식',
+        orderQuantity: 10000.00,
+        progressPrice: { unitPrice: 10000, amount: 4621000 },
+        progressQuantity: 10000.00,
+        orderPrice: { unitPrice: 10000, amount: 3981000 },
+        orderQuantity2: 10000.00,
+        vendors: [
+            { name: '업체1', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
+            { name: '업체2', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
+            { name: '업체3', unitPrice: 10000, amount: 4277500 }
+        ],
+        remarks: ''
+    },
     items: []
 };
 
@@ -24,6 +44,26 @@ function openPriceComparisonModal() {
 
     // 데이터 초기화
     priceComparisonData = {
+        siteName: '',
+        summaryRow: {
+            itemName: '경량공사',
+            spec: '3*6*9.5T*2PLY/3600이하',
+            unit: '식',
+            contractQty: 10000.00,
+            contractPrice: { unitPrice: 10000, amount: 5780000 },
+            orderUnit: '식',
+            orderQuantity: 10000.00,
+            progressPrice: { unitPrice: 10000, amount: 4621000 },
+            progressQuantity: 10000.00,
+            orderPrice: { unitPrice: 10000, amount: 3981000 },
+            orderQuantity2: 10000.00,
+            vendors: [
+                { name: '업체1', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
+                { name: '업체2', unitPrice: 10000, amount: 4277500, quantity: 10000.00 },
+                { name: '업체3', unitPrice: 10000, amount: 4277500 }
+            ],
+            remarks: ''
+        },
         items: [createEmptyItem(1)]
     };
 
@@ -194,7 +234,34 @@ function renderTableBody() {
     const tbody = document.getElementById('priceComparisonTableBody');
     const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
 
-    tbody.innerHTML = priceComparisonData.items.map((item, index) => `
+    // 첫 번째 행: 품명만 입력 가능, 나머지는 빈 칸
+    const firstRow = `
+        <tr>
+            <td></td>
+            <td>
+                <input type="text" value="${priceComparisonData.siteName || ''}"
+                       onchange="updateSiteName(this.value)" placeholder="현장명을 입력하세요">
+            </td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            ${Array.from({ length: vendorCount === 3 ? 7 : vendorCount * 3 }).map(() => '<td></td>').join('')}
+            <td></td>
+        </tr>
+    `;
+
+    // 나머지 데이터 행들
+    const dataRows = priceComparisonData.items.map((item, index) => `
         <!-- 데이터 행 (1줄) -->
         <tr>
             <td>${item.no}</td>
@@ -251,11 +318,60 @@ function renderTableBody() {
             </td>
         </tr>
     `).join('');
+
+    // 두 번째 행: 경량공사 요약 (NO는 빈칸)
+    const summaryRow = `
+        <tr>
+            <td></td>
+            <td>${priceComparisonData.summaryRow.itemName}</td>
+            <td>${priceComparisonData.summaryRow.spec || ''}</td>
+            <td>${priceComparisonData.summaryRow.unit}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.summaryRow.contractQty)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.contractPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.contractPrice.amount)}</td>
+            <td>${priceComparisonData.summaryRow.orderUnit}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.summaryRow.orderQuantity)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.progressPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.progressPrice.amount)}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.summaryRow.progressQuantity)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.orderPrice.unitPrice)}</td>
+            <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.orderPrice.amount)}</td>
+            <td class="number-cell">${formatQuantity(priceComparisonData.summaryRow.orderQuantity2)}</td>
+            ${priceComparisonData.summaryRow.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === priceComparisonData.summaryRow.vendors.length - 1;
+                return `
+                    <td class="number-cell">${formatNumber(vendor.unitPrice)}</td>
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
+                    ${isLast ? '' : `<td class="number-cell">${formatQuantity(vendor.quantity)}</td>`}
+                `;
+            }).join('')}
+            <td>${priceComparisonData.summaryRow.remarks || ''}</td>
+        </tr>
+    `;
+
+    // 첫 번째 행 + 두 번째 행 + 데이터 행들 결합
+    tbody.innerHTML = firstRow + summaryRow + dataRows;
 }
 
 // =============================================================================
 // 데이터 업데이트 함수들
 // =============================================================================
+
+function updateSiteName(value) {
+    priceComparisonData.siteName = value;
+}
+
+function updateSummaryField(field, value) {
+    priceComparisonData.summaryRow[field] = value;
+}
+
+function updateSummaryPrice(priceType, field, value) {
+    priceComparisonData.summaryRow[priceType][field] = value;
+}
+
+function updateSummaryVendor(vendorIndex, field, value) {
+    priceComparisonData.summaryRow.vendors[vendorIndex][field] = value;
+}
 
 function updateItemField(index, field, value) {
     priceComparisonData.items[index][field] = value;
@@ -308,9 +424,23 @@ function updateExpense(index, column, value) {
 /**
  * 숫자 포맷 (천단위 쉼표)
  */
+/**
+ * 금액 포맷 (정수, 천단위 콤마)
+ */
 function formatNumber(num) {
-    if (!num) return '';
+    if (!num && num !== 0) return '';
     return Math.floor(num).toLocaleString('ko-KR');
+}
+
+/**
+ * 수량 포맷 (소수점 2자리, 천단위 콤마)
+ */
+function formatQuantity(num) {
+    if (!num && num !== 0) return '';
+    return parseFloat(num).toLocaleString('ko-KR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 }
 
 // =============================================================================
@@ -375,6 +505,60 @@ function exportPriceComparisonToExcel() {
                 <tbody>
     `;
 
+    // 첫 번째 행: 현장명
+    htmlContent += `
+        <tr>
+            <td></td>
+            <td>${priceComparisonData.siteName || ''}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            ${Array.from({ length: vendorCount === 3 ? 7 : vendorCount * 3 }).map(() => '<td></td>').join('')}
+            <td></td>
+        </tr>
+    `;
+
+    // 두 번째 행: 경량공사 요약
+    const summary = priceComparisonData.summaryRow;
+    htmlContent += `
+        <tr>
+            <td></td>
+            <td>${summary.itemName}</td>
+            <td>${summary.spec}</td>
+            <td>${summary.unit}</td>
+            <td class="number">${formatNumber(summary.contractQty)}</td>
+            <td class="number">${formatNumber(summary.contractPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(summary.contractPrice.amount)}</td>
+            <td>${summary.orderUnit}</td>
+            <td class="number">${formatNumber(summary.orderQuantity)}</td>
+            <td class="number">${formatNumber(summary.progressPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(summary.progressPrice.amount)}</td>
+            <td class="number">${formatNumber(summary.progressQuantity)}</td>
+            <td class="number">${formatNumber(summary.orderPrice.unitPrice)}</td>
+            <td class="number">${formatNumber(summary.orderPrice.amount)}</td>
+            <td class="number">${formatNumber(summary.orderQuantity2)}</td>
+            ${summary.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === summary.vendors.length - 1;
+                return `
+                    <td class="number">${formatNumber(vendor.unitPrice)}</td>
+                    <td class="number">${formatNumber(vendor.amount)}</td>
+                    ${isLast ? '' : `<td class="number">${formatNumber(vendor.quantity)}</td>`}
+                `;
+            }).join('')}
+            <td>${summary.remarks}</td>
+        </tr>
+    `;
+
     priceComparisonData.items.forEach(item => {
         // 데이터 행 (1줄)
         htmlContent += `
@@ -433,6 +617,10 @@ function exportPriceComparisonToExcel() {
 
 window.openPriceComparisonModal = openPriceComparisonModal;
 window.closePriceComparisonModal = closePriceComparisonModal;
+window.updateSiteName = updateSiteName;
+window.updateSummaryField = updateSummaryField;
+window.updateSummaryPrice = updateSummaryPrice;
+window.updateSummaryVendor = updateSummaryVendor;
 window.updateItemField = updateItemField;
 window.updateContractPrice = updateContractPrice;
 window.updateProgressPrice = updateProgressPrice;
