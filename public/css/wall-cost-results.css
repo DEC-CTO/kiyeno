@@ -377,9 +377,10 @@
     border-right: 1px solid #e9ecef;
 }
 
+/* 1번째 컬럼: 벽체명 */
 .comparison-table th:first-child,
 .comparison-table td:first-child {
-    width: 200px;
+    width: 150px;
 }
 
 .comparison-table th:first-child {
@@ -390,74 +391,72 @@
     text-align: left;
 }
 
+/* 2번째 컬럼: 개수 */
 .comparison-table th:nth-child(2),
 .comparison-table td:nth-child(2) {
     width: 80px;
     text-align: center;
 }
 
+/* 3번째 컬럼: 단위 */
 .comparison-table th:nth-child(3),
 .comparison-table td:nth-child(3) {
-    width: 100px;
-}
-
-.comparison-table th:nth-child(3) {
+    width: 80px;
     text-align: center;
 }
 
-.comparison-table td:nth-child(3) {
-    text-align: right;
-}
-
-.comparison-table th:nth-child(4),
-.comparison-table td:nth-child(4) {
-    width: 150px;
-}
-
+/* 4번째 컬럼: 수량 */
 .comparison-table th:nth-child(4) {
+    width: 100px;
     text-align: center;
 }
 
 .comparison-table td:nth-child(4) {
+    width: 100px;
     text-align: right;
 }
 
-.comparison-table th:nth-child(5),
-.comparison-table td:nth-child(5) {
-    width: 150px;
-}
-
+/* 5번째 컬럼: 자재비 */
 .comparison-table th:nth-child(5) {
+    width: 150px;
     text-align: center;
 }
 
 .comparison-table td:nth-child(5) {
-    text-align: right;
-}
-
-.comparison-table th:nth-child(6),
-.comparison-table td:nth-child(6) {
-    width: 120px;
-}
-
-.comparison-table th:nth-child(6) {
-    text-align: center;
-}
-
-.comparison-table td:nth-child(6) {
-    text-align: right;
-}
-
-.comparison-table th:nth-child(7),
-.comparison-table td:nth-child(7) {
     width: 150px;
+    text-align: right;
 }
 
+/* 6번째 컬럼: 노무비 */
+.comparison-table th:nth-child(6) {
+    width: 150px;
+    text-align: center;
+}
+
+.comparison-table td:nth-child(6) {
+    width: 150px;
+    text-align: right;
+}
+
+/* 7번째 컬럼: 단가 */
 .comparison-table th:nth-child(7) {
+    width: 120px;
     text-align: center;
 }
 
 .comparison-table td:nth-child(7) {
+    width: 120px;
+    text-align: right;
+}
+
+/* 8번째 컬럼: 총합계 */
+.comparison-table th:nth-child(8) {
+    width: 150px;
+    text-align: center;
+}
+
+.comparison-table td:nth-child(8) {
+    width: 150px;
     text-align: right;
 }
 
@@ -484,6 +483,50 @@
 .comparison-table .cost-cell {
     font-weight: 500;
     color: #28a745;
+}
+
+/* Excel 내보내기 드롭다운 */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    z-index: 1000;
+    margin-top: 4px;
+    padding: 4px 0;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 10px 15px;
+    color: #212529;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item i {
+    width: 20px;
+    margin-right: 8px;
+    color: #6c757d;
+}
+
+.dropdown-item:hover i {
+    color: #495057;
 }
 
 /* 패널 오버레이 - 모드리스 패널용으로 비활성화 */

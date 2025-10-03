@@ -112,36 +112,6 @@
             <i class="fas fa-calculator"></i> 일위대가 관리
           </button>
 
-          <!-- 구분선 -->
-          <div class="button-divider"></div>
-
-          <!-- 발주서 버튼 -->
-          <button
-            class="btn btn-blue"
-            id="purchaseOrderBtn"
-            onclick="generatePurchaseOrder()"
-          >
-            <i class="fas fa-file-invoice"></i> 발주서
-          </button>
-
-          <!-- 단가비교표 버튼 -->
-          <button
-            class="btn btn-cyan"
-            id="priceComparisonBtn"
-            onclick="generatePriceComparison()"
-          >
-            <i class="fas fa-chart-bar"></i> 단가비교표
-          </button>
-
-          <!-- 견적서 버튼 -->
-          <button
-            class="btn btn-blue"
-            id="estimateBtn"
-            onclick="generateEstimate()"
-          >
-            <i class="fas fa-receipt"></i> 견적서
-          </button>
-
         </div>
 
         <!-- Revit 데이터 확인 테이블 (항상 표시) -->
@@ -1184,9 +1154,25 @@
           <button class="btn btn-sm btn-secondary" onclick="toggleResultsPanel()">
             <i class="fas fa-chevron-down" id="panelToggleIcon"></i>
           </button>
-          <button class="btn btn-sm btn-primary" onclick="exportCalculationResults()">
-            <i class="fas fa-download"></i> Excel 내보내기
-          </button>
+          <div class="dropdown" style="position: relative; display: inline-block;">
+            <button class="btn btn-sm btn-primary" onclick="toggleExportDropdown(event)">
+              <i class="fas fa-download"></i> Excel 내보내기 <i class="fas fa-caret-down"></i>
+            </button>
+            <div id="exportDropdown" class="dropdown-menu" style="display: none;">
+              <a class="dropdown-item" onclick="exportCalculationResults()">
+                <i class="fas fa-file-excel"></i> 벽체 계산 결과 (4개 시트)
+              </a>
+              <a class="dropdown-item" onclick="exportOrderForm()">
+                <i class="fas fa-clipboard-list"></i> 발주서
+              </a>
+              <a class="dropdown-item" onclick="exportPriceComparisonToExcel()">
+                <i class="fas fa-chart-bar"></i> 단가비교표
+              </a>
+              <a class="dropdown-item" onclick="exportEstimate()">
+                <i class="fas fa-file-invoice"></i> 견적서
+              </a>
+            </div>
+          </div>
           <button class="btn btn-sm btn-danger" onclick="closeResultsPanel()">
             <i class="fas fa-times"></i>
           </button>
@@ -1205,6 +1191,15 @@
           <button class="panel-tab" onclick="switchResultTab('summary')">
             <i class="fas fa-chart-pie"></i> 집계 현황
           </button>
+          <button class="panel-tab" onclick="switchResultTab('orderForm')">
+            <i class="fas fa-clipboard-list"></i> 발주서
+          </button>
+          <button class="panel-tab" onclick="switchResultTab('priceComparison')">
+            <i class="fas fa-chart-bar"></i> 단가비교표
+          </button>
+          <button class="panel-tab" onclick="switchResultTab('estimate')">
+            <i class="fas fa-file-invoice"></i> 견적서
+          </button>
         </div>
         
         <!-- 벽체별 합계 탭 -->
@@ -1215,12 +1210,13 @@
                 <thead>
                   <tr>
                     <th>벽체명</th>
+                    <th>개수</th>
                     <th>단위</th>
                     <th>수량</th>
                     <th>자재비</th>
                     <th>노무비</th>
                     <th>단가</th>
-                    <th>금액</th>
+                    <th>총합계</th>
                   </tr>
                 </thead>
                 <tbody id="comparisonTableBody">
@@ -1269,6 +1265,35 @@
                 <h4>벽체 타입별 비교</h4>
                 <canvas id="wallTypeChart"></canvas>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 발주서 탭 -->
+        <div id="orderFormTab" class="tab-content">
+          <div id="orderFormContainer">
+            <div style="padding: 40px; text-align: center; color: #6c757d;">
+              <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+              <p style="font-size: 18px; margin-bottom: 10px;">발주서 기능</p>
+              <p style="font-size: 14px;">준비 중입니다.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 단가비교표 탭 -->
+        <div id="priceComparisonTab" class="tab-content">
+          <div id="priceComparisonContainer">
+            <!-- 단가비교표 내용이 동적으로 렌더링됩니다 -->
+          </div>
+        </div>
+
+        <!-- 견적서 탭 -->
+        <div id="estimateTab" class="tab-content">
+          <div id="estimateContainer">
+            <div style="padding: 40px; text-align: center; color: #6c757d;">
+              <i class="fas fa-file-invoice" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+              <p style="font-size: 18px; margin-bottom: 10px;">견적서 기능</p>
+              <p style="font-size: 14px;">준비 중입니다.</p>
             </div>
           </div>
         </div>

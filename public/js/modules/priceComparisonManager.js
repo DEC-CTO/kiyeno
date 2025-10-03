@@ -519,6 +519,11 @@ function formatQuantity(num) {
  * Excel 파일로 내보내기
  */
 function exportPriceComparisonToExcel() {
+    // 드롭다운 닫기
+    if (typeof window.closeExportDropdown === 'function') {
+        window.closeExportDropdown();
+    }
+
     const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
 
     let htmlContent = `
@@ -718,8 +723,8 @@ function exportPriceComparisonToExcel() {
         </html>
     `;
 
-    const fileName = `단가비교표_${new Date().toISOString().split('T')[0]}.xls`;
-    const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel' });
+    const fileName = `단가비교표_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const blob = new Blob([htmlContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -749,5 +754,48 @@ window.updateVendor = updateVendor;
 window.updateSupplyRate = updateSupplyRate;
 window.updateExpense = updateExpense;
 window.exportPriceComparisonToExcel = exportPriceComparisonToExcel;
+
+// =============================================================================
+// 탭 렌더링 함수
+// =============================================================================
+
+/**
+ * 단가비교표 탭에 렌더링 (모달 대신 탭 사용)
+ */
+window.renderPriceComparisonTable = function() {
+    console.log('💰 단가비교표 테이블 렌더링 시작');
+
+    const container = document.getElementById('priceComparisonContainer');
+    if (!container) {
+        console.error('❌ priceComparisonContainer를 찾을 수 없습니다');
+        return;
+    }
+
+    // 데이터 초기화 (items가 비어있으면 기본 아이템 1개 추가)
+    if (!priceComparisonData.items || priceComparisonData.items.length === 0) {
+        console.log('📝 데이터 초기화: 기본 아이템 추가');
+        priceComparisonData.items = [createEmptyItem(1)];
+    }
+
+    // 테이블 HTML 생성 (컨트롤 버튼 제거됨)
+    const html = `
+        <div class="price-comparison-table-wrapper" style="overflow-x: auto; padding: 15px;">
+            <table class="price-comparison-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                <thead id="priceComparisonTableHead">
+                    <!-- 테이블 헤더가 동적으로 생성됩니다 -->
+                </thead>
+                <tbody id="priceComparisonTableBody">
+                    <!-- 테이블 바디가 동적으로 생성됩니다 -->
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    container.innerHTML = html;
+
+    // 테이블 렌더링
+    renderTableHead();
+    renderTableBody();
+};
 
 console.log('✅ 단가비교표 관리 모듈 로드 완료');

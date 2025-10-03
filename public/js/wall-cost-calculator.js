@@ -851,24 +851,48 @@ function generateChartColors(count) {
 }
 
 /**
- * 비교 분석 렌더링
+ * 비교 분석 렌더링 (벽체명 그룹화)
  */
 function renderComparisonResults() {
     const tbody = document.getElementById('comparisonTableBody');
     if (!tbody || calculationResults.length === 0) return;
-    
+
     tbody.innerHTML = '';
-    
+
+    // 1단계: 벽체명으로 그룹화 및 집계
+    const groupedData = {};
+
     calculationResults.forEach(result => {
+        const wallName = result.wallName;
+
+        if (!groupedData[wallName]) {
+            groupedData[wallName] = {
+                count: 0,                                    // 개수
+                totalArea: 0,                                // 수량 합산
+                totalCost: 0,                                // 총합계 합산
+                materialUnitPrice: result.materialUnitPrice, // M2당 자재비 (첫 번째 값)
+                laborUnitPrice: result.laborUnitPrice,       // M2당 노무비 (첫 번째 값)
+                unitPrice: result.unitPrice                  // M2당 단가 (첫 번째 값)
+            };
+        }
+
+        groupedData[wallName].count++;
+        groupedData[wallName].totalArea += result.area;      // 면적 합산
+        groupedData[wallName].totalCost += result.totalCost;  // 금액 합산
+    });
+
+    // 2단계: 그룹화된 데이터로 테이블 행 생성
+    Object.entries(groupedData).forEach(([wallName, data]) => {
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${result.wallName}</td>
+            <td>${wallName}</td>
+            <td>${data.count}개</td>
             <td>M2</td>
-            <td class="text-right">${result.area.toFixed(2)}</td>
-            <td class="text-right cost-cell">₩${Math.round(result.materialUnitPrice || 0).toLocaleString()}</td>
-            <td class="text-right cost-cell">₩${Math.round(result.laborUnitPrice || 0).toLocaleString()}</td>
-            <td class="text-right">₩${Math.round(result.unitPrice || 0).toLocaleString()}</td>
-            <td class="text-right cost-cell">₩${Math.round(result.totalCost || 0).toLocaleString()}</td>
+            <td class="text-right">${data.totalArea.toFixed(2)}</td>
+            <td class="text-right cost-cell">₩${Math.round(data.materialUnitPrice || 0).toLocaleString()}</td>
+            <td class="text-right cost-cell">₩${Math.round(data.laborUnitPrice || 0).toLocaleString()}</td>
+            <td class="text-right">₩${Math.round(data.unitPrice || 0).toLocaleString()}</td>
+            <td class="text-right cost-cell">₩${Math.round(data.totalCost || 0).toLocaleString()}</td>
         `;
         tbody.appendChild(row);
     });
@@ -883,54 +907,63 @@ window.switchResultTab = function(tabName) {
         tab.classList.remove('active');
     });
     document.querySelector(`[onclick="switchResultTab('${tabName}')"]`).classList.add('active');
-    
+
     // 탭 콘텐츠 표시
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
     });
     document.getElementById(`${tabName}Tab`).classList.add('active');
-    
+
     currentActiveTab = tabName;
+
+    // 탭별 렌더링
+    if (tabName === 'priceComparison') {
+        renderPriceComparisonTab();
+    } else if (tabName === 'orderForm') {
+        renderOrderFormTab();
+    } else if (tabName === 'estimate') {
+        renderEstimateTab();
+    }
 };
 
 /**
  * Excel 내보내기
  */
 window.exportCalculationResults = function() {
+    // 드롭다운 닫기
+    closeExportDropdown();
+
     if (calculationResults.length === 0) {
         alert('내보낼 계산 결과가 없습니다.');
         return;
     }
-    
+
     try {
         console.log('📊 Excel 내보내기 시작:', calculationResults.length, '개 벽체');
-        
+
         // 워크북 생성
         const wb = XLSX.utils.book_new();
-        
-        // 1. 벽체별 상세 시트
-        createDetailSheet(wb);
-        
-        // 2. 집계 현황 시트
-        createSummarySheet(wb);
-        
-        // 3. 비교 분석 시트
+
+        // 1. 벽체별 합계 시트 (비교 분석)
         createComparisonSheet(wb);
-        
-        // 4. 레이어별 자재 시트
+
+        // 2. 벽체별 상세 시트
+        createDetailSheet(wb);
+
+        // 3. 레이어별 자재 시트
         createMaterialSheet(wb);
-        
+
         // 파일 이름 생성
         const now = new Date();
         const dateStr = now.toLocaleDateString('ko-KR').replace(/\./g, '').replace(/\s/g, '');
         const timeStr = now.toLocaleTimeString('ko-KR', {hour12: false}).replace(/:/g, '');
         const filename = `벽체계산결과_${dateStr}_${timeStr}.xlsx`;
-        
+
         // Excel 파일 다운로드
         XLSX.writeFile(wb, filename);
-        
+
         console.log('✅ Excel 파일 생성 완료:', filename);
-        
+
     } catch (error) {
         console.error('Excel 내보내기 실패:', error);
         alert('Excel 내보내기 중 오류가 발생했습니다: ' + error.message);
@@ -942,196 +975,221 @@ window.exportCalculationResults = function() {
  */
 function createDetailSheet(wb) {
     const data = [];
-    
-    // 헤더 추가
+
+    // 헤더 추가 (두께 단위 m로 변경, 단가를 총계 앞으로 이동)
     data.push([
-        'ElementID', '벽체명', '공간명', '레벨', '면적(m²)', '높이(m)', '길이(m)', '두께(mm)',
-        '재료비(₩)', '노무비(₩)', '총계(₩)', '단가(₩/m²)', '계산일시'
+        'ElementID', '벽체명', '공간명', '레벨', '면적(m²)', '높이(m)', '길이(m)', '두께(m)',
+        '재료비(₩)', '노무비(₩)', '단가(₩/m²)', '총계(₩)', '계산일시'
     ]);
-    
-    // 데이터 추가
+
+    // 데이터 추가 (천단위 콤마 적용)
     calculationResults.forEach(result => {
         data.push([
             result.elementId,
             result.wallName,
             result.roomName,
             result.level,
-            result.area,
-            result.height,
-            result.length,
-            result.thickness,
-            result.materialCost,
-            result.laborCost,
-            result.totalCost,
-            result.unitPrice,
+            result.area.toLocaleString(),
+            result.height.toLocaleString(),
+            result.length.toLocaleString(),
+            result.thickness.toFixed(3), // 두께는 이미 m 단위 (소수점 3자리)
+            Math.round(result.materialCost).toLocaleString(),
+            Math.round(result.laborCost).toLocaleString(),
+            Math.round(result.unitPrice).toLocaleString(),
+            Math.round(result.totalCost).toLocaleString(),
             new Date(result.calculatedAt).toLocaleString('ko-KR')
         ]);
     });
-    
+
     const ws = XLSX.utils.aoa_to_sheet(data);
-    
+
     // 컬럼 너비 설정
     ws['!cols'] = [
         {wch: 12}, {wch: 20}, {wch: 15}, {wch: 10}, {wch: 12},
         {wch: 10}, {wch: 10}, {wch: 10}, {wch: 15}, {wch: 15},
         {wch: 15}, {wch: 15}, {wch: 20}
     ];
-    
+
+    // 셀 정렬 및 스타일 설정
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
+            if (!ws[cell_address]) continue;
+
+            // 셀 스타일 초기화
+            if (!ws[cell_address].s) ws[cell_address].s = {};
+            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
+
+            // 금액 컬럼 (8:재료비, 9:노무비, 10:단가, 11:총계) - 우측 정렬
+            if (R > 0 && (C === 8 || C === 9 || C === 10 || C === 11)) {
+                ws[cell_address].s.alignment.horizontal = 'right';
+                ws[cell_address].s.alignment.vertical = 'center';
+            } else {
+                // 나머지 모든 컬럼 - 중앙 정렬
+                ws[cell_address].s.alignment.horizontal = 'center';
+                ws[cell_address].s.alignment.vertical = 'center';
+            }
+        }
+    }
+
     XLSX.utils.book_append_sheet(wb, ws, '벽체별상세');
 }
 
 /**
- * 집계 현황 시트 생성
- */
-function createSummarySheet(wb) {
-    const data = [];
-    
-    // 전체 합계
-    const totalArea = calculationResults.reduce((sum, r) => sum + r.area, 0);
-    const totalMaterialCost = calculationResults.reduce((sum, r) => sum + r.materialCost, 0);
-    const totalLaborCost = calculationResults.reduce((sum, r) => sum + r.laborCost, 0);
-    const totalProjectCost = totalMaterialCost + totalLaborCost;
-    
-    data.push(['=== 전체 집계 ===']);
-    data.push(['총 벽체 수', calculationResults.length, '개']);
-    data.push(['총 면적', totalArea, 'm²']);
-    data.push(['총 재료비', totalMaterialCost, '₩']);
-    data.push(['총 노무비', totalLaborCost, '₩']);
-    data.push(['총 공사비', totalProjectCost, '₩']);
-    data.push(['평균 단가', totalArea > 0 ? totalProjectCost / totalArea : 0, '₩/m²']);
-    data.push([]);
-    
-    // 벽체 타입별 집계
-    data.push(['=== 벽체 타입별 집계 ===']);
-    data.push(['벽체 타입', '개수', '면적(m²)', '재료비(₩)', '노무비(₩)', '총계(₩)', '평균단가(₩/m²)']);
-    
-    const typeData = {};
-    calculationResults.forEach(result => {
-        const typeName = result.wallName;
-        if (typeData[typeName]) {
-            typeData[typeName].count += 1;
-            typeData[typeName].area += result.area;
-            typeData[typeName].materialCost += result.materialCost;
-            typeData[typeName].laborCost += result.laborCost;
-        } else {
-            typeData[typeName] = {
-                count: 1,
-                area: result.area,
-                materialCost: result.materialCost,
-                laborCost: result.laborCost
-            };
-        }
-    });
-    
-    Object.entries(typeData).forEach(([typeName, typeInfo]) => {
-        const totalCost = typeInfo.materialCost + typeInfo.laborCost;
-        const unitPrice = typeInfo.area > 0 ? totalCost / typeInfo.area : 0;
-        
-        data.push([
-            typeName,
-            typeInfo.count,
-            typeInfo.area,
-            typeInfo.materialCost,
-            typeInfo.laborCost,
-            totalCost,
-            unitPrice
-        ]);
-    });
-    
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    
-    // 컬럼 너비 설정
-    ws['!cols'] = [
-        {wch: 20}, {wch: 10}, {wch: 12}, {wch: 15},
-        {wch: 15}, {wch: 15}, {wch: 15}
-    ];
-    
-    XLSX.utils.book_append_sheet(wb, ws, '집계현황');
-}
-
-/**
- * 비교 분석 시트 생성
+ * 비교 분석 시트 생성 (벽체명 그룹화)
  */
 function createComparisonSheet(wb) {
     const data = [];
-    
+
     // 헤더 추가
-    data.push(['벽체명', '면적(m²)', '단가(₩/m²)', '재료비(₩)', '노무비(₩)', '총계(₩)', '비율(%)']);
-    
-    const totalCost = calculationResults.reduce((sum, r) => sum + r.totalCost, 0);
-    
-    // 데이터 추가
+    data.push(['벽체명', '개수', '면적(m²)', '재료비(₩/m²)', '노무비(₩/m²)', '단가(₩/m²)', '총계(₩)', '비율(%)']);
+
+    // 벽체명으로 그룹화
+    const groupedData = {};
     calculationResults.forEach(result => {
-        const percentage = totalCost > 0 ? ((result.totalCost / totalCost) * 100).toFixed(2) : 0;
-        
+        const wallName = result.wallName;
+
+        if (!groupedData[wallName]) {
+            groupedData[wallName] = {
+                count: 0,
+                totalArea: 0,
+                totalCost: 0,
+                materialUnitPrice: result.materialUnitPrice,
+                laborUnitPrice: result.laborUnitPrice,
+                unitPrice: result.unitPrice
+            };
+        }
+
+        groupedData[wallName].count++;
+        groupedData[wallName].totalArea += result.area;
+        groupedData[wallName].totalCost += result.totalCost;
+    });
+
+    const totalCost = Object.values(groupedData).reduce((sum, g) => sum + g.totalCost, 0);
+
+    // 데이터 추가
+    Object.entries(groupedData).forEach(([wallName, groupInfo]) => {
+        const percentage = totalCost > 0 ? ((groupInfo.totalCost / totalCost) * 100).toFixed(2) : 0;
+
         data.push([
-            result.wallName,
-            result.area,
-            result.unitPrice,
-            result.materialCost,
-            result.laborCost,
-            result.totalCost,
+            wallName,
+            groupInfo.count.toLocaleString(),
+            groupInfo.totalArea.toLocaleString(),
+            Math.round(groupInfo.materialUnitPrice).toLocaleString(),
+            Math.round(groupInfo.laborUnitPrice).toLocaleString(),
+            Math.round(groupInfo.unitPrice).toLocaleString(),
+            Math.round(groupInfo.totalCost).toLocaleString(),
             percentage
         ]);
     });
-    
+
     const ws = XLSX.utils.aoa_to_sheet(data);
-    
+
     // 컬럼 너비 설정
     ws['!cols'] = [
-        {wch: 25}, {wch: 12}, {wch: 15}, {wch: 15},
-        {wch: 15}, {wch: 15}, {wch: 10}
+        {wch: 20}, {wch: 10}, {wch: 12}, {wch: 15},
+        {wch: 15}, {wch: 15}, {wch: 15}, {wch: 10}
     ];
-    
-    XLSX.utils.book_append_sheet(wb, ws, '비교분석');
+
+    // 셀 정렬 및 스타일 설정
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
+            if (!ws[cell_address]) continue;
+
+            // 셀 스타일 초기화
+            if (!ws[cell_address].s) ws[cell_address].s = {};
+            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
+
+            // 금액 컬럼 (3:재료비, 4:노무비, 5:단가, 6:총계) - 우측 정렬
+            if (R > 0 && (C === 3 || C === 4 || C === 5 || C === 6)) {
+                ws[cell_address].s.alignment.horizontal = 'right';
+                ws[cell_address].s.alignment.vertical = 'center';
+            } else {
+                // 나머지 모든 컬럼 - 중앙 정렬
+                ws[cell_address].s.alignment.horizontal = 'center';
+                ws[cell_address].s.alignment.vertical = 'center';
+            }
+        }
+    }
+
+    XLSX.utils.book_append_sheet(wb, ws, '벽체별합계');
 }
 
 /**
- * 레이어별 자재 시트 생성
+ * 레이어별 자재 시트 생성 (타입별 1개만)
  */
 function createMaterialSheet(wb) {
     const data = [];
-    
+
     // 헤더 추가
     data.push([
-        'ElementID', '벽체명', '레이어', '자재명', '공종1', '공종2', 
-        '재료비단가(₩/m²)', '노무비단가(₩/m²)', '면적(m²)', '재료비계(₩)', '노무비계(₩)', '소계(₩)'
+        '벽체명', '레이어', '자재명', '공종1', '공종2',
+        '재료비단가(₩/m²)', '노무비단가(₩/m²)', '합계단가(₩/m²)'
     ]);
-    
-    // 데이터 추가
+
+    // 타입별로 1개만 추출
+    const processedTypes = new Set();
+
     calculationResults.forEach(result => {
+        const wallName = result.wallName;
+
+        // 이미 처리된 타입이면 스킵
+        if (processedTypes.has(wallName)) return;
+        processedTypes.add(wallName);
+
+        // 레이어 정보 추가
         Object.entries(result.layerPricing || {}).forEach(([layerKey, layer]) => {
             if (!layer.found || !layer.materialName) return;
-            
-            const materialTotal = layer.materialPrice * result.area;
-            const laborTotal = layer.laborPrice * result.area;
-            const subtotal = materialTotal + laborTotal;
-            
+
+            const totalUnitPrice = layer.materialPrice + layer.laborPrice;
+
             data.push([
-                result.elementId,
-                result.wallName,
+                wallName,
                 getLayerDisplayName(layerKey),
                 layer.materialName,
                 layer.workType1 || '',
                 layer.workType2 || '',
-                layer.materialPrice,
-                layer.laborPrice,
-                result.area,
-                materialTotal,
-                laborTotal,
-                subtotal
+                Math.round(layer.materialPrice).toLocaleString(),
+                Math.round(layer.laborPrice).toLocaleString(),
+                Math.round(totalUnitPrice).toLocaleString()
             ]);
         });
     });
-    
+
     const ws = XLSX.utils.aoa_to_sheet(data);
-    
+
     // 컬럼 너비 설정
     ws['!cols'] = [
-        {wch: 12}, {wch: 20}, {wch: 15}, {wch: 25}, {wch: 12}, {wch: 12},
-        {wch: 15}, {wch: 15}, {wch: 10}, {wch: 15}, {wch: 15}, {wch: 15}
+        {wch: 20}, {wch: 15}, {wch: 25}, {wch: 12}, {wch: 12},
+        {wch: 15}, {wch: 15}, {wch: 15}
     ];
-    
+
+    // 셀 정렬 및 스타일 설정
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+        for (let C = range.s.c; C <= range.e.c; ++C) {
+            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
+            if (!ws[cell_address]) continue;
+
+            // 셀 스타일 초기화
+            if (!ws[cell_address].s) ws[cell_address].s = {};
+            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
+
+            // 금액 컬럼 (5:재료비단가, 6:노무비단가, 7:합계단가) - 우측 정렬
+            if (R > 0 && (C === 5 || C === 6 || C === 7)) {
+                ws[cell_address].s.alignment.horizontal = 'right';
+                ws[cell_address].s.alignment.vertical = 'center';
+            } else {
+                // 나머지 모든 컬럼 - 중앙 정렬
+                ws[cell_address].s.alignment.horizontal = 'center';
+                ws[cell_address].s.alignment.vertical = 'center';
+            }
+        }
+    }
+
     XLSX.utils.book_append_sheet(wb, ws, '레이어별자재');
 }
 
@@ -1299,5 +1357,95 @@ function createSingleWallMaterialSheet(wb, result) {
     
     XLSX.utils.book_append_sheet(wb, ws, '레이어별자재');
 }
+
+/**
+ * 발주서 탭 렌더링
+ */
+function renderOrderFormTab() {
+    console.log('📋 발주서 탭 렌더링');
+    // 향후 구현
+}
+
+/**
+ * 단가비교표 탭 렌더링
+ */
+function renderPriceComparisonTab() {
+    console.log('💰 단가비교표 탭 렌더링');
+
+    if (calculationResults.length === 0) {
+        const container = document.getElementById('priceComparisonContainer');
+        container.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: #6c757d;">
+                <i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p style="font-size: 18px; margin-bottom: 10px;">벽체 계산이 필요합니다</p>
+                <p style="font-size: 14px;">먼저 벽체를 선택하고 "계산하기" 버튼을 클릭하세요.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // priceComparisonManager.js의 renderPriceComparisonTable() 호출
+    if (typeof window.renderPriceComparisonTable === 'function') {
+        window.renderPriceComparisonTable();
+    }
+}
+
+/**
+ * 견적서 탭 렌더링
+ */
+function renderEstimateTab() {
+    console.log('📄 견적서 탭 렌더링');
+    // 향후 구현
+}
+
+// =============================================================================
+// Excel 내보내기 드롭다운 관리
+// =============================================================================
+
+/**
+ * Excel 내보내기 드롭다운 토글
+ */
+window.toggleExportDropdown = function(event) {
+    if (event) event.stopPropagation();
+    const dropdown = document.getElementById('exportDropdown');
+    const isVisible = dropdown.style.display === 'block';
+    dropdown.style.display = isVisible ? 'none' : 'block';
+};
+
+/**
+ * 드롭다운 닫기
+ */
+window.closeExportDropdown = function() {
+    const dropdown = document.getElementById('exportDropdown');
+    if (dropdown) dropdown.style.display = 'none';
+};
+
+/**
+ * 발주서 Excel 내보내기 (향후 구현)
+ */
+window.exportOrderForm = function() {
+    closeExportDropdown();
+    alert('발주서 Excel 내보내기 기능은 준비 중입니다.');
+    // TODO: 발주서 Excel 내보내기 구현
+};
+
+/**
+ * 견적서 Excel 내보내기 (향후 구현)
+ */
+window.exportEstimate = function() {
+    closeExportDropdown();
+    alert('견적서 Excel 내보내기 기능은 준비 중입니다.');
+    // TODO: 견적서 Excel 내보내기 구현
+};
+
+// 외부 클릭 시 드롭다운 닫기
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('exportDropdown');
+    const button = event.target.closest('[onclick*="toggleExportDropdown"]');
+
+    if (!button && dropdown && dropdown.style.display === 'block') {
+        dropdown.style.display = 'none';
+    }
+});
 
 console.log('✅ wall-cost-calculator.js 로드 완료');
