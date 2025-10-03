@@ -667,28 +667,13 @@ body {
     font-size: 9px;
 }
 
-.col-channel { 
+.col-column2,
+.col-channel,
+.col-runner,
+.col-steel {
     width: 100px;
     min-width: 100px;
     max-width: 120px;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-    font-size: 9px;
-}
-.col-runner { 
-    width: 100px;
-    min-width: 100px;
-    max-width: 120px;
-    white-space: normal;
-    word-wrap: break-word;
-    line-height: 1.2;
-    font-size: 9px;
-}
-.col-steel { 
-    width: 120px;
-    min-width: 120px;
-    max-width: 150px;
     white-space: normal;
     word-wrap: break-word;
     line-height: 1.2;

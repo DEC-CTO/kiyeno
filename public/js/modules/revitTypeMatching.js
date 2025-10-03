@@ -211,14 +211,14 @@ function createProjectManagementPanel() {
                                 </th>
                                 <th rowspan="2" class="header-main col-no" title="순서 번호">No</th>
                                 <th rowspan="2" class="header-main col-walltype" title="벽체 타입명">WallType</th>
-                                <th colspan="3" class="header-main" title="석고보드 구조체 레이어">석고보드 구조체</th>
-                                <th rowspan="2" class="header-main col-column col-priority-high" title="Column 모듈게이지">Column<br/>모듈게이지</th>
-                                <th rowspan="2" class="header-main col-infill col-priority-high" title="충진재">Infill</th>
-                                <th colspan="3" class="header-main col-priority-high" title="석고보드 구조체 레이어">석고보드 구조체</th>
-                                <th rowspan="2" class="header-main col-column2 col-priority-medium" title="컬럼">Column</th>
-                                <th rowspan="2" class="header-main col-channel col-priority-low" title="채널">Channel</th>
-                                <th rowspan="2" class="header-main col-runner col-priority-low" title="러너">Runner</th>
-                                <th rowspan="2" class="header-main col-steel col-priority-low" title="아연도금 철판">Steel Plate<br/>(Galvanizing)</th>
+                                <th colspan="3" class="header-main" title="좌측 마감 레이어">좌측마감</th>
+                                <th rowspan="2" class="header-main col-column col-priority-high" title="구조체">구조체</th>
+                                <th rowspan="2" class="header-main col-infill col-priority-high" title="단열제">단열제</th>
+                                <th colspan="3" class="header-main col-priority-high" title="우측 마감 레이어">우측마감</th>
+                                <th rowspan="2" class="header-main col-column2 col-priority-medium" title="옵션1">옵션1</th>
+                                <th rowspan="2" class="header-main col-channel col-priority-low" title="옵션2">옵션2</th>
+                                <th rowspan="2" class="header-main col-runner col-priority-low" title="옵션3">옵션3</th>
+                                <th rowspan="2" class="header-main col-steel col-priority-low" title="옵션4">옵션4</th>
                                 <th rowspan="2" class="header-main col-thickness col-priority-medium" title="벽체 두께 (밀리미터)">두께(mm)</th>
                             </tr>
                             <tr class="header-sub-row">
