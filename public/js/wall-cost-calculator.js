@@ -927,9 +927,9 @@ window.switchResultTab = function(tabName) {
 };
 
 /**
- * Excel 내보내기
+ * Excel 내보내기 (ExcelJS 사용)
  */
-window.exportCalculationResults = function() {
+window.exportCalculationResults = async function() {
     // 드롭다운 닫기
     closeExportDropdown();
 
@@ -941,17 +941,17 @@ window.exportCalculationResults = function() {
     try {
         console.log('📊 Excel 내보내기 시작:', calculationResults.length, '개 벽체');
 
-        // 워크북 생성
-        const wb = XLSX.utils.book_new();
+        // ExcelJS 워크북 생성
+        const workbook = new ExcelJS.Workbook();
 
         // 1. 벽체별 합계 시트 (비교 분석)
-        createComparisonSheet(wb);
+        await createComparisonSheet(workbook);
 
         // 2. 벽체별 상세 시트
-        createDetailSheet(wb);
+        await createDetailSheet(workbook);
 
         // 3. 레이어별 자재 시트
-        createMaterialSheet(wb);
+        await createMaterialSheet(workbook);
 
         // 파일 이름 생성
         const now = new Date();
@@ -960,7 +960,14 @@ window.exportCalculationResults = function() {
         const filename = `벽체계산결과_${dateStr}_${timeStr}.xlsx`;
 
         // Excel 파일 다운로드
-        XLSX.writeFile(wb, filename);
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
 
         console.log('✅ Excel 파일 생성 완료:', filename);
 
@@ -971,79 +978,112 @@ window.exportCalculationResults = function() {
 };
 
 /**
- * 벽체별 상세 시트 생성
+ * 벽체별 상세 시트 생성 - ExcelJS
  */
-function createDetailSheet(wb) {
-    const data = [];
+async function createDetailSheet(workbook) {
+    const worksheet = workbook.addWorksheet('벽체별상세');
 
-    // 헤더 추가 (두께 단위 m로 변경, 단가를 총계 앞으로 이동)
-    data.push([
-        'ElementID', '벽체명', '공간명', '레벨', '면적(m²)', '높이(m)', '길이(m)', '두께(m)',
-        '재료비(₩)', '노무비(₩)', '단가(₩/m²)', '총계(₩)', '계산일시'
-    ]);
-
-    // 데이터 추가 (천단위 콤마 적용)
-    calculationResults.forEach(result => {
-        data.push([
-            result.elementId,
-            result.wallName,
-            result.roomName,
-            result.level,
-            result.area.toLocaleString(),
-            result.height.toLocaleString(),
-            result.length.toLocaleString(),
-            result.thickness.toFixed(3), // 두께는 이미 m 단위 (소수점 3자리)
-            Math.round(result.materialCost).toLocaleString(),
-            Math.round(result.laborCost).toLocaleString(),
-            Math.round(result.unitPrice).toLocaleString(),
-            Math.round(result.totalCost).toLocaleString(),
-            new Date(result.calculatedAt).toLocaleString('ko-KR')
-        ]);
-    });
-
-    const ws = XLSX.utils.aoa_to_sheet(data);
-
-    // 컬럼 너비 설정
-    ws['!cols'] = [
-        {wch: 12}, {wch: 20}, {wch: 15}, {wch: 10}, {wch: 12},
-        {wch: 10}, {wch: 10}, {wch: 10}, {wch: 15}, {wch: 15},
-        {wch: 15}, {wch: 15}, {wch: 20}
+    // 컬럼 정의
+    worksheet.columns = [
+        { header: 'ElementID', key: 'elementId', width: 12 },
+        { header: '벽체명', key: 'wallName', width: 20 },
+        { header: '공간명', key: 'roomName', width: 15 },
+        { header: '레벨', key: 'level', width: 10 },
+        { header: '면적(m²)', key: 'area', width: 12 },
+        { header: '높이(m)', key: 'height', width: 10 },
+        { header: '길이(m)', key: 'length', width: 10 },
+        { header: '두께(m)', key: 'thickness', width: 10 },
+        { header: '재료비(₩)', key: 'materialCost', width: 15 },
+        { header: '노무비(₩)', key: 'laborCost', width: 15 },
+        { header: '단가(₩/m²)', key: 'unitPrice', width: 15 },
+        { header: '총계(₩)', key: 'totalCost', width: 15 },
+        { header: '계산일시', key: 'calculatedAt', width: 20 }
     ];
 
-    // 셀 정렬 및 스타일 설정
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-            if (!ws[cell_address]) continue;
+    // 데이터 추가
+    calculationResults.forEach(result => {
+        worksheet.addRow({
+            elementId: result.elementId,
+            wallName: result.wallName,
+            roomName: result.roomName,
+            level: result.level,
+            area: result.area,
+            height: result.height,
+            length: result.length,
+            thickness: result.thickness,
+            materialCost: Math.round(result.materialCost),
+            laborCost: Math.round(result.laborCost),
+            unitPrice: Math.round(result.unitPrice),
+            totalCost: Math.round(result.totalCost),
+            calculatedAt: new Date(result.calculatedAt).toLocaleString('ko-KR')
+        });
+    });
 
-            // 셀 스타일 초기화
-            if (!ws[cell_address].s) ws[cell_address].s = {};
-            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
+    // 헤더 스타일 적용
+    worksheet.getRow(1).eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF8F9FA' }
+        };
+        cell.font = { bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+    });
 
-            // 금액 컬럼 (8:재료비, 9:노무비, 10:단가, 11:총계) - 우측 정렬
-            if (R > 0 && (C === 8 || C === 9 || C === 10 || C === 11)) {
-                ws[cell_address].s.alignment.horizontal = 'right';
-                ws[cell_address].s.alignment.vertical = 'center';
+    // 데이터 행 스타일 적용
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // 헤더는 이미 처리됨
+
+        row.eachCell((cell, colNumber) => {
+            // 테두리
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+
+            // 정렬: 금액 컬럼(9~12)은 우측, 나머지는 중앙
+            if (colNumber >= 9 && colNumber <= 12) {
+                cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                // 천단위 콤마
+                cell.numFmt = '#,##0';
             } else {
-                // 나머지 모든 컬럼 - 중앙 정렬
-                ws[cell_address].s.alignment.horizontal = 'center';
-                ws[cell_address].s.alignment.vertical = 'center';
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                // 수치 컬럼 포맷
+                if (colNumber === 5 || colNumber === 6 || colNumber === 7) { // 면적, 높이, 길이
+                    cell.numFmt = '#,##0.##';
+                } else if (colNumber === 8) { // 두께
+                    cell.numFmt = '0.000';
+                }
             }
-        }
-    }
-
-    XLSX.utils.book_append_sheet(wb, ws, '벽체별상세');
+        });
+    });
 }
 
 /**
- * 비교 분석 시트 생성 (벽체명 그룹화)
+ * 비교 분석 시트 생성 (벽체명 그룹화) - ExcelJS
  */
-function createComparisonSheet(wb) {
-    const data = [];
+async function createComparisonSheet(workbook) {
+    const worksheet = workbook.addWorksheet('벽체별합계');
 
-    // 헤더 추가
-    data.push(['벽체명', '개수', '면적(m²)', '재료비(₩/m²)', '노무비(₩/m²)', '단가(₩/m²)', '총계(₩)', '비율(%)']);
+    // 컬럼 정의
+    worksheet.columns = [
+        { header: '벽체명', key: 'wallName', width: 20 },
+        { header: '개수', key: 'count', width: 10 },
+        { header: '면적(m²)', key: 'area', width: 12 },
+        { header: '재료비(₩/m²)', key: 'materialPrice', width: 15 },
+        { header: '노무비(₩/m²)', key: 'laborPrice', width: 15 },
+        { header: '단가(₩/m²)', key: 'unitPrice', width: 15 },
+        { header: '총계(₩)', key: 'totalCost', width: 15 },
+        { header: '비율(%)', key: 'percentage', width: 10 }
+    ];
 
     // 벽체명으로 그룹화
     const groupedData = {};
@@ -1072,63 +1112,82 @@ function createComparisonSheet(wb) {
     Object.entries(groupedData).forEach(([wallName, groupInfo]) => {
         const percentage = totalCost > 0 ? ((groupInfo.totalCost / totalCost) * 100).toFixed(2) : 0;
 
-        data.push([
-            wallName,
-            groupInfo.count.toLocaleString(),
-            groupInfo.totalArea.toLocaleString(),
-            Math.round(groupInfo.materialUnitPrice).toLocaleString(),
-            Math.round(groupInfo.laborUnitPrice).toLocaleString(),
-            Math.round(groupInfo.unitPrice).toLocaleString(),
-            Math.round(groupInfo.totalCost).toLocaleString(),
-            percentage
-        ]);
+        worksheet.addRow({
+            wallName: wallName,
+            count: groupInfo.count,
+            area: groupInfo.totalArea,
+            materialPrice: Math.round(groupInfo.materialUnitPrice),
+            laborPrice: Math.round(groupInfo.laborUnitPrice),
+            unitPrice: Math.round(groupInfo.unitPrice),
+            totalCost: Math.round(groupInfo.totalCost),
+            percentage: percentage
+        });
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(data);
+    // 헤더 스타일 적용
+    worksheet.getRow(1).eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF8F9FA' }
+        };
+        cell.font = { bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+    });
 
-    // 컬럼 너비 설정
-    ws['!cols'] = [
-        {wch: 20}, {wch: 10}, {wch: 12}, {wch: 15},
-        {wch: 15}, {wch: 15}, {wch: 15}, {wch: 10}
-    ];
+    // 데이터 행 스타일 적용
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // 헤더는 이미 처리됨
 
-    // 셀 정렬 및 스타일 설정
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-            if (!ws[cell_address]) continue;
+        row.eachCell((cell, colNumber) => {
+            // 테두리
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
 
-            // 셀 스타일 초기화
-            if (!ws[cell_address].s) ws[cell_address].s = {};
-            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
-
-            // 금액 컬럼 (3:재료비, 4:노무비, 5:단가, 6:총계) - 우측 정렬
-            if (R > 0 && (C === 3 || C === 4 || C === 5 || C === 6)) {
-                ws[cell_address].s.alignment.horizontal = 'right';
-                ws[cell_address].s.alignment.vertical = 'center';
+            // 정렬: 금액 컬럼(4~7)은 우측, 나머지는 중앙
+            if (colNumber >= 4 && colNumber <= 7) {
+                cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                // 천단위 콤마
+                if (colNumber !== 8) { // 비율 제외
+                    cell.numFmt = '#,##0';
+                }
             } else {
-                // 나머지 모든 컬럼 - 중앙 정렬
-                ws[cell_address].s.alignment.horizontal = 'center';
-                ws[cell_address].s.alignment.vertical = 'center';
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                if (colNumber === 2 || colNumber === 3) { // 개수, 면적
+                    cell.numFmt = '#,##0.##';
+                }
             }
-        }
-    }
-
-    XLSX.utils.book_append_sheet(wb, ws, '벽체별합계');
+        });
+    });
 }
 
 /**
- * 레이어별 자재 시트 생성 (타입별 1개만)
+ * 레이어별 자재 시트 생성 (타입별 1개만) - ExcelJS
  */
-function createMaterialSheet(wb) {
-    const data = [];
+async function createMaterialSheet(workbook) {
+    const worksheet = workbook.addWorksheet('레이어별자재');
 
-    // 헤더 추가
-    data.push([
-        '벽체명', '레이어', '자재명', '공종1', '공종2',
-        '재료비단가(₩/m²)', '노무비단가(₩/m²)', '합계단가(₩/m²)'
-    ]);
+    // 컬럼 정의
+    worksheet.columns = [
+        { header: '벽체명', key: 'wallName', width: 20 },
+        { header: '레이어', key: 'layer', width: 15 },
+        { header: '자재명', key: 'materialName', width: 25 },
+        { header: '공종1', key: 'workType1', width: 12 },
+        { header: '공종2', key: 'workType2', width: 12 },
+        { header: '재료비단가(₩/m²)', key: 'materialPrice', width: 15 },
+        { header: '노무비단가(₩/m²)', key: 'laborPrice', width: 15 },
+        { header: '합계단가(₩/m²)', key: 'totalPrice', width: 15 }
+    ];
 
     // 타입별로 1개만 추출
     const processedTypes = new Set();
@@ -1146,51 +1205,59 @@ function createMaterialSheet(wb) {
 
             const totalUnitPrice = layer.materialPrice + layer.laborPrice;
 
-            data.push([
-                wallName,
-                getLayerDisplayName(layerKey),
-                layer.materialName,
-                layer.workType1 || '',
-                layer.workType2 || '',
-                Math.round(layer.materialPrice).toLocaleString(),
-                Math.round(layer.laborPrice).toLocaleString(),
-                Math.round(totalUnitPrice).toLocaleString()
-            ]);
+            worksheet.addRow({
+                wallName: wallName,
+                layer: getLayerDisplayName(layerKey),
+                materialName: layer.materialName,
+                workType1: layer.workType1 || '',
+                workType2: layer.workType2 || '',
+                materialPrice: Math.round(layer.materialPrice),
+                laborPrice: Math.round(layer.laborPrice),
+                totalPrice: Math.round(totalUnitPrice)
+            });
         });
     });
 
-    const ws = XLSX.utils.aoa_to_sheet(data);
+    // 헤더 스타일 적용
+    worksheet.getRow(1).eachCell((cell) => {
+        cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF8F9FA' }
+        };
+        cell.font = { bold: true };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+    });
 
-    // 컬럼 너비 설정
-    ws['!cols'] = [
-        {wch: 20}, {wch: 15}, {wch: 25}, {wch: 12}, {wch: 12},
-        {wch: 15}, {wch: 15}, {wch: 15}
-    ];
+    // 데이터 행 스타일 적용
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // 헤더는 이미 처리됨
 
-    // 셀 정렬 및 스타일 설정
-    const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let R = range.s.r; R <= range.e.r; ++R) {
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-            const cell_address = XLSX.utils.encode_cell({r: R, c: C});
-            if (!ws[cell_address]) continue;
+        row.eachCell((cell, colNumber) => {
+            // 테두리
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
 
-            // 셀 스타일 초기화
-            if (!ws[cell_address].s) ws[cell_address].s = {};
-            if (!ws[cell_address].s.alignment) ws[cell_address].s.alignment = {};
-
-            // 금액 컬럼 (5:재료비단가, 6:노무비단가, 7:합계단가) - 우측 정렬
-            if (R > 0 && (C === 5 || C === 6 || C === 7)) {
-                ws[cell_address].s.alignment.horizontal = 'right';
-                ws[cell_address].s.alignment.vertical = 'center';
+            // 정렬: 금액 컬럼(6~8)은 우측, 나머지는 중앙
+            if (colNumber >= 6 && colNumber <= 8) {
+                cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                // 천단위 콤마
+                cell.numFmt = '#,##0';
             } else {
-                // 나머지 모든 컬럼 - 중앙 정렬
-                ws[cell_address].s.alignment.horizontal = 'center';
-                ws[cell_address].s.alignment.vertical = 'center';
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
             }
-        }
-    }
-
-    XLSX.utils.book_append_sheet(wb, ws, '레이어별자재');
+        });
+    });
 }
 
 /**

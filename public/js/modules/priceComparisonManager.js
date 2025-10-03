@@ -516,224 +516,247 @@ function formatQuantity(num) {
 // =============================================================================
 
 /**
- * Excel 파일로 내보내기
+ * Excel 파일로 내보내기 - ExcelJS
  */
-function exportPriceComparisonToExcel() {
+async function exportPriceComparisonToExcel() {
     // 드롭다운 닫기
     if (typeof window.closeExportDropdown === 'function') {
         window.closeExportDropdown();
     }
 
-    const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('단가비교표');
 
-    let htmlContent = `
-        <html xmlns:x="urn:schemas-microsoft-com:office:excel">
-        <head>
-            <meta charset="utf-8">
-            <style>
-                * { font-family: Arial, sans-serif; }
-                table { border-collapse: collapse; width: 100%; }
-                td {
-                    border: 0.5pt solid #000;
-                    padding: 4px;
-                    text-align: center;
-                    font-size: 11pt;
-                    mso-number-format: "@";
+        const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
+
+        // 헤더 행 1 - 타이틀 행
+        const headerRow1 = worksheet.addRow([]);
+        let colIdx = 1;
+
+        // 고정 헤더 (rowspan=2)
+        ['NO', '품명', '규격', '단위', '계약도급수량'].forEach(text => {
+            const cell = headerRow1.getCell(colIdx);
+            cell.value = text;
+            worksheet.mergeCells(1, colIdx, 2, colIdx); // rowspan=2
+            colIdx++;
+        });
+
+        // 계약도급 (colspan=2)
+        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        headerRow1.getCell(colIdx).value = '계약도급';
+        colIdx += 2;
+
+        // 단위, 발주수량 (rowspan=2)
+        ['단위', '발주수량'].forEach(text => {
+            const cell = headerRow1.getCell(colIdx);
+            cell.value = text;
+            worksheet.mergeCells(1, colIdx, 2, colIdx);
+            colIdx++;
+        });
+
+        // 진행도급 (colspan=2)
+        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        headerRow1.getCell(colIdx).value = '진행도급';
+        colIdx += 2;
+
+        // 수량 (rowspan=2)
+        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        headerRow1.getCell(colIdx).value = '수량';
+        colIdx++;
+
+        // 발주단가 (colspan=2)
+        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        headerRow1.getCell(colIdx).value = '발주단가';
+        colIdx += 2;
+
+        // 수량 (rowspan=2)
+        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        headerRow1.getCell(colIdx).value = '수량';
+        colIdx++;
+
+        // 업체 컬럼들
+        priceComparisonData.items[0].vendors.forEach((vendor, vIdx) => {
+            const isLast = vIdx === vendorCount - 1;
+            worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+            headerRow1.getCell(colIdx).value = vendor.name;
+            colIdx += 2;
+
+            if (!isLast) {
+                worksheet.mergeCells(1, colIdx, 2, colIdx);
+                headerRow1.getCell(colIdx).value = '수량';
+                colIdx++;
+            }
+        });
+
+        // 비고 (rowspan=2)
+        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        headerRow1.getCell(colIdx).value = '비고';
+
+        // 헤더 행 2 - 서브 헤더
+        const headerRow2 = worksheet.addRow([]);
+        colIdx = 6; // 계약도급부터 시작
+
+        // 계약도급 서브헤더
+        headerRow2.getCell(colIdx++).value = '단가';
+        headerRow2.getCell(colIdx++).value = '금액';
+        colIdx += 2; // 단위, 발주수량 건너뜀
+
+        // 진행도급 서브헤더
+        headerRow2.getCell(colIdx++).value = '단가';
+        headerRow2.getCell(colIdx++).value = '금액';
+        colIdx++; // 수량 건너뜀
+
+        // 발주단가 서브헤더
+        headerRow2.getCell(colIdx++).value = '단가';
+        headerRow2.getCell(colIdx++).value = '금액';
+        colIdx++; // 수량 건너뜀
+
+        // 업체 서브헤더
+        for (let v = 0; v < vendorCount; v++) {
+            const isLast = v === vendorCount - 1;
+            headerRow2.getCell(colIdx++).value = '단가';
+            headerRow2.getCell(colIdx++).value = '금액';
+            if (!isLast) colIdx++; // 수량 건너뜀
+        }
+
+        // 헤더 스타일 적용
+        [headerRow1, headerRow2].forEach(row => {
+            row.eachCell((cell) => {
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD3D3D3' }
+                };
+                cell.font = { bold: true, size: 12 };
+                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            });
+        });
+
+        // 데이터 행 추가 함수
+        const addDataRow = (rowData) => {
+            let dataColIdx = 1;
+            const row = worksheet.addRow([]);
+
+            // 기본 필드
+            row.getCell(dataColIdx++).value = rowData.no || '';
+            row.getCell(dataColIdx++).value = rowData.itemName;
+            row.getCell(dataColIdx++).value = rowData.spec;
+            row.getCell(dataColIdx++).value = rowData.unit;
+            row.getCell(dataColIdx++).value = parseFloat(rowData.contractQty) || 0;
+
+            // 계약도급
+            row.getCell(dataColIdx++).value = parseFloat(rowData.contractPrice.unitPrice) || 0;
+            row.getCell(dataColIdx++).value = parseFloat(rowData.contractPrice.amount) || 0;
+
+            // 단위, 발주수량
+            row.getCell(dataColIdx++).value = rowData.orderUnit;
+            row.getCell(dataColIdx++).value = parseFloat(rowData.orderQuantity) || 0;
+
+            // 진행도급
+            row.getCell(dataColIdx++).value = parseFloat(rowData.progressPrice.unitPrice) || 0;
+            row.getCell(dataColIdx++).value = parseFloat(rowData.progressPrice.amount) || 0;
+
+            // 수량
+            row.getCell(dataColIdx++).value = parseFloat(rowData.progressQuantity) || 0;
+
+            // 발주단가
+            row.getCell(dataColIdx++).value = parseFloat(rowData.orderPrice.unitPrice) || 0;
+            row.getCell(dataColIdx++).value = parseFloat(rowData.orderPrice.amount) || 0;
+
+            // 수량2
+            row.getCell(dataColIdx++).value = parseFloat(rowData.orderQuantity2) || 0;
+
+            // 업체들
+            rowData.vendors.forEach((vendor, vIdx) => {
+                const isLast = vIdx === vendorCount - 1;
+                row.getCell(dataColIdx++).value = parseFloat(vendor.unitPrice) || 0;
+                row.getCell(dataColIdx++).value = parseFloat(vendor.amount) || 0;
+                if (!isLast) {
+                    row.getCell(dataColIdx++).value = parseFloat(vendor.quantity) || 0;
                 }
-                th {
-                    border: 0.5pt solid #000;
-                    padding: 4px;
-                    text-align: center;
-                    background-color: #d3d3d3 !important;
-                    color: black !important;
-                    font-weight: bold;
-                    font-size: 12pt !important;
-                    mso-pattern: gray-25 solid;
+            });
+
+            // 비고
+            row.getCell(dataColIdx).value = rowData.remarks || '';
+
+            // 스타일 적용
+            row.eachCell((cell, cellColIdx) => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                // 숫자 컬럼은 우측 정렬 및 천단위 콤마
+                if (cellColIdx >= 5 && cellColIdx !== 4 && cellColIdx !== 8) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    if (typeof cell.value === 'number') {
+                        cell.numFmt = '#,##0';
+                    }
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
                 }
-                thead th {
-                    background-color: #d3d3d3 !important;
-                    font-size: 12pt !important;
-                }
-                h2 { font-size: 14pt; font-weight: bold; }
-                .supply-row { background-color: #e3f2fd; }
-                .expense-row { background-color: #fff3cd; }
-                .total-row { background-color: #d1ecf1; font-weight: bold; }
-                .number { text-align: right; }
-            </style>
-        </head>
-        <body>
-            <h2>단가비교표</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th rowspan="2">NO</th>
-                        <th rowspan="2">품명</th>
-                        <th rowspan="2">규격</th>
-                        <th rowspan="2">단위</th>
-                        <th rowspan="2">계약도급수량</th>
-                        <th colspan="2">계약도급</th>
-                        <th rowspan="2">단위</th>
-                        <th rowspan="2">발주수량</th>
-                        <th colspan="2">진행도급</th>
-                        <th rowspan="2">수량</th>
-                        <th colspan="2">발주단가</th>
-                        <th rowspan="2">수량</th>
-                        ${Array.from({ length: vendorCount }, (_, i) => {
-                            const isLast = i === vendorCount - 1;
-                            return `<th colspan="2">${priceComparisonData.items[0].vendors[i].name}</th>${isLast ? '' : '<th rowspan="2">수량</th>'}`;
-                        }).join('')}
-                        <th rowspan="2">비고</th>
-                    </tr>
-                    <tr>
-                        <th>단가</th>
-                        <th>금액</th>
-                        <th>단가</th>
-                        <th>금액</th>
-                        <th>단가</th>
-                        <th>금액</th>
-                        ${Array.from({ length: vendorCount }, () =>
-                            '<th>단가</th><th>금액</th>'
-                        ).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-    `;
+            });
 
-    // 첫 번째 행: 현장명
-    htmlContent += `
-        <tr>
-            <td></td>
-            <td>${priceComparisonData.siteName || ''}</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            ${Array.from({ length: vendorCount === 3 ? 7 : vendorCount * 3 }).map(() => '<td></td>').join('')}
-            <td></td>
-        </tr>
-    `;
+            return row;
+        };
 
-    // 두 번째 행: 경량공사 요약
-    const summary = priceComparisonData.summaryRow;
-    htmlContent += `
-        <tr>
-            <td></td>
-            <td>${summary.itemName}</td>
-            <td>${summary.spec}</td>
-            <td>${summary.unit}</td>
-            <td class="number">${formatQuantity(summary.contractQty)}</td>
-            <td class="number">${formatNumber(summary.contractPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(summary.contractPrice.amount)}</td>
-            <td>${summary.orderUnit}</td>
-            <td class="number">${formatQuantity(summary.orderQuantity)}</td>
-            <td class="number">${formatNumber(summary.progressPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(summary.progressPrice.amount)}</td>
-            <td class="number">${formatQuantity(summary.progressQuantity)}</td>
-            <td class="number">${formatNumber(summary.orderPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(summary.orderPrice.amount)}</td>
-            <td class="number">${formatQuantity(summary.orderQuantity2)}</td>
-            ${summary.vendors.map((vendor, vIdx) => {
-                const isLast = vIdx === summary.vendors.length - 1;
-                return `
-                    <td class="number">${formatNumber(vendor.unitPrice)}</td>
-                    <td class="number">${formatNumber(vendor.amount)}</td>
-                    ${isLast ? '' : `<td class="number">${formatQuantity(vendor.quantity)}</td>`}
-                `;
-            }).join('')}
-            <td>${summary.remarks}</td>
-        </tr>
-    `;
+        // 첫 번째 데이터 행: 현장명
+        const siteRow = worksheet.addRow([]);
+        siteRow.getCell(2).value = priceComparisonData.siteName || '';
+        siteRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
 
-    // 세 번째 행: 공과잡비
-    const misc = priceComparisonData.miscRow;
-    htmlContent += `
-        <tr>
-            <td></td>
-            <td>${misc.itemName}</td>
-            <td>${misc.spec || ''}</td>
-            <td>${misc.unit}</td>
-            <td class="number">${formatQuantity(misc.contractQty)}</td>
-            <td class="number">${formatNumber(misc.contractPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(misc.contractPrice.amount)}</td>
-            <td>${misc.orderUnit || ''}</td>
-            <td class="number">${formatQuantity(misc.orderQuantity)}</td>
-            <td class="number">${formatNumber(misc.progressPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(misc.progressPrice.amount)}</td>
-            <td class="number">${formatQuantity(misc.progressQuantity)}</td>
-            <td class="number">${formatNumber(misc.orderPrice.unitPrice)}</td>
-            <td class="number">${formatNumber(misc.orderPrice.amount)}</td>
-            <td class="number">${formatQuantity(misc.orderQuantity2)}</td>
-            ${misc.vendors.map((vendor, vIdx) => {
-                const isLast = vIdx === misc.vendors.length - 1;
-                return `
-                    <td class="number">${formatNumber(vendor.unitPrice)}</td>
-                    <td class="number">${formatNumber(vendor.amount)}</td>
-                    ${isLast ? '' : `<td class="number">${formatQuantity(vendor.quantity)}</td>`}
-                `;
-            }).join('')}
-            <td>${misc.remarks || ''}</td>
-        </tr>
-    `;
+        // 두 번째 행: 경량공사 요약
+        addDataRow(priceComparisonData.summaryRow);
 
-    priceComparisonData.items.forEach(item => {
-        // 데이터 행 (1줄)
-        htmlContent += `
-            <tr>
-                <td>${item.no}</td>
-                <td>${item.itemName}</td>
-                <td>${item.spec}</td>
-                <td>${item.unit}</td>
-                <td class="number">${formatNumber(item.contractQty)}</td>
-                <td class="number">${formatNumber(item.contractPrice.unitPrice)}</td>
-                <td class="number">${formatNumber(item.contractPrice.amount)}</td>
-                <td>${item.orderUnit}</td>
-                <td class="number">${formatNumber(item.orderQuantity)}</td>
-                <td class="number">${formatNumber(item.progressPrice.unitPrice)}</td>
-                <td class="number">${formatNumber(item.progressPrice.amount)}</td>
-                <td class="number">${formatNumber(item.progressQuantity)}</td>
-                <td class="number">${formatNumber(item.orderPrice.unitPrice)}</td>
-                <td class="number">${formatNumber(item.orderPrice.amount)}</td>
-                <td class="number">${formatNumber(item.orderQuantity2)}</td>
-                ${item.vendors.map((vendor, vIdx) => {
-                    const isLast = vIdx === item.vendors.length - 1;
-                    return `
-                        <td class="number">${formatNumber(vendor.unitPrice)}</td>
-                        <td class="number">${formatNumber(vendor.amount)}</td>
-                        ${isLast ? '' : `<td class="number">${formatNumber(vendor.quantity)}</td>`}
-                    `;
-                }).join('')}
-                <td>${item.remarks}</td>
-            </tr>
-        `;
-    });
+        // 세 번째 행: 공과잡비
+        addDataRow(priceComparisonData.miscRow);
 
-    htmlContent += `
-                </tbody>
-            </table>
-        </body>
-        </html>
-    `;
+        // 나머지 아이템들
+        priceComparisonData.items.forEach(item => {
+            addDataRow(item);
+        });
 
-    const fileName = `단가비교표_${new Date().toISOString().split('T')[0]}.xlsx`;
-    const blob = new Blob([htmlContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.click();
-    URL.revokeObjectURL(url);
+        // 컬럼 너비 설정
+        worksheet.columns = worksheet.columns.map((col, idx) => {
+            if (idx === 1) return { ...col, width: 20 }; // 품명
+            else if (idx === 2) return { ...col, width: 20 }; // 규격
+            else return { ...col, width: 12 };
+        });
 
-    console.log('✅ Excel 파일 내보내기 완료:', fileName);
-    alert('Excel 파일이 다운로드되었습니다.');
+        // 파일 다운로드
+        const buffer = await workbook.xlsx.writeBuffer();
+        const fileName = `단가비교표_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        console.log('✅ Excel 파일 내보내기 완료:', fileName);
+        alert('Excel 파일이 다운로드되었습니다.');
+    } catch (error) {
+        console.error('Excel 내보내기 실패:', error);
+        alert('Excel 내보내기 중 오류가 발생했습니다: ' + error.message);
+    }
 }
 
 // =============================================================================
