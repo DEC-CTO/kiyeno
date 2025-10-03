@@ -1196,24 +1196,48 @@
       <div class="panel-content">
         <!-- 탭 네비게이션 -->
         <div class="panel-tabs">
-          <button class="panel-tab active" onclick="switchResultTab('individual')">
+          <button class="panel-tab active" onclick="switchResultTab('comparison')">
+            <i class="fas fa-balance-scale"></i> 벽체별 합계
+          </button>
+          <button class="panel-tab" onclick="switchResultTab('individual')">
             <i class="fas fa-list"></i> 벽체별 상세
           </button>
           <button class="panel-tab" onclick="switchResultTab('summary')">
             <i class="fas fa-chart-pie"></i> 집계 현황
           </button>
-          <button class="panel-tab" onclick="switchResultTab('comparison')">
-            <i class="fas fa-balance-scale"></i> 비교 분석
-          </button>
         </div>
         
-        <!-- 벽체별 상세 결과 탭 -->
-        <div id="individualTab" class="tab-content active">
+        <!-- 벽체별 합계 탭 -->
+        <div id="comparisonTab" class="tab-content active">
+          <div class="comparison-container">
+            <div class="comparison-table-container">
+              <table class="comparison-table">
+                <thead>
+                  <tr>
+                    <th>벽체명</th>
+                    <th>단위</th>
+                    <th>수량</th>
+                    <th>자재비</th>
+                    <th>노무비</th>
+                    <th>단가</th>
+                    <th>금액</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                  <!-- 동적으로 생성 -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 벽체별 상세 탭 -->
+        <div id="individualTab" class="tab-content">
           <div class="wall-results-container">
             <!-- 벽체별 계산 결과 카드들이 동적으로 생성됩니다 -->
           </div>
         </div>
-        
+
         <!-- 집계 현황 탭 -->
         <div id="summaryTab" class="tab-content">
           <div class="summary-dashboard">
@@ -1235,7 +1259,7 @@
                 <div class="summary-value" id="totalProjectCost">₩0</div>
               </div>
             </div>
-            
+
             <div class="summary-charts">
               <div class="chart-container">
                 <h4>공종별 비용 분포</h4>
@@ -1245,29 +1269,6 @@
                 <h4>벽체 타입별 비교</h4>
                 <canvas id="wallTypeChart"></canvas>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- 비교 분석 탭 -->
-        <div id="comparisonTab" class="tab-content">
-          <div class="comparison-container">
-            <div class="comparison-table-container">
-              <table class="comparison-table">
-                <thead>
-                  <tr>
-                    <th>벽체명</th>
-                    <th>면적 (m²)</th>
-                    <th>단가 (₩/m²)</th>
-                    <th>재료비</th>
-                    <th>노무비</th>
-                    <th>총계</th>
-                  </tr>
-                </thead>
-                <tbody id="comparisonTableBody">
-                  <!-- 동적으로 생성 -->
-                </tbody>
-              </table>
             </div>
           </div>
         </div>

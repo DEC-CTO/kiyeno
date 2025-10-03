@@ -5,7 +5,7 @@
 // 전역 변수
 let calculationResults = [];
 let isResultsPanelOpen = false;
-let currentActiveTab = 'individual';
+let currentActiveTab = 'comparison';
 
 /**
  * 벽체 비용 계산 시작
@@ -127,17 +127,19 @@ async function calculateSingleWallCost(wall, sequence) {
             length: parseFloat(wall.Length) || 0,
             thickness: parseFloat(wall.Thickness) || 0,
             level: wall.Level || '',
-            
+
             // 매칭 정보
             wallType: wallTypeMatch,
             layerPricing: layerPricing,
-            
+
             // 계산 결과
-            materialCost: totalCost.materialCost,
-            laborCost: totalCost.laborCost,
-            totalCost: totalCost.totalCost,
-            unitPrice: area > 0 ? totalCost.totalCost / area : 0,
-            
+            materialCost: totalCost.materialCost,          // 총 자재비
+            laborCost: totalCost.laborCost,                // 총 노무비
+            totalCost: totalCost.totalCost,                // 총계
+            materialUnitPrice: totalCost.materialUnitPrice, // M2당 자재비 단가
+            laborUnitPrice: totalCost.laborUnitPrice,       // M2당 노무비 단가
+            unitPrice: totalCost.unitPrice,                 // M2당 총 단가
+
             // 메타데이터
             calculatedAt: new Date().toISOString(),
             sequence: sequence
@@ -354,31 +356,45 @@ async function findMaterialInUnitPriceDB(materialName) {
  */
 function calculateTotalCost(layerPricing, area) {
     console.log(`💰 총 금액 계산 시작: 면적 ${area}m²`);
-    
-    let totalMaterialCost = 0;
-    let totalLaborCost = 0;
+
+    // 1단계: M2당 단가 합산 (레이어별 단가를 모두 더함)
+    let materialUnitPrice = 0;  // M2당 자재비 단가
+    let laborUnitPrice = 0;     // M2당 노무비 단가
     let layerCount = 0;
-    
+
     Object.entries(layerPricing).forEach(([layerKey, layer]) => {
-        const materialCost = (layer.materialPrice || 0) * area;
-        const laborCost = (layer.laborPrice || 0) * area;
-        
-        console.log(`  ${layerKey}: ${layer.materialName} - 재료비 ${layer.materialPrice}×${area} = ${materialCost}, 노무비 ${layer.laborPrice}×${area} = ${laborCost}`);
-        
-        totalMaterialCost += materialCost;
-        totalLaborCost += laborCost;
+        const layerMaterialPrice = layer.materialPrice || 0;
+        const layerLaborPrice = layer.laborPrice || 0;
+
+        console.log(`  ${layerKey}: ${layer.materialName} - 자재비단가 ${layerMaterialPrice}, 노무비단가 ${layerLaborPrice}`);
+
+        materialUnitPrice += layerMaterialPrice;
+        laborUnitPrice += layerLaborPrice;
         layerCount++;
     });
-    
+
+    console.log(`📊 M2당 단가 합계 - 자재비: ${materialUnitPrice}원/M2, 노무비: ${laborUnitPrice}원/M2`);
+
+    // 2단계: 면적 곱하기 (총 금액 계산)
+    const totalMaterialCost = Math.round(materialUnitPrice * area);
+    const totalLaborCost = Math.round(laborUnitPrice * area);
+    const totalCost = totalMaterialCost + totalLaborCost;
+    const unitPrice = materialUnitPrice + laborUnitPrice;  // M2당 총 단가
+
     const result = {
-        materialCost: totalMaterialCost,
-        laborCost: totalLaborCost,
-        totalCost: totalMaterialCost + totalLaborCost,
+        materialCost: totalMaterialCost,      // 총 자재비
+        laborCost: totalLaborCost,            // 총 노무비
+        totalCost: totalCost,                 // 총계
+        materialUnitPrice: materialUnitPrice, // M2당 자재비 단가
+        laborUnitPrice: laborUnitPrice,       // M2당 노무비 단가
+        unitPrice: unitPrice,                 // M2당 총 단가
         area: area
     };
-    
-    console.log(`💰 총 금액 계산 완료: ${layerCount}개 레이어, 재료비 ${totalMaterialCost}, 노무비 ${totalLaborCost}, 총계 ${result.totalCost}`);
-    
+
+    console.log(`💰 총 금액 계산 완료: ${layerCount}개 레이어`);
+    console.log(`  - M2당 단가: 자재비 ${materialUnitPrice}, 노무비 ${laborUnitPrice}, 총 ${unitPrice}`);
+    console.log(`  - 총 금액: 자재비 ${totalMaterialCost}, 노무비 ${totalLaborCost}, 총계 ${totalCost}`);
+
     return result;
 }
 
@@ -517,7 +533,14 @@ function createWallResultCard(result) {
             </div>
             <div class="wall-card-area">${result.area.toFixed(2)} m²</div>
         </div>
-        
+
+        <div class="layer-header">
+            <div class="layer-header-item">자재명</div>
+            <div class="layer-header-item">재료비</div>
+            <div class="layer-header-item">노무비</div>
+            <div class="layer-header-item">합계</div>
+        </div>
+
         <div class="wall-card-layers">
             ${layerSections}
         </div>
@@ -538,9 +561,6 @@ function createWallResultCard(result) {
         </div>
         
         <div class="wall-card-actions">
-            <button class="btn btn-sm btn-outline-primary" onclick="viewWallDetails('${result.elementId}')">
-                <i class="fas fa-eye"></i> 상세보기
-            </button>
             <button class="btn btn-sm btn-outline-success" onclick="exportSingleWall('${result.elementId}')">
                 <i class="fas fa-file-excel"></i> Excel
             </button>
@@ -581,18 +601,22 @@ function createLayerSection(title, layerKeys, layerPricing, area) {
     const items = layerKeys
         .map(key => layerPricing[key])
         .filter(layer => layer && layer.materialName);
-    
+
     if (items.length === 0) return '';
-    
+
     const layerItems = items.map(layer => {
-        const totalCost = (layer.materialPrice + layer.laborPrice) * area;
+        const materialCost = Math.round(layer.materialPrice * area);
+        const laborCost = Math.round(layer.laborPrice * area);
+        const totalCost = materialCost + laborCost;
+
         return `
             <div class="layer-item material-name">${layer.materialName}</div>
-            <div class="layer-item">₩${layer.materialPrice.toLocaleString()}/m²</div>
+            <div class="layer-item">₩${Math.round(layer.materialPrice).toLocaleString()}</div>
+            <div class="layer-item">₩${Math.round(layer.laborPrice).toLocaleString()}</div>
             <div class="layer-item cost">₩${totalCost.toLocaleString()}</div>
         `;
     }).join('');
-    
+
     return `
         <div class="layer-section">
             <div class="layer-section-title">${title}</div>
@@ -839,11 +863,12 @@ function renderComparisonResults() {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${result.wallName}</td>
+            <td>M2</td>
             <td class="text-right">${result.area.toFixed(2)}</td>
-            <td class="text-right">₩${result.unitPrice.toLocaleString()}</td>
-            <td class="text-right cost-cell">₩${result.materialCost.toLocaleString()}</td>
-            <td class="text-right cost-cell">₩${result.laborCost.toLocaleString()}</td>
-            <td class="text-right cost-cell">₩${result.totalCost.toLocaleString()}</td>
+            <td class="text-right cost-cell">₩${Math.round(result.materialUnitPrice || 0).toLocaleString()}</td>
+            <td class="text-right cost-cell">₩${Math.round(result.laborUnitPrice || 0).toLocaleString()}</td>
+            <td class="text-right">₩${Math.round(result.unitPrice || 0).toLocaleString()}</td>
+            <td class="text-right cost-cell">₩${Math.round(result.totalCost || 0).toLocaleString()}</td>
         `;
         tbody.appendChild(row);
     });
@@ -1130,17 +1155,6 @@ function getLayerDisplayName(layerKey) {
     
     return layerNames[layerKey] || layerKey;
 }
-
-/**
- * 단일 벽체 상세보기
- */
-window.viewWallDetails = function(elementId) {
-    const result = calculationResults.find(r => r.elementId === elementId);
-    if (!result) return;
-    
-    console.log('🔍 벽체 상세보기:', result.wallName, result);
-    alert('벽체 상세보기 기능을 구현 중입니다.');
-};
 
 /**
  * 단일 벽체 Excel 내보내기
