@@ -167,15 +167,8 @@ function createProjectManagementPanel() {
                             <div class="dropdown-item" onclick="addRevitWallType()">
                                 <i class="fas fa-plus"></i> 새 WallType 생성
                             </div>
-                            <div class="dropdown-item" onclick="duplicateRevitWall()">
-                                <i class="fas fa-copy"></i> 선택 복사
-                            </div>
-                            <div class="dropdown-divider"></div>
                             <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
                                 <i class="fas fa-trash-alt"></i> 선택 삭제
-                            </div>
-                            <div class="dropdown-item" onclick="clearRevitWallData()">
-                                <i class="fas fa-eraser"></i> 전체 초기화
                             </div>
                             <div class="dropdown-divider"></div>
                             <div class="dropdown-item" onclick="exportRevitWallTypesToJSON()">
@@ -685,47 +678,6 @@ function handleWallTypeCreationKeydown(event) {
     }
 }
 
-function duplicateRevitWall() {
-    const selectedIds = Array.from(selectedRevitWalls);
-    if (selectedIds.length === 0) {
-        alert('복사할 벽체 타입을 선택해주세요.');
-        return;
-    }
-    
-    let duplicatedCount = 0;
-    
-    selectedIds.forEach(wallId => {
-        const originalWall = window.revitWallTypes.find(w => w.id === wallId);
-        if (originalWall) {
-            const duplicatedWall = {
-                ...originalWall,
-                id: ++revitWallTypeCounter,
-                no: window.revitWallTypes.length + 1,
-                wallType: originalWall.wallType + ' (복사본)',
-                createdAt: new Date().toISOString(),
-                source: 'duplicated'
-            };
-            
-            window.revitWallTypes.push(duplicatedWall);
-            duplicatedCount++;
-        }
-    });
-    
-    if (duplicatedCount > 0) {
-        // 번호 재정렬
-        window.revitWallTypes.forEach((wall, index) => {
-            wall.no = index + 1;
-        });
-        
-        syncRevitWallTypes(); // 전역 변수 동기화
-        saveRevitWallTypes();
-        updateRevitWallTable();
-        selectedRevitWalls.clear();
-        console.log(`✅ ${duplicatedCount}개 벽체 타입 복사됨`);
-        alert(`${duplicatedCount}개의 벽체 타입이 복사되었습니다.`);
-    }
-}
-
 function deleteSelectedRevitWalls() {
     const selectedIds = Array.from(selectedRevitWalls);
     if (selectedIds.length === 0) {
@@ -756,23 +708,6 @@ function deleteSelectedRevitWalls() {
     
     console.log(`✅ ${selectedIds.length}개 벽체 타입 삭제됨`);
     alert(`${selectedIds.length}개의 벽체 타입이 삭제되었습니다.`);
-}
-
-function clearRevitWallData() {
-    if (!confirm('모든 Revit 벽체 타입 데이터를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) {
-        return;
-    }
-    
-    window.revitWallTypes.length = 0; // 배열 초기화 (참조 유지)
-    revitWallTypeCounter = 0;
-    selectedRevitWalls.clear();
-    syncRevitWallTypes(); // 상태 확인
-    
-    saveRevitWallTypes();
-    updateRevitWallTable();
-    
-    console.log('🗑️ 모든 Revit 벽체 타입 데이터 삭제됨');
-    alert('모든 벽체 타입 데이터가 삭제되었습니다.');
 }
 
 // =============================================================================

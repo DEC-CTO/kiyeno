@@ -43,7 +43,44 @@ let priceComparisonData = {
         ],
         remarks: ''
     },
-    items: []
+    roundingRow: {  // 4번째 행: 단수정리
+        itemName: '단수정리',
+        contractPrice: { amount: '' },
+        progressPrice: { amount: '' },
+        orderPrice: { amount: '' },
+        vendors: [
+            { name: '업체1', amount: '' },
+            { name: '업체2', amount: '' },
+            { name: '업체3', amount: '' }
+        ]
+    },
+    subtotalRow: {  // 5번째 행: 합계 (계산됨)
+        itemName: '합 계',
+        contractPrice: { amount: 0 },
+        progressPrice: { amount: 0 },
+        orderPrice: { amount: 0 },
+        vendors: [
+            { name: '업체1', amount: 0 },
+            { name: '업체2', amount: 0 },
+            { name: '업체3', amount: 0 }
+        ]
+    },
+    detailSections: {  // 상세 아이템 (자재비/노무비)
+        materials: [],   // 자재비 아이템 배열
+        labor: []        // 노무비 아이템 배열
+    },
+    finalTotalRow: {  // 최종 계 (자재비+노무비 합계, 계산됨)
+        itemName: '계',
+        contractPrice: { amount: 0 },
+        progressPrice: { amount: 0 },
+        orderPrice: { amount: 0 },
+        vendors: [
+            { name: '업체1', amount: 0 },
+            { name: '업체2', amount: 0 },
+            { name: '업체3', amount: 0 }
+        ]
+    },
+    items: []  // 기존 호환성 유지 (사용 안 함)
 };
 
 // =============================================================================
@@ -101,6 +138,43 @@ function openPriceComparisonModal() {
                 { name: '업체3', unitPrice: '', amount: '' }
             ],
             remarks: ''
+        },
+        roundingRow: {
+            itemName: '단수정리',
+            contractPrice: { amount: '' },
+            progressPrice: { amount: '' },
+            orderPrice: { amount: '' },
+            vendors: [
+                { name: '업체1', amount: '' },
+                { name: '업체2', amount: '' },
+                { name: '업체3', amount: '' }
+            ]
+        },
+        subtotalRow: {
+            itemName: '합 계',
+            contractPrice: { amount: 0 },
+            progressPrice: { amount: 0 },
+            orderPrice: { amount: 0 },
+            vendors: [
+                { name: '업체1', amount: 0 },
+                { name: '업체2', amount: 0 },
+                { name: '업체3', amount: 0 }
+            ]
+        },
+        detailSections: {
+            materials: [],
+            labor: []
+        },
+        finalTotalRow: {
+            itemName: '계',
+            contractPrice: { amount: 0 },
+            progressPrice: { amount: 0 },
+            orderPrice: { amount: 0 },
+            vendors: [
+                { name: '업체1', amount: 0 },
+                { name: '업체2', amount: 0 },
+                { name: '업체3', amount: 0 }
+            ]
         },
         items: [createEmptyItem(1)]
     };
@@ -265,6 +339,245 @@ function renderTableHead() {
     `;
 }
 
+// =============================================================================
+// 테이블 행 렌더링 헬퍼 함수들
+// =============================================================================
+
+/**
+ * 단수정리 행 렌더링
+ */
+function renderRoundingRow() {
+    const vendorCount = priceComparisonData.roundingRow.vendors.length;
+    const row = priceComparisonData.roundingRow;
+
+    return `
+        <tr>
+            <td></td>
+            <td>${row.itemName}</td>
+            <td colspan="3"></td>
+            <td class="number-cell">${row.contractPrice.amount || ''}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${row.progressPrice.amount || ''}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${row.orderPrice.amount || ''}</td>
+            <td></td>
+            ${row.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === vendorCount - 1;
+                return `
+                    <td class="number-cell">${vendor.amount || ''}</td>
+                    <td></td>
+                    ${isLast ? '' : '<td></td>'}
+                `;
+            }).join('')}
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 합계 행 렌더링 (경량공사 + 공과잡비 + 단수정리)
+ */
+function renderSubtotalRow() {
+    const vendorCount = priceComparisonData.subtotalRow.vendors.length;
+    const row = priceComparisonData.subtotalRow;
+
+    return `
+        <tr style="font-weight: bold; background-color: #e6f2ff;">
+            <td></td>
+            <td>${row.itemName}</td>
+            <td colspan="3"></td>
+            <td class="number-cell">${formatNumber(row.contractPrice.amount)}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${formatNumber(row.progressPrice.amount)}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${formatNumber(row.orderPrice.amount)}</td>
+            <td></td>
+            ${row.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === vendorCount - 1;
+                return `
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
+                    <td></td>
+                    ${isLast ? '' : '<td></td>'}
+                `;
+            }).join('')}
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 섹션 구분선 (경량공사 헤더 반복)
+ */
+function renderSectionDivider(title) {
+    const totalCols = 15 + (priceComparisonData.roundingRow.vendors.length * 3);
+
+    return `
+        <tr style="background-color: #f0f0f0; font-weight: bold;">
+            <td></td>
+            <td>${title}</td>
+            <td colspan="${totalCols - 2}"></td>
+        </tr>
+    `;
+}
+
+/**
+ * 섹션 헤더 (자재비/노무비)
+ */
+function renderSectionHeader(title) {
+    const totalCols = 15 + (priceComparisonData.roundingRow.vendors.length * 3);
+
+    return `
+        <tr style="font-weight: bold; background-color: #f0f0f0;">
+            <td></td>
+            <td>${title}</td>
+            <td colspan="${totalCols - 2}"></td>
+        </tr>
+    `;
+}
+
+/**
+ * 상세 아이템 행 렌더링 (공종 헤더 제거)
+ */
+function renderDetailItems(items, type) {
+    if (!items || items.length === 0) {
+        return '';
+    }
+
+    let html = '';
+
+    items.forEach(item => {
+        // 공종 헤더는 스킵 (isHeader 플래그가 있으면 무시)
+        if (item.isHeader) {
+            return;
+        }
+
+        // 일반 아이템만 렌더링
+        html += `
+            <tr>
+                <td></td>
+                <td>${item.itemName}</td>
+                <td>${item.spec || ''}</td>
+                <td>${item.unit}</td>
+                <td class="number-cell">${formatQuantity(item.quantity)}</td>
+                <td class="number-cell">${formatNumber(item.unitPrice)}</td>
+                <td class="number-cell">${formatNumber(item.amount)}</td>
+                <td colspan="${8 + (priceComparisonData.roundingRow.vendors.length * 3)}"></td>
+            </tr>
+        `;
+    });
+
+    return html;
+}
+
+// =============================================================================
+// 자동 계산 함수들
+// =============================================================================
+
+/**
+ * 합계 계산 (경량공사 + 공과잡비 + 단수정리)
+ */
+function calculateSubtotal() {
+    const summary = priceComparisonData.summaryRow;
+    const misc = priceComparisonData.miscRow;
+    const rounding = priceComparisonData.roundingRow;
+    const subtotal = priceComparisonData.subtotalRow;
+
+    // 계약도급 금액
+    subtotal.contractPrice.amount =
+        (parseFloat(summary.contractPrice.amount) || 0) +
+        (parseFloat(misc.contractPrice.amount) || 0) +
+        (parseFloat(rounding.contractPrice.amount) || 0);
+
+    // 진행도급 금액
+    subtotal.progressPrice.amount =
+        (parseFloat(summary.progressPrice.amount) || 0) +
+        (parseFloat(misc.progressPrice.amount) || 0) +
+        (parseFloat(rounding.progressPrice.amount) || 0);
+
+    // 발주단가 금액
+    subtotal.orderPrice.amount =
+        (parseFloat(summary.orderPrice.amount) || 0) +
+        (parseFloat(misc.orderPrice.amount) || 0) +
+        (parseFloat(rounding.orderPrice.amount) || 0);
+
+    // 업체별 금액
+    for (let i = 0; i < subtotal.vendors.length; i++) {
+        subtotal.vendors[i].amount =
+            (parseFloat(summary.vendors[i]?.amount) || 0) +
+            (parseFloat(misc.vendors[i]?.amount) || 0) +
+            (parseFloat(rounding.vendors[i]?.amount) || 0);
+    }
+}
+
+/**
+ * 최종 계 계산 (자재비 + 노무비 합계)
+ */
+function calculateFinalTotal() {
+    const materials = priceComparisonData.detailSections.materials;
+    const labor = priceComparisonData.detailSections.labor;
+    const finalTotal = priceComparisonData.finalTotalRow;
+
+    // 초기화
+    finalTotal.contractPrice.amount = 0;
+    finalTotal.progressPrice.amount = 0;
+    finalTotal.orderPrice.amount = 0;
+    finalTotal.vendors.forEach(v => v.amount = 0);
+
+    // 자재비 합산
+    materials.forEach(item => {
+        if (!item.isHeader) {
+            finalTotal.contractPrice.amount += item.amount || 0;
+        }
+    });
+
+    // 노무비 합산
+    labor.forEach(item => {
+        if (!item.isHeader) {
+            finalTotal.contractPrice.amount += item.amount || 0;
+        }
+    });
+
+    // 진행도급, 발주단가, 업체별은 계약도급과 동일하게 설정
+    // (실제로는 각각 계산해야 하지만, 지금은 단순화)
+    finalTotal.progressPrice.amount = finalTotal.contractPrice.amount;
+    finalTotal.orderPrice.amount = finalTotal.contractPrice.amount;
+    finalTotal.vendors.forEach(v => v.amount = finalTotal.contractPrice.amount);
+}
+
+/**
+ * 최종 계 행 렌더링 (자재비 + 노무비 합계)
+ */
+function renderFinalTotalRow() {
+    const vendorCount = priceComparisonData.finalTotalRow.vendors.length;
+    const row = priceComparisonData.finalTotalRow;
+
+    return `
+        <tr style="font-weight: bold; background-color: #d0e8ff;">
+            <td></td>
+            <td>${row.itemName}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">${formatNumber(row.contractPrice.amount)}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${formatNumber(row.progressPrice.amount)}</td>
+            <td colspan="2"></td>
+            <td class="number-cell">${formatNumber(row.orderPrice.amount)}</td>
+            <td></td>
+            ${row.vendors.map((vendor, vIdx) => {
+                const isLast = vIdx === vendorCount - 1;
+                return `
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
+                    <td></td>
+                    ${isLast ? '' : '<td></td>'}
+                `;
+            }).join('')}
+            <td></td>
+        </tr>
+    `;
+}
+
 /**
  * 테이블 본문 렌더링
  */
@@ -417,8 +730,47 @@ function renderTableBody() {
         </tr>
     `;
 
-    // 첫 번째 행 + 두 번째 행 + 세 번째 행 + 데이터 행들 결합
-    tbody.innerHTML = firstRow + summaryRow + miscRow + dataRows;
+    // ===== 새로운 11단계 렌더링 =====
+    let html = '';
+
+    // 합계 자동 계산 (경량공사 + 공과잡비 + 단수정리)
+    calculateSubtotal();
+
+    // 1. 현장명 행
+    html += firstRow;
+
+    // 2. 경량공사 행
+    html += summaryRow;
+
+    // 3. 공과잡비 행
+    html += miscRow;
+
+    // 4. 단수정리 행
+    html += renderRoundingRow();
+
+    // 5. 합계 행 (경량공사 + 공과잡비 + 단수정리)
+    html += renderSubtotalRow();
+
+    // 6. 경량공사 헤더 (구분선)
+    html += renderSectionDivider('경량공사');
+
+    // 7. 자재비 헤더
+    html += renderSectionHeader('자재비');
+
+    // 8. 자재비 상세 아이템들
+    html += renderDetailItems(priceComparisonData.detailSections.materials, 'material');
+
+    // 9. 노무비 헤더
+    html += renderSectionHeader('노무비');
+
+    // 10. 노무비 상세 아이템들
+    html += renderDetailItems(priceComparisonData.detailSections.labor, 'labor');
+
+    // 11. 최종 계
+    calculateFinalTotal();  // 최종 계 자동 계산
+    html += renderFinalTotalRow();
+
+    tbody.innerHTML = html;
 }
 
 // =============================================================================
@@ -728,10 +1080,160 @@ async function exportPriceComparisonToExcel() {
         // 세 번째 행: 공과잡비
         addDataRow(priceComparisonData.miscRow);
 
-        // 나머지 아이템들
-        priceComparisonData.items.forEach(item => {
-            addDataRow(item);
+        // 네 번째 행: 단수정리
+        addDataRow(priceComparisonData.roundingRow);
+
+        // 다섯 번째 행: 합계 (파란 배경)
+        const subtotalRow = addDataRow(priceComparisonData.subtotalRow);
+        subtotalRow.eachCell((cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD6E9F8' }
+            };
+            cell.font = { bold: true };
         });
+
+        // 경량공사 구분선
+        const dividerRow = worksheet.addRow(['', '경량공사', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        dividerRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.font = { bold: true };
+        });
+
+        // 자재비 헤더
+        const materialHeaderRow = worksheet.addRow(['', '자재비', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        materialHeaderRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.font = { bold: true };
+        });
+
+        // 자재비 상세 아이템들 (공종 헤더 제거)
+        priceComparisonData.detailSections.materials.forEach(item => {
+            // 공종 헤더는 스킵
+            if (item.isHeader) {
+                return;
+            }
+
+            // 아이템 행만 추가
+            const itemRow = worksheet.addRow([
+                '',
+                item.itemName || '',
+                item.spec || '',
+                item.unit || '',
+                item.quantity || 0,
+                item.unitPrice || 0,
+                item.amount || 0,
+                '', '', '', '', '', '', '', '', ''
+            ]);
+            itemRow.eachCell((cell, colIdx) => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+                if (colIdx >= 5 && colIdx <= 7) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    if (typeof cell.value === 'number') {
+                        cell.numFmt = '#,##0';
+                    }
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+            });
+        });
+
+        // 노무비 헤더
+        const laborHeaderRow = worksheet.addRow(['', '노무비', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        laborHeaderRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.font = { bold: true };
+        });
+
+        // 노무비 상세 아이템들 (공종 헤더 제거)
+        priceComparisonData.detailSections.labor.forEach(item => {
+            // 공종 헤더는 스킵
+            if (item.isHeader) {
+                return;
+            }
+
+            // 아이템 행만 추가
+            const itemRow = worksheet.addRow([
+                '',
+                item.itemName || '',
+                item.spec || '',
+                item.unit || '',
+                item.quantity || 0,
+                item.unitPrice || 0,
+                item.amount || 0,
+                '', '', '', '', '', '', '', '', ''
+            ]);
+            itemRow.eachCell((cell, colIdx) => {
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+                if (colIdx >= 5 && colIdx <= 7) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    if (typeof cell.value === 'number') {
+                        cell.numFmt = '#,##0';
+                    }
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+            });
+        });
+
+        // 최종 계 (파란 배경)
+        const finalTotalRow = worksheet.addRow([
+            '',                     // 번호
+            '계',                   // 품명
+            '',                     // 규격
+            '',                     // 단위
+            '',                     // 수량
+            '',                     // 단가
+            priceComparisonData.finalTotalRow.contractPrice.amount || 0,  // 금액
+            '', '', '', '', '', '', '', '', ''
+        ]);
+        finalTotalRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD6E9F8' }
+            };
+            cell.font = { bold: true };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
+        // 금액 컬럼만 우측 정렬
+        finalTotalRow.getCell(7).alignment = { vertical: 'middle', horizontal: 'right' };
+        finalTotalRow.getCell(7).numFmt = '#,##0';
 
         // 컬럼 너비 설정
         worksheet.columns = worksheet.columns.map((col, idx) => {
@@ -779,6 +1281,152 @@ window.updateExpense = updateExpense;
 window.exportPriceComparisonToExcel = exportPriceComparisonToExcel;
 
 // =============================================================================
+// 계산 결과 변환 함수
+// =============================================================================
+
+/**
+ * 일위대가 ID를 파싱하여 품명과 규격 추출
+ * @param {string} id - 예: "unitPrice_C-STUD-450-3600이하-50형-1759332998669"
+ * @returns {object} - { itemName: "C-STUD-450-3600이하", spec: "50형" }
+ */
+function parseUnitPriceId(id) {
+    if (!id) return { itemName: '', spec: '' };
+
+    // unitPrice_ 접두사 제거
+    let cleaned = id.replace(/^unitPrice_/, '');
+
+    // '-'로 분할
+    const parts = cleaned.split('-');
+
+    if (parts.length < 4) {
+        return { itemName: cleaned, spec: '' };
+    }
+
+    // 타임스탬프 제거 (마지막 부분이 13자리 숫자)
+    const lastPart = parts[parts.length - 1];
+    if (lastPart && lastPart.match(/^\d{13}$/)) {
+        parts.pop();
+    }
+
+    // 규격: 마지막 부분
+    const spec = parts.pop() || '';
+
+    // 품명: 나머지 모든 부분을 '-'로 재결합
+    const itemName = parts.join('-');
+
+    console.log(`🔍 ID 파싱: "${id}" → 품명: "${itemName}", 규격: "${spec}"`);
+
+    return { itemName, spec };
+}
+
+/**
+ * calculationResults를 detailSections으로 변환
+ * wall-cost-calculator.js의 calculationResults 전역 변수 사용
+ */
+function convertCalculationResultsToDetailSections() {
+    console.log('🔄 계산 결과를 상세 섹션으로 변환 시작 (layerPricing 기반)');
+
+    // calculationResults가 없으면 빈 배열 반환
+    if (typeof window.calculationResults === 'undefined' || !window.calculationResults || window.calculationResults.length === 0) {
+        console.warn('⚠️ calculationResults가 없습니다');
+        return { materials: [], labor: [] };
+    }
+
+    console.log(`📊 변환할 계산 결과: ${window.calculationResults.length}개 벽체`);
+
+    // 자재별 집계 (공종 구분 없이)
+    const groupedItems = {};
+
+    window.calculationResults.forEach((result, resultIdx) => {
+        console.log(`  📋 처리 중: ${resultIdx + 1}/${window.calculationResults.length} - ${result.wallName} (${result.area.toFixed(2)} M2)`);
+
+        // layerPricing이 없으면 스킵
+        if (!result.layerPricing) {
+            console.warn(`    ⚠️ layerPricing이 없음`);
+            return;
+        }
+
+        // 각 레이어별로 처리 (11개 레이어)
+        Object.entries(result.layerPricing).forEach(([layerKey, layer]) => {
+            // found=false이거나 materialName이 없으면 스킵
+            if (!layer.found || !layer.materialName) {
+                return;
+            }
+
+            // ID 파싱하여 품명과 규격 추출
+            const parsed = parseUnitPriceId(layer.materialName);
+            const materialName = parsed.itemName || layer.materialName;
+            const spec = parsed.spec || layer.spec || '';
+            const unit = layer.unit || 'M2';
+
+            console.log(`    🔹 레이어: ${layerKey} → ${materialName} (${spec})`);
+
+            // 자재명+규격 키
+            const itemKey = `${materialName}|${spec}`;
+
+            // 아이템 초기화
+            if (!groupedItems[itemKey]) {
+                groupedItems[itemKey] = {
+                    itemName: materialName,
+                    spec: spec,
+                    unit: unit,
+                    quantity: 0,
+                    materialUnitPrice: layer.materialPrice || 0,
+                    laborUnitPrice: layer.laborPrice || 0,
+                    materialAmount: 0,
+                    laborAmount: 0
+                };
+            }
+
+            // 수량 = 벽체 면적 (레이어는 이미 M2당 단가임)
+            const qty = parseFloat(result.area) || 0;
+
+            // 수량 및 금액 누적
+            groupedItems[itemKey].quantity += qty;
+            groupedItems[itemKey].materialAmount += (layer.materialPrice || 0) * qty;
+            groupedItems[itemKey].laborAmount += (layer.laborPrice || 0) * qty;
+
+            console.log(`      ✅ 누적: 수량 ${qty.toFixed(2)} M2, 자재비 ${Math.round((layer.materialPrice || 0) * qty).toLocaleString()}원, 노무비 ${Math.round((layer.laborPrice || 0) * qty).toLocaleString()}원`);
+        });
+    });
+
+    // 자재비/노무비 배열 생성
+    const materials = [];
+    const labor = [];
+
+    console.log(`📊 자재 집계 완료: ${Object.keys(groupedItems).length}개 자재`);
+
+    // 품명 순으로 정렬하여 추가
+    Object.values(groupedItems).sort((a, b) => a.itemName.localeCompare(b.itemName)).forEach(item => {
+        // 자재비 아이템
+        materials.push({
+            itemName: item.itemName,
+            spec: item.spec,
+            unit: item.unit,
+            quantity: Math.round(item.quantity * 100) / 100,  // 소수점 2자리
+            unitPrice: Math.round(item.materialUnitPrice),    // 자재비 단가
+            amount: Math.round(item.materialAmount)           // 자재비 총액
+        });
+
+        // 노무비 아이템
+        labor.push({
+            itemName: item.itemName,
+            spec: item.spec,
+            unit: item.unit,
+            quantity: Math.round(item.quantity * 100) / 100,  // 소수점 2자리
+            unitPrice: Math.round(item.laborUnitPrice),       // 노무비 단가
+            amount: Math.round(item.laborAmount)              // 노무비 총액
+        });
+
+        console.log(`    ✅ ${item.itemName} (${item.spec}): 수량 ${(Math.round(item.quantity * 100) / 100).toFixed(2)} ${item.unit}, 자재비 ${Math.round(item.materialAmount).toLocaleString()}원, 노무비 ${Math.round(item.laborAmount).toLocaleString()}원`);
+    });
+
+    console.log(`✅ 변환 완료: 자재비 ${materials.length}개 항목, 노무비 ${labor.length}개 항목`);
+
+    return { materials, labor };
+}
+
+// =============================================================================
 // 탭 렌더링 함수
 // =============================================================================
 
@@ -793,6 +1441,10 @@ window.renderPriceComparisonTable = function() {
         console.error('❌ priceComparisonContainer를 찾을 수 없습니다');
         return;
     }
+
+    // calculationResults를 detailSections으로 변환
+    const detailSections = convertCalculationResultsToDetailSections();
+    priceComparisonData.detailSections = detailSections;
 
     // 데이터 초기화 (items가 비어있으면 기본 아이템 1개 추가)
     if (!priceComparisonData.items || priceComparisonData.items.length === 0) {

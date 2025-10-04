@@ -4,6 +4,7 @@
 
 // 전역 변수
 let calculationResults = [];
+window.calculationResults = calculationResults;  // 전역 노출
 let isResultsPanelOpen = false;
 let currentActiveTab = 'comparison';
 
@@ -28,6 +29,7 @@ window.calculateWallCosts = async function() {
         
         // 3. 벽체별 계산 수행
         calculationResults = [];
+        window.calculationResults = calculationResults;  // 전역 동기화
         for (let i = 0; i < selectedWalls.length; i++) {
             const wall = selectedWalls[i];
             const result = await calculateSingleWallCost(wall, i + 1);
@@ -36,6 +38,9 @@ window.calculateWallCosts = async function() {
             }
             updateCalculationProgress(i + 1, selectedWalls.length);
         }
+
+        // 계산 완료 후 전역 변수 업데이트
+        window.calculationResults = calculationResults;
         
         // 4. 계산 완료 처리
         hideCalculationProgress();
