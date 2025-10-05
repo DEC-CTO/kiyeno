@@ -294,6 +294,7 @@ async function findMaterialInUnitPriceDB(materialName) {
                 // 일위대가 아이템 전체의 단가 정보 반환 (M2 기준)
                 return {
                     name: foundItem.basic?.itemName || foundItem.id,
+                    spec: foundItem.basic?.size || '',
                     materialPrice: parseFloat(foundItem.totalCosts?.material) || 0,
                     laborPrice: parseFloat(foundItem.totalCosts?.labor) || 0,
                     workType1: foundItem.basic?.workType1 || '',
@@ -334,6 +335,7 @@ async function findMaterialInUnitPriceDB(materialName) {
                 console.log(`✅ 기본 자재 DB에서 발견: ${material.name}, 재료비: ${material.materialPrice}, 노무비: ${material.laborPrice}`);
                 return {
                     name: material.name,
+                    spec: material.size || '',
                     materialPrice: parseFloat(material.materialPrice) || 0,
                     laborPrice: parseFloat(material.laborPrice) || 0,
                     workType1: material.workType1 || '',
@@ -1433,7 +1435,7 @@ function createSingleWallMaterialSheet(wb, result) {
 /**
  * 발주서 탭 렌더링
  */
-function renderOrderFormTab() {
+async function renderOrderFormTab() {
     console.log('📋 발주서 탭 렌더링');
 
     const container = document.getElementById('orderFormContainer');
@@ -1448,6 +1450,9 @@ function renderOrderFormTab() {
         `;
         return;
     }
+
+    // 데이터 행 생성 (비동기)
+    const dataRowsHtml = await generateOrderFormDataRows();
 
     // 발주서 HTML 생성
     container.innerHTML = `
@@ -1493,7 +1498,7 @@ function renderOrderFormTab() {
                             <td></td>
                         </tr>
                         <!-- 데이터 행 -->
-                        ${generateOrderFormDataRows()}
+                        ${dataRowsHtml}
                     </tbody>
                 </table>
             </div>
@@ -1567,53 +1572,9 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
 }
 
 /**
- * 일위대가 ID를 파싱하여 품명과 규격 추출
- * @param {string} id - 예: "unitPrice_C-STUD-450-3600이하-50형-1759332998669"
- * @returns {object} - { itemName: "C-STUD", spec: "50형" }
- */
-function parseUnitPriceId(id) {
-    if (!id) return { itemName: '', spec: '' };
-
-    // unitPrice_ 접두사 제거
-    let cleaned = id.replace(/^unitPrice_/, '');
-
-    // 하이픈으로 분리
-    const parts = cleaned.split('-');
-
-    if (parts.length < 2) {
-        return { itemName: cleaned, spec: '' };
-    }
-
-    // 타임스탬프 제거 (마지막 부분이 13자리 숫자)
-    if (parts[parts.length - 1] && parts[parts.length - 1].match(/^\d{13}$/)) {
-        parts.pop();
-    }
-
-    // 규격: 마지막 부분
-    const spec = parts.pop() || '';
-
-    // 품명 패턴 인식
-    // C-STUD, C-RUNNER, J-RUNNER 등 알파벳-알파벳 패턴은 하나로 처리
-    const firstPart = parts[0];
-    const secondPart = parts[1];
-
-    let itemName;
-    if (firstPart && secondPart &&
-        firstPart.match(/^[A-Z]$/) && secondPart.match(/^[A-Z]+$/)) {
-        // C-STUD 패턴 (알파벳 1글자 - 알파벳 여러글자)
-        itemName = `${firstPart}-${secondPart}`;
-    } else {
-        // 일반석고보드 등 일반 패턴
-        itemName = firstPart;
-    }
-
-    return { itemName, spec };
-}
-
-/**
  * 레이어별 상세 행 생성
  */
-function generateLayerDetailRows(result) {
+async function generateLayerDetailRows(result) {
     const layerOrder = [
         'layer3_1', 'layer2_1', 'layer1_1',
         'column1', 'infill',
@@ -1624,17 +1585,28 @@ function generateLayerDetailRows(result) {
     let html = '';
     let layerNumber = 1;
 
-    layerOrder.forEach(layerKey => {
+    for (const layerKey of layerOrder) {
         const layer = result.layerPricing[layerKey];
 
         // 빈 레이어는 건너뛰기
         if (!layer || !layer.materialName) {
-            return;
+            continue;
         }
 
-        // ID 파싱하여 품명과 규격 추출
-        const parsed = parseUnitPriceId(layer.materialName);
-        const displayName = parsed.itemName ? `${parsed.itemName} ${parsed.spec}` : layer.materialName;
+        // DB에서 자재 정보 가져오기
+        const materialInfo = await findMaterialInUnitPriceDB(layer.materialName);
+
+        let displayName;
+        if (materialInfo && materialInfo.name) {
+            // DB에서 찾음: 정확한 품명 + 규격
+            displayName = materialInfo.spec
+                ? `${materialInfo.name} ${materialInfo.spec}`
+                : materialInfo.name;
+        } else {
+            // DB에서 못 찾음: 원본 ID 표시
+            displayName = layer.materialName;
+            console.warn(`⚠️ DB에서 자재를 찾지 못함: ${layer.materialName}`);
+        }
 
         const materialPrice = layer.materialPrice || 0;
         const laborPrice = layer.laborPrice || 0;
@@ -1680,7 +1652,7 @@ function generateLayerDetailRows(result) {
         `;
 
         layerNumber++;
-    });
+    }
 
     return html;
 }
@@ -1688,7 +1660,7 @@ function generateLayerDetailRows(result) {
 /**
  * 발주서 데이터 행 생성
  */
-function generateOrderFormDataRows() {
+async function generateOrderFormDataRows() {
     if (calculationResults.length === 0) {
         return `
             <tr>
@@ -1711,7 +1683,7 @@ function generateOrderFormDataRows() {
         html += generateTypeSummaryRow(typeName, results, typeIndex);
 
         // 레이어별 상세 행 (첫 번째 결과의 레이어 정보 사용)
-        html += generateLayerDetailRows(results[0]);
+        html += await generateLayerDetailRows(results[0]);
 
         typeIndex++;
     }

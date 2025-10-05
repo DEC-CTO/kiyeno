@@ -2048,7 +2048,7 @@ function parseUnitPriceId(id) {
  * calculationResults를 detailSections으로 변환
  * wall-cost-calculator.js의 calculationResults 전역 변수 사용
  */
-function convertCalculationResultsToDetailSections() {
+async function convertCalculationResultsToDetailSections() {
     console.log('🔄 계산 결과를 상세 섹션으로 변환 시작 (layerPricing 기반)');
 
     // calculationResults가 없으면 빈 배열 반환
@@ -2062,29 +2062,50 @@ function convertCalculationResultsToDetailSections() {
     // 자재별 집계 (공종 구분 없이)
     const groupedItems = {};
 
-    window.calculationResults.forEach((result, resultIdx) => {
+    for (const [resultIdx, result] of window.calculationResults.entries()) {
         console.log(`  📋 처리 중: ${resultIdx + 1}/${window.calculationResults.length} - ${result.wallName} (${result.area.toFixed(2)} M2)`);
 
         // layerPricing이 없으면 스킵
         if (!result.layerPricing) {
             console.warn(`    ⚠️ layerPricing이 없음`);
-            return;
+            continue;
         }
 
         // 각 레이어별로 처리 (11개 레이어)
-        Object.entries(result.layerPricing).forEach(([layerKey, layer]) => {
+        for (const [layerKey, layer] of Object.entries(result.layerPricing)) {
             // found=false이거나 materialName이 없으면 스킵
             if (!layer.found || !layer.materialName) {
-                return;
+                continue;
             }
 
-            // ID 파싱하여 품명과 규격 추출
-            const parsed = parseUnitPriceId(layer.materialName);
-            const materialName = parsed.itemName || layer.materialName;
-            const spec = parsed.spec || layer.spec || '';
-            const unit = layer.unit || 'M2';
+            // DB에서 자재 정보 가져오기
+            let materialName, spec, unit;
 
-            console.log(`    🔹 레이어: ${layerKey} → ${materialName} (${spec})`);
+            if (typeof window.findMaterialInUnitPriceDB === 'function') {
+                const materialInfo = await window.findMaterialInUnitPriceDB(layer.materialName);
+
+                if (materialInfo && materialInfo.name) {
+                    // DB에서 찾음: 정확한 품명 + 규격
+                    materialName = materialInfo.name;
+                    spec = materialInfo.spec || '';
+                    unit = materialInfo.unit || layer.unit || 'M2';
+                    console.log(`    🔹 레이어: ${layerKey} → ${materialName} (${spec}) [DB]`);
+                } else {
+                    // DB에서 못 찾음: 파싱으로 폴백
+                    const parsed = parseUnitPriceId(layer.materialName);
+                    materialName = parsed.itemName || layer.materialName;
+                    spec = parsed.spec || '';
+                    unit = layer.unit || 'M2';
+                    console.warn(`    ⚠️ DB에서 못 찾음, 파싱 사용: ${layerKey} → ${materialName} (${spec})`);
+                }
+            } else {
+                // findMaterialInUnitPriceDB 없음: 파싱으로 폴백
+                const parsed = parseUnitPriceId(layer.materialName);
+                materialName = parsed.itemName || layer.materialName;
+                spec = parsed.spec || '';
+                unit = layer.unit || 'M2';
+                console.log(`    🔹 레이어: ${layerKey} → ${materialName} (${spec}) [파싱]`);
+            }
 
             // 자재명+규격 키
             const itemKey = `${materialName}|${spec}`;
@@ -2112,8 +2133,8 @@ function convertCalculationResultsToDetailSections() {
             groupedItems[itemKey].laborAmount += (layer.laborPrice || 0) * qty;
 
             console.log(`      ✅ 누적: 수량 ${qty.toFixed(2)} M2, 자재비 ${Math.round((layer.materialPrice || 0) * qty).toLocaleString()}원, 노무비 ${Math.round((layer.laborPrice || 0) * qty).toLocaleString()}원`);
-        });
-    });
+        }
+    }
 
     // 자재비/노무비 배열 생성
     const materials = [];
@@ -2178,7 +2199,7 @@ function convertCalculationResultsToDetailSections() {
 /**
  * 단가비교표 탭에 렌더링 (모달 대신 탭 사용)
  */
-window.renderPriceComparisonTable = function() {
+window.renderPriceComparisonTable = async function() {
     console.log('💰 단가비교표 테이블 렌더링 시작');
 
     const container = document.getElementById('priceComparisonContainer');
@@ -2188,7 +2209,7 @@ window.renderPriceComparisonTable = function() {
     }
 
     // calculationResults를 detailSections으로 변환
-    const detailSections = convertCalculationResultsToDetailSections();
+    const detailSections = await convertCalculationResultsToDetailSections();
     priceComparisonData.detailSections = detailSections;
 
     // 데이터 초기화 (items가 비어있으면 기본 아이템 1개 추가)
