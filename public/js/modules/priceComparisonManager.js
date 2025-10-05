@@ -1297,18 +1297,23 @@ async function exportPriceComparisonToExcel() {
 
         // 헤더 행 1 - 타이틀 행
         const headerRow1 = worksheet.addRow([]);
+        const row1Num = headerRow1.number;
         let colIdx = 1;
+
+        // 헤더 행 2 - 서브 헤더 (먼저 추가하여 row2Num 확보)
+        const headerRow2 = worksheet.addRow([]);
+        const row2Num = headerRow2.number;
 
         // 고정 헤더 (rowspan=2)
         ['NO', '품명', '규격', '단위', '계약도급수량'].forEach(text => {
             const cell = headerRow1.getCell(colIdx);
             cell.value = text;
-            worksheet.mergeCells(1, colIdx, 2, colIdx); // rowspan=2
+            worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx); // rowspan=2
             colIdx++;
         });
 
         // 계약도급 (colspan=2)
-        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '계약도급';
         colIdx += 2;
 
@@ -1316,50 +1321,52 @@ async function exportPriceComparisonToExcel() {
         ['단위', '발주수량'].forEach(text => {
             const cell = headerRow1.getCell(colIdx);
             cell.value = text;
-            worksheet.mergeCells(1, colIdx, 2, colIdx);
+            worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
             colIdx++;
         });
 
         // 진행도급 (colspan=2)
-        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '진행도급';
         colIdx += 2;
 
         // 수량 (rowspan=2)
-        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '수량';
         colIdx++;
 
         // 발주단가 (colspan=2)
-        worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+        worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '발주단가';
         colIdx += 2;
 
         // 수량 (rowspan=2)
-        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '수량';
         colIdx++;
 
         // 업체 컬럼들
         priceComparisonData.items[0].vendors.forEach((vendor, vIdx) => {
             const isLast = vIdx === vendorCount - 1;
-            worksheet.mergeCells(1, colIdx, 1, colIdx + 1);
+
+            // 모든 업체: 단가+금액 2칸 병합 (먼저 추가)
+            worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
             headerRow1.getCell(colIdx).value = vendor.name;
             colIdx += 2;
 
             if (!isLast) {
-                worksheet.mergeCells(1, colIdx, 2, colIdx);
+                // 업체1,2: 수량(rowspan=2) 나중 추가
+                worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
                 headerRow1.getCell(colIdx).value = '수량';
                 colIdx++;
             }
         });
 
         // 비고 (rowspan=2)
-        worksheet.mergeCells(1, colIdx, 2, colIdx);
+        worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '비고';
 
-        // 헤더 행 2 - 서브 헤더
-        const headerRow2 = worksheet.addRow([]);
+        // 헤더 행 2 서브헤더 작성
         colIdx = 6; // 계약도급부터 시작
 
         // 계약도급 서브헤더
@@ -1382,7 +1389,9 @@ async function exportPriceComparisonToExcel() {
             const isLast = v === vendorCount - 1;
             headerRow2.getCell(colIdx++).value = '단가';
             headerRow2.getCell(colIdx++).value = '금액';
-            if (!isLast) colIdx++; // 수량 건너뜀
+            if (!isLast) {
+                colIdx++; // 수량(rowspan=2) 건너뜀
+            }
         }
 
         // 헤더 스타일 적용
@@ -1409,43 +1418,49 @@ async function exportPriceComparisonToExcel() {
             let dataColIdx = 1;
             const row = worksheet.addRow([]);
 
+            // 빈 값 처리 함수
+            const formatValue = (val) => {
+                const num = parseFloat(val);
+                return (num && num !== 0) ? num : '';
+            };
+
             // 기본 필드
             row.getCell(dataColIdx++).value = rowData.no || '';
             row.getCell(dataColIdx++).value = rowData.itemName;
-            row.getCell(dataColIdx++).value = rowData.spec;
-            row.getCell(dataColIdx++).value = rowData.unit;
-            row.getCell(dataColIdx++).value = parseFloat(rowData.contractQty) || 0;
+            row.getCell(dataColIdx++).value = rowData.spec || '';
+            row.getCell(dataColIdx++).value = rowData.unit || '';
+            row.getCell(dataColIdx++).value = formatValue(rowData.contractQty);
 
             // 계약도급
-            row.getCell(dataColIdx++).value = parseFloat(rowData.contractPrice.unitPrice) || 0;
-            row.getCell(dataColIdx++).value = parseFloat(rowData.contractPrice.amount) || 0;
+            row.getCell(dataColIdx++).value = formatValue(rowData.contractPrice.unitPrice);
+            row.getCell(dataColIdx++).value = formatValue(rowData.contractPrice.amount);
 
             // 단위, 발주수량
-            row.getCell(dataColIdx++).value = rowData.orderUnit;
-            row.getCell(dataColIdx++).value = parseFloat(rowData.orderQuantity) || 0;
+            row.getCell(dataColIdx++).value = rowData.orderUnit || '';
+            row.getCell(dataColIdx++).value = formatValue(rowData.orderQuantity);
 
             // 진행도급
-            row.getCell(dataColIdx++).value = parseFloat(rowData.progressPrice.unitPrice) || 0;
-            row.getCell(dataColIdx++).value = parseFloat(rowData.progressPrice.amount) || 0;
+            row.getCell(dataColIdx++).value = formatValue(rowData.progressPrice.unitPrice);
+            row.getCell(dataColIdx++).value = formatValue(rowData.progressPrice.amount);
 
             // 수량
-            row.getCell(dataColIdx++).value = parseFloat(rowData.progressQuantity) || 0;
+            row.getCell(dataColIdx++).value = formatValue(rowData.progressQuantity);
 
             // 발주단가
-            row.getCell(dataColIdx++).value = parseFloat(rowData.orderPrice.unitPrice) || 0;
-            row.getCell(dataColIdx++).value = parseFloat(rowData.orderPrice.amount) || 0;
+            row.getCell(dataColIdx++).value = formatValue(rowData.orderPrice.unitPrice);
+            row.getCell(dataColIdx++).value = formatValue(rowData.orderPrice.amount);
 
             // 수량2
-            row.getCell(dataColIdx++).value = parseFloat(rowData.orderQuantity2) || 0;
+            row.getCell(dataColIdx++).value = '';  // 항상 빈칸
 
             // 업체들
             rowData.vendors.forEach((vendor, vIdx) => {
                 const isLast = vIdx === vendorCount - 1;
-                row.getCell(dataColIdx++).value = parseFloat(vendor.unitPrice) || 0;
-                row.getCell(dataColIdx++).value = parseFloat(vendor.amount) || 0;
                 if (!isLast) {
-                    row.getCell(dataColIdx++).value = parseFloat(vendor.quantity) || 0;
+                    row.getCell(dataColIdx++).value = formatValue(vendor.quantity);
                 }
+                row.getCell(dataColIdx++).value = formatValue(vendor.unitPrice);
+                row.getCell(dataColIdx++).value = formatValue(vendor.amount);
             });
 
             // 비고
@@ -1772,7 +1787,7 @@ async function exportPriceComparisonToExcel() {
             '',                     // 15. 수량2
             ...priceComparisonData.finalTotalRow.vendors.flatMap((v, vIdx) => {
                 const isLast = vIdx === priceComparisonData.finalTotalRow.vendors.length - 1;
-                return isLast ? [v.amount || 0, ''] : [v.amount || 0, '', ''];  // 16-23. 업체들
+                return isLast ? ['', ''] : ['', '', ''];  // 16-23. 업체들 (모두 빈칸)
             }),
             ''                      // 24. 비고
         ]);
@@ -1796,8 +1811,8 @@ async function exportPriceComparisonToExcel() {
         finalTotalRow.getCell(7).numFmt = '#,##0';
         finalTotalRow.getCell(11).alignment = { vertical: 'middle', horizontal: 'right' };
         finalTotalRow.getCell(11).numFmt = '#,##0';
-        finalTotalRow.getCell(13).alignment = { vertical: 'middle', horizontal: 'right' };
-        finalTotalRow.getCell(13).numFmt = '#,##0';
+        finalTotalRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
+        finalTotalRow.getCell(14).numFmt = '#,##0';
 
         // 컬럼 너비 설정
         worksheet.columns = worksheet.columns.map((col, idx) => {
@@ -1805,6 +1820,117 @@ async function exportPriceComparisonToExcel() {
             else if (idx === 2) return { ...col, width: 20 }; // 규격
             else return { ...col, width: 12 };
         });
+
+        // 전체 테이블 스타일 적용 (동적 범위)
+        const lastRow = worksheet.rowCount;
+        const lastCol = 24; // X열 (비고)
+
+        // 1. 품명 컬럼(B열, 2번째) 왼쪽 정렬 (헤더 제외)
+        for (let rowNum = 3; rowNum <= lastRow; rowNum++) {
+            const cell = worksheet.getRow(rowNum).getCell(2);
+            if (cell.value) {
+                cell.alignment = { ...cell.alignment, horizontal: 'left' };
+            }
+        }
+
+        // 헤더(1-2행) 품명은 가운데 정렬 유지
+        worksheet.getRow(1).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getRow(2).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // 2. 모든 숫자 셀 오른쪽 정렬 및 콤마 포맷
+        for (let rowNum = 1; rowNum <= lastRow; rowNum++) {
+            const row = worksheet.getRow(rowNum);
+            row.eachCell((cell, colNumber) => {
+                if (typeof cell.value === 'number' && cell.value !== 0) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    if (!cell.numFmt || cell.numFmt === 'General') {
+                        cell.numFmt = '#,##0';
+                    }
+                }
+            });
+        }
+
+        // 3. 전체 외곽선 굵은선 적용
+        // 상단 외곽선
+        for (let col = 1; col <= lastCol; col++) {
+            const cell = worksheet.getRow(1).getCell(col);
+            cell.border = {
+                ...cell.border,
+                top: { style: 'medium' }
+            };
+        }
+
+        // 하단 외곽선
+        for (let col = 1; col <= lastCol; col++) {
+            const cell = worksheet.getRow(lastRow).getCell(col);
+            cell.border = {
+                ...cell.border,
+                bottom: { style: 'medium' }
+            };
+        }
+
+        // 좌측 외곽선
+        for (let row = 1; row <= lastRow; row++) {
+            const cell = worksheet.getRow(row).getCell(1);
+            cell.border = {
+                ...cell.border,
+                left: { style: 'medium' }
+            };
+        }
+
+        // 우측 외곽선
+        for (let row = 1; row <= lastRow; row++) {
+            const cell = worksheet.getRow(row).getCell(lastCol);
+            cell.border = {
+                ...cell.border,
+                right: { style: 'medium' }
+            };
+        }
+
+        // 4. 내부 선 스타일 적용 (내부 세로선: 실선, 내부 가로선: 점선)
+        for (let rowNum = 1; rowNum <= lastRow; rowNum++) {
+            for (let colNum = 1; colNum <= lastCol; colNum++) {
+                const cell = worksheet.getRow(rowNum).getCell(colNum);
+                const isTopEdge = rowNum === 1;
+                const isBottomEdge = rowNum === lastRow;
+                const isLeftEdge = colNum === 1;
+                const isRightEdge = colNum === lastCol;
+
+                cell.border = {
+                    top: isTopEdge ? { style: 'medium' } : { style: 'dotted' },
+                    bottom: isBottomEdge ? { style: 'medium' } : { style: 'dotted' },
+                    left: isLeftEdge ? { style: 'medium' } : { style: 'thin' },
+                    right: isRightEdge ? { style: 'medium' } : { style: 'thin' }
+                };
+            }
+        }
+
+        // 5. 헤더 전체(1-2행) 테두리 선 스타일 변경
+        // 헤더 아래쪽 실선 (2행 하단)
+        for (let colNum = 1; colNum <= lastCol; colNum++) {
+            const cell = worksheet.getRow(2).getCell(colNum);
+            cell.border = {
+                ...cell.border,
+                bottom: { style: 'thin' }
+            };
+        }
+
+        // 헤더 내부 가로선 실선 (1행 하단 = 2행 상단)
+        for (let colNum = 1; colNum <= lastCol; colNum++) {
+            const cell1 = worksheet.getRow(1).getCell(colNum);
+            const cell2 = worksheet.getRow(2).getCell(colNum);
+
+            cell1.border = {
+                ...cell1.border,
+                bottom: { style: 'thin' }
+            };
+
+            cell2.border = {
+                ...cell2.border,
+                top: { style: 'thin' },
+                bottom: { style: 'thin' }
+            };
+        }
 
         // 파일 다운로드
         const buffer = await workbook.xlsx.writeBuffer();
@@ -1818,7 +1944,6 @@ async function exportPriceComparisonToExcel() {
         URL.revokeObjectURL(url);
 
         console.log('✅ Excel 파일 내보내기 완료:', fileName);
-        alert('Excel 파일이 다운로드되었습니다.');
     } catch (error) {
         console.error('Excel 내보내기 실패:', error);
         alert('Excel 내보내기 중 오류가 발생했습니다: ' + error.message);
