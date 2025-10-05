@@ -1435,7 +1435,133 @@ function createSingleWallMaterialSheet(wb, result) {
  */
 function renderOrderFormTab() {
     console.log('📋 발주서 탭 렌더링');
-    // 향후 구현
+
+    const container = document.getElementById('orderFormContainer');
+
+    if (calculationResults.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: #6c757d;">
+                <i class="fas fa-clipboard-list" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p style="font-size: 18px; margin-bottom: 10px;">벽체 계산이 필요합니다</p>
+                <p style="font-size: 14px;">먼저 벽체를 선택하고 "계산하기" 버튼을 클릭하세요.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // 발주서 HTML 생성
+    container.innerHTML = `
+        <div class="order-form-wrapper" style="padding: 20px;">
+            <div class="order-form-table-wrapper" style="overflow-x: auto; border: 1px solid #e0e0e0; border-radius: 8px;">
+                <table class="order-form-table">
+                    <thead>
+                        ${generateOrderFormHeader()}
+                    </thead>
+                    <tbody>
+                        <!-- 현장명 입력 행 -->
+                        <tr>
+                            <td>1</td>
+                            <td>
+                                <input type="text" placeholder="현장명을 입력하세요" style="width: 100%; border: 1px solid #ddd; padding: 6px; font-size: 12px;">
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <!-- 데이터 행 -->
+                        <tr>
+                            <td colspan="29" style="padding: 20px; text-align: center; color: #6c757d;">
+                                데이터 행 생성 준비 중...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * 발주서 헤더 생성 (3행 복잡한 병합 구조)
+ */
+function generateOrderFormHeader() {
+    return `
+        <!-- Row 1: 메인 헤더 -->
+        <tr>
+            <th rowspan="3">NO</th>
+            <th rowspan="3">구분</th>
+            <th rowspan="3">품명 및 규격</th>
+            <th colspan="2">WALL</th>
+            <th colspan="5">개수</th>
+            <th colspan="3">환산</th>
+            <th rowspan="3">단위</th>
+            <th rowspan="3">수량</th>
+            <th colspan="6">계약도급</th>
+            <th rowspan="3">비고</th>
+            <th colspan="6">발주단가</th>
+            <th rowspan="3">비고</th>
+        </tr>
+
+        <!-- Row 2: 서브 헤더 -->
+        <tr>
+            <th rowspan="2">THK</th>
+            <th rowspan="2">Type</th>
+            <th rowspan="2">@</th>
+            <th rowspan="2">두께</th>
+            <th rowspan="2">넓이</th>
+            <th rowspan="2">높이</th>
+            <th rowspan="2">M</th>
+            <th rowspan="2">제공자</th>
+            <th rowspan="2">1장->m2</th>
+            <th rowspan="2">장</th>
+            <th colspan="2">자재비</th>
+            <th colspan="2">노무비</th>
+            <th colspan="2">합계</th>
+            <th colspan="2">자재비</th>
+            <th colspan="2">노무비</th>
+            <th colspan="2">합계</th>
+        </tr>
+
+        <!-- Row 3: 세부 헤더 -->
+        <tr>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+        </tr>
+    `;
 }
 
 /**
