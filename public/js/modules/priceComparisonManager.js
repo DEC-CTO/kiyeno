@@ -1295,26 +1295,42 @@ async function exportPriceComparisonToExcel() {
 
         const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
 
-        // 헤더 행 1 - 타이틀 행
+        // 타이틀 행 (행1)
+        const titleRow = worksheet.addRow(['단가비교표']);
+        titleRow.font = { bold: true, size: 14 };
+        titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // 현장명 행 (행2)
+        const siteNameRow = worksheet.addRow([`현장명: ${priceComparisonData.siteName || ''}`]);
+        siteNameRow.font = { bold: true, size: 12 };
+        siteNameRow.alignment = { vertical: 'middle', horizontal: 'left' };
+
+        // 헤더 행 1 - 타이틀 행 (행3)
         const headerRow1 = worksheet.addRow([]);
         const row1Num = headerRow1.number;
         let colIdx = 1;
 
-        // 헤더 행 2 - 서브 헤더 (먼저 추가하여 row2Num 확보)
+        // 헤더 행 2 - 서브 헤더 (행4)
         const headerRow2 = worksheet.addRow([]);
         const row2Num = headerRow2.number;
+
+        // 병합된 셀 정보 추적 (상단 테두리 적용용)
+        const mergedCellRanges = [];
+        const rowspanColumns = []; // rowspan=2로 병합된 열 번호 추적
 
         // 고정 헤더 (rowspan=2)
         ['NO', '품명', '규격', '단위', '계약도급수량'].forEach(text => {
             const cell = headerRow1.getCell(colIdx);
             cell.value = text;
             worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx); // rowspan=2
+            rowspanColumns.push(colIdx); // rowspan 열 기록
             colIdx++;
         });
 
         // 계약도급 (colspan=2)
         worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '계약도급';
+        mergedCellRanges.push({ startCol: colIdx, endCol: colIdx + 1, row: row1Num });
         colIdx += 2;
 
         // 단위, 발주수량 (rowspan=2)
@@ -1322,27 +1338,32 @@ async function exportPriceComparisonToExcel() {
             const cell = headerRow1.getCell(colIdx);
             cell.value = text;
             worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
+            rowspanColumns.push(colIdx); // rowspan 열 기록
             colIdx++;
         });
 
         // 진행도급 (colspan=2)
         worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '진행도급';
+        mergedCellRanges.push({ startCol: colIdx, endCol: colIdx + 1, row: row1Num });
         colIdx += 2;
 
         // 수량 (rowspan=2)
         worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '수량';
+        rowspanColumns.push(colIdx); // rowspan 열 기록
         colIdx++;
 
         // 발주단가 (colspan=2)
         worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
         headerRow1.getCell(colIdx).value = '발주단가';
+        mergedCellRanges.push({ startCol: colIdx, endCol: colIdx + 1, row: row1Num });
         colIdx += 2;
 
         // 수량 (rowspan=2)
         worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '수량';
+        rowspanColumns.push(colIdx); // rowspan 열 기록
         colIdx++;
 
         // 업체 컬럼들
@@ -1352,12 +1373,14 @@ async function exportPriceComparisonToExcel() {
             // 모든 업체: 단가+금액 2칸 병합 (먼저 추가)
             worksheet.mergeCells(row1Num, colIdx, row1Num, colIdx + 1);
             headerRow1.getCell(colIdx).value = vendor.name;
+            mergedCellRanges.push({ startCol: colIdx, endCol: colIdx + 1, row: row1Num });
             colIdx += 2;
 
             if (!isLast) {
                 // 업체1,2: 수량(rowspan=2) 나중 추가
                 worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
                 headerRow1.getCell(colIdx).value = '수량';
+                rowspanColumns.push(colIdx); // rowspan 열 기록
                 colIdx++;
             }
         });
@@ -1365,6 +1388,7 @@ async function exportPriceComparisonToExcel() {
         // 비고 (rowspan=2)
         worksheet.mergeCells(row1Num, colIdx, row2Num, colIdx);
         headerRow1.getCell(colIdx).value = '비고';
+        rowspanColumns.push(colIdx); // rowspan 열 기록
 
         // 헤더 행 2 서브헤더 작성
         colIdx = 6; // 계약도급부터 시작
@@ -1394,7 +1418,7 @@ async function exportPriceComparisonToExcel() {
             }
         }
 
-        // 헤더 스타일 적용
+        // 헤더 스타일 적용 (border는 나중에 적용)
         [headerRow1, headerRow2].forEach(row => {
             row.eachCell((cell) => {
                 cell.fill = {
@@ -1404,12 +1428,6 @@ async function exportPriceComparisonToExcel() {
                 };
                 cell.font = { bold: true, size: 12 };
                 cell.alignment = { vertical: 'middle', horizontal: 'center' };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' }
-                };
             });
         });
 
@@ -1502,13 +1520,13 @@ async function exportPriceComparisonToExcel() {
             cell.alignment = { vertical: 'middle', horizontal: 'center' };
         });
 
-        // 두 번째 행: 경량공사 요약
+        // 두 번째 데이터 행: 경량공사 요약
         addDataRow(priceComparisonData.summaryRow);
 
-        // 세 번째 행: 공과잡비
+        // 세 번째 데이터 행: 공과잡비
         addDataRow(priceComparisonData.miscRow);
 
-        // 네 번째 행: 단수정리 (24칸 구조)
+        // 네 번째 데이터 행: 단수정리 (24칸 구조)
         const roundingRow = worksheet.addRow([
             '',  // 1. NO
             priceComparisonData.roundingRow.itemName,  // 2. 품명
@@ -1596,8 +1614,10 @@ async function exportPriceComparisonToExcel() {
             cell.font = { bold: true };
         });
 
-        // 자재비 헤더
-        const materialHeaderRow = worksheet.addRow(['1-1', '자재비', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        // 자재비 헤더 (24칸 구조)
+        const materialHeaderRow = worksheet.addRow([
+            '1-1', '자재비', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+        ]);
         materialHeaderRow.eachCell((cell) => {
             cell.border = {
                 top: { style: 'thin' },
@@ -1682,8 +1702,10 @@ async function exportPriceComparisonToExcel() {
             materialItemNo++;
         });
 
-        // 노무비 헤더
-        const laborHeaderRow = worksheet.addRow(['1-2', '노무비', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
+        // 노무비 헤더 (24칸 구조)
+        const laborHeaderRow = worksheet.addRow([
+            '1-2', '노무비', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+        ]);
         laborHeaderRow.eachCell((cell) => {
             cell.border = {
                 top: { style: 'thin' },
@@ -1826,16 +1848,16 @@ async function exportPriceComparisonToExcel() {
         const lastCol = 24; // X열 (비고)
 
         // 1. 품명 컬럼(B열, 2번째) 왼쪽 정렬 (헤더 제외)
-        for (let rowNum = 3; rowNum <= lastRow; rowNum++) {
+        for (let rowNum = 5; rowNum <= lastRow; rowNum++) {
             const cell = worksheet.getRow(rowNum).getCell(2);
             if (cell.value) {
                 cell.alignment = { ...cell.alignment, horizontal: 'left' };
             }
         }
 
-        // 헤더(1-2행) 품명은 가운데 정렬 유지
-        worksheet.getRow(1).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
-        worksheet.getRow(2).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+        // 헤더(3-4행) 품명은 가운데 정렬 유지
+        worksheet.getRow(3).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
+        worksheet.getRow(4).getCell(2).alignment = { vertical: 'middle', horizontal: 'center' };
 
         // 2. 모든 숫자 셀 오른쪽 정렬 및 콤마 포맷
         for (let rowNum = 1; rowNum <= lastRow; rowNum++) {
@@ -1850,10 +1872,57 @@ async function exportPriceComparisonToExcel() {
             });
         }
 
-        // 3. 전체 외곽선 굵은선 적용
-        // 상단 외곽선
+        // 3. 내부 선 스타일 적용 (내부 세로선: 실선, 내부 가로선: 점선) - 3행부터
+        for (let rowNum = 3; rowNum <= lastRow; rowNum++) {
+            for (let colNum = 1; colNum <= lastCol; colNum++) {
+                const cell = worksheet.getRow(rowNum).getCell(colNum);
+
+                cell.border = {
+                    top: { style: 'dotted' },
+                    bottom: { style: 'dotted' },
+                    left: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+            }
+        }
+
+        // 4. 타이틀 행(1-2행) 테두리 제거
+        for (let rowNum = 1; rowNum <= 2; rowNum++) {
+            for (let colNum = 1; colNum <= lastCol; colNum++) {
+                worksheet.getRow(rowNum).getCell(colNum).border = {};
+            }
+        }
+
+        // 5. 헤더 내부 가로선 실선 (3행 하단 = 4행 상단)
+        for (let colNum = 1; colNum <= lastCol; colNum++) {
+            const cell3 = worksheet.getRow(3).getCell(colNum);
+            const cell4 = worksheet.getRow(4).getCell(colNum);
+
+            // rowspan 열이 아닌 경우만 내부 가로선 적용
+            if (!rowspanColumns.includes(colNum)) {
+                cell3.border = {
+                    ...cell3.border,
+                    bottom: { style: 'thin' }
+                };
+
+                cell4.border = {
+                    ...cell4.border,
+                    top: { style: 'thin' },
+                    bottom: { style: 'thin' }
+                };
+            } else {
+                // rowspan 열: 4행 하단만 thin
+                cell4.border = {
+                    ...cell4.border,
+                    bottom: { style: 'thin' }
+                };
+            }
+        }
+
+        // 6. 전체 외곽선 굵은선 적용 (타이틀 행 제외, 3행부터 시작) - 마지막에 적용!
+        // 상단 외곽선 (3행)
         for (let col = 1; col <= lastCol; col++) {
-            const cell = worksheet.getRow(1).getCell(col);
+            const cell = worksheet.getRow(3).getCell(col);
             cell.border = {
                 ...cell.border,
                 top: { style: 'medium' }
@@ -1869,8 +1938,8 @@ async function exportPriceComparisonToExcel() {
             };
         }
 
-        // 좌측 외곽선
-        for (let row = 1; row <= lastRow; row++) {
+        // 좌측 외곽선 (3행부터)
+        for (let row = 3; row <= lastRow; row++) {
             const cell = worksheet.getRow(row).getCell(1);
             cell.border = {
                 ...cell.border,
@@ -1878,57 +1947,12 @@ async function exportPriceComparisonToExcel() {
             };
         }
 
-        // 우측 외곽선
-        for (let row = 1; row <= lastRow; row++) {
+        // 우측 외곽선 (3행부터)
+        for (let row = 3; row <= lastRow; row++) {
             const cell = worksheet.getRow(row).getCell(lastCol);
             cell.border = {
                 ...cell.border,
                 right: { style: 'medium' }
-            };
-        }
-
-        // 4. 내부 선 스타일 적용 (내부 세로선: 실선, 내부 가로선: 점선)
-        for (let rowNum = 1; rowNum <= lastRow; rowNum++) {
-            for (let colNum = 1; colNum <= lastCol; colNum++) {
-                const cell = worksheet.getRow(rowNum).getCell(colNum);
-                const isTopEdge = rowNum === 1;
-                const isBottomEdge = rowNum === lastRow;
-                const isLeftEdge = colNum === 1;
-                const isRightEdge = colNum === lastCol;
-
-                cell.border = {
-                    top: isTopEdge ? { style: 'medium' } : { style: 'dotted' },
-                    bottom: isBottomEdge ? { style: 'medium' } : { style: 'dotted' },
-                    left: isLeftEdge ? { style: 'medium' } : { style: 'thin' },
-                    right: isRightEdge ? { style: 'medium' } : { style: 'thin' }
-                };
-            }
-        }
-
-        // 5. 헤더 전체(1-2행) 테두리 선 스타일 변경
-        // 헤더 아래쪽 실선 (2행 하단)
-        for (let colNum = 1; colNum <= lastCol; colNum++) {
-            const cell = worksheet.getRow(2).getCell(colNum);
-            cell.border = {
-                ...cell.border,
-                bottom: { style: 'thin' }
-            };
-        }
-
-        // 헤더 내부 가로선 실선 (1행 하단 = 2행 상단)
-        for (let colNum = 1; colNum <= lastCol; colNum++) {
-            const cell1 = worksheet.getRow(1).getCell(colNum);
-            const cell2 = worksheet.getRow(2).getCell(colNum);
-
-            cell1.border = {
-                ...cell1.border,
-                bottom: { style: 'thin' }
-            };
-
-            cell2.border = {
-                ...cell2.border,
-                top: { style: 'thin' },
-                bottom: { style: 'thin' }
             };
         }
 
