@@ -1493,16 +1493,230 @@ function renderOrderFormTab() {
                             <td></td>
                         </tr>
                         <!-- 데이터 행 -->
-                        <tr>
-                            <td colspan="29" style="padding: 20px; text-align: center; color: #6c757d;">
-                                데이터 행 생성 준비 중...
-                            </td>
-                        </tr>
+                        ${generateOrderFormDataRows()}
                     </tbody>
                 </table>
             </div>
         </div>
     `;
+}
+
+/**
+ * calculationResults를 타입별로 그룹핑
+ */
+function groupResultsByType(results) {
+    const grouped = {};
+    results.forEach(result => {
+        const typeName = result.wallType.wallType;
+        if (!grouped[typeName]) {
+            grouped[typeName] = [];
+        }
+        grouped[typeName].push(result);
+    });
+    return grouped;
+}
+
+/**
+ * 타입 합계 행 생성
+ */
+function generateTypeSummaryRow(typeName, results, typeIndex) {
+    // 타입별 합계 계산
+    const totalArea = results.reduce((sum, r) => sum + r.area, 0);
+    const totalMaterialCost = results.reduce((sum, r) => sum + r.materialCost, 0);
+    const totalLaborCost = results.reduce((sum, r) => sum + r.laborCost, 0);
+    const totalCost = totalMaterialCost + totalLaborCost;
+
+    // 단가 계산
+    const materialUnitPrice = totalArea > 0 ? totalMaterialCost / totalArea : 0;
+    const laborUnitPrice = totalArea > 0 ? totalLaborCost / totalArea : 0;
+    const unitPrice = totalArea > 0 ? totalCost / totalArea : 0;
+
+    return `
+        <tr>
+            <td>1-${typeIndex}</td>
+            <td>${typeName}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>M2</td>
+            <td>${totalArea.toFixed(2)}</td>
+            <td>${materialUnitPrice.toFixed(0)}</td>
+            <td>${totalMaterialCost.toFixed(0)}</td>
+            <td>${laborUnitPrice.toFixed(0)}</td>
+            <td>${totalLaborCost.toFixed(0)}</td>
+            <td>${unitPrice.toFixed(0)}</td>
+            <td>${totalCost.toFixed(0)}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 일위대가 ID를 파싱하여 품명과 규격 추출
+ * @param {string} id - 예: "unitPrice_C-STUD-450-3600이하-50형-1759332998669"
+ * @returns {object} - { itemName: "C-STUD", spec: "50형" }
+ */
+function parseUnitPriceId(id) {
+    if (!id) return { itemName: '', spec: '' };
+
+    // unitPrice_ 접두사 제거
+    let cleaned = id.replace(/^unitPrice_/, '');
+
+    // 하이픈으로 분리
+    const parts = cleaned.split('-');
+
+    if (parts.length < 2) {
+        return { itemName: cleaned, spec: '' };
+    }
+
+    // 타임스탬프 제거 (마지막 부분이 13자리 숫자)
+    if (parts[parts.length - 1] && parts[parts.length - 1].match(/^\d{13}$/)) {
+        parts.pop();
+    }
+
+    // 규격: 마지막 부분
+    const spec = parts.pop() || '';
+
+    // 품명 패턴 인식
+    // C-STUD, C-RUNNER, J-RUNNER 등 알파벳-알파벳 패턴은 하나로 처리
+    const firstPart = parts[0];
+    const secondPart = parts[1];
+
+    let itemName;
+    if (firstPart && secondPart &&
+        firstPart.match(/^[A-Z]$/) && secondPart.match(/^[A-Z]+$/)) {
+        // C-STUD 패턴 (알파벳 1글자 - 알파벳 여러글자)
+        itemName = `${firstPart}-${secondPart}`;
+    } else {
+        // 일반석고보드 등 일반 패턴
+        itemName = firstPart;
+    }
+
+    return { itemName, spec };
+}
+
+/**
+ * 레이어별 상세 행 생성
+ */
+function generateLayerDetailRows(result) {
+    const layerOrder = [
+        'layer3_1', 'layer2_1', 'layer1_1',
+        'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2',
+        'column2', 'channel', 'runner'
+    ];
+
+    let html = '';
+    let layerNumber = 1;
+
+    layerOrder.forEach(layerKey => {
+        const layer = result.layerPricing[layerKey];
+
+        // 빈 레이어는 건너뛰기
+        if (!layer || !layer.materialName) {
+            return;
+        }
+
+        // ID 파싱하여 품명과 규격 추출
+        const parsed = parseUnitPriceId(layer.materialName);
+        const displayName = parsed.itemName ? `${parsed.itemName} ${parsed.spec}` : layer.materialName;
+
+        const materialPrice = layer.materialPrice || 0;
+        const laborPrice = layer.laborPrice || 0;
+        const unitPrice = materialPrice + laborPrice;
+        const area = result.area || 0;
+
+        const materialAmount = materialPrice * area;
+        const laborAmount = laborPrice * area;
+        const totalAmount = materialAmount + laborAmount;
+
+        html += `
+            <tr>
+                <td>${layerNumber}</td>
+                <td></td>
+                <td>${displayName}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>${layer.unit || 'M2'}</td>
+                <td>${area.toFixed(2)}</td>
+                <td>${materialPrice.toFixed(0)}</td>
+                <td>${materialAmount.toFixed(0)}</td>
+                <td>${laborPrice.toFixed(0)}</td>
+                <td>${laborAmount.toFixed(0)}</td>
+                <td>${unitPrice.toFixed(0)}</td>
+                <td>${totalAmount.toFixed(0)}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        `;
+
+        layerNumber++;
+    });
+
+    return html;
+}
+
+/**
+ * 발주서 데이터 행 생성
+ */
+function generateOrderFormDataRows() {
+    if (calculationResults.length === 0) {
+        return `
+            <tr>
+                <td colspan="29" style="padding: 20px; text-align: center; color: #6c757d;">
+                    벽체 계산 데이터가 없습니다. 먼저 벽체를 선택하고 계산하기를 실행하세요.
+                </td>
+            </tr>
+        `;
+    }
+
+    let html = '';
+    let typeIndex = 1;
+
+    // 타입별로 그룹핑
+    const groupedByType = groupResultsByType(calculationResults);
+
+    // 각 타입별 처리
+    for (const [typeName, results] of Object.entries(groupedByType)) {
+        // 타입 합계 행
+        html += generateTypeSummaryRow(typeName, results, typeIndex);
+
+        // 레이어별 상세 행 (첫 번째 결과의 레이어 정보 사용)
+        html += generateLayerDetailRows(results[0]);
+
+        typeIndex++;
+    }
+
+    return html;
 }
 
 /**
