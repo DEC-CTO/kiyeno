@@ -1,0 +1,399 @@
+/* =============================================================================
+   견적서 스타일 (갑지 + 을지)
+   ============================================================================= */
+
+/* 견적서 컨테이너 */
+#estimateContainer {
+    padding: 20px;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* =============================================================================
+   갑지 (표지) 스타일
+   ============================================================================= */
+
+.estimate-cover-section {
+    margin-bottom: 40px;
+}
+
+.estimate-cover {
+    width: 297mm;  /* A4 가로 */
+    min-height: 210mm;  /* A4 가로 */
+    margin: 0 auto;
+    padding: 40px;
+    background: white;
+    border: 3px solid #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 헤더 로고 */
+.cover-header {
+    text-align: left;
+    margin-bottom: 40px;
+    border-bottom: 3px solid #333;
+    padding-bottom: 20px;
+}
+
+.cover-logo {
+    max-width: 200px;
+    height: auto;
+}
+
+/* 입력 행 */
+.cover-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #333;
+    background: #fff;
+}
+
+.cover-row label {
+    font-weight: 600;
+    font-size: 14px;
+    min-width: 180px;
+    color: #333;
+}
+
+.cover-row input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    padding: 5px 10px;
+    background: #ffffcc;
+}
+
+.cover-date {
+    margin-left: auto;
+    font-size: 14px;
+    color: #333;
+    border: none;
+    outline: none;
+    padding: 5px 10px;
+    background: #ffffcc;
+    text-align: right;
+    font-family: inherit;
+}
+
+.cover-row .amount-number {
+    margin-left: auto;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+#estimateTotalAmount {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 메시지 섹션 */
+.cover-message {
+    margin: 40px 0;
+    padding: 20px;
+    text-align: center;
+    border-top: 2px solid #333;
+    border-bottom: 2px solid #333;
+}
+
+.cover-message p {
+    margin: 10px 0;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.cover-message p:first-child {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 견적조건 */
+.cover-terms {
+    margin: 30px 0;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.cover-terms h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    color: #333;
+}
+
+.cover-terms ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cover-terms li {
+    margin: 8px 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* 회사 정보 */
+.cover-footer {
+    margin-top: 60px;
+    text-align: right;
+    font-size: 13px;
+    line-height: 2;
+}
+
+.cover-footer p {
+    margin: 5px 0;
+}
+
+.cover-footer p:first-child {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.cover-footer p:nth-child(2) {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* =============================================================================
+   페이지 구분선
+   ============================================================================= */
+
+.page-break {
+    height: 40px;
+    margin: 20px 0;
+    border-bottom: 2px dashed #ccc;
+    position: relative;
+}
+
+.page-break::after {
+    content: '▼ 계약내역서 ▼';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #f5f5f5;
+    padding: 5px 20px;
+    color: #666;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* =============================================================================
+   을지 (내역서) 스타일
+   ============================================================================= */
+
+.estimate-detail-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 래퍼 */
+.estimate-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+/* 테이블 */
+.estimate-table {
+    width: 1920px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 11px;
+    background: white;
+}
+
+.estimate-table th,
+.estimate-table td {
+    border: 1px solid #333;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* 헤더 스타일 */
+.estimate-table thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+/* 본문 스타일 */
+.estimate-table tbody tr {
+    background: white;
+}
+
+/* 섹션 헤더 (직접공사비, 간접공사비 등) */
+.estimate-table tbody tr.section-header {
+    background: #e3f2fd;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+/* 타입별 행 */
+.estimate-table tbody tr.type-row {
+    background: #f8f9fa;
+    font-size: 11px;
+}
+
+/* 소계 행 */
+.estimate-table tbody tr.subtotal-row {
+    background: #d1ecf1;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+/* 간접공사비 행 (노란색) */
+.estimate-table tbody tr.indirect-cost-row {
+    background: #fff3cd;
+    font-size: 11px;
+}
+
+/* 합계 행 */
+.estimate-table tbody tr.total-row {
+    background: #667eea;
+    color: white;
+    font-weight: 700;
+    font-size: 11px;
+}
+
+/* 숫자 셀 오른쪽 정렬 */
+.estimate-table td.number-cell {
+    text-align: right !important;
+    padding-right: 12px;
+    font-family: inherit;
+    font-size: 11px;
+}
+
+/* 품명 셀 왼쪽 정렬 */
+.estimate-table td.left-align {
+    text-align: left !important;
+    padding-left: 12px;
+}
+
+/* 들여쓰기 (세부 항목) */
+.estimate-table td.indent-1 {
+    padding-left: 20px !important;
+}
+
+.estimate-table td.indent-2 {
+    padding-left: 40px !important;
+}
+
+/* =============================================================================
+   컬럼 너비는 colgroup에서 직접 지정됨
+   ============================================================================= */
+
+/* 견적서 입력 필드 */
+.estimate-input {
+    width: 100%;
+    border: 1px solid #ccc;
+    background: #fff;
+    text-align: right;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.estimate-input:focus {
+    background: #ffffcc;
+    border-color: #667eea;
+}
+
+/* 액션 버튼 */
+.estimate-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-export {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-export:hover {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+}
+
+.btn-export i {
+    font-size: 16px;
+}
+
+/* =============================================================================
+   인쇄 스타일
+   ============================================================================= */
+
+@media print {
+    #estimateContainer {
+        background: white;
+        padding: 0;
+    }
+
+    .estimate-cover {
+        border: none;
+        box-shadow: none;
+    }
+
+    .page-break {
+        page-break-after: always;
+        border: none;
+    }
+
+    .page-break::after {
+        display: none;
+    }
+
+    .estimate-actions {
+        display: none;
+    }
+
+    .estimate-detail-section {
+        box-shadow: none;
+    }
+}
+
+/* =============================================================================
+   반응형
+   ============================================================================= */
+
+@media (max-width: 1400px) {
+    .estimate-cover {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .estimate-table {
+        font-size: 11px;
+    }
+
+    .estimate-table th,
+    .estimate-table td {
+        padding: 6px 4px;
+    }
+}

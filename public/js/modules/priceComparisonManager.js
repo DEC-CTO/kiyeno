@@ -1289,11 +1289,22 @@ async function exportPriceComparisonToExcel() {
         window.closeExportDropdown();
     }
 
+    // 데이터 확인
+    if (!priceComparisonData || !priceComparisonData.items || priceComparisonData.items.length === 0) {
+        alert('단가비교표 데이터가 없습니다. 먼저 단가비교표를 작성해주세요.');
+        return;
+    }
+
+    if (!priceComparisonData.items[0].vendors || priceComparisonData.items[0].vendors.length === 0) {
+        alert('업체 정보가 없습니다. 먼저 업체를 추가해주세요.');
+        return;
+    }
+
     try {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('단가비교표');
 
-        const vendorCount = priceComparisonData.items[0]?.vendors.length || 3;
+        const vendorCount = priceComparisonData.items[0].vendors.length;
 
         // 타이틀 행 (행1)
         const titleRow = worksheet.addRow(['단가비교표']);

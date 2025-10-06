@@ -1779,7 +1779,992 @@ function renderPriceComparisonTab() {
  */
 function renderEstimateTab() {
     console.log('📄 견적서 탭 렌더링');
-    // 향후 구현
+
+    const container = document.getElementById('estimateContainer');
+
+    if (calculationResults.length === 0) {
+        container.innerHTML = `
+            <div style="padding: 40px; text-align: center; color: #6c757d;">
+                <i class="fas fa-file-invoice" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i>
+                <p style="font-size: 18px; margin-bottom: 10px;">벽체 계산이 필요합니다</p>
+                <p style="font-size: 14px;">먼저 벽체를 선택하고 "계산하기" 버튼을 클릭하세요.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // 견적서 HTML 생성
+    container.innerHTML = `
+        <!-- 갑지 (표지) -->
+        <div class="estimate-cover-section">
+            <div class="estimate-cover">
+                <div class="cover-header">
+                    <img src="/image.png" alt="KIYENO" class="cover-logo">
+                </div>
+                <div class="cover-row">
+                    <label>제 출 처 /</label>
+                    <input type="text" id="estimateRecipient" placeholder="발주기업명 입력">
+                    <input type="date" id="estimateDate" class="cover-date">
+                </div>
+                <div class="cover-row">
+                    <label>공 사 명 / PROJECT</label>
+                    <input type="text" id="estimateProject" placeholder="공사명 입력" value="${getSiteNameFromOrderForm()}">
+                </div>
+                <div class="cover-row">
+                    <label>금     액 / AMOUNT</label>
+                    <span id="estimateTotalAmount">일금 영 원정</span>
+                    <span class="amount-number">₩ -</span>
+                </div>
+                <div class="cover-message">
+                    <p>상기와 같이 견적서를 제출합니다.</p>
+                    <p>WE ARE PLEASED TO SUBMIT YOU ESTIMATE AS SPECIFIED ON ATTACHED SHEETS.</p>
+                </div>
+                <div class="cover-terms">
+                    <h3>견 적 조 건 / TERMS</h3>
+                    <ul id="estimateTermsList">
+                        <li contenteditable="true" ondblclick="removeEstimateTerm(this)">-V.A.T 제외</li>
+                        <li contenteditable="true" ondblclick="removeEstimateTerm(this)">-현장여건에 따라 금액 변동 있음</li>
+                        <li contenteditable="true" ondblclick="removeEstimateTerm(this)">-견적서 사항과 분도</li>
+                    </ul>
+                    <div style="margin-top: 10px; display: flex; gap: 10px;">
+                        <button onclick="addEstimateTerm()" style="padding: 5px 15px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">+ 조건 추가</button>
+                        <button onclick="removeLastEstimateTerm()" style="padding: 5px 15px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">- 조건 삭제</button>
+                    </div>
+                </div>
+                <div class="cover-footer">
+                    <p>(주) 키 예 노</p>
+                    <p>대표이사 고병화 (인)</p>
+                    <p>서울시 강남구 봉은사로 37길 26 키예노빌딩</p>
+                    <p>TEL: 02)2193-8300 , FAX: 02)3463-0769</p>
+                    <p>MAIN E-MAIL: kiyeno@kiyeno.co.kr</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 페이지 구분선 -->
+        <div class="page-break"></div>
+
+        <!-- 을지 (내역서) -->
+        <div class="estimate-detail-section">
+            <div class="estimate-table-wrapper">
+                <table class="estimate-table">
+                    <colgroup>
+                        <col style="width: 60px;">
+                        <col style="width: 300px;">
+                        <col style="width: 400px;">
+                        <col style="width: 60px;">
+                        <col style="width: 80px;">
+                        <col style="width: 150px;">
+                        <col style="width: 150px;">
+                        <col style="width: 150px;">
+                        <col style="width: 150px;">
+                        <col style="width: 150px;">
+                        <col style="width: 150px;">
+                        <col style="width: 120px;">
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th rowspan="3">NO.</th>
+                            <th rowspan="3">품명</th>
+                            <th rowspan="3">규격</th>
+                            <th rowspan="3">단위</th>
+                            <th colspan="7">계 약 내 역 서</th>
+                            <th rowspan="3">비고</th>
+                        </tr>
+                        <tr>
+                            <th rowspan="2">수량</th>
+                            <th colspan="2">자재비</th>
+                            <th colspan="2">노무비</th>
+                            <th colspan="2">합계</th>
+                        </tr>
+                        <tr>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
+                        </tr>
+                    </thead>
+                    <tbody id="estimateDetailTableBody">
+                        ${generateEstimateDetailRows()}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    // 총액 계산 및 표시
+    updateEstimateTotalAmount();
+}
+
+/**
+ * 발주서에서 현장명 가져오기
+ */
+function getSiteNameFromOrderForm() {
+    const siteNameInput = document.querySelector('#orderFormContainer input[placeholder="현장명을 입력하세요"]');
+    return siteNameInput ? siteNameInput.value : '';
+}
+
+/**
+ * 견적서 총액 업데이트
+ */
+function updateEstimateTotalAmount() {
+    const grandTotal = calculateEstimateGrandTotal();
+    const amountElement = document.getElementById('estimateTotalAmount');
+    const numberElement = document.querySelector('.amount-number');
+
+    if (amountElement && numberElement) {
+        amountElement.textContent = `일금 ${numberToKorean(grandTotal)} 원정`;
+        numberElement.textContent = `₩ ${Math.round(grandTotal).toLocaleString()}`;
+    }
+}
+
+/**
+ * 숫자를 한글로 변환
+ */
+function numberToKorean(num) {
+    if (num === 0) return '영';
+
+    const koreanNum = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+    const koreanUnit = ['', '만', '억', '조'];
+    const smallUnit = ['천', '백', '십', ''];
+
+    num = Math.round(num);
+    if (num === 0) return '영';
+
+    let result = '';
+    let unitIndex = 0;
+
+    while (num > 0) {
+        const part = num % 10000;
+        if (part > 0) {
+            let partStr = '';
+            for (let i = 0; i < 4; i++) {
+                const digit = Math.floor(part / Math.pow(10, 3 - i)) % 10;
+                if (digit > 0) {
+                    partStr += koreanNum[digit] + smallUnit[i];
+                }
+            }
+            result = partStr + koreanUnit[unitIndex] + result;
+        }
+        num = Math.floor(num / 10000);
+        unitIndex++;
+    }
+
+    return result || '영';
+}
+
+/**
+ * 견적서 상세 행 생성
+ */
+function generateEstimateDetailRows() {
+    let html = '';
+
+    // A. 직접공사비
+    html += `
+        <tr class="section-header">
+            <td></td>
+            <td class="left-align">직접공사비</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    // 직접공사비 항목들
+    const directItems = [
+        { no: '', name: 'A. 인테리어 설계비' },
+        { no: '', name: 'B. 가설 및 공사준비 작업' },
+        { no: '', name: 'C. 철거공사' },
+        { no: '', name: 'D. 인테리어공사' },
+        { no: 'D-1', name: '바닥공사' },
+        { no: 'D-2', name: '벽체공사' },
+        { no: 'D-3', name: '벽체마감공사' },
+        { no: 'D-4', name: '유리벽체공사' },
+        { no: 'D-5', name: '창호 및 하드웨어 공사' },
+        { no: 'D-6', name: '천정공사' },
+        { no: 'D-7', name: '천정마감공사' },
+        { no: 'D-8', name: '조명기구공사' },
+        { no: 'D-9', name: '블라인드공사' },
+        { no: 'D-10', name: '실내싸인공사' },
+        { no: '', name: 'E. 기계설비공사' },
+        { no: 'E-1', name: '공조 및 환기덕트 공사' },
+        { no: 'E-2', name: '위생설비 공사' },
+        { no: 'E-3', name: '기계 소화설비 공사' },
+        { no: 'E-4', name: '기타' },
+        { no: '', name: 'F. 전기공사' },
+        { no: 'F-1', name: '동력전원설비공사' },
+        { no: 'F-2', name: '전열설비공사' },
+        { no: 'F-3', name: '전등설비공사' },
+        { no: 'F-4', name: '철거및이설공사' },
+        { no: 'F-5', name: '자탐 및 유도등공사' },
+        { no: 'F-6', name: '전관방송설비공사' },
+        { no: '', name: 'G. 제작가구공사' },
+        { no: '', name: 'H. 이동식가구공사' },
+        { no: '', name: 'I. 기타공사' }
+    ];
+
+    directItems.forEach(item => {
+        // D-1, E-1, F-1 등 하위 항목은 들여쓰기 적용
+        const indentClass = item.no && item.no.includes('-') ? 'indent-2' : 'indent-1';
+        html += `
+            <tr class="type-row">
+                <td>${item.no}</td>
+                <td class="left-align ${indentClass}">${item.name}</td>
+                <td></td>
+                <td>LOT</td>
+                <td class="number-cell">1.00</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        `;
+    });
+
+    // A-TOTAL
+    html += `
+        <tr class="subtotal-row">
+            <td></td>
+            <td class="left-align">A - TOTAL</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    // B. 간접공사비 (GRAND TOTAL 포함)
+    html += generateIndirectCostRows();
+
+    return html;
+}
+
+/**
+ * 직접공사비 계산
+ */
+function calculateDirectCosts() {
+    let materialCost = 0;
+    let laborCost = 0;
+
+    calculationResults.forEach(result => {
+        materialCost += result.materialCost;
+        laborCost += result.laborCost;
+    });
+
+    return {
+        materialCost,
+        laborCost,
+        totalCost: materialCost + laborCost
+    };
+}
+
+/**
+ * 간접공사비 행 생성
+ */
+function generateIndirectCostRows() {
+    let html = '';
+
+    html += `
+        <tr class="section-header">
+            <td></td>
+            <td class="left-align">간접공사비</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    const indirectItems = [
+        '산재보험료 (노무비의 3.75%)',
+        '안전관리비 (직접비의 1.99%+5,349,000)',
+        '고용보험료 (노무비의 0.87%)',
+        '건강보험료 (노무비의 3.23%)',
+        '연금보험료 (노무비의 4.5%)',
+        '장기요양보험료 (건강보험료의 8.51%)',
+        '퇴직공제부금 (노무비의 2.3%)',
+        '계약이행증권',
+        '영업배상책임보험',
+        '하자이행증권',
+        '공과잡비 (직접공사비기준)',
+        '기업이윤 (직접공사비기준)'
+    ];
+
+    indirectItems.forEach((itemName, index) => {
+        html += `
+            <tr class="indirect-cost-row">
+                <td></td>
+                <td class="left-align indent-1">${itemName}</td>
+                <td></td>
+                <td>LOT</td>
+                <td class="number-cell">1.00</td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="materialPrice"></td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="materialAmount"></td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="laborPrice"></td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="laborAmount"></td>
+                <td class="number-cell"></td>
+                <td class="number-cell"></td>
+                <td></td>
+            </tr>
+        `;
+    });
+
+    // B-TOTAL
+    html += `
+        <tr class="subtotal-row">
+            <td></td>
+            <td class="left-align">B - TOTAL</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    // 단수정리
+    html += `
+        <tr class="type-row">
+            <td></td>
+            <td class="left-align indent-1">단수정리</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    // GRAND TOTAL
+    html += `
+        <tr class="subtotal-row">
+            <td></td>
+            <td class="left-align">GRAND TOTAL (A+B+C+D)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+
+    return html;
+}
+
+/**
+ * 견적서 총액 계산
+ */
+function calculateEstimateGrandTotal() {
+    const directCosts = calculateDirectCosts();
+    const laborTotal = directCosts.laborCost;
+    const total = directCosts.totalCost;
+
+    // 간접공사비 계산
+    const indirectTotal =
+        laborTotal * 0.0375 +  // 안전보건관리
+        Math.max(total * 0.0199, 5349000) +  // 안전관리비
+        laborTotal * 0.0087 +  // 고용보험료
+        laborTotal * 0.0323 +  // 산업분류료
+        laborTotal * 0.045 +   // 연금보험료
+        (laborTotal * 0.045) * 0.0851 +  // 경기요양보험료
+        laborTotal * 0.023;    // 퇴직공제분담금
+
+    return directCosts.totalCost + indirectTotal;
+}
+
+/**
+ * 견적조건 추가
+ */
+window.addEstimateTerm = function() {
+    const termsList = document.getElementById('estimateTermsList');
+    if (termsList) {
+        const newLi = document.createElement('li');
+        newLi.contentEditable = 'true';
+        newLi.textContent = '-새 조건 입력';
+        newLi.setAttribute('ondblclick', 'removeEstimateTerm(this)');
+        termsList.appendChild(newLi);
+    }
+};
+
+/**
+ * 견적조건 삭제 (마지막 항목)
+ */
+window.removeLastEstimateTerm = function() {
+    const termsList = document.getElementById('estimateTermsList');
+    if (termsList && termsList.children.length > 0) {
+        termsList.removeChild(termsList.lastElementChild);
+    }
+};
+
+/**
+ * 견적조건 삭제 (더블클릭한 항목)
+ */
+window.removeEstimateTerm = function(element) {
+    if (confirm('이 조건을 삭제하시겠습니까?')) {
+        element.remove();
+    }
+};
+
+/**
+ * 견적서 Excel 내보내기
+ */
+async function exportEstimateToExcel() {
+    try {
+        console.log('📊 견적서 Excel 내보내기 시작');
+
+        // 워크북 생성
+        const workbook = new ExcelJS.Workbook();
+
+        // 1. 갑지 (표지) 시트
+        await createEstimateCoverSheet(workbook);
+
+        // 2. 을지 (내역서) 시트
+        await createEstimateDetailSheet(workbook);
+
+        // 파일 이름 생성
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0,10).replace(/-/g, '');
+        const timeStr = now.toTimeString().slice(0,8).replace(/:/g, '');
+        const filename = `견적서_${dateStr}_${timeStr}.xlsx`;
+
+        // Excel 파일 다운로드
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+
+        console.log('✅ 견적서 Excel 파일 생성 완료:', filename);
+
+    } catch (error) {
+        console.error('견적서 Excel 내보내기 실패:', error);
+        alert('Excel 내보내기 중 오류가 발생했습니다: ' + error.message);
+    }
+}
+
+/**
+ * 갑지 (표지) 시트 생성
+ */
+async function createEstimateCoverSheet(workbook) {
+    const sheet = workbook.addWorksheet('갑지');
+
+    // 입력 값 가져오기
+    const recipient = document.getElementById('estimateRecipient')?.value || '';
+    const project = document.getElementById('estimateProject')?.value || '';
+    const date = document.getElementById('estimateDate')?.value || '';
+    const totalAmount = document.getElementById('estimateTotalAmount')?.textContent || '';
+    const amountNumber = document.querySelector('.amount-number')?.textContent || '';
+
+    // 견적조건 가져오기
+    const termsList = document.getElementById('estimateTermsList');
+    const terms = termsList ? Array.from(termsList.children).map(li => li.textContent.trim()) : [];
+
+    let currentRow = 1;
+
+    // 로고 이미지 삽입
+    try {
+        const imageResponse = await fetch('/image.png');
+        const imageBlob = await imageResponse.blob();
+        const imageBase64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = reject;
+            reader.readAsDataURL(imageBlob);
+        });
+
+        const imageId = workbook.addImage({
+            base64: imageBase64,
+            extension: 'png',
+        });
+
+        // 이미지 삽입
+        // ExcelJS는 픽셀 단위 사용 (72 DPI 기준)
+        // 높이 2.83cm = 2.83 * 28.35 = 80.27pt = 107 픽셀
+        // 너비 2.46cm = 2.46 * 28.35 = 69.74pt = 93 픽셀
+        sheet.addImage(imageId, {
+            tl: { col: 0, row: 0 },
+            ext: { width: 93, height: 107 },
+            editAs: 'oneCell'
+        });
+
+        currentRow = 5; // 이미지 공간 확보
+    } catch (error) {
+        console.warn('이미지 로드 실패, 텍스트로 대체:', error);
+        // 이미지 로드 실패 시 텍스트로 대체
+        sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+        sheet.getCell(`A${currentRow}`).value = 'KIYENO';
+        sheet.getCell(`A${currentRow}`).font = { size: 24, bold: true };
+        sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'left', vertical: 'middle' };
+        currentRow += 2;
+    }
+
+    // 구분선
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).border = { bottom: { style: 'thick' } };
+    currentRow++;
+
+    // 제출처
+    sheet.getCell(`A${currentRow}`).value = '제 출 처 /';
+    sheet.getCell(`A${currentRow}`).font = { size: 12, bold: true };
+    sheet.mergeCells(`B${currentRow}:C${currentRow}`);
+    sheet.getCell(`B${currentRow}`).value = recipient;
+    sheet.getCell(`B${currentRow}`).font = { size: 12 };
+    sheet.getCell(`D${currentRow}`).value = date;
+    sheet.getCell(`D${currentRow}`).font = { size: 12 };
+    sheet.getCell(`D${currentRow}`).alignment = { horizontal: 'right', vertical: 'middle' };
+    currentRow++;
+
+    // 공사명
+    sheet.getCell(`A${currentRow}`).value = '공 사 명 / PROJECT';
+    sheet.getCell(`A${currentRow}`).font = { size: 12, bold: true };
+    sheet.mergeCells(`B${currentRow}:D${currentRow}`);
+    sheet.getCell(`B${currentRow}`).value = project;
+    sheet.getCell(`B${currentRow}`).font = { size: 12 };
+    currentRow++;
+
+    // 금액
+    sheet.getCell(`A${currentRow}`).value = '금     액 / AMOUNT';
+    sheet.getCell(`A${currentRow}`).font = { size: 12, bold: true };
+    sheet.getCell(`B${currentRow}`).value = totalAmount;
+    sheet.getCell(`B${currentRow}`).font = { size: 12 };
+    sheet.getCell(`D${currentRow}`).value = amountNumber;
+    sheet.getCell(`D${currentRow}`).font = { size: 12 };
+    sheet.getCell(`D${currentRow}`).alignment = { horizontal: 'right', vertical: 'middle' };
+    currentRow += 2;
+
+    // 메시지
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = '상기와 같이 견적서를 제출합니다.';
+    sheet.getCell(`A${currentRow}`).font = { size: 11 };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'center' };
+    currentRow++;
+
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = 'WE ARE PLEASED TO SUBMIT YOU ESTIMATE AS SPECIFIED ON ATTACHED SHEETS.';
+    sheet.getCell(`A${currentRow}`).font = { size: 11 };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'center' };
+    currentRow += 2;
+
+    // 견적조건
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = '견 적 조 건 / TERMS';
+    sheet.getCell(`A${currentRow}`).font = { size: 12, bold: true };
+    currentRow++;
+
+    terms.forEach(term => {
+        sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+        sheet.getCell(`A${currentRow}`).value = term;
+        sheet.getCell(`A${currentRow}`).font = { size: 11 };
+        currentRow++;
+    });
+
+    currentRow += 2;
+
+    // 회사 정보
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = '(주) 키 예 노';
+    sheet.getCell(`A${currentRow}`).font = { size: 11, bold: true };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'right' };
+    currentRow++;
+
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = '대표이사 고병화 (인)';
+    sheet.getCell(`A${currentRow}`).font = { size: 11, bold: true };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'right' };
+    currentRow++;
+
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = '서울시 강남구 봉은사로 37길 26 키예노빌딩';
+    sheet.getCell(`A${currentRow}`).font = { size: 11 };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'right' };
+    currentRow++;
+
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = 'TEL: 02)2193-8300 , FAX: 02)3463-0769';
+    sheet.getCell(`A${currentRow}`).font = { size: 11 };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'right' };
+    currentRow++;
+
+    sheet.mergeCells(`A${currentRow}:D${currentRow}`);
+    sheet.getCell(`A${currentRow}`).value = 'MAIN E-MAIL: kiyeno@kiyeno.co.kr';
+    sheet.getCell(`A${currentRow}`).font = { size: 11 };
+    sheet.getCell(`A${currentRow}`).alignment = { horizontal: 'right' };
+
+    // 컬럼 너비 설정
+    sheet.getColumn(1).width = 25;
+    sheet.getColumn(2).width = 30;
+    sheet.getColumn(3).width = 20;
+    sheet.getColumn(4).width = 20;
+}
+
+/**
+ * 을지 (내역서) 시트 생성
+ */
+async function createEstimateDetailSheet(workbook) {
+    const sheet = workbook.addWorksheet('을지');
+
+    // 3단 헤더
+    const headerRow1 = sheet.getRow(1);
+    const headerRow2 = sheet.getRow(2);
+    const headerRow3 = sheet.getRow(3);
+
+    // 1단 헤더
+    sheet.mergeCells('A1:A3');
+    sheet.getCell('A1').value = 'NO.';
+
+    sheet.mergeCells('B1:B3');
+    sheet.getCell('B1').value = '품명';
+
+    sheet.mergeCells('C1:C3');
+    sheet.getCell('C1').value = '규격';
+
+    sheet.mergeCells('D1:D3');
+    sheet.getCell('D1').value = '단위';
+
+    sheet.mergeCells('E1:K1');
+    sheet.getCell('E1').value = '계 약 내 역 서';
+
+    sheet.mergeCells('L1:L3');
+    sheet.getCell('L1').value = '비고';
+
+    // 2단 헤더
+    sheet.mergeCells('E2:E3');
+    sheet.getCell('E2').value = '수량';
+
+    sheet.mergeCells('F2:G2');
+    sheet.getCell('F2').value = '자재비';
+
+    sheet.mergeCells('H2:I2');
+    sheet.getCell('H2').value = '노무비';
+
+    sheet.mergeCells('J2:K2');
+    sheet.getCell('J2').value = '합계';
+
+    // 3단 헤더
+    sheet.getCell('F3').value = '단가';
+    sheet.getCell('G3').value = '금액';
+    sheet.getCell('H3').value = '단가';
+    sheet.getCell('I3').value = '금액';
+    sheet.getCell('J3').value = '단가';
+    sheet.getCell('K3').value = '금액';
+
+    // 헤더 스타일 적용
+    [1, 2, 3].forEach(rowNum => {
+        const row = sheet.getRow(rowNum);
+        row.eachCell({ includeEmpty: true }, (cell) => {
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF667EEA' }
+            };
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+    });
+
+    // 데이터 행 추가
+    let currentRow = 4;
+    let itemNo = 1;
+
+    // 직접공사비 계산
+    const directCosts = calculateDirectCosts();
+
+    // 직접공사비 항목들
+    const detailRows = generateEstimateDetailRowsData();
+
+    detailRows.forEach(row => {
+        const dataRow = sheet.getRow(currentRow);
+
+        dataRow.getCell(1).value = row.no || itemNo++;
+        dataRow.getCell(2).value = row.name;
+        dataRow.getCell(3).value = row.spec || '';
+        dataRow.getCell(4).value = row.unit || '';
+        dataRow.getCell(5).value = row.quantity || '';
+        dataRow.getCell(6).value = row.materialUnitPrice || '';
+        dataRow.getCell(7).value = row.materialAmount || '';
+        dataRow.getCell(8).value = row.laborUnitPrice || '';
+        dataRow.getCell(9).value = row.laborAmount || '';
+        dataRow.getCell(10).value = row.totalUnitPrice || '';
+        dataRow.getCell(11).value = row.totalAmount || '';
+        dataRow.getCell(12).value = row.remark || '';
+
+        // 스타일 적용
+        if (row.type === 'section-header') {
+            dataRow.eachCell((cell) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE3F2FD' } };
+                cell.font = { bold: true };
+            });
+        } else if (row.type === 'subtotal') {
+            dataRow.eachCell((cell) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD1ECF1' } };
+                cell.font = { bold: true };
+            });
+        } else if (row.type === 'indirect') {
+            dataRow.eachCell((cell) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF3CD' } };
+            });
+        } else if (row.type === 'total') {
+            dataRow.eachCell((cell) => {
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF667EEA' } };
+                cell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+            });
+        }
+
+        // 테두리 적용
+        dataRow.eachCell((cell) => {
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+
+        // 숫자 셀 오른쪽 정렬 및 천단위 구분
+        [5, 6, 7, 8, 9, 10, 11].forEach(colNum => {
+            const cell = dataRow.getCell(colNum);
+            cell.alignment = { horizontal: 'right', vertical: 'middle' };
+            if (typeof cell.value === 'number') {
+                cell.numFmt = '#,##0';
+            }
+        });
+
+        // 품명 왼쪽 정렬
+        dataRow.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' };
+
+        currentRow++;
+    });
+
+    // 컬럼 너비 설정
+    sheet.getColumn(1).width = 40;  // NO
+    sheet.getColumn(2).width = 30;  // 품명
+    sheet.getColumn(3).width = 15;  // 규격
+    sheet.getColumn(4).width = 8;   // 단위
+    sheet.getColumn(5).width = 12;  // 수량
+    sheet.getColumn(6).width = 15;  // 자재비 단가
+    sheet.getColumn(7).width = 15;  // 자재비 금액
+    sheet.getColumn(8).width = 15;  // 노무비 단가
+    sheet.getColumn(9).width = 15;  // 노무비 금액
+    sheet.getColumn(10).width = 15; // 합계 단가
+    sheet.getColumn(11).width = 15; // 합계 금액
+    sheet.getColumn(12).width = 15; // 비고
+}
+
+/**
+ * 견적서 데이터 행 생성 (Excel용)
+ */
+function generateEstimateDetailRowsData() {
+    const rows = [];
+    const directCosts = calculateDirectCosts();
+
+    // 직접공사비 섹션 헤더
+    rows.push({
+        no: '',
+        name: '직접공사비',
+        type: 'section-header'
+    });
+
+    // 직접공사비 항목들
+    const directItems = [
+        { no: '', name: 'A. 인테리어 설계비' },
+        { no: '', name: 'B. 가설 및 공사준비 작업' },
+        { no: '', name: 'C. 철거공사' },
+        { no: '', name: 'D. 인테리어공사' },
+        { no: 'D-1', name: '바닥공사' },
+        { no: 'D-2', name: '벽체공사' },
+        { no: 'D-3', name: '벽체마감공사' },
+        { no: 'D-4', name: '유리벽체공사' },
+        { no: 'D-5', name: '창호 및 하드웨어 공사' },
+        { no: 'D-6', name: '천정공사' },
+        { no: 'D-7', name: '천정마감공사' },
+        { no: 'D-8', name: '조명기구공사' },
+        { no: 'D-9', name: '블라인드공사' },
+        { no: 'D-10', name: '실내싸인공사' },
+        { no: '', name: 'E. 기계설비공사' },
+        { no: 'E-1', name: '공조 및 환기덕트 공사' },
+        { no: 'E-2', name: '위생설비 공사' },
+        { no: 'E-3', name: '기계 소화설비 공사' },
+        { no: 'E-4', name: '기타' },
+        { no: '', name: 'F. 전기공사' },
+        { no: 'F-1', name: '동력전원설비공사' },
+        { no: 'F-2', name: '전열설비공사' },
+        { no: 'F-3', name: '전등설비공사' },
+        { no: 'F-4', name: '철거및이설공사' },
+        { no: 'F-5', name: '자탐 및 유도등공사' },
+        { no: 'F-6', name: '전관방송설비공사' },
+        { no: '', name: 'G. 제작가구공사' },
+        { no: '', name: 'H. 이동식가구공사' },
+        { no: '', name: 'I. 기타공사' }
+    ];
+
+    directItems.forEach(item => {
+        rows.push({
+            no: item.no,
+            name: item.name,
+            spec: '',
+            unit: 'LOT',
+            quantity: 1.00,
+            materialUnitPrice: '',
+            materialAmount: '',
+            laborUnitPrice: '',
+            laborAmount: '',
+            totalUnitPrice: '',
+            totalAmount: '',
+            remark: '',
+            type: 'item'
+        });
+    });
+
+    // 직접공사비 소계
+    rows.push({
+        no: '',
+        name: 'A - TOTAL',
+        spec: '',
+        unit: '',
+        quantity: '',
+        materialUnitPrice: '',
+        materialAmount: '',
+        laborUnitPrice: '',
+        laborAmount: '',
+        totalUnitPrice: '',
+        totalAmount: '',
+        remark: '',
+        type: 'subtotal'
+    });
+
+    // 간접공사비 섹션 헤더
+    rows.push({
+        no: '',
+        name: '간접공사비',
+        type: 'section-header'
+    });
+
+    const laborTotal = directCosts.laborCost;
+    const total = directCosts.totalCost;
+
+    // 간접공사비 항목들
+    const indirectItems = [
+        { name: '산재보험료 (노무비의 3.75%)', value: 0 },
+        { name: '안전관리비 (직접비의 1.99%+5,349,000)', value: 0 },
+        { name: '고용보험료 (노무비의 0.87%)', value: 0 },
+        { name: '건강보험료 (노무비의 3.23%)', value: 0 },
+        { name: '연금보험료 (노무비의 4.5%)', value: 0 },
+        { name: '장기요양보험료 (건강보험료의 8.51%)', value: 0 },
+        { name: '퇴직공제부금 (노무비의 2.3%)', value: 0 },
+        { name: '계약이행증권', value: 0 },
+        { name: '영업배상책임보험', value: 0 },
+        { name: '하자이행증권', value: 0 },
+        { name: '공과잡비 (직접공사비기준)', value: 0 },
+        { name: '기업이윤 (직접공사비기준)', value: 0 }
+    ];
+
+    let indirectTotal = 0;
+
+    indirectItems.forEach(item => {
+        indirectTotal += item.value;
+        rows.push({
+            no: '',
+            name: item.name,
+            spec: '',
+            unit: 'LOT',
+            quantity: 1.00,
+            materialUnitPrice: '',
+            materialAmount: '',
+            laborUnitPrice: '',
+            laborAmount: Math.round(item.value) || '',
+            totalUnitPrice: '',
+            totalAmount: Math.round(item.value) || '',
+            remark: '',
+            type: 'indirect'
+        });
+    });
+
+    // 간접공사비 소계
+    rows.push({
+        no: '',
+        name: 'B - TOTAL',
+        spec: '',
+        unit: '',
+        quantity: '',
+        materialUnitPrice: '',
+        materialAmount: '',
+        laborUnitPrice: '',
+        laborAmount: '',
+        totalUnitPrice: '',
+        totalAmount: '',
+        remark: '',
+        type: 'subtotal'
+    });
+
+    // 총 합계
+    const grandTotal = 0; // 모든 금액이 0이므로
+    rows.push({
+        no: '',
+        name: 'GRAND TOTAL (A+B)',
+        spec: '',
+        unit: '',
+        quantity: '',
+        materialUnitPrice: '',
+        materialAmount: '',
+        laborUnitPrice: '',
+        laborAmount: '',
+        totalUnitPrice: '',
+        totalAmount: '',
+        remark: '',
+        type: 'total'
+    });
+
+    return rows;
 }
 
 // =============================================================================
@@ -1814,12 +2799,11 @@ window.exportOrderForm = function() {
 };
 
 /**
- * 견적서 Excel 내보내기 (향후 구현)
+ * 견적서 Excel 내보내기
  */
 window.exportEstimate = function() {
     closeExportDropdown();
-    alert('견적서 Excel 내보내기 기능은 준비 중입니다.');
-    // TODO: 견적서 Excel 내보내기 구현
+    exportEstimateToExcel();
 };
 
 // 외부 클릭 시 드롭다운 닫기

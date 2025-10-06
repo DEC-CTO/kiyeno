@@ -279,7 +279,7 @@
 /* 반응형 */
 @media (max-width: 1400px) {
     .order-form-table {
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .order-form-table th,
