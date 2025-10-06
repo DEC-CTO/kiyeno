@@ -1553,12 +1553,12 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td>M2</td>
             <td>${totalArea.toFixed(2)}</td>
-            <td>${materialUnitPrice.toFixed(0)}</td>
-            <td>${totalMaterialCost.toFixed(0)}</td>
-            <td>${laborUnitPrice.toFixed(0)}</td>
-            <td>${totalLaborCost.toFixed(0)}</td>
-            <td>${unitPrice.toFixed(0)}</td>
-            <td>${totalCost.toFixed(0)}</td>
+            <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(unitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
             <td></td>
             <td></td>
             <td></td>
@@ -1634,12 +1634,12 @@ async function generateLayerDetailRows(result) {
                 <td></td>
                 <td>${layer.unit || 'M2'}</td>
                 <td>${area.toFixed(2)}</td>
-                <td>${materialPrice.toFixed(0)}</td>
-                <td>${materialAmount.toFixed(0)}</td>
-                <td>${laborPrice.toFixed(0)}</td>
-                <td>${laborAmount.toFixed(0)}</td>
-                <td>${unitPrice.toFixed(0)}</td>
-                <td>${totalAmount.toFixed(0)}</td>
+                <td class="number-cell">${Math.round(materialPrice).toLocaleString()}</td>
+                <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
+                <td class="number-cell">${Math.round(laborPrice).toLocaleString()}</td>
+                <td class="number-cell">${Math.round(laborAmount).toLocaleString()}</td>
+                <td class="number-cell">${Math.round(unitPrice).toLocaleString()}</td>
+                <td class="number-cell">${Math.round(totalAmount).toLocaleString()}</td>
                 <td></td>
                 <td></td>
                 <td></td>
