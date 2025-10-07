@@ -91,23 +91,32 @@ class RevitService extends ApiService {
     /**
      * WallType 생성 결과 처리
      */
-    handleWallTypeResults(results) {
+    handleWallTypeResults(result) {
         try {
-            const successCount = results.filter(r => r.Success).length;
-            const totalCount = results.length;
-            
-            if (successCount === totalCount) {
-                this.showNotification(`${successCount}개의 WallType이 성공적으로 생성되었습니다.`, 'success');
-            } else {
-                this.showNotification(`${successCount}/${totalCount}개의 WallType이 생성되었습니다.`, 'warning');
-            }
+            // 새 형식: { Success, Message, CreatedTypes, FailedTypes }
+            if (result.Success !== undefined) {
+                const successCount = result.CreatedTypes ? result.CreatedTypes.length : 0;
+                const failCount = result.FailedTypes ? result.FailedTypes.length : 0;
+                const totalCount = successCount + failCount;
 
-            // 결과 상세 표시 (선택적)
-            console.table(results.map(r => ({
-                이름: r.WallTypeName,
-                성공: r.Success ? '✅' : '❌',
-                메시지: r.Message
-            })));
+                if (result.Success) {
+                    this.showNotification(`${successCount}개의 WallType이 성공적으로 생성되었습니다.`, 'success');
+                } else {
+                    this.showNotification(`${successCount}/${totalCount}개의 WallType이 생성되었습니다.`, 'warning');
+                }
+
+                // 결과 상세 표시
+                console.log('📊 생성 결과:', result.Message);
+                if (result.CreatedTypes && result.CreatedTypes.length > 0) {
+                    console.log('✅ 성공:', result.CreatedTypes);
+                }
+                if (result.FailedTypes && result.FailedTypes.length > 0) {
+                    console.log('❌ 실패:', result.FailedTypes);
+                }
+            } else {
+                // 구식 형식 (배열): 하위 호환성
+                console.warn('⚠️ 구식 결과 형식 수신:', result);
+            }
         } catch (error) {
             console.error('WallType 결과 처리 오류:', error);
         }

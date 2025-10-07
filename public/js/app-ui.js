@@ -1108,10 +1108,14 @@ function createSubModal(title, content, buttons = [], options = {}) {
     // 서브 모달 생성
     const subModal = document.createElement('div');
     subModal.className = 'sub-modal';
+
+    // 기본 스타일 설정
+    const modalWidth = options.width || '90vw';
     subModal.style.cssText = `
         background: white;
         padding: 24px;
         border-radius: 8px;
+        width: ${modalWidth};
         max-width: 90vw;
         max-height: 90vh;
         overflow: auto;
@@ -1153,10 +1157,12 @@ function createSubModal(title, content, buttons = [], options = {}) {
             border-top: 1px solid #eee;
         `;
         
-        buttons.forEach(buttonConfig => {
+        buttons.forEach((buttonConfig, index) => {
+            console.log(`🔧 버튼 ${index} 생성:`, buttonConfig.text, 'onClick:', typeof buttonConfig.onClick);
+
             const button = document.createElement('button');
             button.innerHTML = buttonConfig.text; // textContent → innerHTML 변경
-            button.className = `btn ${buttonConfig.class || 'btn-primary'}`;
+            button.className = `btn ${buttonConfig.className || buttonConfig.class || 'btn-primary'}`;
             button.style.cssText = `
                 padding: 8px 20px;
                 border: none;
@@ -1168,6 +1174,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
 
             if (buttonConfig.onClick) {
                 button.addEventListener('click', (event) => {
+                    console.log(`🖱️ 버튼 클릭 이벤트 발생 (버튼 ${index}):`, buttonConfig.text);
                     event.preventDefault();
                     event.stopPropagation();
                     buttonConfig.onClick(subModalOverlay);

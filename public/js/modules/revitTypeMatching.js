@@ -2058,6 +2058,7 @@ async function showWallTypePreview() {
             text: '<i class="fas fa-times"></i> 취소',
             className: 'btn btn-secondary',
             onClick: (modal) => {
+                console.log('🔴 취소 버튼 클릭됨');
                 closeSubModal(modal);
             }
         }
@@ -2068,9 +2069,79 @@ async function showWallTypePreview() {
         buttons.push({
             text: '<i class="fas fa-check"></i> Revit에서 생성하기',
             className: 'btn btn-success',
-            onClick: (modal) => {
-                closeSubModal(modal);
-                createWallTypesInRevit(wallTypesData);
+            onClick: async (modal) => {
+                console.log('🟢 생성하기 버튼 클릭됨');
+                console.log('wallTypesData:', wallTypesData);
+
+                // 직접 인라인으로 함수 내용 실행 (함수 이름 충돌 회피)
+                try {
+                    console.log('📤 Revit 벽체 타입 생성 시작:', wallTypesData);
+
+                    // 1. 오류가 없는 벽체 타입만 필터링
+                    const validWallTypes = wallTypesData.filter(data => !data.hasErrors);
+                    console.log('✅ 유효한 벽체 타입:', validWallTypes.length, '개');
+
+                    if (validWallTypes.length === 0) {
+                        alert('생성 가능한 벽체 타입이 없습니다.\n모든 벽체에 오류가 있습니다.');
+                        return;
+                    }
+
+                    // 2. Revit C# 호환 형식으로 데이터 변환
+                    console.log('🔄 데이터 변환 시작...');
+                    const revitData = validWallTypes.map(wallData => ({
+                        WallTypeName: wallData.wallTypeName,
+                        TotalThickness: wallData.totalThickness,
+                        Layers: wallData.layers.map(layer => ({
+                            Position: layer.position,
+                            MaterialId: layer.materialId,
+                            MaterialName: layer.materialName,
+                            Specification: layer.spec,
+                            Thickness: layer.thickness,
+                            IsUnitPrice: layer.isUnitPrice
+                        }))
+                    }));
+
+                    console.log('🔄 변환된 Revit 데이터:', revitData);
+
+                    // 3. WebSocket을 통해 Revit으로 전송
+                    console.log('🔍 WebSocket 연결 상태 확인...');
+                    if (!window.socketService || !window.socketService.isConnected) {
+                        alert('WebSocket 서버에 연결되어 있지 않습니다.\n서버 연결 상태를 확인해주세요.');
+                        return;
+                    }
+
+                    if (!window.socketService.revitConnected) {
+                        alert('Revit이 연결되어 있지 않습니다.\nRevit에서 Kiyeno 애드인을 실행해주세요.');
+                        return;
+                    }
+
+                    // 전송 중 메시지 표시
+                    console.log('📡 Revit으로 벽체 타입 생성 명령 전송 중...');
+
+                    const success = window.socketService.sendRevitCommand('CREATE_WALL_TYPES', revitData);
+
+                    if (success) {
+                        // 전송 성공 메시지
+                        const skippedCount = wallTypesData.length - validWallTypes.length;
+                        let message = `${validWallTypes.length}개의 벽체 타입 생성 명령을 Revit으로 전송했습니다.`;
+
+                        if (skippedCount > 0) {
+                            message += `\n\n⚠️ ${skippedCount}개의 벽체 타입은 오류로 인해 제외되었습니다.`;
+                        }
+
+                        alert(message + '\n\n잠시 후 결과를 확인할 수 있습니다.');
+                        console.log('✅ Revit 명령 전송 완료');
+                    } else {
+                        alert('Revit 명령 전송에 실패했습니다.\n네트워크 연결을 확인해주세요.');
+                        console.error('❌ Revit 명령 전송 실패');
+                    }
+                } catch (error) {
+                    console.error('❌ 벽체 타입 생성 오류:', error);
+                    console.error('스택:', error.stack);
+                    alert(`벽체 타입 생성 중 오류 발생:\n${error.message}`);
+                } finally {
+                    closeSubModal(modal);
+                }
             }
         });
     }
@@ -2082,7 +2153,7 @@ async function showWallTypePreview() {
         buttons,
         {
             disableBackgroundClick: true,
-            width: '1350px'
+            width: '1000px'
         }
     );
 
@@ -2095,14 +2166,76 @@ async function showWallTypePreview() {
 }
 
 /**
- * Revit에서 벽체 타입 생성 (추후 구현)
+ * Revit에서 벽체 타입 생성
  * @param {Array} wallTypesData - 벽체 타입 레이어 구조 배열
  */
 async function createWallTypesInRevit(wallTypesData) {
-    console.log('📤 Revit 벽체 타입 생성 (현재는 로그만 출력):', wallTypesData);
+    try {
+        console.log('📤 Revit 벽체 타입 생성 시작:', wallTypesData);
 
-    // TODO: Phase 5에서 구현 예정
-    alert(`Revit 통신 기능은 Phase 2에서 구현 예정입니다.\n\n현재 ${wallTypesData.length}개 벽체 타입의 레이어 구조가 정상적으로 계산되었습니다.`);
+        // 1. 오류가 없는 벽체 타입만 필터링
+        const validWallTypes = wallTypesData.filter(data => !data.hasErrors);
+        console.log('✅ 유효한 벽체 타입:', validWallTypes.length, '개');
+
+        if (validWallTypes.length === 0) {
+            alert('생성 가능한 벽체 타입이 없습니다.\n모든 벽체에 오류가 있습니다.');
+            return;
+        }
+
+        // 2. Revit C# 호환 형식으로 데이터 변환
+        console.log('🔄 데이터 변환 시작...');
+        const revitData = validWallTypes.map(wallData => ({
+            WallTypeName: wallData.wallTypeName,
+            TotalThickness: wallData.totalThickness,
+            Layers: wallData.layers.map(layer => ({
+                Position: layer.position,
+                MaterialId: layer.materialId,
+                MaterialName: layer.materialName,
+                Specification: layer.spec,
+                Thickness: layer.thickness,
+                IsUnitPrice: layer.isUnitPrice
+            }))
+        }));
+
+        console.log('🔄 변환된 Revit 데이터:', revitData);
+
+        // 3. WebSocket을 통해 Revit으로 전송
+        console.log('🔍 WebSocket 연결 상태 확인...');
+        if (!window.socketService || !window.socketService.isConnected) {
+            alert('WebSocket 서버에 연결되어 있지 않습니다.\n서버 연결 상태를 확인해주세요.');
+            return;
+        }
+
+        if (!window.socketService.revitConnected) {
+            alert('Revit이 연결되어 있지 않습니다.\nRevit에서 Kiyeno 애드인을 실행해주세요.');
+            return;
+        }
+
+        // 전송 중 메시지 표시
+        console.log('📡 Revit으로 벽체 타입 생성 명령 전송 중...');
+
+        const success = window.socketService.sendRevitCommand('CREATE_WALL_TYPES', revitData);
+
+        if (success) {
+            // 전송 성공 메시지
+            const skippedCount = wallTypesData.length - validWallTypes.length;
+            let message = `${validWallTypes.length}개의 벽체 타입 생성 명령을 Revit으로 전송했습니다.`;
+
+            if (skippedCount > 0) {
+                message += `\n\n⚠️ ${skippedCount}개의 벽체 타입은 오류로 인해 제외되었습니다.`;
+            }
+
+            alert(message + '\n\n잠시 후 결과를 확인할 수 있습니다.');
+            console.log('✅ Revit 명령 전송 완료');
+        } else {
+            alert('Revit 명령 전송에 실패했습니다.\n네트워크 연결을 확인해주세요.');
+            console.error('❌ Revit 명령 전송 실패');
+        }
+    } catch (error) {
+        console.error('❌ createWallTypesInRevit 오류:', error);
+        console.error('스택:', error.stack);
+        alert(`벽체 타입 생성 중 오류 발생:\n${error.message}`);
+    }
 }
 
 // 두께 계산 유틸리티 함수들 전역 등록
@@ -2111,9 +2244,121 @@ window.extractThicknessFromMaterial = extractThicknessFromMaterial;
 window.getLayerStructure = getLayerStructure;
 window.createLayerPreviewModalHTML = createLayerPreviewModalHTML;
 window.showWallTypePreview = showWallTypePreview;
-window.createWallTypesInRevit = createWallTypesInRevit;
+// createWallTypesInRevit는 인라인 구현으로 대체되어 전역 등록 불필요
 
-console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 (원본 복원) 및 전역 함수 등록됨');
+console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 및 전역 함수 등록됨');
+
+// Revit 벽체 타입 생성 결과 이벤트 리스너
+if (window.socketService) {
+    window.socketService.on('revit:wallTypeResult', (result) => {
+        console.log('🔧 Revit 벽체 타입 생성 결과 수신:', result);
+
+        // 결과 모달 표시
+        showWallTypeCreationResult(result);
+    });
+    console.log('✅ Revit 벽체 타입 생성 결과 리스너 등록 완료');
+} else {
+    console.warn('⚠️ socketService가 아직 초기화되지 않았습니다. 리스너는 나중에 등록될 것입니다.');
+}
+
+/**
+ * 벽체 타입 생성 결과 모달 표시
+ * @param {Object} result - Revit으로부터 받은 생성 결과
+ */
+function showWallTypeCreationResult(result) {
+    console.log('📊 벽체 타입 생성 결과 표시:', result);
+
+    // 결과 HTML 생성
+    let html = `
+        <div style="max-height: 600px; overflow-y: auto;">
+            <div style="margin-bottom: 20px; padding: 15px; background: ${result.Success ? '#f0fdf4' : '#fef2f2'}; border-radius: 8px; border-left: 4px solid ${result.Success ? '#10b981' : '#ef4444'};">
+                <h4 style="margin: 0 0 10px 0; color: ${result.Success ? '#166534' : '#991b1b'};">
+                    <i class="fas ${result.Success ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${result.Success ? '벽체 타입 생성 완료' : '벽체 타입 생성 실패'}
+                </h4>
+                <p style="margin: 0; color: #475569;">
+                    ${result.Message || '결과 메시지가 없습니다.'}
+                </p>
+            </div>
+    `;
+
+    // 성공한 타입들
+    if (result.CreatedTypes && result.CreatedTypes.length > 0) {
+        html += `
+            <div style="margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #10b981;">
+                    <i class="fas fa-check"></i> 생성 성공 (${result.CreatedTypes.length}개)
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    ${result.CreatedTypes.map(typeName => `
+                        <li style="padding: 8px 12px; margin: 4px 0; background: #f0fdf4; border-radius: 4px; border-left: 3px solid #10b981;">
+                            <i class="fas fa-layer-group"></i> ${typeName}
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    // 실패한 타입들
+    if (result.FailedTypes && result.FailedTypes.length > 0) {
+        html += `
+            <div style="margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #ef4444;">
+                    <i class="fas fa-times"></i> 생성 실패 (${result.FailedTypes.length}개)
+                </h4>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    ${result.FailedTypes.map(failure => `
+                        <li style="padding: 8px 12px; margin: 4px 0; background: #fef2f2; border-radius: 4px; border-left: 3px solid #ef4444;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">
+                                <i class="fas fa-layer-group"></i> ${failure.WallTypeName || '알 수 없는 타입'}
+                            </div>
+                            <div style="font-size: 11px; color: #991b1b;">
+                                ${failure.ErrorMessage || '오류 메시지가 없습니다.'}
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    // 상세 오류 메시지
+    if (result.ErrorMessage) {
+        html += `
+            <div style="margin-top: 20px; padding: 12px; background: #fee2e2; border-radius: 6px; color: #991b1b; font-size: 11px;">
+                <strong><i class="fas fa-exclamation-triangle"></i> 상세 오류:</strong>
+                <div style="margin-top: 8px; white-space: pre-wrap; font-family: monospace;">
+                    ${result.ErrorMessage}
+                </div>
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+
+    // 모달 표시
+    if (window.createSubModal) {
+        window.createSubModal({
+            title: 'Revit 벽체 타입 생성 결과',
+            content: html,
+            width: '800px',
+            buttons: [
+                {
+                    text: '<i class="fas fa-check"></i> 확인',
+                    className: 'btn-primary',
+                    onClick: (modal) => modal.remove()
+                }
+            ]
+        });
+    } else {
+        // createSubModal이 없으면 기본 alert 사용
+        alert(result.Message || '벽체 타입 생성이 완료되었습니다.');
+    }
+}
+
+// showWallTypeCreationResult 전역 등록
+window.showWallTypeCreationResult = showWallTypeCreationResult;
 
 // 페이지 로드 시 초기 데이터 동기화
 document.addEventListener('DOMContentLoaded', function() {

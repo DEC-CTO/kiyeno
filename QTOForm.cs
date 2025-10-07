@@ -44,6 +44,9 @@ namespace QTO
         // 선택된 벽체 정보를 저장할 리스트
         public static List<WallInfo> selectedWalls = new List<WallInfo>();
 
+        // 벽체 타입 생성 데이터
+        public static List<WallTypeCreationData> wallTypesToCreate = new List<WallTypeCreationData>();
+
         // WebSocket 클라이언트 (순수 WebSocket)
         private ClientWebSocket webSocket;
         private CancellationTokenSource cancellationTokenSource;
@@ -57,8 +60,9 @@ namespace QTO
         {
             InitializeComponent();
             // 서버 경로 설정 (애드인 실행 파일과 같은 디렉토리)
-            string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            serverPath = Path.GetDirectoryName(assemblyPath);
+            //string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            //serverPath = Path.GetDirectoryName(assemblyPath);
+            serverPath = @"C:\ClaudeProject\ReReKiyeno";
             // WebSocket 클라이언트 초기화
             InitializeWebSocketClient();
         }
@@ -246,7 +250,7 @@ namespace QTO
             {
                 UpdateStatus($"Revit 명령 수신: {command.Action}");
                 string nn = command.Action.ToUpper();
-                
+
                 switch (command.Action.ToUpper())
                 {
                     case "SELECTWALL":
@@ -285,13 +289,15 @@ namespace QTO
                     case "CREATE_WALL_TYPES":
                         if (command.Data != null)
                         {
-                            //var wallTypesData = JsonConvert.DeserializeObject<List<WallTypeCreationData>>(command.Data.ToString());
-                            //wallTypesToCreate = wallTypesData;
-                            //isSimpleMode = command.IsSimpleMode;
+                            // 웹에서 받은 벽체 타입 데이터 파싱
+                            var wallTypesData = JsonConvert.DeserializeObject<List<WallTypeCreationData>>(command.Data.ToString());
+                            wallTypesToCreate = wallTypesData;
 
-                            //DozeOff();
-                            //m_behavior = "CREATE_WALL_TYPES";
-                            //m_exEvent.Raise();
+                            UpdateStatus($"벽체 타입 생성 요청 받음: {wallTypesData.Count}개");
+
+                            DozeOff();
+                            m_behavior = "CREATE_WALL_TYPES";
+                            m_exEvent.Raise();
                         }
                         break;
                     case "GET_REVIT_INFO":
@@ -377,13 +383,41 @@ namespace QTO
             {
                 if (webSocket?.State == WebSocketState.Open)
                 {
-                    var message = new
+                    // 성공/실패 목록 분리
+                    var createdTypes = results.Where(r => r.Success).Select(r => r.WallTypeName).ToList();
+                    var failedTypes = results.Where(r => !r.Success)
+                        .Select(r => new
+                        {
+                            WallTypeName = r.WallTypeName,
+                            ErrorMessage = r.Message
+                        })
+                        .ToList();
+
+                    int successCount = createdTypes.Count;
+                    int failCount = failedTypes.Count;
+
+                    // 전체 성공 여부 판단
+                    bool overallSuccess = failCount == 0;
+
+                    // 메시지 생성
+                    string message = overallSuccess
+                        ? $"{successCount}개의 벽체 타입이 성공적으로 생성되었습니다."
+                        : $"{successCount}개 생성 성공, {failCount}개 생성 실패";
+
+                    var resultData = new
                     {
                         type = "revit:wallTypeResult",
-                        data = results
+                        data = new
+                        {
+                            Success = overallSuccess,
+                            Message = message,
+                            CreatedTypes = createdTypes,
+                            FailedTypes = failedTypes,
+                            ErrorMessage = failCount > 0 ? string.Join("\n", failedTypes.Select(f => $"- {f.WallTypeName}: {f.ErrorMessage}")) : null
+                        }
                     };
 
-                    await SendWebSocketMessage(message);
+                    await SendWebSocketMessage(resultData);
                     UpdateStatus($"{results.Count}개 WallType 생성 결과를 웹으로 전송했습니다.");
                 }
                 else
@@ -1123,7 +1157,7 @@ namespace QTO
             try
             {
                 UpdateStatus("Revit 선택 요소 확인 중...");
-                
+
                 // 현재 선택된 요소들을 Revit에서 가져와서 웹으로 전송
                 DozeOff();
                 m_behavior = "SEND_SELECTION_TO_WEB";
@@ -1132,7 +1166,7 @@ namespace QTO
             catch (Exception ex)
             {
                 UpdateStatus($"선택 요소 확인 실패: {ex.Message}");
-                MessageBox.Show($"선택 요소 확인 중 오류가 발생했습니다:\n{ex.Message}", 
+                MessageBox.Show($"선택 요소 확인 중 오류가 발생했습니다:\n{ex.Message}",
                               "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -1261,8 +1295,7 @@ namespace QTO
 
                 else if (QTOForm.m_behavior == "CREATE_WALL_TYPES")
                 {
-                    //CreateWallTypes(m_doc, app);
-                    MessageBox.Show("준비중입니다.");
+                    CreateWallTypesInRevit(m_doc, app);
                 }
 
                 else if (QTOForm.m_behavior == "None")
@@ -1298,6 +1331,94 @@ namespace QTO
             finally
             {
                 form?.WakeUp();
+            }
+        }
+
+        /// <summary>
+        /// Revit에서 벽체 타입 생성
+        /// </summary>
+        private void CreateWallTypesInRevit(Document doc, UIApplication app)
+        {
+            var results = new List<WallTypeCreationResult>();
+
+            try
+            {
+                var wallTypesToCreate = QTOForm.wallTypesToCreate;
+
+                if (wallTypesToCreate == null || wallTypesToCreate.Count == 0)
+                {
+                    TaskDialog.Show("알림", "생성할 벽체 타입 데이터가 없습니다.");
+                    return;
+                }
+
+                // 트랜잭션 시작
+                using (Transaction trans = new Transaction(doc, "벽체 타입 생성"))
+                {
+                    trans.Start();
+
+                    foreach (var wallData in wallTypesToCreate)
+                    {
+                        try
+                        {
+                            // WallTypeCreate 클래스를 통해 벽체 타입 생성
+                            var creator = new WallTypeCreate(doc);
+                            var result = creator.CreateWallType(wallData);
+
+                            results.Add(result);
+
+                            // 성공 로그
+                            if (result.Success)
+                            {
+                                form?.UpdateStatus($"✅ {result.WallTypeName} 생성 완료");
+                            }
+                            else
+                            {
+                                form?.UpdateStatus($"❌ {result.WallTypeName} 생성 실패: {result.Message}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // 개별 벽체 타입 생성 실패 시
+                            results.Add(new WallTypeCreationResult
+                            {
+                                WallTypeName = wallData.WallTypeName,
+                                Success = false,
+                                Message = $"생성 중 오류 발생: {ex.Message}"
+                            });
+
+                            form?.UpdateStatus($"❌ {wallData.WallTypeName} 오류: {ex.Message}");
+                        }
+                    }
+
+                    trans.Commit();
+                }
+
+                // 결과 요약
+                int successCount = results.Count(r => r.Success);
+                int failCount = results.Count - successCount;
+
+                string summary = $"벽체 타입 생성 완료\n\n성공: {successCount}개\n실패: {failCount}개";
+                TaskDialog.Show("생성 결과", summary);
+
+                // 웹으로 결과 전송
+                form?.SendWallTypeCreationResult(results);
+            }
+            catch (Exception ex)
+            {
+                TaskDialog.Show("오류", $"벽체 타입 생성 중 오류 발생:\n{ex.Message}");
+
+                // 전체 실패 결과 전송
+                if (results.Count == 0)
+                {
+                    results.Add(new WallTypeCreationResult
+                    {
+                        WallTypeName = "전체",
+                        Success = false,
+                        Message = $"전체 생성 실패: {ex.Message}"
+                    });
+                }
+
+                form?.SendWallTypeCreationResult(results);
             }
         }
 
@@ -1370,7 +1491,7 @@ namespace QTO
             {
                 Selection selection = uidoc.Selection;
                 // 1. 룸 선택
-                Reference roomRef = selection.PickObject( ObjectType.Element,new RoomSelectionFilter(), "룸을 선택하세요");
+                Reference roomRef = selection.PickObject(ObjectType.Element, new RoomSelectionFilter(), "룸을 선택하세요");
 
                 if (roomRef != null)
                 {
@@ -1424,12 +1545,12 @@ namespace QTO
                 {
                     int t = Convert.ToInt32(item);
                     ElementId id = new ElementId(t);
-                    if(id != null)
+                    if (id != null)
                     {
                         idx.Add(id);
                     }
                 }
-                if(idx.Count > 0)
+                if (idx.Count > 0)
                 {
                     uidoc.Selection.SetElementIds(idx);
                     uidoc.ShowElements(idx);
@@ -1506,30 +1627,30 @@ namespace QTO
                 // 현재 선택된 요소들 가져오기
                 Selection selection = uidoc.Selection;
                 ICollection<ElementId> selectedIds = selection.GetElementIds();
-                
+
                 if (selectedIds.Count == 0)
                 {
                     TaskDialog.Show("알림", "선택된 요소가 없습니다.\n먼저 Revit에서 요소를 선택한 후 '정보확인' 버튼을 클릭하세요.");
                     return;
                 }
-                
+
                 // ElementId를 문자열 리스트로 변환
                 List<string> elementIdStrings = new List<string>();
                 foreach (ElementId elementId in selectedIds)
                 {
                     elementIdStrings.Add(elementId.ToString());
                 }
-                
+
                 // 선택된 요소들의 정보 로깅
                 System.Diagnostics.Debug.WriteLine($"선택된 요소 개수: {elementIdStrings.Count}");
                 foreach (string id in elementIdStrings)
                 {
                     System.Diagnostics.Debug.WriteLine($"ElementID: {id}");
                 }
-                
+
                 // 웹앱으로 전송
                 form?.SendSelectedElementsToWeb(elementIdStrings);
-                
+
                 // 사용자에게 피드백
                 //TaskDialog.Show("완료", $"{elementIdStrings.Count}개의 선택된 요소 정보를 웹앱으로 전송했습니다.");
             }

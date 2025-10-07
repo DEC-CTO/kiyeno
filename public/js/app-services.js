@@ -3665,33 +3665,7 @@ window.toggleRevitSelection = (elementId) => Kiyeno.RevitService.toggleRevitSele
 window.toggleAllRevitSelection = () => Kiyeno.RevitService.toggleAllRevitSelection();
 window.addSelectedRevitWalls = () => Kiyeno.RevitService.addSelectedRevitWalls();
 window.clearRevitData = () => Kiyeno.RevitService.clearRevitData();
-window.createWallTypesInRevit = createWallTypesInRevit;
 window.toggleRevitDataSection = toggleRevitDataSection;
-
-// 누락된 Revit 관련 함수들 추가
-function createWallTypesInRevit() {
-    try {
-        const selectedWalls = Kiyeno.Data.getSelectedWalls();
-        if (selectedWalls.length === 0) {
-            showToast('WallType을 생성할 벽체를 선택해주세요.', 'warning');
-            return;
-        }
-        
-        // WebSocket을 통한 Revit 통신
-        if (window.socketService && window.socketService.isConnected()) {
-            window.socketService.sendRevitCommand('CREATE_WALL_TYPES', {
-                wallData: selectedWalls,
-                isSimple: false
-            });
-        } else {
-            console.log('WallType 생성 시뮬레이션:', selectedWalls);
-            showToast(`${selectedWalls.length}개 벽체의 WallType 생성을 요청했습니다.`, 'info');
-        }
-    } catch (error) {
-        console.error('WallType 생성 요청 실패:', error);
-        showToast('WallType 생성 요청 중 오류가 발생했습니다.', 'error');
-    }
-}
 
 function toggleRevitDataSection() {
     const revitSection = document.getElementById('revitDataSection');
