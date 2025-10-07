@@ -167,6 +167,11 @@ function createProjectManagementPanel() {
                             <div class="dropdown-item" onclick="addRevitWallType()">
                                 <i class="fas fa-plus"></i> 새 WallType 생성
                             </div>
+                            <div class="dropdown-divider"></div>
+                            <div class="dropdown-item" onclick="showWallTypePreview()">
+                                <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
+                            </div>
+                            <div class="dropdown-divider"></div>
                             <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
                                 <i class="fas fa-trash-alt"></i> 선택 삭제
                             </div>
@@ -1653,6 +1658,460 @@ window.importRevitWallTypesFromJSON = importRevitWallTypesFromJSON;
 // 기타 유틸리티 함수들
 window.saveAllChanges = saveAllChanges;
 window.initializeTypeMappingTabs = initializeTypeMappingTabs;
+
+// =============================================================================
+// 벽체 타입 두께 계산 및 Revit 생성 기능
+// =============================================================================
+
+/**
+ * ID가 일위대가 ID인지 확인
+ * @param {string} id - 확인할 ID
+ * @returns {boolean}
+ */
+function isUnitPriceId(id) {
+    return id && typeof id === 'string' && id.startsWith('unitPrice_');
+}
+
+/**
+ * 일위대가 ID로 일위대가 데이터 조회
+ * @param {string} unitPriceId - 일위대가 ID (예: "unitPrice_일반석고보드-36-3600이하-95T1PLY-1759333188504")
+ * @returns {Promise<object|null>} 일위대가 데이터 객체
+ */
+async function getUnitPriceData(unitPriceId) {
+    if (!isUnitPriceId(unitPriceId)) {
+        console.warn(`잘못된 일위대가 ID 형식: ${unitPriceId}`);
+        return null;
+    }
+
+    // "unitPrice_" 접두사 제거
+    const actualId = unitPriceId.replace('unitPrice_', '');
+
+    try {
+        // window.unitPriceDB가 존재하는지 확인
+        if (!window.unitPriceDB) {
+            console.error('❌ unitPriceDB가 초기화되지 않았습니다');
+            return null;
+        }
+
+        // IndexedDB에서 일위대가 조회
+        const unitPrice = await window.unitPriceDB.getUnitPriceById(actualId);
+
+        if (unitPrice) {
+            console.log(`✅ 일위대가 조회 성공: ${actualId}`);
+        } else {
+            console.warn(`⚠️ 일위대가를 찾을 수 없음: ${actualId}`);
+        }
+
+        return unitPrice;
+    } catch (error) {
+        console.error(`❌ 일위대가 조회 오류 (${actualId}):`, error);
+        return null;
+    }
+}
+
+/**
+ * 일위대가의 구성품에서 두께 추출
+ * @param {string} unitPriceId - 일위대가 ID
+ * @returns {Promise<number|null>} 추출된 두께 (mm)
+ */
+async function extractThicknessFromUnitPrice(unitPriceId) {
+    const unitPrice = await getUnitPriceData(unitPriceId);
+
+    if (!unitPrice || !unitPrice.components || unitPrice.components.length === 0) {
+        console.warn(`일위대가 ${unitPriceId}에 구성품이 없습니다`);
+        return null;
+    }
+
+    console.log(`🔍 일위대가 구성품 분석: ${unitPrice.components.length}개`);
+
+    // 구성품에서 석고보드나 스터드 찾기
+    for (const component of unitPrice.components) {
+        if (!component.materialId) {
+            console.log(`  ⏭️  구성품 "${component.name}": materialId 없음 (스킵)`);
+            continue;
+        }
+
+        // priceDatabase에서 실제 자재 조회 (비동기)
+        const material = await getMaterialData(component.materialId);
+
+        if (!material) {
+            console.log(`  ⚠️  구성품 "${component.name}": 자재 ${component.materialId} 찾을 수 없음`);
+            continue;
+        }
+
+        // 단열재 제외
+        if (material.category === 'INSULATION') {
+            console.log(`  🚫 구성품 "${component.name}": 단열재 (제외)`);
+            continue;
+        }
+
+        // 석고보드: t 필드 사용
+        if (material.t !== undefined && material.t !== null) {
+            const thickness = parseFloat(material.t);
+            console.log(`  ✅ 석고보드 두께 추출: ${component.name} → ${thickness}mm (t 필드)`);
+            return thickness;
+        }
+
+        // 경량자재 (스터드): size 필드에서 가로값 추출
+        if (material.size) {
+            const match = material.size.match(/\d+\.?\d*T\*(\d+)/);
+            if (match) {
+                const thickness = parseFloat(match[1]);
+                console.log(`  ✅ 스터드 가로값 추출: ${component.name} → ${thickness}mm (size: ${material.size})`);
+                return thickness;
+            }
+        }
+
+        console.log(`  ⏭️  구성품 "${component.name}": 두께 추출 불가 (t: ${material.t}, size: ${material.size})`);
+    }
+
+    console.warn(`일위대가 ${unitPriceId}에서 유효한 두께를 찾을 수 없습니다`);
+    return null;
+}
+
+/**
+ * 자재 ID로 자재 정보 조회 (비동기)
+ * @param {string} materialId - 자재 ID
+ * @returns {Promise<object|null>} 자재 데이터 객체
+ */
+async function getMaterialData(materialId) {
+    if (!materialId || !window.priceDB) {
+        console.warn('자재 ID가 없거나 priceDB가 초기화되지 않았습니다');
+        return null;
+    }
+
+    try {
+        // IndexedDB materials 테이블에서 ID로 직접 조회
+        const material = await window.priceDB.findMaterialById(materialId);
+
+        if (material) {
+            console.log(`✅ 자재 발견: ${materialId} - ${material.name || material.item}`);
+            return material;
+        }
+
+        console.warn(`자재 ${materialId}를 찾을 수 없습니다`);
+        return null;
+    } catch (error) {
+        console.error(`자재 조회 오류 (${materialId}):`, error);
+        return null;
+    }
+}
+
+/**
+ * 자재 ID 또는 일위대가 ID로부터 두께(mm) 추출
+ * @param {string} materialId - 자재 ID 또는 일위대가 ID
+ * @returns {Promise<number|null>} 두께(mm) 또는 null
+ */
+async function extractThicknessFromMaterial(materialId) {
+    // 일위대가 ID인 경우
+    if (isUnitPriceId(materialId)) {
+        console.log(`📋 일위대가 ID 감지: ${materialId}`);
+        return await extractThicknessFromUnitPrice(materialId);
+    }
+
+    // 일반 자재 ID인 경우
+    const material = await getMaterialData(materialId);
+    if (!material) {
+        console.warn(`자재 ${materialId}를 찾을 수 없습니다`);
+        return null;
+    }
+
+    // 디버깅: 자재 객체 전체 출력
+    console.log(`🔍 자재 객체 구조 확인 (${materialId}):`, material);
+
+    // 석고보드: t 필드 사용 (9.5, 12.5, 15.0 등)
+    if (material.t !== undefined && material.t !== null) {
+        const thickness = parseFloat(material.t);
+        console.log(`📏 석고보드 두께: ${materialId} → ${thickness}mm (t 필드)`);
+        return thickness;
+    }
+
+    // 경량자재: size 필드에서 가로값 추출 ("0.8T*60*45" → 60)
+    if (material.size) {
+        const match = material.size.match(/\d+\.?\d*T\*(\d+)/);
+        if (match) {
+            const thickness = parseFloat(match[1]);
+            console.log(`📏 경량자재 두께: ${materialId} → ${thickness}mm (size: ${material.size})`);
+            return thickness;
+        }
+    }
+
+    // 단열재 제외 처리
+    if (material.category === 'INSULATION') {
+        console.log(`🚫 단열재 ${materialId}는 두께 계산에서 제외됨`);
+        return null;
+    }
+
+    console.warn(`자재 ${materialId}의 두께를 추출할 수 없습니다 (t: ${material.t}, size: ${material.size})`);
+    console.log(`📋 사용 가능한 필드:`, Object.keys(material));
+    return null;
+}
+
+/**
+ * 벽체 타입으로부터 레이어 구조 생성 (비동기)
+ * @param {object} wallType - 벽체 타입 객체
+ * @returns {Promise<object>} { wallTypeName, layers, totalThickness, errors, hasErrors }
+ */
+async function getLayerStructure(wallType) {
+    console.log('🏗️ 레이어 구조 생성:', wallType.wallType);
+
+    const layers = [];
+    const errors = [];
+    let totalThickness = 0;
+
+    // 레이어 순서: 좌측마감3 → 좌측마감2 → 좌측마감1 → 구조체 → 우측마감1 → 우측마감2 → 우측마감3
+    const layerConfig = [
+        { field: 'layer3_1', name: '좌측마감 Layer3' },
+        { field: 'layer2_1', name: '좌측마감 Layer2' },
+        { field: 'layer1_1', name: '좌측마감 Layer1' },
+        { field: 'column1', name: '구조체' },
+        { field: 'layer1_2', name: '우측마감 Layer1' },
+        { field: 'layer2_2', name: '우측마감 Layer2' },
+        { field: 'layer3_2', name: '우측마감 Layer3' }
+    ];
+
+    // 비동기 처리를 위해 for...of 사용
+    for (const config of layerConfig) {
+        const materialId = wallType[config.field];
+
+        if (!materialId) {
+            console.log(`⏭️  ${config.name}: 빈 레이어 (스킵)`);
+            continue; // 빈 레이어 스킵
+        }
+
+        // 일위대가인지 확인
+        let displayName = materialId;
+        let spec = '';
+        let isUnitPrice = false;
+
+        if (isUnitPriceId(materialId)) {
+            // 일위대가인 경우
+            isUnitPrice = true;
+            const unitPrice = await getUnitPriceData(materialId);
+
+            if (!unitPrice) {
+                errors.push(`${config.name}: 일위대가 ${materialId}를 찾을 수 없음`);
+                console.error(`❌ ${config.name}: 일위대가 ${materialId} 조회 실패`);
+                continue;
+            }
+
+            displayName = unitPrice.basic?.itemName || '알 수 없는 일위대가';
+            spec = `일위대가 (구성품 ${unitPrice.components?.length || 0}개)`;
+        } else {
+            // 일반 자재인 경우
+            const material = await getMaterialData(materialId);
+            if (!material) {
+                errors.push(`${config.name}: 자재 ${materialId}를 찾을 수 없음`);
+                console.error(`❌ ${config.name}: 자재 ${materialId} 조회 실패`);
+                continue;
+            }
+
+            displayName = material.name || material.item;
+            spec = material.spec || material.size || '';
+        }
+
+        // 두께 추출 (비동기)
+        const thickness = await extractThicknessFromMaterial(materialId);
+        if (thickness === null) {
+            errors.push(`${config.name}: ${displayName} 두께 추출 실패`);
+            console.error(`❌ ${config.name}: 두께 추출 실패`);
+            continue;
+        }
+
+        layers.push({
+            position: config.name,
+            materialId: materialId,
+            materialName: displayName,
+            spec: spec,
+            thickness: thickness,
+            isUnitPrice: isUnitPrice
+        });
+
+        totalThickness += thickness;
+        console.log(`  ✓ ${config.name}: ${displayName} (${thickness}mm)`);
+    }
+
+    const result = {
+        wallTypeName: wallType.wallType,
+        layers: layers,
+        totalThickness: Math.round(totalThickness * 10) / 10, // 소수점 1자리
+        errors: errors,
+        hasErrors: errors.length > 0
+    };
+
+    console.log(`📊 레이어 구조 생성 완료: ${layers.length}개 레이어, 총 ${result.totalThickness}mm, 오류 ${errors.length}개`);
+
+    return result;
+}
+
+/**
+ * 레이어 구조 미리보기 모달 HTML 생성
+ * @param {Array} wallTypesData - 벽체 타입 레이어 구조 배열
+ * @returns {string} 모달 HTML
+ */
+function createLayerPreviewModalHTML(wallTypesData) {
+    let html = `
+        <div class="layer-preview-container" style="max-height: 600px; overflow-y: auto;">
+            <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                <h4 style="margin: 0 0 10px 0; color: #1e40af;">
+                    <i class="fas fa-info-circle"></i> 생성 예정 벽체 타입
+                </h4>
+                <p style="margin: 0; color: #475569;">
+                    선택된 ${wallTypesData.length}개의 벽체 타입을 Revit에서 생성합니다.
+                </p>
+            </div>
+    `;
+
+    wallTypesData.forEach((data, index) => {
+        const hasErrors = data.hasErrors;
+        const borderColor = hasErrors ? '#ef4444' : '#10b981';
+        const bgColor = hasErrors ? '#fef2f2' : '#f0fdf4';
+
+        html += `
+            <div class="wall-type-preview" style="margin-bottom: 20px; padding: 20px; background: ${bgColor}; border-radius: 8px; border: 2px solid ${borderColor};">
+                <h3 style="margin: 0 0 15px 0; color: #1f2937; display: flex; justify-content: space-between; align-items: center;">
+                    <span>
+                        <i class="fas fa-layer-group"></i> ${data.wallTypeName}
+                    </span>
+                    <span style="font-size: 18px; font-weight: 700; color: ${borderColor};">
+                        총 두께: ${data.totalThickness}mm
+                    </span>
+                </h3>
+
+                ${hasErrors ? `
+                    <div style="margin-bottom: 15px; padding: 10px; background: #fee2e2; border-radius: 6px; color: #991b1b;">
+                        <strong><i class="fas fa-exclamation-triangle"></i> 오류:</strong>
+                        <ul style="margin: 5px 0 0 20px; padding: 0;">
+                            ${data.errors.map(err => `<li>${err}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: #1f2937; color: white;">
+                            <th style="padding: 10px; text-align: left; font-size: 12px;">위치</th>
+                            <th style="padding: 10px; text-align: left; font-size: 12px;">자재명</th>
+                            <th style="padding: 10px; text-align: left; font-size: 12px;">규격</th>
+                            <th style="padding: 10px; text-align: right; font-size: 12px;">두께(mm)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.layers.map(layer => `
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 10px; font-size: 11px; color: #6b7280;">${layer.position}</td>
+                                <td style="padding: 10px; font-size: 11px; font-weight: 600;">${layer.materialName}</td>
+                                <td style="padding: 10px; font-size: 11px; color: #6b7280;">${layer.spec}</td>
+                                <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 600; color: #3b82f6;">${layer.thickness}</td>
+                            </tr>
+                        `).join('')}
+                        <tr style="background: #f9fafb; font-weight: 700;">
+                            <td colspan="3" style="padding: 12px; font-size: 12px; text-align: right;">합계</td>
+                            <td style="padding: 12px; font-size: 12px; text-align: right; color: ${borderColor};">${data.totalThickness} mm</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+    return html;
+}
+
+/**
+ * 벽체 타입 레이어 구조 미리보기 모달 표시 (비동기)
+ */
+async function showWallTypePreview() {
+    console.log('🔍 벽체타입 생성 미리보기');
+
+    // 1. 선택된 벽체 타입 ID 확인
+    const selectedIds = Array.from(selectedRevitWalls);
+
+    if (selectedIds.length === 0) {
+        alert('벽체 타입을 선택해주세요.');
+        return;
+    }
+
+    // 2. ID로부터 실제 벽체 객체 가져오기
+    const selectedWalls = window.revitWallTypes.filter(wall => selectedIds.includes(wall.id));
+
+    console.log(`📋 선택된 벽체 타입: ${selectedWalls.length}개`, selectedWalls);
+
+    // 드롭다운 닫기
+    toggleRevitActionsDropdown();
+
+    // 3. 각 벽체 타입의 레이어 구조 계산 (비동기 처리)
+    const wallTypesData = await Promise.all(
+        selectedWalls.map(wallType => getLayerStructure(wallType))
+    );
+
+    // 4. 오류가 있는 벽체 타입 확인
+    const errorCount = wallTypesData.filter(data => data.hasErrors).length;
+
+    // 4. 미리보기 모달 HTML 생성
+    const previewHTML = createLayerPreviewModalHTML(wallTypesData);
+
+    // 5. 모달 버튼 설정
+    const buttons = [
+        {
+            text: '<i class="fas fa-times"></i> 취소',
+            className: 'btn btn-secondary',
+            onClick: (modal) => {
+                closeSubModal(modal);
+            }
+        }
+    ];
+
+    // 오류가 없는 경우에만 생성 버튼 추가
+    if (errorCount === 0) {
+        buttons.push({
+            text: '<i class="fas fa-check"></i> Revit에서 생성하기',
+            className: 'btn btn-success',
+            onClick: (modal) => {
+                closeSubModal(modal);
+                createWallTypesInRevit(wallTypesData);
+            }
+        });
+    }
+
+    // 6. 서브 모달 생성
+    const modal = createSubModal(
+        '🏗️ 벽체타입 생성 미리보기',
+        previewHTML,
+        buttons,
+        {
+            disableBackgroundClick: true,
+            width: '1350px'
+        }
+    );
+
+    // 7. 오류 알림
+    if (errorCount > 0) {
+        setTimeout(() => {
+            alert(`${errorCount}개 벽체 타입에 오류가 있습니다.\n자재 정보를 확인하고 다시 시도해주세요.`);
+        }, 300);
+    }
+}
+
+/**
+ * Revit에서 벽체 타입 생성 (추후 구현)
+ * @param {Array} wallTypesData - 벽체 타입 레이어 구조 배열
+ */
+async function createWallTypesInRevit(wallTypesData) {
+    console.log('📤 Revit 벽체 타입 생성 (현재는 로그만 출력):', wallTypesData);
+
+    // TODO: Phase 5에서 구현 예정
+    alert(`Revit 통신 기능은 Phase 2에서 구현 예정입니다.\n\n현재 ${wallTypesData.length}개 벽체 타입의 레이어 구조가 정상적으로 계산되었습니다.`);
+}
+
+// 두께 계산 유틸리티 함수들 전역 등록
+window.getMaterialData = getMaterialData;
+window.extractThicknessFromMaterial = extractThicknessFromMaterial;
+window.getLayerStructure = getLayerStructure;
+window.createLayerPreviewModalHTML = createLayerPreviewModalHTML;
+window.showWallTypePreview = showWallTypePreview;
+window.createWallTypesInRevit = createWallTypesInRevit;
 
 console.log('✅ revitTypeMatching.js 로드 완료 - Revit 타입 매칭 전담 모듈 (원본 복원) 및 전역 함수 등록됨');
 

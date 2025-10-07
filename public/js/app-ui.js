@@ -1155,7 +1155,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
         
         buttons.forEach(buttonConfig => {
             const button = document.createElement('button');
-            button.textContent = buttonConfig.text;
+            button.innerHTML = buttonConfig.text; // textContent → innerHTML 변경
             button.className = `btn ${buttonConfig.class || 'btn-primary'}`;
             button.style.cssText = `
                 padding: 8px 20px;
@@ -1165,7 +1165,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
                 font-size: 14px;
                 font-weight: 500;
             `;
-            
+
             if (buttonConfig.onClick) {
                 button.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -1173,7 +1173,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
                     buttonConfig.onClick(subModalOverlay);
                 });
             }
-            
+
             buttonContainer.appendChild(button);
         });
         
