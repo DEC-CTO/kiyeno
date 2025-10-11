@@ -484,7 +484,8 @@ async function openUnitPriceManagement() {
         }}
     ], {
         disableBackgroundClick: true,
-        disableEscapeKey: true
+        disableEscapeKey: true,
+        width: '70vw'
     });
     
     console.log('🔍 createSubModal 완료 - modal 객체:', modal);
@@ -568,53 +569,235 @@ function openUnitPriceBasicModal(editData = null) {
 function showUnitPriceBasicModal(editData = null) {
     const isEdit = editData !== null;
     const modalTitle = isEdit ? '일위대가 수정' : '새 일위대가 추가';
-    
+
+    // 아이템명 옵션 목록
+    const itemNameOptions = ['C-STUD', 'CH-STUD', '그라스울', '런너', 'J런너', '일반석고보드', '방수석고보드', '방화석고보드', '차음석고보드'];
+    const spacingOptions = ['@300', '@400', '@450', '@600', '3*6', '24K*50T'];
+    const heightOptions = ['3600이하', '3600이상'];
+    const workTypeOptions = ['경량', '건자재'];
+
+    // SIZE 옵션 (그룹화)
+    const sizeOptionsStuds = ['50형', '60형', '65형', '70형', '75형', '80형', '90형', '100형', '102형', '110형', '120형', '125형', '127형', '130형', '140형', '150형', '152형', '160형', '200형'];
+    const sizeOptionsBoards = ['9.5T*1PLY', '12.5T*1PLY', '15T*1PLY', '9.5T*3*8*1PLY', '12.5T*3*8*1PLY', '15T*3*8*1PLY', '12.5T*4*8*1PLY', '15T*4*8*1PLY', '19T*1PLY', '25T*2*6*1PLY'];
+    const sizeOptionsEtc = ['24K*50T'];
+    const allSizeOptions = [...sizeOptionsStuds, ...sizeOptionsBoards, ...sizeOptionsEtc];
+
+    // 현재 값이 드롭다운에 없는 커스텀 값인지 확인
+    const currentItemName = editData?.basic?.itemName || '';
+    const currentSpacing = editData?.basic?.spacing || '';
+    const currentHeight = editData?.basic?.height || '';
+    const currentSize = editData?.basic?.size || '';
+
+    const isCustomItemName = currentItemName && !itemNameOptions.includes(currentItemName);
+    const isCustomSpacing = currentSpacing && !spacingOptions.includes(currentSpacing);
+    const isCustomHeight = currentHeight && !heightOptions.includes(currentHeight);
+    const isCustomSize = currentSize && !allSizeOptions.includes(currentSize);
+
     const basicModalHTML = `
+        <style>
+            .unit-price-basic-form .form-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+
+            .unit-price-basic-form .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .unit-price-basic-form .form-group label {
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: #374151;
+                font-size: 14px;
+            }
+
+            .unit-price-basic-form .form-group select,
+            .unit-price-basic-form .form-group input {
+                padding: 10px 12px;
+                border: 2px solid #d1d5db;
+                border-radius: 6px;
+                font-size: 14px;
+                transition: all 0.2s;
+                font-family: inherit;
+            }
+
+            .unit-price-basic-form .form-group select:focus,
+            .unit-price-basic-form .form-group input:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+
+            .unit-price-basic-form .form-group input[readonly] {
+                background-color: #f3f4f6;
+                color: #6b7280;
+                cursor: not-allowed;
+                border-color: #e5e7eb;
+            }
+
+            .unit-price-basic-form .required {
+                color: #ef4444;
+                margin-left: 2px;
+                font-weight: 700;
+            }
+
+            .unit-price-basic-form select {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%236b7280' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 10px center;
+                background-size: 16px;
+                appearance: none;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+                padding-right: 40px;
+                cursor: pointer;
+            }
+
+            .unit-price-basic-form select:hover {
+                border-color: #9ca3af;
+            }
+
+            .unit-price-basic-form optgroup {
+                font-weight: 700;
+                color: #1f2937;
+                background: #f9fafb;
+                font-size: 13px;
+            }
+
+            .unit-price-basic-form option {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .unit-price-basic-form option[data-custom="true"] {
+                background-color: #e8f5e8;
+                font-weight: 600;
+                color: #16a34a;
+            }
+
+            .custom-input-wrapper {
+                display: flex;
+                gap: 8px;
+                align-items: center;
+            }
+
+            .custom-input-wrapper input {
+                flex: 1;
+            }
+
+            .custom-input-wrapper button {
+                padding: 10px 16px;
+                background: #6b7280;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                white-space: nowrap;
+                font-size: 13px;
+                transition: background 0.2s;
+            }
+
+            .custom-input-wrapper button:hover {
+                background: #4b5563;
+            }
+        </style>
+
         <div class="unit-price-basic-form">
             <div class="form-grid">
                 <!-- 아이템명 -->
-                <div class="form-group">
+                <div class="form-group" id="itemNameGroup">
                     <label>아이템 <span class="required">*</span></label>
-                    <input type="text" id="itemName" placeholder="예: C-STUD" value="${editData?.basic?.itemName || ''}" required>
+                    ${isCustomItemName ? `
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="itemName" placeholder="직접 입력" value="${currentItemName}" required>
+                            <button type="button" onclick="window.resetItemNameToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    ` : `
+                        <select id="itemName" required>
+                            <option value="">선택하세요</option>
+                            ${itemNameOptions.map(item => `<option value="${item}" ${currentItemName === item ? 'selected' : ''}>${item}</option>`).join('')}
+                            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+                        </select>
+                    `}
                 </div>
-                
-                <!-- 간격 입력 -->
-                <div class="form-group">
+
+                <!-- 간격 -->
+                <div class="form-group" id="spacingGroup">
                     <label>간격 <span class="required">*</span></label>
-                    <input type="text" id="spacing" placeholder="예: @400" value="${editData?.basic?.spacing || ''}" required>
+                    ${isCustomSpacing ? `
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="spacing" placeholder="직접 입력" value="${currentSpacing}" required>
+                            <button type="button" onclick="window.resetSpacingToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    ` : `
+                        <select id="spacing" required>
+                            <option value="">선택하세요</option>
+                            ${spacingOptions.map(spacing => `<option value="${spacing}" ${currentSpacing === spacing ? 'selected' : ''}>${spacing}</option>`).join('')}
+                            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+                        </select>
+                    `}
                 </div>
-                
-                <!-- 높이 입력 -->
-                <div class="form-group">
+
+                <!-- 높이 -->
+                <div class="form-group" id="heightGroup">
                     <label>높이 <span class="required">*</span></label>
-                    <input type="text" id="height" placeholder="예: 3600이하" value="${editData?.basic?.height || ''}" required>
+                    ${isCustomHeight ? `
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="height" placeholder="직접 입력" value="${currentHeight}" required>
+                            <button type="button" onclick="window.resetHeightToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    ` : `
+                        <select id="height" required>
+                            <option value="">선택하세요</option>
+                            ${heightOptions.map(height => `<option value="${height}" ${currentHeight === height ? 'selected' : ''}>${height}</option>`).join('')}
+                            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+                        </select>
+                    `}
                 </div>
-                
-                <!-- 규격 -->
-                <div class="form-group">
+
+                <!-- SIZE -->
+                <div class="form-group" id="sizeGroup">
                     <label>SIZE <span class="required">*</span></label>
-                    <input type="text" id="size" placeholder="예: 50형" value="${editData?.basic?.size || ''}" required>
+                    ${isCustomSize ? `
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="size" placeholder="직접 입력" value="${currentSize}" required>
+                            <button type="button" onclick="window.resetSizeToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    ` : `
+                        <select id="size" required>
+                            <option value="">선택하세요</option>
+                            <optgroup label="스터드 규격">
+                                ${sizeOptionsStuds.map(size => `<option value="${size}" ${currentSize === size ? 'selected' : ''}>${size}</option>`).join('')}
+                            </optgroup>
+                            <optgroup label="석고보드 규격">
+                                ${sizeOptionsBoards.map(size => `<option value="${size}" ${currentSize === size ? 'selected' : ''}>${size}</option>`).join('')}
+                            </optgroup>
+                            <optgroup label="기타">
+                                ${sizeOptionsEtc.map(size => `<option value="${size}" ${currentSize === size ? 'selected' : ''}>${size}</option>`).join('')}
+                            </optgroup>
+                            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+                        </select>
+                    `}
                 </div>
-                
-                <!-- 부위 -->
+
+                <!-- 부위 (고정값) -->
                 <div class="form-group">
                     <label>부위 <span class="required">*</span></label>
-                    <input type="text" id="location" placeholder="예: 벽체" value="${editData?.basic?.location || ''}" required>
+                    <input type="text" id="location" value="벽체" readonly>
                 </div>
-                
-                <!-- 공종1 -->
-                <div class="form-group">
-                    <label>공종1 <span class="required">*</span></label>
-                    <input type="text" id="workType1" placeholder="예: 경량" value="${editData?.basic?.workType1 || ''}" required>
-                </div>
-                
-                <!-- 공종2 -->
-                <div class="form-group">
-                    <label>공종2</label>
-                    <input type="text" id="workType2" placeholder="예: 벽체" value="${editData?.basic?.workType2 || ''}">
-                </div>
-                
-                <!-- 단위 드롭다운 -->
+
+                <!-- UNIT -->
                 <div class="form-group">
                     <label>UNIT <span class="required">*</span></label>
                     <select id="unit" required>
@@ -623,8 +806,26 @@ function showUnitPriceBasicModal(editData = null) {
                         <option value="M" ${editData?.basic?.unit === 'M' ? 'selected' : ''}>M</option>
                     </select>
                 </div>
+
+                <!-- 공종1 -->
+                <div class="form-group">
+                    <label>공종1 <span class="required">*</span></label>
+                    <select id="workType1" required>
+                        <option value="">선택하세요</option>
+                        ${workTypeOptions.map(type => `<option value="${type}" ${editData?.basic?.workType1 === type ? 'selected' : ''}>${type}</option>`).join('')}
+                    </select>
+                </div>
+
+                <!-- 공종2 -->
+                <div class="form-group">
+                    <label>공종2</label>
+                    <select id="workType2">
+                        <option value="">선택하세요</option>
+                        ${workTypeOptions.map(type => `<option value="${type}" ${editData?.basic?.workType2 === type ? 'selected' : ''}>${type}</option>`).join('')}
+                    </select>
+                </div>
             </div>
-            
+
             <!-- 버튼들은 createSubModal에서 처리 -->
         </div>
     `;
@@ -642,9 +843,237 @@ function showUnitPriceBasicModal(editData = null) {
         { text: isEdit ? '수정 계속' : '세부 설정', class: 'btn-primary', onClick: (modal) => proceedToDetailInput(isEdit) }
     ], {
         disableBackgroundClick: true,
-        disableEscapeKey: true
+        disableEscapeKey: true,
+        width: '70vw'
     });
+
+    // 모달이 열린 후 이벤트 리스너 등록
+    setTimeout(() => {
+        const itemNameSelect = document.getElementById('itemName');
+        const spacingSelect = document.getElementById('spacing');
+        const heightSelect = document.getElementById('height');
+        const sizeSelect = document.getElementById('size');
+
+        // 아이템명 select가 있을 때만 이벤트 등록 (직접입력 모드가 아닐 때)
+        if (itemNameSelect && itemNameSelect.tagName === 'SELECT') {
+            itemNameSelect.addEventListener('change', function(e) {
+                if (e.target.value === 'CUSTOM_INPUT') {
+                    const itemNameGroup = document.getElementById('itemNameGroup');
+                    itemNameGroup.innerHTML = `
+                        <label>아이템 <span class="required">*</span></label>
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="itemName" placeholder="직접 입력" value="" required>
+                            <button type="button" onclick="window.resetItemNameToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('itemName').focus();
+                }
+            });
+        }
+
+        // 간격 select 이벤트
+        if (spacingSelect && spacingSelect.tagName === 'SELECT') {
+            spacingSelect.addEventListener('change', function(e) {
+                if (e.target.value === 'CUSTOM_INPUT') {
+                    const spacingGroup = document.getElementById('spacingGroup');
+                    spacingGroup.innerHTML = `
+                        <label>간격 <span class="required">*</span></label>
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="spacing" placeholder="직접 입력" value="" required>
+                            <button type="button" onclick="window.resetSpacingToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('spacing').focus();
+                }
+            });
+        }
+
+        // 높이 select 이벤트
+        if (heightSelect && heightSelect.tagName === 'SELECT') {
+            heightSelect.addEventListener('change', function(e) {
+                if (e.target.value === 'CUSTOM_INPUT') {
+                    const heightGroup = document.getElementById('heightGroup');
+                    heightGroup.innerHTML = `
+                        <label>높이 <span class="required">*</span></label>
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="height" placeholder="직접 입력" value="" required>
+                            <button type="button" onclick="window.resetHeightToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('height').focus();
+                }
+            });
+        }
+
+        // SIZE select 이벤트
+        if (sizeSelect && sizeSelect.tagName === 'SELECT') {
+            sizeSelect.addEventListener('change', function(e) {
+                if (e.target.value === 'CUSTOM_INPUT') {
+                    const sizeGroup = document.getElementById('sizeGroup');
+                    sizeGroup.innerHTML = `
+                        <label>SIZE <span class="required">*</span></label>
+                        <div class="custom-input-wrapper">
+                            <input type="text" id="size" placeholder="직접 입력" value="" required>
+                            <button type="button" onclick="window.resetSizeToSelect()">
+                                <i class="fas fa-undo"></i> 목록
+                            </button>
+                        </div>
+                    `;
+                    document.getElementById('size').focus();
+                }
+            });
+        }
+    }, 100);
 }
+
+// 아이템명을 select로 되돌리기 (전역 함수)
+window.resetItemNameToSelect = function() {
+    const itemNameGroup = document.getElementById('itemNameGroup');
+    const itemNameOptions = ['C-STUD', 'CH-STUD', '그라스울', '런너', 'J런너', '일반석고보드', '방수석고보드', '방화석고보드', '차음석고보드'];
+
+    if (!itemNameGroup) return;
+
+    itemNameGroup.innerHTML = `
+        <label>아이템 <span class="required">*</span></label>
+        <select id="itemName" required>
+            <option value="">선택하세요</option>
+            ${itemNameOptions.map(item => `<option value="${item}">${item}</option>`).join('')}
+            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+        </select>
+    `;
+
+    // 이벤트 리스너 재등록
+    const itemNameSelect = document.getElementById('itemName');
+    itemNameSelect.addEventListener('change', function(e) {
+        if (e.target.value === 'CUSTOM_INPUT') {
+            itemNameGroup.innerHTML = `
+                <label>아이템 <span class="required">*</span></label>
+                <div class="custom-input-wrapper">
+                    <input type="text" id="itemName" placeholder="직접 입력" value="" required>
+                    <button type="button" onclick="window.resetItemNameToSelect()">
+                        <i class="fas fa-undo"></i> 목록
+                    </button>
+                </div>
+            `;
+            document.getElementById('itemName').focus();
+        }
+    });
+};
+
+// 간격을 select로 되돌리기 (전역 함수)
+window.resetSpacingToSelect = function() {
+    const spacingGroup = document.getElementById('spacingGroup');
+    const spacingOptions = ['@300', '@400', '@450', '@600', '3*6', '24K*50T'];
+
+    if (!spacingGroup) return;
+
+    spacingGroup.innerHTML = `
+        <label>간격 <span class="required">*</span></label>
+        <select id="spacing" required>
+            <option value="">선택하세요</option>
+            ${spacingOptions.map(spacing => `<option value="${spacing}">${spacing}</option>`).join('')}
+            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+        </select>
+    `;
+
+    const spacingSelect = document.getElementById('spacing');
+    spacingSelect.addEventListener('change', function(e) {
+        if (e.target.value === 'CUSTOM_INPUT') {
+            spacingGroup.innerHTML = `
+                <label>간격 <span class="required">*</span></label>
+                <div class="custom-input-wrapper">
+                    <input type="text" id="spacing" placeholder="직접 입력" value="" required>
+                    <button type="button" onclick="window.resetSpacingToSelect()">
+                        <i class="fas fa-undo"></i> 목록
+                    </button>
+                </div>
+            `;
+            document.getElementById('spacing').focus();
+        }
+    });
+};
+
+// 높이를 select로 되돌리기 (전역 함수)
+window.resetHeightToSelect = function() {
+    const heightGroup = document.getElementById('heightGroup');
+    const heightOptions = ['3600이하', '3600이상'];
+
+    if (!heightGroup) return;
+
+    heightGroup.innerHTML = `
+        <label>높이 <span class="required">*</span></label>
+        <select id="height" required>
+            <option value="">선택하세요</option>
+            ${heightOptions.map(height => `<option value="${height}">${height}</option>`).join('')}
+            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+        </select>
+    `;
+
+    const heightSelect = document.getElementById('height');
+    heightSelect.addEventListener('change', function(e) {
+        if (e.target.value === 'CUSTOM_INPUT') {
+            heightGroup.innerHTML = `
+                <label>높이 <span class="required">*</span></label>
+                <div class="custom-input-wrapper">
+                    <input type="text" id="height" placeholder="직접 입력" value="" required>
+                    <button type="button" onclick="window.resetHeightToSelect()">
+                        <i class="fas fa-undo"></i> 목록
+                    </button>
+                </div>
+            `;
+            document.getElementById('height').focus();
+        }
+    });
+};
+
+// SIZE를 select로 되돌리기 (전역 함수)
+window.resetSizeToSelect = function() {
+    const sizeGroup = document.getElementById('sizeGroup');
+    const sizeOptionsStuds = ['50형', '60형', '65형', '70형', '75형', '80형', '90형', '100형', '102형', '110형', '120형', '125형', '127형', '130형', '140형', '150형', '152형', '160형', '200형'];
+    const sizeOptionsBoards = ['9.5T*1PLY', '12.5T*1PLY', '15T*1PLY', '9.5T*3*8*1PLY', '12.5T*3*8*1PLY', '15T*3*8*1PLY', '12.5T*4*8*1PLY', '15T*4*8*1PLY', '19T*1PLY', '25T*2*6*1PLY'];
+    const sizeOptionsEtc = ['24K*50T'];
+
+    if (!sizeGroup) return;
+
+    sizeGroup.innerHTML = `
+        <label>SIZE <span class="required">*</span></label>
+        <select id="size" required>
+            <option value="">선택하세요</option>
+            <optgroup label="스터드 규격">
+                ${sizeOptionsStuds.map(size => `<option value="${size}">${size}</option>`).join('')}
+            </optgroup>
+            <optgroup label="석고보드 규격">
+                ${sizeOptionsBoards.map(size => `<option value="${size}">${size}</option>`).join('')}
+            </optgroup>
+            <optgroup label="기타">
+                ${sizeOptionsEtc.map(size => `<option value="${size}">${size}</option>`).join('')}
+            </optgroup>
+            <option value="CUSTOM_INPUT" data-custom="true">✏️ 직접 입력하기</option>
+        </select>
+    `;
+
+    const sizeSelect = document.getElementById('size');
+    sizeSelect.addEventListener('change', function(e) {
+        if (e.target.value === 'CUSTOM_INPUT') {
+            sizeGroup.innerHTML = `
+                <label>SIZE <span class="required">*</span></label>
+                <div class="custom-input-wrapper">
+                    <input type="text" id="size" placeholder="직접 입력" value="" required>
+                    <button type="button" onclick="window.resetSizeToSelect()">
+                        <i class="fas fa-undo"></i> 목록
+                    </button>
+                </div>
+            `;
+            document.getElementById('size').focus();
+        }
+    });
+};
 
 // 기본 정보에서 세부 설정으로 진행
 function proceedToDetailInput(isEdit = false) {
@@ -750,8 +1179,7 @@ function openUnitPriceDetailModal(isEdit = false) {
     ], {
         disableBackgroundClick: true,
         disableEscapeKey: true,
-        width: '95%',
-        maxWidth: '1400px'
+        width: '70vw'
     });
     
     // 편집 모드일 때 고정 비율 복원
