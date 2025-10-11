@@ -44,22 +44,9 @@
     padding: 8px;
 }
 
-/* 본문 스타일 - 4줄 반복 패턴 */
-.order-form-table tbody tr:nth-child(4n+1) {
-    background: #f8f9fa;
-}
-
-.order-form-table tbody tr:nth-child(4n+2) {
-    background: #e3f2fd;
-}
-
-.order-form-table tbody tr:nth-child(4n+3) {
-    background: #fff3cd;
-}
-
-.order-form-table tbody tr:nth-child(4n) {
-    background: #d1ecf1;
-    font-weight: 600;
+/* 본문 스타일 - 기본 흰색 배경 (타입 헤더 행은 JS에서 인라인 스타일로 처리) */
+.order-form-table tbody tr {
+    background: white;
 }
 
 /* 입력 필드 */

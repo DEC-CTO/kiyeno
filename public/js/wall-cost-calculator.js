@@ -507,15 +507,18 @@ function renderCalculationResults() {
 }
 
 /**
- * 벽체별 상세 결과 렌더링
+ * 벽체별 상세 결과 렌더링 (타입별 정렬 적용)
  */
 function renderIndividualResults() {
     const container = document.querySelector('.wall-results-container');
     if (!container || calculationResults.length === 0) return;
-    
+
     container.innerHTML = '';
-    
-    calculationResults.forEach(result => {
+
+    // ✅ 타입별 정렬 적용
+    const sortedResults = sortCalculationResultsByType(calculationResults);
+
+    sortedResults.forEach(result => {
         const card = createWallResultCard(result);
         container.appendChild(card);
     });
@@ -764,11 +767,12 @@ function renderWallTypeChart() {
             };
         }
     });
-    
-    const labels = Object.keys(wallTypeData);
+
+    // ✅ 정렬 적용
+    const labels = sortWallTypeNames(Object.keys(wallTypeData));
     const materialData = labels.map(label => wallTypeData[label].materialCost);
     const laborData = labels.map(label => wallTypeData[label].laborCost);
-    
+
     wallTypeChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -888,8 +892,11 @@ function renderComparisonResults() {
         groupedData[wallName].totalCost += result.totalCost;  // 금액 합산
     });
 
-    // 2단계: 그룹화된 데이터로 테이블 행 생성
-    Object.entries(groupedData).forEach(([wallName, data]) => {
+    // 2단계: 그룹화된 데이터로 테이블 행 생성 (✅ 정렬 적용)
+    const sortedWallNames = sortWallTypeNames(Object.keys(groupedData));
+
+    sortedWallNames.forEach(wallName => {
+        const data = groupedData[wallName];
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${wallName}</td>
@@ -1509,8 +1516,59 @@ async function renderOrderFormTab() {
 /**
  * calculationResults를 타입별로 그룹핑
  */
+/**
+ * 벽체 타입 이름 정렬 함수
+ * W1, W2, W3, A1, A2 등을 올바르게 정렬
+ * @param {Array<string>} typeNames - 벽체 타입 이름 배열
+ * @returns {Array<string>} 정렬된 배열
+ */
+function sortWallTypeNames(typeNames) {
+    return typeNames.sort((a, b) => {
+        // 알파벳 부분 추출
+        const letterA = a.match(/^[A-Za-z]+/)?.[0] || '';
+        const letterB = b.match(/^[A-Za-z]+/)?.[0] || '';
+
+        // 숫자 부분 추출
+        const numberA = parseInt(a.match(/\d+/)?.[0] || '0');
+        const numberB = parseInt(b.match(/\d+/)?.[0] || '0');
+
+        // 알파벳 먼저 비교
+        if (letterA !== letterB) {
+            return letterA.localeCompare(letterB);
+        }
+
+        // 알파벳이 같으면 숫자 비교
+        return numberA - numberB;
+    });
+}
+
+/**
+ * 계산 결과를 타입별로 정렬
+ * @param {Array} results - 계산 결과 배열
+ * @returns {Array} 정렬된 결과 배열
+ */
+function sortCalculationResultsByType(results) {
+    return [...results].sort((a, b) => {
+        const typeA = a.wallType.wallType;
+        const typeB = b.wallType.wallType;
+
+        // 타입 이름 정렬 로직 재사용
+        const letterA = typeA.match(/^[A-Za-z]+/)?.[0] || '';
+        const letterB = typeB.match(/^[A-Za-z]+/)?.[0] || '';
+        const numberA = parseInt(typeA.match(/\d+/)?.[0] || '0');
+        const numberB = parseInt(typeB.match(/\d+/)?.[0] || '0');
+
+        if (letterA !== letterB) {
+            return letterA.localeCompare(letterB);
+        }
+        return numberA - numberB;
+    });
+}
+
 function groupResultsByType(results) {
     const grouped = {};
+
+    // 1. 타입별 그룹핑
     results.forEach(result => {
         const typeName = result.wallType.wallType;
         if (!grouped[typeName]) {
@@ -1518,7 +1576,19 @@ function groupResultsByType(results) {
         }
         grouped[typeName].push(result);
     });
-    return grouped;
+
+    // 2. ✅ 타입 이름 정렬
+    const sortedTypeNames = sortWallTypeNames(Object.keys(grouped));
+
+    // 3. ✅ 정렬된 순서로 새 객체 생성
+    const sortedGrouped = {};
+    sortedTypeNames.forEach(typeName => {
+        sortedGrouped[typeName] = grouped[typeName];
+    });
+
+    console.log('📊 벽체 타입 정렬:', Object.keys(sortedGrouped));
+
+    return sortedGrouped;
 }
 
 /**
@@ -1537,7 +1607,7 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
     const unitPrice = totalArea > 0 ? totalCost / totalArea : 0;
 
     return `
-        <tr>
+        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
             <td>1-${typeIndex}</td>
             <td>${typeName}</td>
             <td></td>
@@ -1551,8 +1621,8 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td></td>
             <td></td>
-            <td>M2</td>
-            <td>${totalArea.toFixed(2)}</td>
+            <td></td>
+            <td></td>
             <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
             <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
@@ -1572,7 +1642,363 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
 }
 
 /**
- * 레이어별 상세 행 생성
+ * 자재 타입 판별 헬퍼 함수들
+ */
+function isStud(name) {
+    return name && (name.includes('스터드') || name.toUpperCase().includes('STUD'));
+}
+
+function isRunner(name) {
+    return name && (name.includes('런너') || name.toUpperCase().includes('RUNNER'));
+}
+
+function isGypsumBoard(name) {
+    return name && (name.includes('석고보드') || name.toUpperCase().includes('GYPSUM'));
+}
+
+function isGlassWool(name) {
+    return name && (name.includes('그라스울') || name.toUpperCase().includes('GLASSWOOL'));
+}
+
+/**
+ * 컴포넌트 표시 여부 판별 함수
+ * 스터드, 런너, 석고보드, 그라스울만 발주서에 표시
+ * @param {string} componentName - 컴포넌트 이름
+ * @returns {boolean} - 표시 여부
+ */
+function shouldDisplayComponent(componentName) {
+    if (!componentName) return false;
+
+    // 표시할 자재: 스터드, 런너, 석고보드, 그라스울
+    return isStud(componentName) ||
+           isRunner(componentName) ||
+           isGypsumBoard(componentName) ||
+           isGlassWool(componentName);
+}
+
+/**
+ * SIZE 필드 파싱 함수
+ * @param {string} sizeString - SIZE 문자열 (예: "0.8T*60*45", "50형", "9.5T*1PLY")
+ * @returns {object} - { thickness, width, height }
+ */
+function parseSizeField(sizeString) {
+    if (!sizeString) {
+        return { thickness: null, width: null, height: null };
+    }
+
+    // "0.8T*60*45" 패턴 처리
+    const match = sizeString.match(/(\d+\.?\d*)T?\*?(\d+)?\*?(\d+)?/);
+    if (match) {
+        return {
+            thickness: parseFloat(match[1]) || null,
+            width: match[2] ? parseInt(match[2]) : null,
+            height: match[3] ? parseInt(match[3]) : null
+        };
+    }
+
+    // "50형" 패턴 처리
+    const formMatch = sizeString.match(/(\d+)형/);
+    if (formMatch) {
+        return {
+            thickness: null,
+            width: parseInt(formMatch[1]) || null,
+            height: null
+        };
+    }
+
+    return { thickness: null, width: null, height: null };
+}
+
+/**
+ * 간격 값 추출 함수
+ * @param {string} spacingString - 간격 문자열 (예: "@450", "450")
+ * @returns {number|null} - 간격 숫자값
+ */
+function extractSpacingValue(spacingString) {
+    if (!spacingString) return null;
+    const match = spacingString.match(/@?(\d+)/);
+    return match ? parseInt(match[1]) : null;
+}
+
+/**
+ * materialId로 자재 DB에서 자재 정보 조회
+ * @param {string} materialId - 자재 ID (예: ST001, RN001, GB001)
+ * @returns {object|null} - 자재 정보 또는 null
+ */
+async function findMaterialByIdInDB(materialId) {
+    try {
+        if (!materialId) return null;
+
+        console.log(`  🔍 자재 DB 조회 시작: ${materialId}`);
+
+        // priceDB에서 조회
+        if (window.priceDB) {
+            const materials = await window.priceDB.getAllMaterials();
+            const found = materials.find(m => m.id === materialId);
+
+            if (found) {
+                console.log(`  ✅ 자재 DB 조회 성공: ${materialId}`, {
+                    name: found.name,
+                    size: found.size,
+                    category: found.category
+                });
+                return found;
+            }
+        }
+
+        console.warn(`  ⚠️ 자재 DB 조회 실패: ${materialId}`);
+        return null;
+
+    } catch (error) {
+        console.error(`  ❌ 자재 DB 조회 오류: ${materialId}`, error);
+        return null;
+    }
+}
+
+/**
+ * 일위대가 전체 데이터 조회 함수
+ */
+async function findUnitPriceItemByIdOrName(materialNameOrId) {
+    try {
+        // unitPrice_ 접두사 제거
+        let searchName = materialNameOrId;
+        if (materialNameOrId.startsWith('unitPrice_')) {
+            searchName = materialNameOrId.replace('unitPrice_', '');
+        }
+
+        // 일위대가 DB에서 검색
+        if (window.unitPriceDB) {
+            const unitPriceItems = await window.unitPriceDB.getAllUnitPrices();
+
+            // ID로 직접 검색
+            const foundItem = unitPriceItems.find(item =>
+                item.id && item.id.trim() === searchName.trim()
+            );
+
+            if (foundItem) {
+                console.log(`✅ 일위대가 아이템 발견: ${foundItem.id}`);
+                return foundItem;  // 전체 데이터 반환
+            }
+        }
+
+        return null;
+    } catch (error) {
+        console.error('일위대가 조회 실패:', error);
+        return null;
+    }
+}
+
+/**
+ * 품명 및 규격 생성 함수
+ */
+function generateItemNameWithSpec(unitPriceItem, componentName) {
+    if (!unitPriceItem || !unitPriceItem.basic) {
+        return componentName;
+    }
+
+    const { basic, components } = unitPriceItem;
+
+    // 해당 구성품 찾기
+    const component = components && components.find(c =>
+        (c.name && componentName && (c.name.includes(componentName) || componentName.includes(c.name)))
+    );
+
+    // 1. 스터드 판별
+    if (isStud(componentName)) {
+        const size = basic.size || '';           // "50형" 또는 "0.8T*60*45"
+        const spacing = basic.spacing || '';     // "@450"
+        const quantity = component?.quantity || 0;
+
+        // "스터드 0.8T*60*45 @450 M2.33" 형식
+        return `${basic.itemName || componentName} ${size} ${spacing} M${quantity.toFixed(2)}`.trim();
+    }
+
+    // 2. 런너 판별
+    if (isRunner(componentName)) {
+        const spacing = basic.spacing || '';
+
+        // "런너 @450" 형식
+        return `${basic.itemName || componentName} ${spacing}`.trim();
+    }
+
+    // 3. 석고보드 판별
+    if (isGypsumBoard(componentName)) {
+        const size = basic.size || '';           // "9.5T*1PLY"
+
+        // "일반석고보드 9.5T*1PLY" 형식 (M 표시 없음)
+        return `${basic.itemName || componentName} ${size}`.trim();
+    }
+
+    // 4. 기타 (기본값)
+    return basic.itemName || componentName;
+}
+
+/**
+ * 컴포넌트별 행 생성 함수 (async로 변경)
+ * @param {object} component - 컴포넌트 객체 (스터드, 런너, 석고보드 등)
+ * @param {object} unitPriceItem - 전체 일위대가 아이템
+ * @param {object} result - 계산 결과 객체 (area, wallType 포함)
+ * @param {number} rowNumber - 행 번호
+ * @returns {Promise<string>} HTML 행 문자열
+ */
+async function generateComponentRow(component, unitPriceItem, result, rowNumber) {
+    const componentName = component.name || '';
+
+    // ✅ materialId로 자재 DB에서 자재 정보 조회
+    const materialData = await findMaterialByIdInDB(component.materialId);
+    const sizeFromDB = materialData?.size || '';
+
+    // A. 품명 및 규격 생성
+    let displayName = '';
+
+    if (isStud(componentName)) {
+        // ✅ component.name 사용 (예: "메탈 스터드 65형 ㉿")
+        displayName = component.name || componentName;
+
+    } else if (isRunner(componentName)) {
+        // ✅ component.name 사용 (예: "메탈 런너 50형 ㉿")
+        displayName = component.name || componentName;
+
+    } else if (isGypsumBoard(componentName)) {
+        // ✅ component.name + component.spec 사용 (예: "일반석고보드 12.5T*1PLY")
+        const name = component.name || componentName;
+        const spec = component.spec || '';
+        displayName = `${name} ${spec}`.trim();
+
+    } else if (isGlassWool(componentName)) {
+        // "그라스울 24K*50T"
+        const size = sizeFromDB || component.size || '';
+        displayName = `${componentName} ${size}`.trim();
+
+    } else {
+        displayName = componentName;
+    }
+
+    // B. WALL 및 개수 컬럼 채우기
+    const wallTypeCode = result.wallType?.wallType || '';
+    const sizeData = parseSizeField(sizeFromDB || component.size);
+    const spacingValue = extractSpacingValue(unitPriceItem.basic?.spacing);
+
+    let wallThk = '';
+    let atValue = '';
+    let thicknessValue = '';
+    let widthValue = '';
+    let heightValue = '';
+    let mValue = '';
+
+    if (isStud(componentName) || isRunner(componentName)) {
+        // 스터드/런너: THK 비움, 나머지 채움
+        atValue = spacingValue || '';
+        thicknessValue = sizeData.thickness || '';
+        widthValue = sizeData.width || '';
+        heightValue = sizeData.height || '';
+        mValue = component.quantity ? component.quantity.toFixed(2) : '';
+
+        console.log(`  📏 스터드/런너 (${componentName}):`, {
+            Type: wallTypeCode,
+            '@': atValue,
+            '두께': thicknessValue,
+            '넓이': widthValue,
+            '높이': heightValue,
+            'M': mValue
+        });
+
+    } else if (isGypsumBoard(componentName)) {
+        // 석고보드: THK만 채움 (✅ materialData.t 필드 사용)
+        wallThk = materialData?.t || '';
+
+        console.log(`  📏 석고보드 (${componentName}):`, {
+            THK: wallThk,
+            Type: wallTypeCode
+        });
+    }
+
+    // C. 환산 컬럼: 석고보드만 1장->m2 계산
+    let conversionM2 = '';
+    let sheetQuantity = '';
+
+    if (isGypsumBoard(componentName) && materialData) {
+        // ✅ (W/1000) * (H/1000) 소수 3째자리 반올림
+        const w = parseFloat(materialData.w) || 0;
+        const h = parseFloat(materialData.h) || 0;
+        if (w > 0 && h > 0) {
+            conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
+        }
+    }
+
+    // D. 단가 및 금액 계산
+    const area = result.area || 0;
+    const componentQuantity = parseFloat(component.quantity) || 0;
+    const quantity = area * componentQuantity;  // ✅ 전체 합산 수량 = 면적 × 컴포넌트 수량
+
+    // 석고보드 장 수량 계산: 수량 ÷ 1장당m2 (0단위 반올림)
+    if (isGypsumBoard(componentName) && conversionM2) {
+        const m2PerSheet = parseFloat(conversionM2);
+        if (m2PerSheet > 0) {
+            sheetQuantity = Math.round(quantity / m2PerSheet);  // ✅ 0단위 반올림
+        }
+    }
+
+    // 재료비
+    const materialUnitPrice = parseFloat(component.materialPrice) || 0;
+    const materialAmount = materialUnitPrice * quantity * componentQuantity;
+
+    // 노무비 - laborAmount (금액) ÷ componentQuantity = 단가
+    const laborAmount = parseFloat(component.laborAmount) || 0;
+    const laborUnitPrice = componentQuantity > 0 ? laborAmount / componentQuantity : 0;
+    const laborTotalAmount = laborAmount * quantity;
+
+    // 합계
+    const totalUnitPrice = materialUnitPrice + laborUnitPrice;
+    const totalAmount = materialAmount + laborTotalAmount;
+
+    console.log(`  💰 단가 계산 (${componentName}):`, {
+        '재료비단가': materialUnitPrice,
+        '재료비금액': materialAmount,
+        '노무비단가': laborUnitPrice,
+        '노무비금액': laborTotalAmount,
+        '합계단가': totalUnitPrice,
+        '합계금액': totalAmount
+    });
+
+    // E. HTML 생성
+    return `
+        <tr style="background: white;">
+            <td>${rowNumber}</td>
+            <td></td>
+            <td>${displayName}</td>
+            <td>${wallThk}</td>
+            <td>${wallTypeCode}</td>
+            <td>${atValue}</td>
+            <td>${thicknessValue}</td>
+            <td>${widthValue}</td>
+            <td>${heightValue}</td>
+            <td>${mValue}</td>
+            <td><input type="text" placeholder="제공자" style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 4px;"></td>
+            <td>${conversionM2}</td>
+            <td>${sheetQuantity}</td>
+            <td>M2</td>
+            <td>${quantity.toFixed(2)}</td>
+            <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(laborTotalAmount).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalAmount).toLocaleString()}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 레이어별 상세 행 생성 (컴포넌트별로 분리)
  */
 async function generateLayerDetailRows(result) {
     const layerOrder = [
@@ -1593,65 +2019,82 @@ async function generateLayerDetailRows(result) {
             continue;
         }
 
-        // DB에서 자재 정보 가져오기
-        const materialInfo = await findMaterialInUnitPriceDB(layer.materialName);
+        // ✅ 일위대가 전체 데이터 조회
+        const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
 
-        let displayName;
-        if (materialInfo && materialInfo.name) {
-            // DB에서 찾음: 정확한 품명 + 규격
-            displayName = materialInfo.spec
-                ? `${materialInfo.name} ${materialInfo.spec}`
-                : materialInfo.name;
+        if (unitPriceItem && unitPriceItem.components && unitPriceItem.components.length > 0) {
+            // ✅ 일위대가 아이템 발견: 각 컴포넌트마다 별도 행 생성
+            console.log(`📋 일위대가 아이템 사용: ${unitPriceItem.id} (컴포넌트 ${unitPriceItem.components.length}개)`);
+
+            for (const component of unitPriceItem.components) {
+                // 스터드, 런너, 석고보드, 그라스울만 표시 (피스, 타정총알, 용접봉 제외)
+                if (!shouldDisplayComponent(component.name)) {
+                    console.log(`  ⏭️ 컴포넌트 건너뛰기: ${component.name}`);
+                    continue;
+                }
+
+                html += await generateComponentRow(component, unitPriceItem, result, layerNumber);
+                layerNumber++;
+            }
+
         } else {
-            // DB에서 못 찾음: 원본 ID 표시
-            displayName = layer.materialName;
-            console.warn(`⚠️ DB에서 자재를 찾지 못함: ${layer.materialName}`);
+            // ❌ 일위대가 없음: 기존 자재 정보로 단일 행 생성 (하위 호환성)
+            console.log(`⚠️ 일위대가 없음 - 기존 자재 정보 사용: ${layer.materialName}`);
+
+            const materialInfo = await findMaterialInUnitPriceDB(layer.materialName);
+            const displayName = materialInfo?.name
+                ? (materialInfo.spec ? `${materialInfo.name} ${materialInfo.spec}` : materialInfo.name)
+                : layer.materialName;
+
+            const quantity = result.area || 0;
+            const materialUnitPrice = layer.materialPrice || 0;
+            const laborUnitPrice = layer.laborPrice || 0;
+            const totalUnitPrice = materialUnitPrice + laborUnitPrice;
+
+            const materialAmount = materialUnitPrice * quantity;
+            const laborAmount = laborUnitPrice * quantity;
+            const totalAmount = materialAmount + laborAmount;
+
+            // 벽체타입
+            const wallTypeCode = result.wallType?.wallType || '';
+
+            // 기본 행 생성 (WALL/개수 컬럼 비워둠)
+            html += `
+                <tr>
+                    <td>${layerNumber}</td>
+                    <td></td>
+                    <td>${displayName}</td>
+                    <td></td>
+                    <td>${wallTypeCode}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>M2</td>
+                    <td>${quantity.toFixed(2)}</td>
+                    <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
+                    <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
+                    <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
+                    <td class="number-cell">${Math.round(laborAmount).toLocaleString()}</td>
+                    <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
+                    <td class="number-cell">${Math.round(totalAmount).toLocaleString()}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `;
+
+            layerNumber++;
         }
-
-        const materialPrice = layer.materialPrice || 0;
-        const laborPrice = layer.laborPrice || 0;
-        const unitPrice = materialPrice + laborPrice;
-        const area = result.area || 0;
-
-        const materialAmount = materialPrice * area;
-        const laborAmount = laborPrice * area;
-        const totalAmount = materialAmount + laborAmount;
-
-        html += `
-            <tr>
-                <td>${layerNumber}</td>
-                <td></td>
-                <td>${displayName}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>${layer.unit || 'M2'}</td>
-                <td>${area.toFixed(2)}</td>
-                <td class="number-cell">${Math.round(materialPrice).toLocaleString()}</td>
-                <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
-                <td class="number-cell">${Math.round(laborPrice).toLocaleString()}</td>
-                <td class="number-cell">${Math.round(laborAmount).toLocaleString()}</td>
-                <td class="number-cell">${Math.round(unitPrice).toLocaleString()}</td>
-                <td class="number-cell">${Math.round(totalAmount).toLocaleString()}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-        `;
-
-        layerNumber++;
     }
 
     return html;
