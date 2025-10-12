@@ -1474,7 +1474,7 @@ async function renderOrderFormTab() {
                         <tr>
                             <td>1</td>
                             <td>
-                                <input type="text" placeholder="현장명을 입력하세요" style="width: 100%; border: 1px solid #ddd; padding: 6px; font-size: 12px;">
+                                <input type="text" id="orderFormSiteName" placeholder="현장명을 입력하세요" style="width: 100%; border: 1px solid #ddd; padding: 6px; font-size: 12px;">
                             </td>
                             <td></td>
                             <td></td>
@@ -1968,9 +1968,8 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
         });
 
     } else if (isRunner(componentName)) {
-        // 런너: M 컬럼에 (component.quantity × 면적합계) 표시, 0단위 반올림, 천단위 구분
-        const runnerType = unitPriceItem.basic?.runnerType || '일반';
-        atValue = runnerType;
+        // 런너: @ 컬럼 비움, M 컬럼에 (component.quantity × 면적합계) 표시
+        atValue = '';  // ✅ 런너는 @ 값 비움
         thicknessValue = sizeData.thickness || '';
         widthValue = sizeData.width || '';
         heightValue = sizeData.height || '';
@@ -1980,7 +1979,7 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
 
         console.log(`  📏 런너 (${componentName}):`, {
             Type: wallTypeCode,
-            '@': atValue,
+            '@': '(비움)',
             '두께': thicknessValue,
             '넓이': widthValue,
             '높이': heightValue,
@@ -2062,7 +2061,7 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
             <td>${widthValue}</td>
             <td>${heightValue}</td>
             <td>${mValue}</td>
-            <td><input type="text" placeholder="제공자" style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 4px;"></td>
+            <td><input type="text" class="supplier-input" data-row="${rowNumber}" placeholder="제공자" style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 4px;"></td>
             <td>${conversionM2}</td>
             <td>${sheetQuantity ? parseInt(sheetQuantity).toLocaleString() : ''}</td>
             <td>M2</td>
@@ -3430,52 +3429,59 @@ function createOrderFormExcelHeader(worksheet) {
         { key: 'note2', width: 10 }       // AC: 비고
     ];
 
-    // Row 1: 메인 헤더
-    const row1 = worksheet.getRow(1);
-    row1.values = ['NO', '구분', '품명 및 규격', 'WALL', '', '개수', '', '', '', '', '환산', '', '', '단위', '수량', '계약도급', '', '', '', '', '', '비고', '발주단가', '', '', '', '', '', '비고'];
+    // ✅ A1:C3 영역에 "발주서" 제목 추가
+    worksheet.mergeCells('A1:C3');
+    const titleCell = worksheet.getCell('A1');
+    titleCell.value = '발주서';
+    titleCell.font = { bold: true, size: 22 };
+    titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // Row 2: 서브 헤더 (A, B, C는 빈 값 - Row 1과 병합됨)
-    const row2 = worksheet.getRow(2);
-    row2.values = ['', '', '', 'THK', 'Type', '@', '두께', '넓이', '높이', 'M', '제공자', '1장->m2', '장', '', '', '자재비', '', '노무비', '', '합계', '', '', '자재비', '', '노무비', '', '합계', '', ''];
+    // ✅ Row 4: 메인 헤더 (1~3행은 빈칸)
+    const row4 = worksheet.getRow(4);
+    row4.values = ['NO', '구분', '품명 및 규격', 'WALL', '', '개수', '', '', '', '', '환산', '', '', '단위', '수량', '계약도급', '', '', '', '', '', '비고', '발주단가', '', '', '', '', '', '비고'];
 
-    // Row 3: 세부 헤더 (A, B, C는 빈 값 - Row 1과 병합됨)
-    const row3 = worksheet.getRow(3);
-    row3.values = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '', '단가', '금액', '단가', '금액', '단가', '금액', ''];
+    // ✅ Row 5: 서브 헤더 (A, B, C는 빈 값 - Row 4와 병합됨)
+    const row5 = worksheet.getRow(5);
+    row5.values = ['', '', '', 'THK', 'Type', '@', '두께', '넓이', '높이', 'M', '제공자', '1장->m2', '장', '', '', '자재비', '', '노무비', '', '합계', '', '', '자재비', '', '노무비', '', '합계', '', ''];
 
-    // 병합 (병합은 데이터 입력 후에 수행)
-    worksheet.mergeCells('A1:A3'); // NO (1,2,3 row 병합)
-    worksheet.mergeCells('B1:B3'); // 구분 (1,2,3 row 병합)
-    worksheet.mergeCells('C1:C3'); // 품명 및 규격 (1,2,3 row 병합)
-    worksheet.mergeCells('D1:E1'); // WALL (2개)
-    worksheet.mergeCells('F1:J1'); // 개수 (5개: @, 두께, 넓이, 높이, M)
-    worksheet.mergeCells('K1:M1'); // 환산 (3개: 제공자, 1장->m2, 장)
-    worksheet.mergeCells('N1:N3'); // 단위 (1,2,3 row 병합)
-    worksheet.mergeCells('O1:O3'); // 수량 (1,2,3 row 병합)
-    worksheet.mergeCells('P1:U1'); // 계약도급 (6개)
-    worksheet.mergeCells('V1:V3'); // 비고 (1,2,3 row 병합)
-    worksheet.mergeCells('W1:AB1'); // 발주단가 (6개)
-    worksheet.mergeCells('AC1:AC3'); // 비고 (1,2,3 row 병합)
+    // ✅ Row 6: 세부 헤더 (A, B, C는 빈 값 - Row 4와 병합됨)
+    const row6 = worksheet.getRow(6);
+    row6.values = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '', '단가', '금액', '단가', '금액', '단가', '금액', ''];
 
-    // Row 2와 Row 3 병합
-    worksheet.mergeCells('D2:D3'); // THK
-    worksheet.mergeCells('E2:E3'); // Type
-    worksheet.mergeCells('F2:F3'); // @
-    worksheet.mergeCells('G2:G3'); // 두께
-    worksheet.mergeCells('H2:H3'); // 넓이
-    worksheet.mergeCells('I2:I3'); // 높이
-    worksheet.mergeCells('J2:J3'); // M
-    worksheet.mergeCells('K2:K3'); // 제공자
-    worksheet.mergeCells('L2:L3'); // 1장->m2
-    worksheet.mergeCells('M2:M3'); // 장
-    worksheet.mergeCells('P2:Q2'); // 계약도급 - 자재비
-    worksheet.mergeCells('R2:S2'); // 계약도급 - 노무비
-    worksheet.mergeCells('T2:U2'); // 계약도급 - 합계
-    worksheet.mergeCells('W2:X2'); // 발주단가 - 자재비
-    worksheet.mergeCells('Y2:Z2'); // 발주단가 - 노무비
-    worksheet.mergeCells('AA2:AB2'); // 발주단가 - 합계
+    // ✅ 병합 (4~6행으로 변경)
+    worksheet.mergeCells('A4:A6'); // NO (4,5,6 row 병합)
+    worksheet.mergeCells('B4:B6'); // 구분 (4,5,6 row 병합)
+    worksheet.mergeCells('C4:C6'); // 품명 및 규격 (4,5,6 row 병합)
+    worksheet.mergeCells('D4:E4'); // WALL (2개)
+    worksheet.mergeCells('F4:J4'); // 개수 (5개: @, 두께, 넓이, 높이, M)
+    worksheet.mergeCells('K4:M4'); // 환산 (3개: 제공자, 1장->m2, 장)
+    worksheet.mergeCells('N4:N6'); // 단위 (4,5,6 row 병합)
+    worksheet.mergeCells('O4:O6'); // 수량 (4,5,6 row 병합)
+    worksheet.mergeCells('P4:U4'); // 계약도급 (6개)
+    worksheet.mergeCells('V4:V6'); // 비고 (4,5,6 row 병합)
+    worksheet.mergeCells('W4:AB4'); // 발주단가 (6개)
+    worksheet.mergeCells('AC4:AC6'); // 비고 (4,5,6 row 병합)
 
-    // 헤더 스타일 적용 (폰트 크기 12)
-    [row1, row2, row3].forEach(row => {
+    // Row 5와 Row 6 병합
+    worksheet.mergeCells('D5:D6'); // THK
+    worksheet.mergeCells('E5:E6'); // Type
+    worksheet.mergeCells('F5:F6'); // @
+    worksheet.mergeCells('G5:G6'); // 두께
+    worksheet.mergeCells('H5:H6'); // 넓이
+    worksheet.mergeCells('I5:I6'); // 높이
+    worksheet.mergeCells('J5:J6'); // M
+    worksheet.mergeCells('K5:K6'); // 제공자
+    worksheet.mergeCells('L5:L6'); // 1장->m2
+    worksheet.mergeCells('M5:M6'); // 장
+    worksheet.mergeCells('P5:Q5'); // 계약도급 - 자재비
+    worksheet.mergeCells('R5:S5'); // 계약도급 - 노무비
+    worksheet.mergeCells('T5:U5'); // 계약도급 - 합계
+    worksheet.mergeCells('W5:X5'); // 발주단가 - 자재비
+    worksheet.mergeCells('Y5:Z5'); // 발주단가 - 노무비
+    worksheet.mergeCells('AA5:AB5'); // 발주단가 - 합계
+
+    // ✅ 헤더 스타일 적용 (폰트 크기 12) - Row 4, 5, 6
+    [row4, row5, row6].forEach(row => {
         row.height = 20;
         row.eachCell({ includeEmpty: true }, (cell) => {
             cell.font = { bold: true, size: 12 };
@@ -3499,11 +3505,15 @@ function createOrderFormExcelHeader(worksheet) {
  * 발주서 Excel 데이터 행 추가
  */
 async function addOrderFormDataToExcel(worksheet) {
-    let currentRow = 4; // 헤더 이후 시작
+    let currentRow = 7; // ✅ 헤더(4~6행) 이후 7행부터 시작
+
+    // ✅ 현장명 입력값 가져오기
+    const siteNameInput = document.getElementById('orderFormSiteName');
+    const siteName = siteNameInput ? siteNameInput.value : '현장명을 입력하세요';
 
     // 현장명 입력 행 (29개 컬럼)
     const siteRow = worksheet.getRow(currentRow);
-    siteRow.values = ['1', '현장명을 입력하세요', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+    siteRow.values = ['1', siteName, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
 
     // 현장명 행 스타일 적용
     siteRow.eachCell({ includeEmpty: true }, (cell) => {
@@ -3576,24 +3586,45 @@ async function addOrderFormDataToExcel(worksheet) {
                 };
 
                 // 정렬
-                if (colNumber === 1 || colNumber === 2 || colNumber === 3) {
+                if (colNumber === 1) {
+                    // NO: 중앙 정렬
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                } else if (colNumber === 2 || colNumber === 3) {
+                    // 구분, 품명 및 규격: 왼쪽 정렬
                     cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                } else if ((colNumber >= 16 && colNumber <= 21) ||
+                           (colNumber >= 23 && colNumber <= 28)) {
+                    // ✅ 단가/금액 컬럼 (P~U, W~AB): 오른쪽 정렬
+                    // P(16): 자재비단가, Q(17): 자재비금액
+                    // R(18): 노무비단가, S(19): 노무비금액
+                    // T(20): 합계단가, U(21): 합계금액
+                    // W(23): 발주단가 자재비단가, X(24): 발주단가 자재비금액
+                    // Y(25): 발주단가 노무비단가, Z(26): 발주단가 노무비금액
+                    // AA(27): 발주단가 합계단가, AB(28): 발주단가 합계금액
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
                 } else {
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
                 }
 
                 // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위
-                // G(7), H(8), I(9), J(10): 두께, 넓이, 높이, M
-                // M(13): 장 수량
-                // O(15): 수량
-                // P~U(16~21): 계약도급
-                // W~AB(23~28): 발주단가
-                if ((colNumber >= 7 && colNumber <= 10) ||
-                    colNumber === 13 ||
-                    colNumber === 15 ||
-                    (colNumber >= 16 && colNumber <= 21) ||
-                    (colNumber >= 23 && colNumber <= 28)) {
-                    if (cell.value && !isNaN(cell.value)) {
+                // G(7): 두께 - 소수점 1자리
+                // H(8), I(9), J(10): 넓이, 높이, M - 정수
+                // M(13): 장 수량 - 정수
+                // O(15): 수량 - 소수점 2자리
+                // P~U(16~21): 계약도급 - 정수
+                // W~AB(23~28): 발주단가 - 정수
+                if (cell.value && !isNaN(cell.value)) {
+                    if (colNumber === 7) {
+                        // 두께: 소수점 1자리 표시
+                        cell.numFmt = '0.0';
+                    } else if (colNumber === 15) {
+                        // 수량: 소수점 2자리 표시
+                        cell.numFmt = '#,##0.00';
+                    } else if ((colNumber >= 8 && colNumber <= 10) ||
+                               colNumber === 13 ||
+                               (colNumber >= 16 && colNumber <= 21) ||
+                               (colNumber >= 23 && colNumber <= 28)) {
+                        // 나머지: 정수 천단위 구분
                         cell.numFmt = '#,##0';
                     }
                 }
@@ -3605,7 +3636,7 @@ async function addOrderFormDataToExcel(worksheet) {
         typeIndex++;
     }
 
-    console.log(`✅ 총 ${currentRow - 4}개 데이터 행 추가 완료`);
+    console.log(`✅ 총 ${currentRow - 7}개 데이터 행 추가 완료`);
 }
 
 /**
@@ -3686,7 +3717,7 @@ async function generateTypeSummaryRowData(typeName, results, typeIndex) {
         '',                         // L: 1장->m2 (환산 그룹)
         '',                         // M: 장 (환산 그룹)
         'M2',                       // N: 단위
-        totalArea.toFixed(2),       // O: 수량
+        '',                         // O: 수량 (타입 요약 행은 빈칸)
         Math.round(totalMaterialUnitPrice), // P: 계약도급 자재비 단가
         Math.round(totalMaterialCost),      // Q: 계약도급 자재비 금액
         Math.round(totalLaborUnitPrice),    // R: 계약도급 노무비 단가
@@ -3763,9 +3794,15 @@ async function generateComponentRowData(component, unitPriceItem, result, layerN
     let width = '';
     let height = '';
     let length = '';
-    let supplier = '';
     let areaPerSheet = '';
     let sheets = '';
+
+    // ✅ 제공자 입력값 가져오기 (HTML에서)
+    let supplier = '';
+    const supplierInput = document.querySelector(`.supplier-input[data-row="${layerNumber}"]`);
+    if (supplierInput) {
+        supplier = supplierInput.value || '';
+    }
 
     const sizeData = parseSizeField(materialData?.size);
 
@@ -3782,8 +3819,8 @@ async function generateComponentRowData(component, unitPriceItem, result, layerN
         }
 
     } else if (isRunner(componentName)) {
-        // 런너: @ 컬럼에 "일반" 또는 "더블", M 컬럼에 (소요량 × 면적합계), 0단위 반올림
-        spacing = basic.runnerType === '더블' ? '더블' : '일반';
+        // 런너: @ 컬럼 비움, M 컬럼에 (소요량 × 면적합계), 0단위 반올림
+        spacing = '';  // ✅ 런너는 @ 값 비움
         const quantity = component?.quantity || 0;
         if (materialData) {
             thick = materialData.t || sizeData.thickness || '';
@@ -3818,11 +3855,10 @@ async function generateComponentRowData(component, unitPriceItem, result, layerN
         }
 
     } else if (isGlassWool(componentName)) {
-        if (materialData) {
-            thick = materialData.t || sizeData.thickness || '';
-            width = materialData.w || sizeData.width || '';
-            height = materialData.h || sizeData.height || '';
-        }
+        // 그라스울: 두께, 넓이, 높이 비움 (석고보드와 동일)
+        thick = '';
+        width = '';
+        height = '';
     }
 
     // 수량 및 단가
