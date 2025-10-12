@@ -144,8 +144,8 @@
 
 /* Row 1: 개수 (5=@~M) - colspan=5 */
 .order-form-table thead tr:first-child th:nth-child(5) {
-    width: 200px; /* 40px × 5 */
-    min-width: 200px;
+    width: 240px; /* 40px × 4 + 80px(M) */
+    min-width: 240px;
 }
 
 /* Row 2: THK(1), Type(2) - rowspan=2 */
@@ -155,14 +155,19 @@
     min-width: 40px;
 }
 
-/* Row 2: @(3), 두께(4), 넓이(5), 높이(6), M(7) - rowspan=2 */
+/* Row 2: @(3), 두께(4), 넓이(5), 높이(6) - rowspan=2 */
 .order-form-table thead tr:nth-child(2) th:nth-child(3),
 .order-form-table thead tr:nth-child(2) th:nth-child(4),
 .order-form-table thead tr:nth-child(2) th:nth-child(5),
-.order-form-table thead tr:nth-child(2) th:nth-child(6),
-.order-form-table thead tr:nth-child(2) th:nth-child(7) {
+.order-form-table thead tr:nth-child(2) th:nth-child(6) {
     width: 40px;
     min-width: 40px;
+}
+
+/* Row 2: M(7) - rowspan=2, 80px */
+.order-form-table thead tr:nth-child(2) th:nth-child(7) {
+    width: 80px;
+    min-width: 80px;
 }
 
 /* tbody 데이터 행 너비 (29개 컬럼) */
@@ -188,14 +193,19 @@
     min-width: 40px;
 }
 
-/* 개수: @(6), 두께(7), 넓이(8), 높이(9), M(10) */
+/* 개수: @(6), 두께(7), 넓이(8), 높이(9) */
 .order-form-table tbody td:nth-child(6),
 .order-form-table tbody td:nth-child(7),
 .order-form-table tbody td:nth-child(8),
-.order-form-table tbody td:nth-child(9),
-.order-form-table tbody td:nth-child(10) {
+.order-form-table tbody td:nth-child(9) {
     width: 40px;
     min-width: 40px;
+}
+
+/* 개수: M(10) - 80px */
+.order-form-table tbody td:nth-child(10) {
+    width: 80px;
+    min-width: 80px;
 }
 
 /* Row 2: 제공자(8), 1장->m2(9), 장(10) - rowspan=2 */

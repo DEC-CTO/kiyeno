@@ -1948,26 +1948,48 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
     let heightValue = '';
     let mValue = '';
 
-    if (isStud(componentName) || isRunner(componentName)) {
-        // 스터드/런너: THK 비움, 나머지 채움
+    if (isStud(componentName)) {
+        // 스터드: M 컬럼에 (component.quantity × 면적합계) 표시, 0단위 반올림, 천단위 구분
         atValue = spacingValue || '';
         thicknessValue = sizeData.thickness || '';
         widthValue = sizeData.width || '';
         heightValue = sizeData.height || '';
-        mValue = component.quantity ? component.quantity.toFixed(2) : '';
+        const componentQty = parseFloat(component.quantity) || 0;
+        const mValueRaw = Math.round(componentQty * totalArea);
+        mValue = mValueRaw.toLocaleString();
 
-        console.log(`  📏 스터드/런너 (${componentName}):`, {
+        console.log(`  📏 스터드 (${componentName}):`, {
             Type: wallTypeCode,
             '@': atValue,
             '두께': thicknessValue,
             '넓이': widthValue,
             '높이': heightValue,
-            'M': mValue
+            'M': `${mValue} (${componentQty} × ${totalArea})`
+        });
+
+    } else if (isRunner(componentName)) {
+        // 런너: M 컬럼에 (component.quantity × 면적합계) 표시, 0단위 반올림, 천단위 구분
+        const runnerType = unitPriceItem.basic?.runnerType || '일반';
+        atValue = runnerType;
+        thicknessValue = sizeData.thickness || '';
+        widthValue = sizeData.width || '';
+        heightValue = sizeData.height || '';
+        const componentQty = parseFloat(component.quantity) || 0;
+        const mValueRaw = Math.round(componentQty * totalArea);
+        mValue = mValueRaw.toLocaleString();
+
+        console.log(`  📏 런너 (${componentName}):`, {
+            Type: wallTypeCode,
+            '@': atValue,
+            '두께': thicknessValue,
+            '넓이': widthValue,
+            '높이': heightValue,
+            'M': `${mValue} (${componentQty} × ${totalArea})`
         });
 
     } else if (isGypsumBoard(componentName)) {
         // 석고보드: THK만 채움 (✅ materialData.t 필드 사용)
-        wallThk = materialData?.t || '';
+        wallThk = materialData?.t || sizeData.thickness || '';
 
         console.log(`  📏 석고보드 (${componentName}):`, {
             THK: wallThk,
@@ -1980,11 +2002,12 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
     let sheetQuantity = '';
 
     if (isGypsumBoard(componentName) && materialData) {
-        // ✅ (W/1000) * (H/1000) 소수 3째자리 반올림
+        // ✅ (W/1000) * (H/1000) 소수 셋째자리 반올림
         const w = parseFloat(materialData.w) || 0;
         const h = parseFloat(materialData.h) || 0;
         if (w > 0 && h > 0) {
             conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
+            console.log(`  📐 석고보드 1장당 면적: ${conversionM2} m² (W:${w}, H:${h})`);
         }
     }
 
@@ -2009,6 +2032,7 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
         if (m2PerSheet > 0) {
             const actualQuantity = area * componentQuantity;
             sheetQuantity = Math.round(actualQuantity / m2PerSheet);  // ✅ 0단위 반올림
+            console.log(`  📦 석고보드 장 수량: ${sheetQuantity}장 (면적:${area} × 소요량:${componentQuantity} ÷ 1장당:${m2PerSheet})`);
         }
     }
 
@@ -3303,13 +3327,597 @@ window.closeExportDropdown = function() {
 };
 
 /**
- * 발주서 Excel 내보내기 (향후 구현)
+ * 발주서 Excel 내보내기
  */
 window.exportOrderForm = function() {
     closeExportDropdown();
-    alert('발주서 Excel 내보내기 기능은 준비 중입니다.');
-    // TODO: 발주서 Excel 내보내기 구현
+    exportOrderFormToExcel();
 };
+
+/**
+ * 발주서 Excel 파일 생성 및 다운로드
+ */
+async function exportOrderFormToExcel() {
+    try {
+        console.log('📋 발주서 Excel 내보내기 시작');
+
+        if (calculationResults.length === 0) {
+            alert('벽체 계산 데이터가 없습니다. 먼저 벽체를 선택하고 계산하기를 실행하세요.');
+            return;
+        }
+
+        // 워크북 생성
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('발주서', {
+            pageSetup: {
+                paperSize: 9, // A4
+                orientation: 'landscape',
+                fitToPage: true,
+                fitToWidth: 1,
+                fitToHeight: 0
+            }
+        });
+
+        // 헤더 생성 (3행 병합 구조)
+        createOrderFormExcelHeader(worksheet);
+
+        // 데이터 행 생성 (스타일 포함)
+        await addOrderFormDataToExcel(worksheet);
+
+        // 파일 다운로드
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, '');
+        const filename = `발주서_${dateStr}_${timeStr}.xlsx`;
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        console.log('✅ 발주서 Excel 내보내기 완료:', filename);
+
+    } catch (error) {
+        console.error('❌ 발주서 Excel 내보내기 오류:', error);
+        alert('발주서 Excel 내보내기 중 오류가 발생했습니다.\n' + error.message);
+    }
+}
+
+/**
+ * 발주서 Excel 헤더 생성 (3행 병합 구조)
+ * HTML 구조와 정확히 일치: 29개 컬럼, 개수 5개(F~J), 환산 3개(K~M)
+ */
+function createOrderFormExcelHeader(worksheet) {
+    // 29개 컬럼 설정
+    worksheet.columns = [
+        { key: 'no', width: 6 },           // A: NO
+        { key: 'category', width: 12 },   // B: 구분
+        { key: 'name', width: 25 },       // C: 품명 및 규격
+        { key: 'thk', width: 8 },         // D: WALL - THK
+        { key: 'type', width: 10 },       // E: WALL - Type
+        { key: 'spacing', width: 8 },     // F: 개수 - @
+        { key: 'thick', width: 8 },       // G: 개수 - 두께
+        { key: 'width', width: 8 },       // H: 개수 - 넓이
+        { key: 'height', width: 8 },      // I: 개수 - 높이
+        { key: 'length', width: 8 },      // J: 개수 - M
+        { key: 'supplier', width: 12 },   // K: 환산 - 제공자
+        { key: 'area', width: 10 },       // L: 환산 - 1장->m2
+        { key: 'sheets', width: 8 },      // M: 환산 - 장
+        { key: 'unit', width: 8 },        // N: 단위
+        { key: 'amount', width: 10 },     // O: 수량
+        { key: 'matPrice', width: 10 },   // P: 계약도급 - 자재비 단가
+        { key: 'matCost', width: 12 },    // Q: 계약도급 - 자재비 금액
+        { key: 'labPrice', width: 10 },   // R: 계약도급 - 노무비 단가
+        { key: 'labCost', width: 12 },    // S: 계약도급 - 노무비 금액
+        { key: 'totalPrice', width: 10 }, // T: 계약도급 - 합계 단가
+        { key: 'totalCost', width: 12 },  // U: 계약도급 - 합계 금액
+        { key: 'note1', width: 10 },      // V: 비고
+        { key: 'ordMatPrice', width: 10 },// W: 발주단가 - 자재비 단가
+        { key: 'ordMatCost', width: 12 }, // X: 발주단가 - 자재비 금액
+        { key: 'ordLabPrice', width: 10 },// Y: 발주단가 - 노무비 단가
+        { key: 'ordLabCost', width: 12 }, // Z: 발주단가 - 노무비 금액
+        { key: 'ordTotalPrice', width: 10 }, // AA: 발주단가 - 합계 단가
+        { key: 'ordTotalCost', width: 12 },  // AB: 발주단가 - 합계 금액
+        { key: 'note2', width: 10 }       // AC: 비고
+    ];
+
+    // Row 1: 메인 헤더
+    const row1 = worksheet.getRow(1);
+    row1.values = ['NO', '구분', '품명 및 규격', 'WALL', '', '개수', '', '', '', '', '환산', '', '', '단위', '수량', '계약도급', '', '', '', '', '', '비고', '발주단가', '', '', '', '', '', '비고'];
+
+    // Row 2: 서브 헤더 (A, B, C는 빈 값 - Row 1과 병합됨)
+    const row2 = worksheet.getRow(2);
+    row2.values = ['', '', '', 'THK', 'Type', '@', '두께', '넓이', '높이', 'M', '제공자', '1장->m2', '장', '', '', '자재비', '', '노무비', '', '합계', '', '', '자재비', '', '노무비', '', '합계', '', ''];
+
+    // Row 3: 세부 헤더 (A, B, C는 빈 값 - Row 1과 병합됨)
+    const row3 = worksheet.getRow(3);
+    row3.values = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '', '단가', '금액', '단가', '금액', '단가', '금액', ''];
+
+    // 병합 (병합은 데이터 입력 후에 수행)
+    worksheet.mergeCells('A1:A3'); // NO (1,2,3 row 병합)
+    worksheet.mergeCells('B1:B3'); // 구분 (1,2,3 row 병합)
+    worksheet.mergeCells('C1:C3'); // 품명 및 규격 (1,2,3 row 병합)
+    worksheet.mergeCells('D1:E1'); // WALL (2개)
+    worksheet.mergeCells('F1:J1'); // 개수 (5개: @, 두께, 넓이, 높이, M)
+    worksheet.mergeCells('K1:M1'); // 환산 (3개: 제공자, 1장->m2, 장)
+    worksheet.mergeCells('N1:N3'); // 단위 (1,2,3 row 병합)
+    worksheet.mergeCells('O1:O3'); // 수량 (1,2,3 row 병합)
+    worksheet.mergeCells('P1:U1'); // 계약도급 (6개)
+    worksheet.mergeCells('V1:V3'); // 비고 (1,2,3 row 병합)
+    worksheet.mergeCells('W1:AB1'); // 발주단가 (6개)
+    worksheet.mergeCells('AC1:AC3'); // 비고 (1,2,3 row 병합)
+
+    // Row 2와 Row 3 병합
+    worksheet.mergeCells('D2:D3'); // THK
+    worksheet.mergeCells('E2:E3'); // Type
+    worksheet.mergeCells('F2:F3'); // @
+    worksheet.mergeCells('G2:G3'); // 두께
+    worksheet.mergeCells('H2:H3'); // 넓이
+    worksheet.mergeCells('I2:I3'); // 높이
+    worksheet.mergeCells('J2:J3'); // M
+    worksheet.mergeCells('K2:K3'); // 제공자
+    worksheet.mergeCells('L2:L3'); // 1장->m2
+    worksheet.mergeCells('M2:M3'); // 장
+    worksheet.mergeCells('P2:Q2'); // 계약도급 - 자재비
+    worksheet.mergeCells('R2:S2'); // 계약도급 - 노무비
+    worksheet.mergeCells('T2:U2'); // 계약도급 - 합계
+    worksheet.mergeCells('W2:X2'); // 발주단가 - 자재비
+    worksheet.mergeCells('Y2:Z2'); // 발주단가 - 노무비
+    worksheet.mergeCells('AA2:AB2'); // 발주단가 - 합계
+
+    // 헤더 스타일 적용 (폰트 크기 12)
+    [row1, row2, row3].forEach(row => {
+        row.height = 20;
+        row.eachCell({ includeEmpty: true }, (cell) => {
+            cell.font = { bold: true, size: 12 };
+            cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFD0D0D0' }
+            };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+        });
+    });
+}
+
+/**
+ * 발주서 Excel 데이터 행 추가
+ */
+async function addOrderFormDataToExcel(worksheet) {
+    let currentRow = 4; // 헤더 이후 시작
+
+    // 현장명 입력 행 (29개 컬럼)
+    const siteRow = worksheet.getRow(currentRow);
+    siteRow.values = ['1', '현장명을 입력하세요', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+
+    // 현장명 행 스타일 적용
+    siteRow.eachCell({ includeEmpty: true }, (cell) => {
+        cell.font = { size: 11 };
+        cell.alignment = { vertical: 'middle', horizontal: 'left' };
+        cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+        };
+    });
+
+    currentRow++;
+
+    // 타입별로 그룹핑
+    const groupedByType = groupResultsByType(calculationResults);
+    let typeIndex = 1;
+
+    // 각 타입별 처리
+    for (const [typeName, results] of Object.entries(groupedByType)) {
+        console.log(`📋 타입 처리: ${typeName} (${results.length}개 벽체)`);
+
+        // 타입 합계 행 추가
+        const summaryRowData = await generateTypeSummaryRowData(typeName, results, typeIndex);
+        const summaryRow = worksheet.getRow(currentRow);
+        summaryRow.values = summaryRowData;
+
+        // 타입 합계 행 스타일 (굵은 글씨, 배경색, 폰트 11)
+        summaryRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            cell.font = { bold: true, size: 11 };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF9370DB' } // 보라색
+            };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                bottom: { style: 'thin' },
+                right: { style: 'thin' }
+            };
+
+            // ✅ 타입 요약 행도 숫자 포맷 적용
+            if (colNumber === 15 ||
+                (colNumber >= 16 && colNumber <= 21) ||
+                (colNumber >= 23 && colNumber <= 28)) {
+                if (cell.value && !isNaN(cell.value)) {
+                    cell.numFmt = '#,##0';
+                }
+            }
+        });
+        currentRow++;
+
+        // 레이어별 상세 행 추가
+        const detailRows = await generateLayerDetailRowsData(results[0], results);
+        for (const rowData of detailRows) {
+            const dataRow = worksheet.getRow(currentRow);
+            dataRow.values = rowData;
+
+            // 데이터 행 스타일 적용 (폰트 11)
+            dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                cell.font = { size: 11 };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                // 정렬
+                if (colNumber === 1 || colNumber === 2 || colNumber === 3) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+
+                // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위
+                // G(7), H(8), I(9), J(10): 두께, 넓이, 높이, M
+                // M(13): 장 수량
+                // O(15): 수량
+                // P~U(16~21): 계약도급
+                // W~AB(23~28): 발주단가
+                if ((colNumber >= 7 && colNumber <= 10) ||
+                    colNumber === 13 ||
+                    colNumber === 15 ||
+                    (colNumber >= 16 && colNumber <= 21) ||
+                    (colNumber >= 23 && colNumber <= 28)) {
+                    if (cell.value && !isNaN(cell.value)) {
+                        cell.numFmt = '#,##0';
+                    }
+                }
+            });
+
+            currentRow++;
+        }
+
+        typeIndex++;
+    }
+
+    console.log(`✅ 총 ${currentRow - 4}개 데이터 행 추가 완료`);
+}
+
+/**
+ * 타입 합계 행 데이터 생성 (Excel용)
+ */
+async function generateTypeSummaryRowData(typeName, results, typeIndex) {
+    // 타입별 전체 면적 합계
+    const totalArea = results.reduce((sum, r) => sum + r.area, 0);
+
+    // THK 계산
+    let totalThickness = 0;
+    let studWidthAdded = false;
+
+    // 단가 계산
+    let totalMaterialUnitPrice = 0;
+    let totalLaborUnitPrice = 0;
+
+    const layerOrder = [
+        'layer3_1', 'layer2_1', 'layer1_1',
+        'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2',
+        'column2', 'channel', 'runner'
+    ];
+
+    if (results.length > 0) {
+        const result = results[0];
+
+        for (const layerKey of layerOrder) {
+            const layer = result.layerPricing[layerKey];
+            if (!layer || !layer.materialName) continue;
+
+            const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
+
+            if (unitPriceItem && unitPriceItem.components) {
+                for (const component of unitPriceItem.components) {
+                    const componentName = component.name || '';
+                    if (!shouldDisplayComponent(componentName)) continue;
+
+                    const materialData = await findMaterialByIdInDB(component.materialId);
+
+                    // THK 계산
+                    if (isGypsumBoard(componentName) && materialData?.t) {
+                        totalThickness += parseFloat(materialData.t) || 0;
+                    } else if (isStud(componentName) && !studWidthAdded) {
+                        const studWidth = materialData?.w || parseSizeField(materialData?.size).width;
+                        if (studWidth) {
+                            totalThickness += parseFloat(studWidth) || 0;
+                            studWidthAdded = true;
+                        }
+                    }
+
+                    // 단가 합산
+                    totalMaterialUnitPrice += parseFloat(component.materialPrice) || 0;
+                    totalLaborUnitPrice += parseFloat(component.laborPrice) || 0;
+                }
+            }
+        }
+    }
+
+    const totalMaterialCost = totalMaterialUnitPrice * totalArea;
+    const totalLaborCost = totalLaborUnitPrice * totalArea;
+    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice;
+    const totalCost = totalMaterialCost + totalLaborCost;
+
+    // 29개 컬럼 데이터 배열 반환 (HTML TD 순서와 일치)
+    return [
+        `1-${typeIndex}`,           // A: NO
+        typeName,                   // B: 구분
+        '',                         // C: 품명 및 규격
+        totalThickness || '',       // D: THK
+        typeName,                   // E: Type
+        '',                         // F: @ (개수 그룹)
+        '',                         // G: 두께 (개수 그룹)
+        '',                         // H: 넓이 (개수 그룹)
+        '',                         // I: 높이 (개수 그룹)
+        '',                         // J: M (개수 그룹)
+        '',                         // K: 제공자 (환산 그룹)
+        '',                         // L: 1장->m2 (환산 그룹)
+        '',                         // M: 장 (환산 그룹)
+        'M2',                       // N: 단위
+        totalArea.toFixed(2),       // O: 수량
+        Math.round(totalMaterialUnitPrice), // P: 계약도급 자재비 단가
+        Math.round(totalMaterialCost),      // Q: 계약도급 자재비 금액
+        Math.round(totalLaborUnitPrice),    // R: 계약도급 노무비 단가
+        Math.round(totalLaborCost),         // S: 계약도급 노무비 금액
+        Math.round(totalUnitPrice),         // T: 계약도급 합계 단가
+        Math.round(totalCost),              // U: 계약도급 합계 금액
+        '',                         // V: 비고
+        '',                         // W: 발주단가 자재비 단가
+        '',                         // X: 발주단가 자재비 금액
+        '',                         // Y: 발주단가 노무비 단가
+        '',                         // Z: 발주단가 노무비 금액
+        '',                         // AA: 발주단가 합계 단가
+        '',                         // AB: 발주단가 합계 금액
+        ''                          // AC: 비고
+    ];
+}
+
+/**
+ * 레이어 상세 행 데이터 생성 (Excel용)
+ */
+async function generateLayerDetailRowsData(result, allResults) {
+    const layerOrder = [
+        'layer3_1', 'layer2_1', 'layer1_1',
+        'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2',
+        'column2', 'channel', 'runner'
+    ];
+
+    const totalArea = allResults.reduce((sum, r) => sum + (r.area || 0), 0);
+    const rows = [];
+    let layerNumber = 1;
+
+    for (const layerKey of layerOrder) {
+        const layer = result.layerPricing[layerKey];
+        if (!layer || !layer.materialName) continue;
+
+        const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
+
+        if (unitPriceItem && unitPriceItem.components && unitPriceItem.components.length > 0) {
+            for (const component of unitPriceItem.components) {
+                if (!shouldDisplayComponent(component.name)) continue;
+
+                const rowData = await generateComponentRowData(component, unitPriceItem, result, layerNumber, totalArea);
+                rows.push(rowData);
+                layerNumber++;
+            }
+        }
+    }
+
+    return rows;
+}
+
+/**
+ * 컴포넌트 행 데이터 생성 (Excel용)
+ */
+async function generateComponentRowData(component, unitPriceItem, result, layerNumber, totalArea) {
+    const materialData = await findMaterialByIdInDB(component.materialId);
+    const componentName = component.name || '';
+
+    // 기본 정보
+    const basic = unitPriceItem.basic || {};
+    const wallTypeCode = result.wallType?.wallType || '';
+
+    // 품명 및 규격
+    let productName = materialData?.name || componentName;
+    if (materialData?.spec) {
+        productName += ` ${materialData.spec}`;
+    }
+
+    // WALL 정보
+    let thk = '';
+    let spacing = '';
+    let thick = '';
+    let width = '';
+    let height = '';
+    let length = '';
+    let supplier = '';
+    let areaPerSheet = '';
+    let sheets = '';
+
+    const sizeData = parseSizeField(materialData?.size);
+
+    if (isStud(componentName)) {
+        // 스터드: @ 컬럼에 간격, M 컬럼에 (소요량 × 면적합계), 0단위 반올림
+        spacing = basic.spacing || '';
+        const quantity = component?.quantity || 0;
+
+        if (materialData) {
+            thick = materialData.t || sizeData.thickness || '';
+            width = materialData.w || sizeData.width || '';
+            height = materialData.h || sizeData.height || '';
+            length = Math.round(quantity * totalArea);  // M 컬럼: 0단위 반올림
+        }
+
+    } else if (isRunner(componentName)) {
+        // 런너: @ 컬럼에 "일반" 또는 "더블", M 컬럼에 (소요량 × 면적합계), 0단위 반올림
+        spacing = basic.runnerType === '더블' ? '더블' : '일반';
+        const quantity = component?.quantity || 0;
+        if (materialData) {
+            thick = materialData.t || sizeData.thickness || '';
+            width = materialData.w || sizeData.width || '';
+            height = materialData.h || sizeData.height || '';
+            length = Math.round(quantity * totalArea);  // M 컬럼: 0단위 반올림
+        }
+
+    } else if (isGypsumBoard(componentName)) {
+        // 석고보드: THK 채우기 (D열), 1장->m2, 장 수량
+        // ✅ 두께, 넓이, 높이는 비움 (개수 그룹에 표시 안 함)
+        if (materialData) {
+            thk = materialData.t || sizeData.thickness || '';  // THK (D열)
+            thick = '';  // 두께 비움 (G열)
+            width = '';  // 넓이 비움 (H열)
+            height = ''; // 높이 비움 (I열)
+
+            const w = parseFloat(materialData.w) || 0;
+            const h = parseFloat(materialData.h) || 0;
+
+            if (w > 0 && h > 0) {
+                // ✅ (W/1000) * (H/1000) 소수 셋째자리
+                areaPerSheet = ((w / 1000) * (h / 1000)).toFixed(3);
+
+                // ✅ 장 수량: (면적 × 소요량) ÷ 1장당면적 (0단위 반올림)
+                const componentQuantity = parseFloat(component.quantity) || 0;
+                if (areaPerSheet && componentQuantity > 0) {
+                    const actualQuantity = totalArea * componentQuantity;
+                    sheets = Math.round(actualQuantity / parseFloat(areaPerSheet));
+                }
+            }
+        }
+
+    } else if (isGlassWool(componentName)) {
+        if (materialData) {
+            thick = materialData.t || sizeData.thickness || '';
+            width = materialData.w || sizeData.width || '';
+            height = materialData.h || sizeData.height || '';
+        }
+    }
+
+    // 수량 및 단가
+    // ✅ 수량은 면적 합계만 표시 (HTML과 동일)
+    const finalQuantity = totalArea;
+    const unit = 'M2';
+
+    const materialPrice = parseFloat(component.materialPrice) || 0;
+    const laborPrice = parseFloat(component.laborPrice) || 0;
+    const totalPrice = materialPrice + laborPrice;
+
+    // ✅ 금액 = 단가 × 면적합계
+    const materialCost = materialPrice * totalArea;
+    const laborCost = laborPrice * totalArea;
+    const totalCost = materialCost + laborCost;
+
+    // 29개 컬럼 데이터 배열 반환 (HTML TD 순서와 정확히 일치)
+    return [
+        layerNumber,                    // A: NO
+        '',                             // B: 구분
+        productName,                    // C: 품명 및 규격
+        thk,                            // D: THK (석고보드만)
+        wallTypeCode,                   // E: Type
+        spacing,                        // F: @ (스터드/런너만, 개수 그룹)
+        thick,                          // G: 두께 (스터드/런너만, 개수 그룹)
+        width,                          // H: 넓이 (스터드/런너만, 개수 그룹)
+        height,                         // I: 높이 (스터드/런너만, 개수 그룹)
+        length,                         // J: M (스터드/런너만, 개수 그룹)
+        supplier,                       // K: 제공자 (환산 그룹)
+        areaPerSheet,                   // L: 1장->m2 (석고보드만, 환산 그룹)
+        sheets,                         // M: 장 (석고보드만, 환산 그룹)
+        unit,                           // N: 단위
+        finalQuantity,                  // O: 수량
+        Math.round(materialPrice),      // P: 계약도급 자재비 단가
+        Math.round(materialCost),       // Q: 계약도급 자재비 금액
+        Math.round(laborPrice),         // R: 계약도급 노무비 단가
+        Math.round(laborCost),          // S: 계약도급 노무비 금액
+        Math.round(totalPrice),         // T: 계약도급 합계 단가
+        Math.round(totalCost),          // U: 계약도급 합계 금액
+        '',                             // V: 비고
+        '',                             // W: 발주단가 자재비 단가
+        '',                             // X: 발주단가 자재비 금액
+        '',                             // Y: 발주단가 노무비 단가
+        '',                             // Z: 발주단가 노무비 금액
+        '',                             // AA: 발주단가 합계 단가
+        '',                             // AB: 발주단가 합계 금액
+        ''                              // AC: 비고
+    ];
+}
+
+/**
+ * 발주서 Excel 스타일 적용
+ * 29개 컬럼 기준 (A~AC)
+ */
+function applyOrderFormExcelStyles(worksheet) {
+    // 모든 데이터 행에 테두리 적용
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber > 3) { // 헤더 이후
+            row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+                // 테두리
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' }
+                };
+
+                // 정렬
+                if (colNumber === 1 || colNumber === 2 || colNumber === 3) {
+                    // A, B, C: NO, 구분, 품명 - 좌측 정렬
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                } else {
+                    // 나머지 - 가운데 정렬
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                }
+
+                // 숫자 포맷 (천단위 콤마)
+                // P~U: 계약도급 (16~21)
+                if (colNumber >= 16 && colNumber <= 21) {
+                    if (cell.value && !isNaN(cell.value)) {
+                        cell.numFmt = '#,##0';
+                    }
+                }
+                // W~AB: 발주단가 (23~28)
+                if (colNumber >= 23 && colNumber <= 28) {
+                    if (cell.value && !isNaN(cell.value)) {
+                        cell.numFmt = '#,##0';
+                    }
+                }
+            });
+        }
+    });
+
+    console.log('✅ 발주서 Excel 스타일 적용 완료');
+}
 
 /**
  * 견적서 Excel 내보내기
