@@ -1841,7 +1841,7 @@ function generateItemNameWithSpec(unitPriceItem, componentName) {
  * @param {number} rowNumber - 행 번호
  * @returns {Promise<string>} HTML 행 문자열
  */
-async function generateComponentRow(component, unitPriceItem, result, rowNumber) {
+async function generateComponentRow(component, unitPriceItem, result, rowNumber, totalArea) {
     const componentName = component.name || '';
 
     // ✅ materialId로 자재 DB에서 자재 정보 조회
@@ -1927,26 +1927,30 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber)
     }
 
     // D. 단가 및 금액 계산
-    const area = result.area || 0;
+    const area = totalArea || result.area || 0;  // ✅ 타입별 전체 면적 합계 사용
     const componentQuantity = parseFloat(component.quantity) || 0;
-    const quantity = area * componentQuantity;  // ✅ 전체 합산 수량 = 면적 × 컴포넌트 수량
 
-    // 석고보드 장 수량 계산: 수량 ÷ 1장당m2 (0단위 반올림)
+    // ✅ 수량 컬럼에는 면적만 표시
+    const displayQuantity = area;
+
+    // ✅ 금액 계산용 실제 수량 (면적 × component.quantity)
+    const actualQuantity = area * componentQuantity;
+
+    // 석고보드 장 수량 계산: 실제수량 ÷ 1장당m2 (0단위 반올림)
     if (isGypsumBoard(componentName) && conversionM2) {
         const m2PerSheet = parseFloat(conversionM2);
         if (m2PerSheet > 0) {
-            sheetQuantity = Math.round(quantity / m2PerSheet);  // ✅ 0단위 반올림
+            sheetQuantity = Math.round(actualQuantity / m2PerSheet);  // ✅ 0단위 반올림
         }
     }
 
-    // 재료비
+    // 재료비 (실제 수량으로 계산)
     const materialUnitPrice = parseFloat(component.materialPrice) || 0;
-    const materialAmount = materialUnitPrice * quantity * componentQuantity;
+    const materialAmount = materialUnitPrice * actualQuantity;  // ✅ 단가 × 실제수량
 
-    // 노무비 - laborAmount (금액) ÷ componentQuantity = 단가
-    const laborAmount = parseFloat(component.laborAmount) || 0;
-    const laborUnitPrice = componentQuantity > 0 ? laborAmount / componentQuantity : 0;
-    const laborTotalAmount = laborAmount * quantity;
+    // 노무비 - component에 이미 계산된 laborPrice 사용
+    const laborUnitPrice = parseFloat(component.laborPrice) || 0;
+    const laborTotalAmount = laborUnitPrice * actualQuantity;  // ✅ 단가 × 실제수량
 
     // 합계
     const totalUnitPrice = materialUnitPrice + laborUnitPrice;
@@ -1978,7 +1982,7 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber)
             <td>${conversionM2}</td>
             <td>${sheetQuantity}</td>
             <td>M2</td>
-            <td>${quantity.toFixed(2)}</td>
+            <td>${displayQuantity.toFixed(2)}</td>
             <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
             <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
@@ -1999,14 +2003,20 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber)
 
 /**
  * 레이어별 상세 행 생성 (컴포넌트별로 분리)
+ * @param {object} result - 대표 결과 (레이어 구조 참조용)
+ * @param {array} allResults - 같은 타입의 모든 결과 (면적 합계용)
  */
-async function generateLayerDetailRows(result) {
+async function generateLayerDetailRows(result, allResults) {
     const layerOrder = [
         'layer3_1', 'layer2_1', 'layer1_1',
         'column1', 'infill',
         'layer1_2', 'layer2_2', 'layer3_2',
         'column2', 'channel', 'runner'
     ];
+
+    // ✅ 타입별 전체 면적 합계 계산
+    const totalArea = allResults.reduce((sum, r) => sum + (r.area || 0), 0);
+    console.log(`📐 타입별 전체 면적 합계: ${totalArea.toFixed(2)} m²`);
 
     let html = '';
     let layerNumber = 1;
@@ -2033,7 +2043,7 @@ async function generateLayerDetailRows(result) {
                     continue;
                 }
 
-                html += await generateComponentRow(component, unitPriceItem, result, layerNumber);
+                html += await generateComponentRow(component, unitPriceItem, result, layerNumber, totalArea);
                 layerNumber++;
             }
 
@@ -2125,8 +2135,8 @@ async function generateOrderFormDataRows() {
         // 타입 합계 행
         html += generateTypeSummaryRow(typeName, results, typeIndex);
 
-        // 레이어별 상세 행 (첫 번째 결과의 레이어 정보 사용)
-        html += await generateLayerDetailRows(results[0]);
+        // 레이어별 상세 행 (첫 번째 결과의 레이어 구조 사용, 모든 results의 면적 합계 사용)
+        html += await generateLayerDetailRows(results[0], results);
 
         typeIndex++;
     }
