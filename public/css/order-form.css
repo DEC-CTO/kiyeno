@@ -2,9 +2,18 @@
    발주서 테이블 스타일 (단가비교표 스타일 기반)
    ============================================================================= */
 
+/* 스크롤 컨테이너 */
+#orderFormContainer {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+}
+
 /* 테이블 기본 스타일 */
 .order-form-table {
-    width: 100%;
+    min-width: 2120px; /* 29개 컬럼 총 너비 (1880px + 240px) */
+    width: 100%; /* 화면 전체 너비 사용 */
     border-collapse: collapse;
     font-size: 11px;
     background: white;
@@ -88,6 +97,25 @@
 .order-form-table td:nth-child(3) input {
     text-align: left !important;
     padding-left: 8px;
+}
+
+/* 단가 및 금액 컬럼 오른쪽 정렬 */
+/* 계약도급: 단가(16,18,20), 금액(17,19,21) */
+.order-form-table tbody td:nth-child(16),
+.order-form-table tbody td:nth-child(17),
+.order-form-table tbody td:nth-child(18),
+.order-form-table tbody td:nth-child(19),
+.order-form-table tbody td:nth-child(20),
+.order-form-table tbody td:nth-child(21),
+/* 발주단가: 단가(23,25,27), 금액(24,26,28) */
+.order-form-table tbody td:nth-child(23),
+.order-form-table tbody td:nth-child(24),
+.order-form-table tbody td:nth-child(25),
+.order-form-table tbody td:nth-child(26),
+.order-form-table tbody td:nth-child(27),
+.order-form-table tbody td:nth-child(28) {
+    text-align: right !important;
+    padding-right: 12px;
 }
 
 /* 컬럼 너비 설정 */
@@ -174,15 +202,19 @@
 .order-form-table thead tr:nth-child(2) th:nth-child(8),
 .order-form-table thead tr:nth-child(2) th:nth-child(9),
 .order-form-table thead tr:nth-child(2) th:nth-child(10) {
+    width: 60px;
+    min-width: 60px;
+}
+
+/* Row 1: 단위(7), 수량(8) - rowspan=3 */
+.order-form-table thead tr:first-child th:nth-child(7) {
     width: 40px;
     min-width: 40px;
 }
 
-/* Row 1: 단위(7), 수량(8) - rowspan=3 */
-.order-form-table thead tr:first-child th:nth-child(7),
 .order-form-table thead tr:first-child th:nth-child(8) {
-    width: 40px;
-    min-width: 40px;
+    width: 70px;
+    min-width: 70px;
 }
 
 /* Row 3: 단가/금액 (계약도급 6개 + 발주단가 6개 = 12개) */
@@ -202,23 +234,27 @@
 .order-form-table thead tr:nth-child(3) th:nth-child(8),
 .order-form-table thead tr:nth-child(3) th:nth-child(10),
 .order-form-table thead tr:nth-child(3) th:nth-child(12) {
-    width: 80px;
-    min-width: 80px;
+    width: 120px;
+    min-width: 120px;
 }
 
 /* tbody 데이터 행: 환산(11-13) */
 .order-form-table tbody td:nth-child(11),
 .order-form-table tbody td:nth-child(12),
 .order-form-table tbody td:nth-child(13) {
+    width: 60px;
+    min-width: 60px;
+}
+
+/* tbody 데이터 행: 단위(14), 수량(15) */
+.order-form-table tbody td:nth-child(14) {
     width: 40px;
     min-width: 40px;
 }
 
-/* tbody 데이터 행: 단위(14), 수량(15) */
-.order-form-table tbody td:nth-child(14),
 .order-form-table tbody td:nth-child(15) {
-    width: 40px;
-    min-width: 40px;
+    width: 70px;
+    min-width: 70px;
 }
 
 /* tbody 데이터 행: 계약도급 단가(16,18,20), 금액(17,19,21) */
@@ -232,8 +268,8 @@
 .order-form-table tbody td:nth-child(17),
 .order-form-table tbody td:nth-child(19),
 .order-form-table tbody td:nth-child(21) {
-    width: 80px;
-    min-width: 80px;
+    width: 120px;
+    min-width: 120px;
 }
 
 /* tbody 데이터 행: 비고(22) */
@@ -253,8 +289,8 @@
 .order-form-table tbody td:nth-child(24),
 .order-form-table tbody td:nth-child(26),
 .order-form-table tbody td:nth-child(28) {
-    width: 80px;
-    min-width: 80px;
+    width: 120px;
+    min-width: 120px;
 }
 
 /* tbody 데이터 행: 비고(29) */
@@ -263,14 +299,29 @@
     min-width: 80px;
 }
 
-/* 반응형 */
+/* 반응형 - 스크롤바 스타일 개선 */
 @media (max-width: 1400px) {
-    .order-form-table {
-        font-size: 11px;
+    /* 테이블 크기는 유지하고 스크롤만 활성화 */
+    #orderFormContainer {
+        box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1);
     }
 
-    .order-form-table th,
-    .order-form-table td {
-        padding: 6px 4px;
+    /* 스크롤바 스타일 (Webkit 브라우저) */
+    #orderFormContainer::-webkit-scrollbar {
+        height: 12px;
+    }
+
+    #orderFormContainer::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 6px;
+    }
+
+    #orderFormContainer::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 6px;
+    }
+
+    #orderFormContainer::-webkit-scrollbar-thumb:hover {
+        background: #5568d3;
     }
 }

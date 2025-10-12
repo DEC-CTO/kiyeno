@@ -1594,21 +1594,86 @@ function groupResultsByType(results) {
 /**
  * 타입 합계 행 생성
  */
-function generateTypeSummaryRow(typeName, results, typeIndex) {
-    // 타입별 합계 계산
+async function generateTypeSummaryRow(typeName, results, typeIndex) {
+    // 타입별 전체 면적 합계
     const totalArea = results.reduce((sum, r) => sum + r.area, 0);
-    const totalMaterialCost = results.reduce((sum, r) => sum + r.materialCost, 0);
-    const totalLaborCost = results.reduce((sum, r) => sum + r.laborCost, 0);
+
+    // ✅ THK 계산: 석고보드 두께(중복 허용) + 스터드 넓이(1개만)
+    let totalThickness = 0;
+    let studWidthAdded = false; // 스터드는 1개만 추가
+
+    // ✅ 단가 계산: 표시되는 컴포넌트의 단가만 합산
+    let totalMaterialUnitPrice = 0;
+    let totalLaborUnitPrice = 0;
+
+    // 레이어 순서 정의 (발주서 표시 순서와 동일)
+    const layerOrder = [
+        'layer3_1', 'layer2_1', 'layer1_1',
+        'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2',
+        'column2', 'channel', 'runner'
+    ];
+
+    // 첫 번째 결과만 사용 (대표값)
+    if (results.length > 0) {
+        const result = results[0];
+
+        // ✅ layerOrder 순서대로 순회 (모든 레이어 처리)
+        for (const layerKey of layerOrder) {
+            const layer = result.layerPricing[layerKey];
+
+            if (!layer || !layer.materialName) continue;
+
+            // 일위대가 아이템 조회
+            const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
+
+            if (unitPriceItem && unitPriceItem.components) {
+                for (const component of unitPriceItem.components) {
+                    const componentName = component.name || '';
+
+                    // 표시되는 컴포넌트만 처리
+                    if (!shouldDisplayComponent(componentName)) continue;
+
+                    // 자재 DB 조회
+                    const materialData = await findMaterialByIdInDB(component.materialId);
+
+                    // THK 계산
+                    if (isGypsumBoard(componentName) && materialData?.t) {
+                        // ✅ 석고보드: 모든 레이어의 두께 누적 (중복 허용)
+                        totalThickness += parseFloat(materialData.t) || 0;
+                        console.log(`  📏 석고보드 두께 추가: ${materialData.t} (레이어: ${layerKey})`);
+                    } else if (isStud(componentName) && !studWidthAdded) {
+                        // ✅ 스터드: size 필드 파싱하여 넓이 추출
+                        const studWidth = materialData?.w || parseSizeField(materialData?.size).width;
+                        if (studWidth) {
+                            totalThickness += parseFloat(studWidth) || 0;
+                            studWidthAdded = true;
+                            console.log(`  📏 스터드 넓이 추가: ${studWidth} (레이어: ${layerKey})`);
+                        }
+                    }
+
+                    // ✅ 단가 합산
+                    totalMaterialUnitPrice += parseFloat(component.materialPrice) || 0;
+                    totalLaborUnitPrice += parseFloat(component.laborPrice) || 0;
+                }
+            }
+        }
+    }
+
+    // ✅ 금액 계산 (단가 × 면적)
+    const totalMaterialCost = totalMaterialUnitPrice * totalArea;
+    const totalLaborCost = totalLaborUnitPrice * totalArea;
+    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice;
     const totalCost = totalMaterialCost + totalLaborCost;
 
-    // 단가 계산
-    const materialUnitPrice = totalArea > 0 ? totalMaterialCost / totalArea : 0;
-    const laborUnitPrice = totalArea > 0 ? totalLaborCost / totalArea : 0;
-    const unitPrice = totalArea > 0 ? totalCost / totalArea : 0;
+    console.log(`📐 ${typeName} THK: ${totalThickness}, 재료비단가: ${totalMaterialUnitPrice}, 노무비단가: ${totalLaborUnitPrice}`);
 
     return `
         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
             <td>1-${typeIndex}</td>
+            <td>${typeName}</td>
+            <td></td>
+            <td>${totalThickness || ''}</td>
             <td>${typeName}</td>
             <td></td>
             <td></td>
@@ -1618,16 +1683,13 @@ function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td></td>
             <td></td>
+            <td>M2</td>
             <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalMaterialUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalLaborUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(unitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
             <td></td>
             <td></td>
@@ -1930,27 +1992,25 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
     const area = totalArea || result.area || 0;  // ✅ 타입별 전체 면적 합계 사용
     const componentQuantity = parseFloat(component.quantity) || 0;
 
-    // ✅ 수량 컬럼에는 면적만 표시
+    // ✅ 수량 컬럼: 모든 자재 동일하게 면적만 표시
     const displayQuantity = area;
 
-    // ✅ 금액 계산용 실제 수량 (면적 × component.quantity)
-    const actualQuantity = area * componentQuantity;
+    // ✅ 단가: component에 이미 소요량이 반영된 단가가 들어있음
+    const materialUnitPrice = parseFloat(component.materialPrice) || 0;
+    const laborUnitPrice = parseFloat(component.laborPrice) || 0;
 
-    // 석고보드 장 수량 계산: 실제수량 ÷ 1장당m2 (0단위 반올림)
+    // ✅ 금액: 단가 × 면적
+    const materialAmount = materialUnitPrice * area;
+    const laborTotalAmount = laborUnitPrice * area;
+
+    // 석고보드 장 수량 재계산: 실제수량 ÷ 1장당m2 (0단위 반올림)
     if (isGypsumBoard(componentName) && conversionM2) {
         const m2PerSheet = parseFloat(conversionM2);
         if (m2PerSheet > 0) {
+            const actualQuantity = area * componentQuantity;
             sheetQuantity = Math.round(actualQuantity / m2PerSheet);  // ✅ 0단위 반올림
         }
     }
-
-    // 재료비 (실제 수량으로 계산)
-    const materialUnitPrice = parseFloat(component.materialPrice) || 0;
-    const materialAmount = materialUnitPrice * actualQuantity;  // ✅ 단가 × 실제수량
-
-    // 노무비 - component에 이미 계산된 laborPrice 사용
-    const laborUnitPrice = parseFloat(component.laborPrice) || 0;
-    const laborTotalAmount = laborUnitPrice * actualQuantity;  // ✅ 단가 × 실제수량
 
     // 합계
     const totalUnitPrice = materialUnitPrice + laborUnitPrice;
@@ -1980,7 +2040,7 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
             <td>${mValue}</td>
             <td><input type="text" placeholder="제공자" style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 4px;"></td>
             <td>${conversionM2}</td>
-            <td>${sheetQuantity}</td>
+            <td>${sheetQuantity ? parseInt(sheetQuantity).toLocaleString() : ''}</td>
             <td>M2</td>
             <td>${displayQuantity.toFixed(2)}</td>
             <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
@@ -2133,7 +2193,7 @@ async function generateOrderFormDataRows() {
     // 각 타입별 처리
     for (const [typeName, results] of Object.entries(groupedByType)) {
         // 타입 합계 행
-        html += generateTypeSummaryRow(typeName, results, typeIndex);
+        html += await generateTypeSummaryRow(typeName, results, typeIndex);
 
         // 레이어별 상세 행 (첫 번째 결과의 레이어 구조 사용, 모든 results의 면적 합계 사용)
         html += await generateLayerDetailRows(results[0], results);

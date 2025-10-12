@@ -199,13 +199,16 @@
 
 /* 테이블 래퍼 */
 .estimate-table-wrapper {
+    width: 100%;
     overflow-x: auto;
     margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
 }
 
 /* 테이블 */
 .estimate-table {
-    width: 1920px;
+    min-width: 1920px; /* 최소 너비 */
+    width: 100%; /* 화면 전체 너비 사용 */
     table-layout: fixed;
     border-collapse: collapse;
     font-size: 11px;
