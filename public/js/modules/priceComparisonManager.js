@@ -18,9 +18,9 @@ let priceComparisonData = {
         orderPrice: { unitPrice: '', amount: '' },
         orderQuantity2: 1.00,
         vendors: [
-            { name: '업체1', unitPrice: '', amount: '', quantity: '' },
-            { name: '업체2', unitPrice: '', amount: '', quantity: '' },
-            { name: '업체3', unitPrice: '', amount: '' }
+            { name: '업체1', unitPrice: '', amount: '', quantity: 1.00 },
+            { name: '업체2', unitPrice: '', amount: '', quantity: 1.00 },
+            { name: '업체3', unitPrice: '', amount: '', quantity: 1.00 }
         ],
         remarks: ''
     },
@@ -33,13 +33,13 @@ let priceComparisonData = {
         orderUnit: '',
         orderQuantity: '',
         progressPrice: { unitPrice: '', amount: '' },
-        progressQuantity: '',
-        orderPrice: { unitPrice: '', amount: '' },
+        progressQuantity: 0,
+        orderPrice: { unitPrice: '', amount: 0 },
         orderQuantity2: '',
         vendors: [
-            { name: '업체1', unitPrice: '', amount: '', quantity: '' },
-            { name: '업체2', unitPrice: '', amount: '', quantity: '' },
-            { name: '업체3', unitPrice: '', amount: '' }
+            { name: '업체1', percent: 0, amount: 0, quantity: '' },
+            { name: '업체2', percent: 0, amount: 0, quantity: '' },
+            { name: '업체3', percent: 0, amount: 0 }
         ],
         remarks: ''
     },
@@ -371,13 +371,12 @@ function renderRoundingRow() {
             <td></td>
             <td></td>
             <td class="number-cell">${row.orderPrice.amount || ''}</td>
-            <td></td>
             ${row.vendors.map((vendor, vIdx) => {
                 const isLast = vIdx === vendorCount - 1;
                 return `
                     <td></td>
                     <td></td>
-                    ${isLast ? '' : '<td></td>'}
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
                 `;
             }).join('')}
             <td></td>
@@ -408,13 +407,11 @@ function renderSubtotalRow() {
             <td></td>
             <td></td>
             <td class="number-cell">${formatNumber(row.orderPrice.amount)}</td>
-            <td></td>
             ${row.vendors.map((vendor, vIdx) => {
-                const isLast = vIdx === vendorCount - 1;
                 return `
                     <td></td>
                     <td></td>
-                    ${isLast ? '' : '<td></td>'}
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
                 `;
             }).join('')}
             <td></td>
@@ -519,10 +516,9 @@ function renderDetailItems(items, type) {
                 <td class="number-cell order-price-quantity" data-type="${type}" data-index="${index}">${formatNumber(item.orderPriceQuantity || 0)}</td>
                 <td class="number-cell">${formatNumber(item.unitPrice)}</td>
                 <td class="number-cell order-price-amount" data-type="${type}" data-index="${index}">${formatNumber(item.orderPriceAmount || 0)}</td>
-                <td></td>
                 ${Array.from({ length: vendorCount }, (_, i) => {
-                    const isLast = i === vendorCount - 1;
-                    return `<td></td><td></td>${isLast ? '' : '<td></td>'}`;
+                    const vendor = item.vendors && item.vendors[i] ? item.vendors[i] : { unitPrice: 0, amount: 0, quantity: 0 };
+                    return `<td class="number-cell vendor-quantity-${i}" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatNumber(item.orderPriceQuantity || 0)}</td><td><input type="text" class="vendor-unit-price-input" data-type="${type}" data-index="${index}" data-vendor="${i}" value="${vendor.unitPrice ? formatNumber(vendor.unitPrice) : ''}" style="width: 80px; text-align: right !important;" /></td><td class="number-cell vendor-amount" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatNumber(vendor.amount || 0)}</td>`;
                 }).join('')}
                 <td></td>
             </tr>
@@ -605,8 +601,26 @@ function calculateFinalTotal() {
         }
     });
 
-    // 업체별은 계약도급과 동일하게 설정 (단가는 빈칸)
-    finalTotal.vendors.forEach(v => v.amount = finalTotal.contractPrice.amount);
+    // 업체별 합산 (자재비 + 노무비)
+    finalTotal.vendors.forEach((vendor, vIdx) => {
+        let vendorTotal = 0;
+
+        // 자재비 합산
+        materials.forEach(item => {
+            if (!item.isHeader && item.vendors && item.vendors[vIdx]) {
+                vendorTotal += item.vendors[vIdx].amount || 0;
+            }
+        });
+
+        // 노무비 합산
+        labor.forEach(item => {
+            if (!item.isHeader && item.vendors && item.vendors[vIdx]) {
+                vendorTotal += item.vendors[vIdx].amount || 0;
+            }
+        });
+
+        vendor.amount = vendorTotal;
+    });
 }
 
 /**
@@ -632,13 +646,11 @@ function renderFinalTotalRow() {
             <td></td>
             <td></td>
             <td class="number-cell">${formatNumber(row.orderPrice.amount)}</td>
-            <td></td>
             ${row.vendors.map((vendor, vIdx) => {
-                const isLast = vIdx === vendorCount - 1;
                 return `
                     <td></td>
                     <td></td>
-                    ${isLast ? '' : '<td></td>'}
+                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
                 `;
             }).join('')}
             <td></td>
@@ -666,13 +678,11 @@ function renderSummaryRow() {
             <td class="number-cell">${formatQuantity(priceComparisonData.summaryRow.progressQuantity)}</td>
             <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.orderPrice.unitPrice)}</td>
             <td class="number-cell">${formatNumber(priceComparisonData.summaryRow.orderPrice.amount)}</td>
-            <td></td>
             ${priceComparisonData.summaryRow.vendors.map((vendor, vIdx) => {
-                const isLast = vIdx === priceComparisonData.summaryRow.vendors.length - 1;
                 return `
+                    <td class="number-cell">${formatQuantity(vendor.quantity)}</td>
                     <td></td>
                     <td class="number-cell">${formatNumber(vendor.amount)}</td>
-                    ${isLast ? '' : `<td class="number-cell">${formatQuantity(vendor.quantity)}</td>`}
                 `;
             }).join('')}
             <td>${priceComparisonData.summaryRow.remarks || ''}</td>
@@ -686,7 +696,7 @@ function renderSummaryRow() {
 function renderMiscRow() {
     const progressQuantityValue = priceComparisonData.miscRow.progressQuantity
         ? priceComparisonData.miscRow.progressQuantity.toString().replace('%', '')
-        : '';
+        : '0';
 
     return `
         <tr>
@@ -704,13 +714,12 @@ function renderMiscRow() {
             <td><input type="text" class="misc-quantity-input" value="${progressQuantityValue}" style="width: 80px; text-align: right !important;" /></td>
             <td class="number-cell">${formatNumber(priceComparisonData.miscRow.orderPrice.unitPrice)}</td>
             <td class="number-cell">${formatNumber(priceComparisonData.miscRow.orderPrice.amount)}</td>
-            <td class="number-cell">${formatQuantity(priceComparisonData.miscRow.orderQuantity2)}</td>
             ${priceComparisonData.miscRow.vendors.map((vendor, vIdx) => {
                 const isLast = vIdx === priceComparisonData.miscRow.vendors.length - 1;
                 return `
+                    <td><input type="text" class="vendor-misc-percent-input" data-vendor="${vIdx}" value="${vendor.percent || 0}" style="width: 80px; text-align: right !important;" /></td>
                     <td></td>
-                    <td class="number-cell">${formatNumber(vendor.amount)}</td>
-                    ${isLast ? '' : `<td class="number-cell">${formatQuantity(vendor.quantity)}</td>`}
+                    <td class="number-cell vendor-misc-amount" data-vendor="${vIdx}">${formatNumber(vendor.amount)}</td>
                 `;
             }).join('')}
             <td>${priceComparisonData.miscRow.remarks || ''}</td>
@@ -874,6 +883,8 @@ function renderTableBody() {
     attachOrderQuantityListeners();       // 발주수량 입력
     attachOrderPriceUnitListeners();      // 발주단가 단가 입력
     attachMiscQuantityListener();         // 공과잡비 % 입력
+    attachVendorUnitPriceListeners();     // 업체별 단가 입력
+    attachVendorMiscPercentListeners();   // 업체별 공과잡비 % 입력
 }
 
 /**
@@ -954,6 +965,29 @@ function attachOrderQuantityListeners() {
                 const orderAmountCell = document.querySelector(`.order-price-amount[data-type="${type}"][data-index="${index}"]`);
                 if (orderAmountCell) {
                     orderAmountCell.textContent = formatNumber(Math.round(orderPriceAmount));
+                }
+
+                // ✅ 업체별 수량 자동 복사 (9번 → 15번, 18번, 21번)
+                if (items[index].vendors) {
+                    items[index].vendors.forEach((vendor, vIdx) => {
+                        vendor.quantity = quantity;
+
+                        // 15열, 18열, 21열 (업체1, 2, 3 수량) - data-vendor="0", "1", "2"
+                        const vendorQuantityCell = document.querySelector(`.vendor-quantity-${vIdx}[data-type="${type}"][data-index="${index}"]`);
+                        if (vendorQuantityCell) {
+                            vendorQuantityCell.textContent = formatNumber(quantity);
+                        }
+
+                        // 업체별 금액 재계산: 수량 × 업체 단가
+                        const vendorAmount = quantity * (vendor.unitPrice || 0);
+                        vendor.amount = Math.round(vendorAmount);
+
+                        // 업체별 금액 UI 업데이트
+                        const vendorAmountCell = document.querySelector(`.vendor-amount[data-type="${type}"][data-index="${index}"][data-vendor="${vIdx}"]`);
+                        if (vendorAmountCell) {
+                            vendorAmountCell.textContent = formatNumber(Math.round(vendorAmount));
+                        }
+                    });
                 }
 
                 // ✅ 추가: "계" 행 재계산
@@ -1317,6 +1351,248 @@ function attachMiscQuantityListener() {
     });
 }
 
+/**
+ * 업체별 단가 입력 필드에 이벤트 리스너 부착
+ */
+function attachVendorUnitPriceListeners() {
+    const inputs = document.querySelectorAll('.vendor-unit-price-input');
+
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const type = this.dataset.type;  // 'material' 또는 'labor'
+            const index = parseInt(this.dataset.index);
+            const vendorIndex = parseInt(this.dataset.vendor);
+
+            // 콤마 제거 후 숫자만 추출
+            const rawValue = this.value.replace(/,/g, '');
+
+            // 숫자가 아닌 문자 제거 (소수점과 숫자만 허용)
+            const cleanValue = rawValue.replace(/[^\d.]/g, '');
+
+            // 소수점이 여러 개 있으면 첫 번째만 유지
+            const parts = cleanValue.split('.');
+            const formattedValue = parts.length > 1
+                ? parts[0] + '.' + parts.slice(1).join('')
+                : cleanValue;
+
+            const unitPrice = parseFloat(formattedValue) || 0;
+
+            // 데이터 모델 업데이트
+            const items = type === 'material'
+                ? priceComparisonData.detailSections.materials
+                : priceComparisonData.detailSections.labor;
+
+            if (items[index] && items[index].vendors && items[index].vendors[vendorIndex]) {
+                items[index].vendors[vendorIndex].unitPrice = unitPrice;
+
+                // 커서 위치 저장
+                const cursorPos = this.selectionStart;
+                const oldLength = this.value.length;
+
+                // 콤마 포맷 적용 (정수 부분만 콤마, 소수점 유지)
+                if (formattedValue) {
+                    const [intPart, decPart] = formattedValue.split('.');
+                    const formattedInt = parseInt(intPart || 0).toLocaleString('ko-KR');
+                    this.value = decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt;
+                } else {
+                    this.value = '';
+                }
+
+                // 커서 위치 복원 (콤마 추가로 인한 위치 조정)
+                const newLength = this.value.length;
+                const newCursorPos = cursorPos + (newLength - oldLength);
+                this.setSelectionRange(newCursorPos, newCursorPos);
+
+                // 업체별 금액 계산: 수량 × 단가
+                const quantity = items[index].vendors[vendorIndex].quantity || 0;
+                const vendorAmount = quantity * unitPrice;
+                items[index].vendors[vendorIndex].amount = Math.round(vendorAmount);
+
+                // UI 업데이트 (업체별 금액 셀)
+                const vendorAmountCell = document.querySelector(`.vendor-amount[data-type="${type}"][data-index="${index}"][data-vendor="${vendorIndex}"]`);
+                if (vendorAmountCell) {
+                    vendorAmountCell.textContent = formatNumber(Math.round(vendorAmount));
+                }
+
+                // 업체별 "계" 행, "경량공사" 행, "공과잡비" 행, "합계" 행 재계산
+                calculateVendorTotals();
+            }
+        });
+    });
+}
+
+/**
+ * 업체별 공과잡비 % 입력 필드에 이벤트 리스너 부착
+ */
+function attachVendorMiscPercentListeners() {
+    const inputs = document.querySelectorAll('.vendor-misc-percent-input');
+
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const vendorIndex = parseInt(this.dataset.vendor);
+
+            // 콤마 제거 후 숫자만 추출
+            const rawValue = this.value.replace(/,/g, '');
+            const cleanValue = rawValue.replace(/[^\d.]/g, '');
+            const parts = cleanValue.split('.');
+            const formattedValue = parts.length > 1
+                ? parts[0] + '.' + parts.slice(1).join('')
+                : cleanValue;
+
+            const percent = parseFloat(formattedValue) || 0;
+
+            // 데이터 업데이트
+            priceComparisonData.miscRow.vendors[vendorIndex].percent = percent;
+
+            // 커서 위치 저장
+            const cursorPos = this.selectionStart;
+            const oldLength = this.value.length;
+
+            // 콤마 포맷 적용
+            if (formattedValue) {
+                const [intPart, decPart] = formattedValue.split('.');
+                const formattedInt = parseInt(intPart || 0).toLocaleString('ko-KR');
+                this.value = decPart !== undefined ? `${formattedInt}.${decPart}` : formattedInt;
+            } else {
+                this.value = '';
+            }
+
+            // 커서 위치 복원
+            const newLength = this.value.length;
+            const newCursorPos = cursorPos + (newLength - oldLength);
+            this.setSelectionRange(newCursorPos, newCursorPos);
+
+            // 금액 계산: 경량공사 × (% ÷ 100)
+            const summaryAmount = priceComparisonData.summaryRow.vendors[vendorIndex].amount || 0;
+            const miscAmount = Math.round(summaryAmount * (percent / 100));
+            priceComparisonData.miscRow.vendors[vendorIndex].amount = miscAmount;
+
+            // UI 업데이트
+            const amountCell = document.querySelector(`.vendor-misc-amount[data-vendor="${vendorIndex}"]`);
+            if (amountCell) {
+                amountCell.textContent = formatNumber(miscAmount);
+            }
+
+            // 단수정리 및 합계 재계산
+            calculateVendorRounding();
+            calculateSubtotal();
+            updateVendorUI();
+        });
+    });
+}
+
+/**
+ * 업체별 단수정리 계산
+ */
+function calculateVendorRounding() {
+    priceComparisonData.roundingRow.vendors.forEach((vendor, vIdx) => {
+        const summaryAmount = priceComparisonData.summaryRow.vendors[vIdx].amount || 0;
+        const miscAmount = priceComparisonData.miscRow.vendors[vIdx].amount || 0;
+        const totalBeforeRounding = summaryAmount + miscAmount;
+        const roundingAmount = totalBeforeRounding % 100000;  // 십만단위 미만 금액
+        vendor.amount = -roundingAmount;
+    });
+}
+
+/**
+ * 업체별 합계 계산 (계, 경량공사, 공과잡비, 합계)
+ */
+function calculateVendorTotals() {
+    // 1. "계" 행 업데이트 (자재비 + 노무비)
+    calculateFinalTotal();
+
+    // 2. "경량공사" 행 업데이트 (계 복사)
+    priceComparisonData.summaryRow.vendors.forEach((vendor, vIdx) => {
+        vendor.amount = priceComparisonData.finalTotalRow.vendors[vIdx].amount;
+    });
+
+    // 3. "공과잡비" 행 업데이트 (경량공사 × 공과잡비%)
+    const miscPercent = priceComparisonData.miscRow.progressQuantity || 0;
+    priceComparisonData.miscRow.vendors.forEach((vendor, vIdx) => {
+        const summaryAmount = priceComparisonData.summaryRow.vendors[vIdx].amount || 0;
+        vendor.amount = Math.round(summaryAmount * (miscPercent / 100));
+    });
+
+    // 4. "단수정리" 행 업데이트
+    calculateVendorRounding();
+
+    // 5. "합계" 행 업데이트 (경량공사 + 공과잡비 + 단수정리)
+    calculateSubtotal();
+
+    // 6. UI 업데이트
+    updateVendorUI();
+}
+
+/**
+ * 업체별 UI 업데이트
+ */
+function updateVendorUI() {
+    const tbody = document.getElementById('priceComparisonTableBody');
+    if (!tbody) return;
+
+    // "계" 행 (마지막 행)
+    const finalTotalRow = tbody.querySelector('tr:last-child');
+    if (finalTotalRow) {
+        priceComparisonData.finalTotalRow.vendors.forEach((vendor, vIdx) => {
+            // 컬럼 계산: 15번(업체1 수량 앞) 시작
+            // 업체1: 16단가, 17금액 / 업체2: 18수량, 19단가, 20금액 / 업체3: 21수량, 22단가, 23금액
+            const columnIndex = vIdx === 0 ? 17 : vIdx === 1 ? 20 : 23;
+            const cell = finalTotalRow.querySelector(`td:nth-child(${columnIndex})`);
+            if (cell) {
+                cell.textContent = formatNumber(vendor.amount);
+            }
+        });
+    }
+
+    // "경량공사" 행 (2번째 행)
+    const summaryRow = tbody.querySelector('tr:nth-child(2)');
+    if (summaryRow) {
+        priceComparisonData.summaryRow.vendors.forEach((vendor, vIdx) => {
+            const columnIndex = vIdx === 0 ? 17 : vIdx === 1 ? 20 : 23;
+            const cell = summaryRow.querySelector(`td:nth-child(${columnIndex})`);
+            if (cell) {
+                cell.textContent = formatNumber(vendor.amount);
+            }
+        });
+    }
+
+    // "공과잡비" 행 (3번째 행)
+    const miscRow = tbody.querySelector('tr:nth-child(3)');
+    if (miscRow) {
+        priceComparisonData.miscRow.vendors.forEach((vendor, vIdx) => {
+            const columnIndex = vIdx === 0 ? 17 : vIdx === 1 ? 20 : 23;
+            const cell = miscRow.querySelector(`td:nth-child(${columnIndex})`);
+            if (cell) {
+                cell.textContent = formatNumber(vendor.amount);
+            }
+        });
+    }
+
+    // "단수정리" 행 (4번째 행)
+    const roundingRow = tbody.querySelector('tr:nth-child(4)');
+    if (roundingRow) {
+        priceComparisonData.roundingRow.vendors.forEach((vendor, vIdx) => {
+            const columnIndex = vIdx === 0 ? 17 : vIdx === 1 ? 20 : 23;
+            const cell = roundingRow.querySelector(`td:nth-child(${columnIndex})`);
+            if (cell) {
+                cell.textContent = formatNumber(vendor.amount);
+            }
+        });
+    }
+
+    // "합계" 행 (5번째 행)
+    const subtotalRow = tbody.querySelector('tr:nth-child(5)');
+    if (subtotalRow) {
+        priceComparisonData.subtotalRow.vendors.forEach((vendor, vIdx) => {
+            const columnIndex = vIdx === 0 ? 17 : vIdx === 1 ? 20 : 23;
+            const cell = subtotalRow.querySelector(`td:nth-child(${columnIndex})`);
+            if (cell) {
+                cell.textContent = formatNumber(vendor.amount);
+            }
+        });
+    }
+}
+
 // =============================================================================
 // 데이터 업데이트 함수들
 // =============================================================================
@@ -1610,17 +1886,11 @@ async function exportPriceComparisonToExcel() {
             row.getCell(dataColIdx++).value = formatValue(rowData.orderPrice.unitPrice);
             row.getCell(dataColIdx++).value = formatValue(rowData.orderPrice.amount);
 
-            // 수량2
-            row.getCell(dataColIdx++).value = '';  // 항상 빈칸
-
-            // 업체들
+            // 업체들 - 요약 행은 수량(있으면 표시), 단가(빈칸), 금액만 표시
             rowData.vendors.forEach((vendor, vIdx) => {
-                const isLast = vIdx === vendorCount - 1;
-                if (!isLast) {
-                    row.getCell(dataColIdx++).value = formatValue(vendor.quantity);
-                }
-                row.getCell(dataColIdx++).value = formatValue(vendor.unitPrice);
-                row.getCell(dataColIdx++).value = formatValue(vendor.amount);
+                row.getCell(dataColIdx++).value = formatValue(vendor.quantity);  // 15,18,21열: 수량
+                row.getCell(dataColIdx++).value = '';  // 16,19,22열: 단가 (항상 빈칸)
+                row.getCell(dataColIdx++).value = formatValue(vendor.amount);  // 17,20,23열: 금액
             });
 
             // 비고
@@ -1674,6 +1944,33 @@ async function exportPriceComparisonToExcel() {
         miscRow.getCell(14).value = { formula: `=N${summaryRowNum}*(L${miscRowNum}/100)` };  // 14. 공과잡비 금액 = 경량공사 금액 × (% ÷ 100)
         miscRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
         miscRow.getCell(14).numFmt = '#,##0';
+
+        // 업체1 공과잡비: 15열(% 입력), 16열(빈칸), 17열(금액)
+        miscRow.getCell(15).value = priceComparisonData.miscRow.vendors[0]?.percent || 0;  // 15. 업체1 공과잡비 % (수량 열)
+        miscRow.getCell(15).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(15).numFmt = '#,##0';
+        miscRow.getCell(17).value = { formula: `=Q${summaryRowNum}*(O${miscRowNum}/100)` };  // 17. 업체1 공과잡비 금액 = 경량공사 × (% ÷ 100)
+        miscRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(17).numFmt = '#,##0';
+
+        // 업체2 공과잡비: 18열(% 입력), 19열(빈칸), 20열(금액)
+        miscRow.getCell(18).value = priceComparisonData.miscRow.vendors[1]?.percent || 0;  // 18. 업체2 공과잡비 % (수량 열)
+        miscRow.getCell(18).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(18).numFmt = '#,##0';
+        miscRow.getCell(20).value = { formula: `=T${summaryRowNum}*(R${miscRowNum}/100)` };  // 20. 업체2 공과잡비 금액 = 경량공사 × (% ÷ 100)
+        miscRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(20).numFmt = '#,##0';
+
+        // 업체3 공과잡비: 21열(% 입력), 22열(빈칸), 23열(금액)
+        miscRow.getCell(21).value = priceComparisonData.miscRow.vendors[2]?.percent || 0;  // 21. 업체3 공과잡비 % (수량 열)
+        miscRow.getCell(21).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(21).numFmt = '#,##0';
+        miscRow.getCell(23).value = { formula: `=W${summaryRowNum}*(U${miscRowNum}/100)` };  // 23. 업체3 공과잡비 금액 = 경량공사 × (% ÷ 100)
+        miscRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(23).numFmt = '#,##0';
+
+        // 경량공사 행에 업체별 SUM 수식 추가 (자재비/노무비 합계)
+        // 주의: materialStartRow, laborEndRow는 아직 정의되지 않았으므로 나중에 적용
 
         // 네 번째 데이터 행: 단수정리 (24칸 구조)
         const roundingRow = worksheet.addRow([
@@ -1732,12 +2029,37 @@ async function exportPriceComparisonToExcel() {
             ''  // 24. 비고
         ]);
 
-        // "합계" 행에 SUM 수식 적용 (경량공사 + 공과잡비 + 단수정리)
+        // 단수정리 행에 업체별 수식 적용
         const roundingRowNum = roundingRow.number;
 
+        // 업체1 단수정리: (경량공사 + 공과잡비)의 십만단위 미만 × -1
+        roundingRow.getCell(17).value = { formula: `=MOD(Q${summaryRowNum}+Q${miscRowNum}, 100000)*-1` };
+        roundingRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
+        roundingRow.getCell(17).numFmt = '#,##0';
+
+        // 업체2 단수정리
+        roundingRow.getCell(20).value = { formula: `=MOD(T${summaryRowNum}+T${miscRowNum}, 100000)*-1` };
+        roundingRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
+        roundingRow.getCell(20).numFmt = '#,##0';
+
+        // 업체3 단수정리
+        roundingRow.getCell(23).value = { formula: `=MOD(W${summaryRowNum}+W${miscRowNum}, 100000)*-1` };
+        roundingRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
+        roundingRow.getCell(23).numFmt = '#,##0';
+
+        // "합계" 행에 SUM 수식 적용 (경량공사 + 공과잡비 + 단수정리)
         subtotalRow.getCell(7).value = { formula: `=SUM(G${summaryRowNum},G${miscRowNum},G${roundingRowNum})` };   // 7. 계약도급 금액
         subtotalRow.getCell(11).value = { formula: `=SUM(K${summaryRowNum},K${miscRowNum},K${roundingRowNum})` };  // 11. 진행도급 금액
         subtotalRow.getCell(14).value = { formula: `=SUM(N${summaryRowNum},N${miscRowNum},N${roundingRowNum})` };  // 14. 발주단가 금액
+
+        // 업체1 합계: 경량공사 + 공과잡비 + 단수정리
+        subtotalRow.getCell(17).value = { formula: `=SUM(Q${summaryRowNum},Q${miscRowNum},Q${roundingRowNum})` };  // 17. 업체1 금액
+
+        // 업체2 합계
+        subtotalRow.getCell(20).value = { formula: `=SUM(T${summaryRowNum},T${miscRowNum},T${roundingRowNum})` };  // 20. 업체2 금액
+
+        // 업체3 합계
+        subtotalRow.getCell(23).value = { formula: `=SUM(W${summaryRowNum},W${miscRowNum},W${roundingRowNum})` };  // 23. 업체3 금액
         subtotalRow.eachCell((cell) => {
             cell.border = {
                 top: { style: 'thin' },
@@ -1764,6 +2086,14 @@ async function exportPriceComparisonToExcel() {
         subtotalRow.getCell(11).numFmt = '#,##0';
         subtotalRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
         subtotalRow.getCell(14).numFmt = '#,##0';
+
+        // 업체별 금액 컬럼 우측 정렬 및 숫자 포맷
+        subtotalRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(17).numFmt = '#,##0';
+        subtotalRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(20).numFmt = '#,##0';
+        subtotalRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(23).numFmt = '#,##0';
 
         // 경량공사 구분선
         const dividerRow = worksheet.addRow(['', '경량공사', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
@@ -1836,10 +2166,9 @@ async function exportPriceComparisonToExcel() {
                 item.orderPriceQuantity || 0,           // 12. 발주단가 수량
                 item.unitPrice || 0,                    // 13. 발주단가 단가
                 '',                                     // 14. 발주단가 금액 (수식)
-                '',                                     // 15. 수량2
-                '', '', '',                             // 16-18. 업체1 (단가, 금액, 수량)
-                '', '', '',                             // 19-21. 업체2 (단가, 금액, 수량)
-                '', '',                                 // 22-23. 업체3 (단가, 금액)
+                item.orderQuantity || 0, item.vendors[0]?.unitPrice || 0, '',  // 15-17. 업체1 (수량, 단가, 금액)
+                item.orderQuantity || 0, item.vendors[1]?.unitPrice || 0, '',  // 18-20. 업체2 (수량, 단가, 금액)
+                item.orderQuantity || 0, item.vendors[2]?.unitPrice || 0, '',  // 21-23. 업체3 (수량, 단가, 금액)
                 ''                                      // 24. 비고
             ]);
 
@@ -1853,6 +2182,10 @@ async function exportPriceComparisonToExcel() {
             itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
             itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
             itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
+            // 업체별 금액 수식 (발주수량 × 업체 단가)
+            itemRow.getCell(17).value = { formula: `=I${rowNum}*P${rowNum}` };  // 17. 업체1 금액 = 9열(발주수량) × 16열(단가)
+            itemRow.getCell(20).value = { formula: `=I${rowNum}*S${rowNum}` };  // 20. 업체2 금액 = 9열(발주수량) × 19열(단가)
+            itemRow.getCell(23).value = { formula: `=I${rowNum}*V${rowNum}` };  // 23. 업체3 금액 = 9열(발주수량) × 22열(단가)
 
             itemRow.eachCell((cell, colIdx) => {
                 cell.border = {
@@ -1861,14 +2194,8 @@ async function exportPriceComparisonToExcel() {
                     bottom: { style: 'thin' },
                     right: { style: 'thin' }
                 };
-                if (colIdx >= 5 && colIdx <= 7) {
-                    // 계약도급 수량/단가/금액
-                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number' || cell.value?.formula) {
-                        cell.numFmt = '#,##0';
-                    }
-                } else if (colIdx >= 9 && colIdx <= 14) {
-                    // 발주수량, 진행도급 단가/금액, 발주단가 수량/단가/금액
+                // 숫자/금액 컬럼: 5-7, 9-23 (계약도급, 발주수량, 진행도급, 발주단가, 업체1/2/3)
+                if ((colIdx >= 5 && colIdx <= 7) || (colIdx >= 9 && colIdx <= 23)) {
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                     if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
@@ -1938,10 +2265,9 @@ async function exportPriceComparisonToExcel() {
                 item.orderPriceQuantity || 0,           // 12. 발주단가 수량
                 item.unitPrice || 0,                    // 13. 발주단가 단가
                 '',                                     // 14. 발주단가 금액 (수식)
-                '',                                     // 15. 수량2
-                '', '', '',                             // 16-18. 업체1 (단가, 금액, 수량)
-                '', '', '',                             // 19-21. 업체2 (단가, 금액, 수량)
-                '', '',                                 // 22-23. 업체3 (단가, 금액)
+                item.orderQuantity || 0, item.vendors[0]?.unitPrice || 0, '',  // 15-17. 업체1 (수량, 단가, 금액)
+                item.orderQuantity || 0, item.vendors[1]?.unitPrice || 0, '',  // 18-20. 업체2 (수량, 단가, 금액)
+                item.orderQuantity || 0, item.vendors[2]?.unitPrice || 0, '',  // 21-23. 업체3 (수량, 단가, 금액)
                 ''                                      // 24. 비고
             ]);
 
@@ -1955,6 +2281,10 @@ async function exportPriceComparisonToExcel() {
             itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
             itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
             itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
+            // 업체별 금액 수식 (발주수량 × 업체 단가)
+            itemRow.getCell(17).value = { formula: `=I${rowNum}*P${rowNum}` };  // 17. 업체1 금액 = 9열(발주수량) × 16열(단가)
+            itemRow.getCell(20).value = { formula: `=I${rowNum}*S${rowNum}` };  // 20. 업체2 금액 = 9열(발주수량) × 19열(단가)
+            itemRow.getCell(23).value = { formula: `=I${rowNum}*V${rowNum}` };  // 23. 업체3 금액 = 9열(발주수량) × 22열(단가)
 
             itemRow.eachCell((cell, colIdx) => {
                 cell.border = {
@@ -1963,14 +2293,8 @@ async function exportPriceComparisonToExcel() {
                     bottom: { style: 'thin' },
                     right: { style: 'thin' }
                 };
-                if (colIdx >= 5 && colIdx <= 7) {
-                    // 계약도급 수량/단가/금액
-                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number' || cell.value?.formula) {
-                        cell.numFmt = '#,##0';
-                    }
-                } else if (colIdx >= 9 && colIdx <= 14) {
-                    // 발주수량, 진행도급 단가/금액, 발주단가 수량/단가/금액
+                // 숫자/금액 컬럼: 5-7, 9-23 (계약도급, 발주수량, 진행도급, 발주단가, 업체1/2/3)
+                if ((colIdx >= 5 && colIdx <= 7) || (colIdx >= 9 && colIdx <= 23)) {
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                     if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
@@ -2011,6 +2335,15 @@ async function exportPriceComparisonToExcel() {
             finalTotalRow.getCell(7).value = { formula: `=SUM(G${materialStartRow}:G${laborEndRow})` };  // 7. 계약도급 금액
             finalTotalRow.getCell(11).value = { formula: `=SUM(K${materialStartRow}:K${laborEndRow})` };  // 11. 진행도급 금액
             finalTotalRow.getCell(14).value = { formula: `=SUM(N${materialStartRow}:N${laborEndRow})` };  // 14. 발주단가 금액
+            // 업체별 합계 수식 추가
+            finalTotalRow.getCell(17).value = { formula: `=SUM(Q${materialStartRow}:Q${laborEndRow})` };  // 17. 업체1 금액
+            finalTotalRow.getCell(20).value = { formula: `=SUM(T${materialStartRow}:T${laborEndRow})` };  // 20. 업체2 금액
+            finalTotalRow.getCell(23).value = { formula: `=SUM(W${materialStartRow}:W${laborEndRow})` };  // 23. 업체3 금액
+
+            // 경량공사 행에 업체별 SUM 수식 추가 (이제 materialStartRow, laborEndRow 사용 가능)
+            summaryRow.getCell(17).value = { formula: `=SUM(Q${materialStartRow}:Q${laborEndRow})` };  // 17. 업체1 금액
+            summaryRow.getCell(20).value = { formula: `=SUM(T${materialStartRow}:T${laborEndRow})` };  // 20. 업체2 금액
+            summaryRow.getCell(23).value = { formula: `=SUM(W${materialStartRow}:W${laborEndRow})` };  // 23. 업체3 금액
         }
         finalTotalRow.eachCell((cell) => {
             cell.border = {
@@ -2034,6 +2367,13 @@ async function exportPriceComparisonToExcel() {
         finalTotalRow.getCell(11).numFmt = '#,##0';
         finalTotalRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
         finalTotalRow.getCell(14).numFmt = '#,##0';
+        // 업체 금액 컬럼 포맷팅
+        finalTotalRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
+        finalTotalRow.getCell(17).numFmt = '#,##0';
+        finalTotalRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
+        finalTotalRow.getCell(20).numFmt = '#,##0';
+        finalTotalRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
+        finalTotalRow.getCell(23).numFmt = '#,##0';
 
         // 컬럼 너비 설정
         worksheet.columns = worksheet.columns.map((col, idx) => {
@@ -2364,7 +2704,13 @@ async function convertCalculationResultsToDetailSections() {
                 // 발주단가 관련 필드
                 orderPriceQuantity: 0,                            // 발주단가 수량 (발주수량 자동 복사)
                 orderPriceUnitPrice: 0,                           // 발주단가 단가 (입력 가능)
-                orderPriceAmount: 0                               // 발주단가 금액 (자동 계산)
+                orderPriceAmount: 0,                              // 발주단가 금액 (자동 계산)
+                // 업체별 필드
+                vendors: [
+                    { name: '업체1', unitPrice: 0, amount: 0, quantity: 0 },
+                    { name: '업체2', unitPrice: 0, amount: 0, quantity: 0 },
+                    { name: '업체3', unitPrice: 0, amount: 0 }
+                ]
             });
 
             // 노무비 아이템
@@ -2386,7 +2732,13 @@ async function convertCalculationResultsToDetailSections() {
                 // 발주단가 관련 필드
                 orderPriceQuantity: 0,                            // 발주단가 수량 (발주수량 자동 복사)
                 orderPriceUnitPrice: 0,                           // 발주단가 단가 (입력 가능)
-                orderPriceAmount: 0                               // 발주단가 금액 (자동 계산)
+                orderPriceAmount: 0,                              // 발주단가 금액 (자동 계산)
+                // 업체별 필드
+                vendors: [
+                    { name: '업체1', unitPrice: 0, amount: 0, quantity: 0 },
+                    { name: '업체2', unitPrice: 0, amount: 0, quantity: 0 },
+                    { name: '업체3', unitPrice: 0, amount: 0 }
+                ]
             });
 
             console.log(`    ✅ ${item.itemName} (${item.spec}): 수량 ${(Math.round(item.quantity * 100) / 100).toFixed(2)} ${item.unit}, 자재비 ${Math.round(item.materialAmount).toLocaleString()}원, 노무비 ${Math.round(item.laborAmount).toLocaleString()}원`);
