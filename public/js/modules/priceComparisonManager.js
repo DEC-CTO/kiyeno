@@ -1663,10 +1663,17 @@ async function exportPriceComparisonToExcel() {
         });
 
         // 두 번째 데이터 행: 경량공사 요약
-        addDataRow(priceComparisonData.summaryRow);
+        const summaryRow = addDataRow(priceComparisonData.summaryRow);
 
         // 세 번째 데이터 행: 공과잡비
-        addDataRow(priceComparisonData.miscRow);
+        const miscRow = addDataRow(priceComparisonData.miscRow);
+
+        // 공과잡비 수식 적용
+        const miscRowNum = miscRow.number;
+        const summaryRowNum = summaryRow.number;
+        miscRow.getCell(14).value = { formula: `=N${summaryRowNum}*(L${miscRowNum}/100)` };  // 14. 공과잡비 금액 = 경량공사 금액 × (% ÷ 100)
+        miscRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
+        miscRow.getCell(14).numFmt = '#,##0';
 
         // 네 번째 데이터 행: 단수정리 (24칸 구조)
         const roundingRow = worksheet.addRow([
@@ -1709,14 +1716,14 @@ async function exportPriceComparisonToExcel() {
             '',  // 4. 단위
             '',  // 5. 계약도급수량
             '',  // 6. 계약도급 단가
-            priceComparisonData.subtotalRow.contractPrice.amount || 0,  // 7. 계약도급 금액
+            '',  // 7. 계약도급 금액 (SUM 수식)
             '',  // 8. 단위
             '',  // 9. 발주수량
             '',  // 10. 진행도급 단가
-            priceComparisonData.subtotalRow.progressPrice.amount || 0,  // 11. 진행도급 금액
+            '',  // 11. 진행도급 금액 (SUM 수식)
             '',  // 12. 수량
             '',  // 13. 발주단가 단가
-            priceComparisonData.subtotalRow.orderPrice.amount || 0,  // 14. 발주단가 금액
+            '',  // 14. 발주단가 금액 (SUM 수식)
             '',  // 15. 수량2
             ...priceComparisonData.subtotalRow.vendors.flatMap((v, vIdx) => {
                 const isLast = vIdx === priceComparisonData.subtotalRow.vendors.length - 1;
@@ -1724,6 +1731,13 @@ async function exportPriceComparisonToExcel() {
             }),
             ''  // 24. 비고
         ]);
+
+        // "합계" 행에 SUM 수식 적용 (경량공사 + 공과잡비 + 단수정리)
+        const roundingRowNum = roundingRow.number;
+
+        subtotalRow.getCell(7).value = { formula: `=SUM(G${summaryRowNum},G${miscRowNum},G${roundingRowNum})` };   // 7. 계약도급 금액
+        subtotalRow.getCell(11).value = { formula: `=SUM(K${summaryRowNum},K${miscRowNum},K${roundingRowNum})` };  // 11. 진행도급 금액
+        subtotalRow.getCell(14).value = { formula: `=SUM(N${summaryRowNum},N${miscRowNum},N${roundingRowNum})` };  // 14. 발주단가 금액
         subtotalRow.eachCell((cell) => {
             cell.border = {
                 top: { style: 'thin' },
@@ -1742,6 +1756,14 @@ async function exportPriceComparisonToExcel() {
                 cell.numFmt = '#,##0';
             }
         });
+
+        // 금액 컬럼만 우측 정렬 및 숫자 포맷
+        subtotalRow.getCell(7).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(7).numFmt = '#,##0';
+        subtotalRow.getCell(11).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(11).numFmt = '#,##0';
+        subtotalRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
+        subtotalRow.getCell(14).numFmt = '#,##0';
 
         // 경량공사 구분선
         const dividerRow = worksheet.addRow(['', '경량공사', '', '', '', '', '', '', '', '', '', '', '', '', '', '']);
@@ -1790,6 +1812,8 @@ async function exportPriceComparisonToExcel() {
 
         // 자재비 상세 아이템들 (공종 헤더 없이 순번만)
         let materialItemNo = 1;
+        let materialStartRow = null;
+        let materialEndRow = null;
         priceComparisonData.detailSections.materials.forEach(item => {
             // isHeader 체크 (하위 호환성 유지)
             if (item.isHeader) {
@@ -1803,21 +1827,33 @@ async function exportPriceComparisonToExcel() {
                 item.spec || '',                        // 3. 규격
                 item.unit || '',                        // 4. 단위
                 item.quantity || 0,                     // 5. 계약도급수량
-                item.contractUnitPrice || 0,            // 6. 계약도급 단가
-                item.contractAmount || 0,               // 7. 계약도급 금액
+                '',                                     // 6. 계약도급 단가 (수식)
+                '',                                     // 7. 계약도급 금액 (수식)
                 item.orderUnit || item.unit || '',      // 8. 단위
                 item.orderQuantity || 0,                // 9. 발주수량
-                item.progressUnitPrice || 0,            // 10. 진행도급 단가
+                '',                                     // 10. 진행도급 단가 (수식)
                 item.progressAmount || 0,               // 11. 진행도급 금액
                 item.orderPriceQuantity || 0,           // 12. 발주단가 수량
                 item.unitPrice || 0,                    // 13. 발주단가 단가
-                item.orderPriceAmount || 0,             // 14. 발주단가 금액
+                '',                                     // 14. 발주단가 금액 (수식)
                 '',                                     // 15. 수량2
                 '', '', '',                             // 16-18. 업체1 (단가, 금액, 수량)
                 '', '', '',                             // 19-21. 업체2 (단가, 금액, 수량)
                 '', '',                                 // 22-23. 업체3 (단가, 금액)
                 ''                                      // 24. 비고
             ]);
+
+            // 수식 적용
+            const rowNum = itemRow.number;
+            if (!materialStartRow) materialStartRow = rowNum;
+            materialEndRow = rowNum;
+
+            itemRow.getCell(6).value = { formula: `=M${rowNum}*1.2` };  // 6. 계약도급 단가 = 발주단가 × 1.2
+            itemRow.getCell(7).value = { formula: `=E${rowNum}*F${rowNum}` };  // 7. 계약도급 금액 = 수량 × 계약도급 단가
+            itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
+            itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
+            itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
+
             itemRow.eachCell((cell, colIdx) => {
                 cell.border = {
                     top: { style: 'thin' },
@@ -1828,13 +1864,13 @@ async function exportPriceComparisonToExcel() {
                 if (colIdx >= 5 && colIdx <= 7) {
                     // 계약도급 수량/단가/금액
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number') {
+                    if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
                     }
-                } else if (colIdx >= 9 && colIdx <= 11) {
-                    // 발주수량, 진행도급 단가/금액
+                } else if (colIdx >= 9 && colIdx <= 14) {
+                    // 발주수량, 진행도급 단가/금액, 발주단가 수량/단가/금액
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number') {
+                    if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
                     }
                 } else {
@@ -1878,6 +1914,8 @@ async function exportPriceComparisonToExcel() {
 
         // 노무비 상세 아이템들 (공종 헤더 없이 순번만)
         let laborItemNo = 1;
+        let laborStartRow = null;
+        let laborEndRow = null;
         priceComparisonData.detailSections.labor.forEach(item => {
             // isHeader 체크 (하위 호환성 유지)
             if (item.isHeader) {
@@ -1891,21 +1929,33 @@ async function exportPriceComparisonToExcel() {
                 item.spec || '',                        // 3. 규격
                 item.unit || '',                        // 4. 단위
                 item.quantity || 0,                     // 5. 계약도급수량
-                item.contractUnitPrice || 0,            // 6. 계약도급 단가
-                item.contractAmount || 0,               // 7. 계약도급 금액
+                '',                                     // 6. 계약도급 단가 (수식)
+                '',                                     // 7. 계약도급 금액 (수식)
                 item.orderUnit || item.unit || '',      // 8. 단위
                 item.orderQuantity || 0,                // 9. 발주수량
-                item.progressUnitPrice || 0,            // 10. 진행도급 단가
+                '',                                     // 10. 진행도급 단가 (수식)
                 item.progressAmount || 0,               // 11. 진행도급 금액
                 item.orderPriceQuantity || 0,           // 12. 발주단가 수량
                 item.unitPrice || 0,                    // 13. 발주단가 단가
-                item.orderPriceAmount || 0,             // 14. 발주단가 금액
+                '',                                     // 14. 발주단가 금액 (수식)
                 '',                                     // 15. 수량2
                 '', '', '',                             // 16-18. 업체1 (단가, 금액, 수량)
                 '', '', '',                             // 19-21. 업체2 (단가, 금액, 수량)
                 '', '',                                 // 22-23. 업체3 (단가, 금액)
                 ''                                      // 24. 비고
             ]);
+
+            // 수식 적용
+            const rowNum = itemRow.number;
+            if (!laborStartRow) laborStartRow = rowNum;
+            laborEndRow = rowNum;
+
+            itemRow.getCell(6).value = { formula: `=M${rowNum}*1.2` };  // 6. 계약도급 단가 = 발주단가 × 1.2
+            itemRow.getCell(7).value = { formula: `=E${rowNum}*F${rowNum}` };  // 7. 계약도급 금액 = 수량 × 계약도급 단가
+            itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
+            itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
+            itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
+
             itemRow.eachCell((cell, colIdx) => {
                 cell.border = {
                     top: { style: 'thin' },
@@ -1916,13 +1966,13 @@ async function exportPriceComparisonToExcel() {
                 if (colIdx >= 5 && colIdx <= 7) {
                     // 계약도급 수량/단가/금액
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number') {
+                    if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
                     }
-                } else if (colIdx >= 9 && colIdx <= 11) {
-                    // 발주수량, 진행도급 단가/금액
+                } else if (colIdx >= 9 && colIdx <= 14) {
+                    // 발주수량, 진행도급 단가/금액, 발주단가 수량/단가/금액
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
-                    if (typeof cell.value === 'number') {
+                    if (typeof cell.value === 'number' || cell.value?.formula) {
                         cell.numFmt = '#,##0';
                     }
                 } else {
@@ -1940,14 +1990,14 @@ async function exportPriceComparisonToExcel() {
             '',                     // 4. 단위
             '',                     // 5. 계약도급수량
             '',                     // 6. 계약도급 단가
-            priceComparisonData.finalTotalRow.contractPrice.amount || 0,  // 7. 계약도급 금액
+            '',                     // 7. 계약도급 금액 (SUM 수식)
             '',                     // 8. 단위
             '',                     // 9. 발주수량
             '',                     // 10. 진행도급 단가
-            priceComparisonData.finalTotalRow.progressPrice.amount || 0,  // 11. 진행도급 금액
+            '',                     // 11. 진행도급 금액 (SUM 수식)
             '',                     // 12. 수량
             '',                     // 13. 발주단가 단가
-            priceComparisonData.finalTotalRow.orderPrice.amount || 0,  // 14. 발주단가 금액
+            '',                     // 14. 발주단가 금액 (SUM 수식)
             '',                     // 15. 수량2
             ...priceComparisonData.finalTotalRow.vendors.flatMap((v, vIdx) => {
                 const isLast = vIdx === priceComparisonData.finalTotalRow.vendors.length - 1;
@@ -1955,6 +2005,13 @@ async function exportPriceComparisonToExcel() {
             }),
             ''                      // 24. 비고
         ]);
+
+        // "계" 행에 SUM 수식 적용
+        if (materialStartRow && laborEndRow) {
+            finalTotalRow.getCell(7).value = { formula: `=SUM(G${materialStartRow}:G${laborEndRow})` };  // 7. 계약도급 금액
+            finalTotalRow.getCell(11).value = { formula: `=SUM(K${materialStartRow}:K${laborEndRow})` };  // 11. 진행도급 금액
+            finalTotalRow.getCell(14).value = { formula: `=SUM(N${materialStartRow}:N${laborEndRow})` };  // 14. 발주단가 금액
+        }
         finalTotalRow.eachCell((cell) => {
             cell.border = {
                 top: { style: 'thin' },
