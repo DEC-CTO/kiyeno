@@ -2008,3 +2008,35 @@ body {
         font-size: 18px;
     }
 }
+
+/* =============================================================================
+   견적서 토글 버튼 스타일 (접기/펼치기)
+   ============================================================================= */
+.toggle-btn {
+    display: inline-block;
+    cursor: pointer;
+    color: #3b82f6;
+    font-weight: bold;
+    font-size: 14px;
+    margin-right: 5px;
+    user-select: none;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    color: #1d4ed8;
+    transform: scale(1.1);
+}
+
+.toggle-btn:active {
+    transform: scale(0.95);
+}
+
+/* 자식 행 스타일 */
+.child-row {
+    transition: all 0.3s ease;
+}
+
+.child-row.hidden {
+    display: none;
+}

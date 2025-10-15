@@ -2385,18 +2385,29 @@ function renderEstimateTab() {
             <div class="estimate-table-wrapper">
                 <table class="estimate-table">
                     <colgroup>
-                        <col style="width: 60px;">
-                        <col style="width: 300px;">
-                        <col style="width: 400px;">
-                        <col style="width: 60px;">
-                        <col style="width: 80px;">
-                        <col style="width: 150px;">
-                        <col style="width: 150px;">
-                        <col style="width: 150px;">
-                        <col style="width: 150px;">
-                        <col style="width: 150px;">
-                        <col style="width: 150px;">
-                        <col style="width: 120px;">
+                        <col style="width: 60px;">   <!-- NO. -->
+                        <col style="width: 300px;">  <!-- 품명 -->
+                        <col style="width: 400px;">  <!-- 규격 -->
+                        <col style="width: 60px;">   <!-- 단위 -->
+                        <col style="width: 80px;">   <!-- 수량 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 자재비 단가 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 자재비 금액 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 노무비 단가 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 노무비 금액 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 경비 단가 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 경비 금액 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 합계 단가 -->
+                        <col style="width: 120px;">  <!-- 도급내역서: 합계 금액 -->
+                        <col style="width: 100px;">  <!-- 비고① -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 자재비 단가 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 자재비 금액 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 노무비 단가 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 노무비 금액 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 경비 단가 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 경비 금액 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 합계 단가 -->
+                        <col style="width: 120px;">  <!-- 발주단가내역서: 합계 금액 -->
+                        <col style="width: 100px;">  <!-- 비고② -->
                     </colgroup>
                     <thead>
                         <tr>
@@ -2404,16 +2415,33 @@ function renderEstimateTab() {
                             <th rowspan="3">품명</th>
                             <th rowspan="3">규격</th>
                             <th rowspan="3">단위</th>
-                            <th colspan="7">계 약 내 역 서</th>
+                            <th colspan="9">도급내역서</th>
+                            <th rowspan="3">비고</th>
+                            <th colspan="8">발주단가내역서</th>
                             <th rowspan="3">비고</th>
                         </tr>
                         <tr>
                             <th rowspan="2">수량</th>
                             <th colspan="2">자재비</th>
                             <th colspan="2">노무비</th>
+                            <th colspan="2">경비</th>
+                            <th colspan="2">합계</th>
+                            <th colspan="2">자재비</th>
+                            <th colspan="2">노무비</th>
+                            <th colspan="2">경비</th>
                             <th colspan="2">합계</th>
                         </tr>
                         <tr>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
+                            <th>단가</th>
+                            <th>금액</th>
                             <th>단가</th>
                             <th>금액</th>
                             <th>단가</th>
@@ -2512,6 +2540,17 @@ function generateEstimateDetailRows() {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     `;
 
@@ -2551,13 +2590,45 @@ function generateEstimateDetailRows() {
     directItems.forEach(item => {
         // D-1, E-1, F-1 등 하위 항목은 들여쓰기 적용
         const indentClass = item.no && item.no.includes('-') ? 'indent-2' : 'indent-1';
+
+        // 하위 항목 여부 판별
+        const isChildRow = item.no && item.no.includes('-');
+
+        // 상위 항목(D, E, F) 판별 및 토글 버튼 추가
+        let toggleButton = '';
+        let parentId = '';
+        let dataParentAttr = '';
+        let childRowClass = '';
+
+        if (isChildRow) {
+            // 하위 항목: D-1 → parent = D
+            parentId = item.no.split('-')[0];
+            dataParentAttr = `data-parent="${parentId}"`;
+            childRowClass = 'child-row';
+        } else if (item.name.startsWith('D.') || item.name.startsWith('E.') || item.name.startsWith('F.')) {
+            // 상위 항목: D, E, F
+            const groupId = item.name.charAt(0);
+            toggleButton = `<span class="toggle-btn" onclick="toggleEstimateGroup('${groupId}')" title="하위 항목 접기/펼치기">[-]</span> `;
+        }
+
         html += `
-            <tr class="type-row">
+            <tr class="type-row ${childRowClass}" ${dataParentAttr}>
                 <td>${item.no}</td>
-                <td class="left-align ${indentClass}">${item.name}</td>
+                <td class="left-align ${indentClass}">${toggleButton}${item.name}</td>
                 <td></td>
                 <td>LOT</td>
                 <td class="number-cell">1.00</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -2584,6 +2655,17 @@ function generateEstimateDetailRows() {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     `;
 
@@ -2591,6 +2673,36 @@ function generateEstimateDetailRows() {
     html += generateIndirectCostRows();
 
     return html;
+}
+
+/**
+ * 견적서 그룹 토글 (접기/펼치기)
+ * @param {string} groupId - 그룹 ID (D, E, F 등)
+ */
+function toggleEstimateGroup(groupId) {
+    // 해당 그룹의 모든 자식 행 찾기
+    const childRows = document.querySelectorAll(`tr[data-parent="${groupId}"]`);
+
+    // 토글 버튼 찾기
+    const toggleBtn = document.querySelector(`.toggle-btn[onclick*="${groupId}"]`);
+
+    if (!childRows.length || !toggleBtn) return;
+
+    // 현재 상태 확인 (첫 번째 자식 행의 display 속성으로 판단)
+    const isVisible = childRows[0].style.display !== 'none';
+
+    // 모든 자식 행 토글
+    childRows.forEach(row => {
+        row.style.display = isVisible ? 'none' : 'table-row';
+    });
+
+    // 토글 버튼 텍스트 변경
+    toggleBtn.textContent = isVisible ? '[+]' : '[-]';
+}
+
+// 전역 접근을 위해 window 객체에 추가
+if (typeof window !== 'undefined') {
+    window.toggleEstimateGroup = toggleEstimateGroup;
 }
 
 /**
@@ -2632,6 +2744,17 @@ function generateIndirectCostRows() {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     `;
 
@@ -2662,8 +2785,19 @@ function generateIndirectCostRows() {
                 <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="materialAmount"></td>
                 <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="laborPrice"></td>
                 <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="laborAmount"></td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="expensePrice"></td>
+                <td><input type="text" class="estimate-input" data-type="indirect" data-index="${index}" data-field="expenseAmount"></td>
                 <td class="number-cell"></td>
                 <td class="number-cell"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
                 <td></td>
             </tr>
         `;
@@ -2674,6 +2808,17 @@ function generateIndirectCostRows() {
         <tr class="subtotal-row">
             <td></td>
             <td class="left-align">B - TOTAL</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -2702,6 +2847,17 @@ function generateIndirectCostRows() {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
         </tr>
     `;
 
@@ -2710,6 +2866,17 @@ function generateIndirectCostRows() {
         <tr class="subtotal-row">
             <td></td>
             <td class="left-align">GRAND TOTAL (A+B+C+D)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
             <td></td>
             <td></td>
             <td></td>
@@ -3001,11 +3168,17 @@ async function createEstimateDetailSheet(workbook) {
     sheet.mergeCells('D1:D3');
     sheet.getCell('D1').value = '단위';
 
-    sheet.mergeCells('E1:K1');
-    sheet.getCell('E1').value = '계 약 내 역 서';
+    sheet.mergeCells('E1:M1');
+    sheet.getCell('E1').value = '도급내역서';
 
-    sheet.mergeCells('L1:L3');
-    sheet.getCell('L1').value = '비고';
+    sheet.mergeCells('N1:N3');
+    sheet.getCell('N1').value = '비고';
+
+    sheet.mergeCells('O1:V1');
+    sheet.getCell('O1').value = '발주단가내역서';
+
+    sheet.mergeCells('W1:W3');
+    sheet.getCell('W1').value = '비고';
 
     // 2단 헤더
     sheet.mergeCells('E2:E3');
@@ -3018,7 +3191,22 @@ async function createEstimateDetailSheet(workbook) {
     sheet.getCell('H2').value = '노무비';
 
     sheet.mergeCells('J2:K2');
-    sheet.getCell('J2').value = '합계';
+    sheet.getCell('J2').value = '경비';
+
+    sheet.mergeCells('L2:M2');
+    sheet.getCell('L2').value = '합계';
+
+    sheet.mergeCells('O2:P2');
+    sheet.getCell('O2').value = '자재비';
+
+    sheet.mergeCells('Q2:R2');
+    sheet.getCell('Q2').value = '노무비';
+
+    sheet.mergeCells('S2:T2');
+    sheet.getCell('S2').value = '경비';
+
+    sheet.mergeCells('U2:V2');
+    sheet.getCell('U2').value = '합계';
 
     // 3단 헤더
     sheet.getCell('F3').value = '단가';
@@ -3027,6 +3215,16 @@ async function createEstimateDetailSheet(workbook) {
     sheet.getCell('I3').value = '금액';
     sheet.getCell('J3').value = '단가';
     sheet.getCell('K3').value = '금액';
+    sheet.getCell('L3').value = '단가';
+    sheet.getCell('M3').value = '금액';
+    sheet.getCell('O3').value = '단가';
+    sheet.getCell('P3').value = '금액';
+    sheet.getCell('Q3').value = '단가';
+    sheet.getCell('R3').value = '금액';
+    sheet.getCell('S3').value = '단가';
+    sheet.getCell('T3').value = '금액';
+    sheet.getCell('U3').value = '단가';
+    sheet.getCell('V3').value = '금액';
 
     // 헤더 스타일 적용
     [1, 2, 3].forEach(rowNum => {
@@ -3070,9 +3268,25 @@ async function createEstimateDetailSheet(workbook) {
         dataRow.getCell(7).value = row.materialAmount || '';
         dataRow.getCell(8).value = row.laborUnitPrice || '';
         dataRow.getCell(9).value = row.laborAmount || '';
-        dataRow.getCell(10).value = row.totalUnitPrice || '';
-        dataRow.getCell(11).value = row.totalAmount || '';
-        dataRow.getCell(12).value = row.remark || '';
+        dataRow.getCell(10).value = row.expenseUnitPrice || '';
+        dataRow.getCell(11).value = row.expenseAmount || '';
+        dataRow.getCell(12).value = row.totalUnitPrice || '';
+        dataRow.getCell(13).value = row.totalAmount || '';
+        dataRow.getCell(14).value = row.remark || '';
+        dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
+        dataRow.getCell(16).value = row.orderMaterialAmount || '';
+        dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
+        dataRow.getCell(18).value = row.orderLaborAmount || '';
+        dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
+        dataRow.getCell(20).value = row.orderExpenseAmount || '';
+        dataRow.getCell(21).value = row.orderTotalUnitPrice || '';
+        dataRow.getCell(22).value = row.orderTotalAmount || '';
+        dataRow.getCell(23).value = row.remark2 || '';
+
+        // Excel 그룹화: 자식 행 판별 (D-1, D-2, E-1, E-2 등)
+        if (row.no && typeof row.no === 'string' && row.no.includes('-')) {
+            dataRow.outlineLevel = 1;
+        }
 
         // 스타일 적용
         if (row.type === 'section-header') {
@@ -3107,7 +3321,7 @@ async function createEstimateDetailSheet(workbook) {
         });
 
         // 숫자 셀 오른쪽 정렬 및 천단위 구분
-        [5, 6, 7, 8, 9, 10, 11].forEach(colNum => {
+        [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22].forEach(colNum => {
             const cell = dataRow.getCell(colNum);
             cell.alignment = { horizontal: 'right', vertical: 'middle' };
             if (typeof cell.value === 'number') {
@@ -3122,18 +3336,29 @@ async function createEstimateDetailSheet(workbook) {
     });
 
     // 컬럼 너비 설정
-    sheet.getColumn(1).width = 40;  // NO
+    sheet.getColumn(1).width = 8;   // NO
     sheet.getColumn(2).width = 30;  // 품명
     sheet.getColumn(3).width = 15;  // 규격
     sheet.getColumn(4).width = 8;   // 단위
-    sheet.getColumn(5).width = 12;  // 수량
-    sheet.getColumn(6).width = 15;  // 자재비 단가
-    sheet.getColumn(7).width = 15;  // 자재비 금액
-    sheet.getColumn(8).width = 15;  // 노무비 단가
-    sheet.getColumn(9).width = 15;  // 노무비 금액
-    sheet.getColumn(10).width = 15; // 합계 단가
-    sheet.getColumn(11).width = 15; // 합계 금액
-    sheet.getColumn(12).width = 15; // 비고
+    sheet.getColumn(5).width = 10;  // 수량
+    sheet.getColumn(6).width = 12;  // 도급: 자재비 단가
+    sheet.getColumn(7).width = 12;  // 도급: 자재비 금액
+    sheet.getColumn(8).width = 12;  // 도급: 노무비 단가
+    sheet.getColumn(9).width = 12;  // 도급: 노무비 금액
+    sheet.getColumn(10).width = 12; // 도급: 경비 단가
+    sheet.getColumn(11).width = 12; // 도급: 경비 금액
+    sheet.getColumn(12).width = 12; // 도급: 합계 단가
+    sheet.getColumn(13).width = 12; // 도급: 합계 금액
+    sheet.getColumn(14).width = 10; // 비고①
+    sheet.getColumn(15).width = 12; // 발주: 자재비 단가
+    sheet.getColumn(16).width = 12; // 발주: 자재비 금액
+    sheet.getColumn(17).width = 12; // 발주: 노무비 단가
+    sheet.getColumn(18).width = 12; // 발주: 노무비 금액
+    sheet.getColumn(19).width = 12; // 발주: 경비 단가
+    sheet.getColumn(20).width = 12; // 발주: 경비 금액
+    sheet.getColumn(21).width = 12; // 발주: 합계 단가
+    sheet.getColumn(22).width = 12; // 발주: 합계 금액
+    sheet.getColumn(23).width = 10; // 비고②
 }
 
 /**
@@ -3194,9 +3419,20 @@ function generateEstimateDetailRowsData() {
             materialAmount: '',
             laborUnitPrice: '',
             laborAmount: '',
+            expenseUnitPrice: '',
+            expenseAmount: '',
             totalUnitPrice: '',
             totalAmount: '',
             remark: '',
+            orderMaterialUnitPrice: '',
+            orderMaterialAmount: '',
+            orderLaborUnitPrice: '',
+            orderLaborAmount: '',
+            orderExpenseUnitPrice: '',
+            orderExpenseAmount: '',
+            orderTotalUnitPrice: '',
+            orderTotalAmount: '',
+            remark2: '',
             type: 'item'
         });
     });
@@ -3212,9 +3448,20 @@ function generateEstimateDetailRowsData() {
         materialAmount: '',
         laborUnitPrice: '',
         laborAmount: '',
+        expenseUnitPrice: '',
+        expenseAmount: '',
         totalUnitPrice: '',
         totalAmount: '',
         remark: '',
+        orderMaterialUnitPrice: '',
+        orderMaterialAmount: '',
+        orderLaborUnitPrice: '',
+        orderLaborAmount: '',
+        orderExpenseUnitPrice: '',
+        orderExpenseAmount: '',
+        orderTotalUnitPrice: '',
+        orderTotalAmount: '',
+        remark2: '',
         type: 'subtotal'
     });
 
@@ -3258,9 +3505,20 @@ function generateEstimateDetailRowsData() {
             materialAmount: '',
             laborUnitPrice: '',
             laborAmount: Math.round(item.value) || '',
+            expenseUnitPrice: '',
+            expenseAmount: '',
             totalUnitPrice: '',
             totalAmount: Math.round(item.value) || '',
             remark: '',
+            orderMaterialUnitPrice: '',
+            orderMaterialAmount: '',
+            orderLaborUnitPrice: '',
+            orderLaborAmount: '',
+            orderExpenseUnitPrice: '',
+            orderExpenseAmount: '',
+            orderTotalUnitPrice: '',
+            orderTotalAmount: '',
+            remark2: '',
             type: 'indirect'
         });
     });
@@ -3276,9 +3534,20 @@ function generateEstimateDetailRowsData() {
         materialAmount: '',
         laborUnitPrice: '',
         laborAmount: '',
+        expenseUnitPrice: '',
+        expenseAmount: '',
         totalUnitPrice: '',
         totalAmount: '',
         remark: '',
+        orderMaterialUnitPrice: '',
+        orderMaterialAmount: '',
+        orderLaborUnitPrice: '',
+        orderLaborAmount: '',
+        orderExpenseUnitPrice: '',
+        orderExpenseAmount: '',
+        orderTotalUnitPrice: '',
+        orderTotalAmount: '',
+        remark2: '',
         type: 'subtotal'
     });
 
@@ -3294,9 +3563,20 @@ function generateEstimateDetailRowsData() {
         materialAmount: '',
         laborUnitPrice: '',
         laborAmount: '',
+        expenseUnitPrice: '',
+        expenseAmount: '',
         totalUnitPrice: '',
         totalAmount: '',
         remark: '',
+        orderMaterialUnitPrice: '',
+        orderMaterialAmount: '',
+        orderLaborUnitPrice: '',
+        orderLaborAmount: '',
+        orderExpenseUnitPrice: '',
+        orderExpenseAmount: '',
+        orderTotalUnitPrice: '',
+        orderTotalAmount: '',
+        remark2: '',
         type: 'total'
     });
 
