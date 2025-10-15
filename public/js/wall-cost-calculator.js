@@ -1503,6 +1503,10 @@ async function renderOrderFormTab() {
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
                         <!-- 데이터 행 -->
                         ${dataRowsHtml}
@@ -1511,6 +1515,19 @@ async function renderOrderFormTab() {
             </div>
         </div>
     `;
+
+    // 경비 입력 이벤트 리스너 추가
+    attachExpenseInputListeners();
+
+    // 조정비율 입력 필드 이벤트 리스너
+    const contractRatioInput = document.getElementById('contractRatioInput');
+    if (contractRatioInput) {
+        contractRatioInput.addEventListener('input', async function() {
+            console.log('🔄 조정비율 변경됨:', this.value);
+            // 테이블 전체 재렌더링
+            await renderOrderFormTab();
+        });
+    }
 }
 
 /**
@@ -1663,10 +1680,16 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
     // ✅ 금액 계산 (단가 × 면적)
     const totalMaterialCost = totalMaterialUnitPrice * totalArea;
     const totalLaborCost = totalLaborUnitPrice * totalArea;
-    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice;
-    const totalCost = totalMaterialCost + totalLaborCost;
 
-    console.log(`📐 ${typeName} THK: ${totalThickness}, 재료비단가: ${totalMaterialUnitPrice}, 노무비단가: ${totalLaborUnitPrice}`);
+    // ✅ 경비 계산 (타입 요약 행은 경비 0)
+    const totalExpenseUnitPrice = 0; // 경비 단가 (기본값 0)
+    const totalExpenseCost = 0; // 경비 금액 (기본값 0)
+
+    // ✅ 합계 계산 (자재비 + 노무비 + 경비)
+    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice + totalExpenseUnitPrice;
+    const totalCost = totalMaterialCost + totalLaborCost + totalExpenseCost;
+
+    console.log(`📐 ${typeName} THK: ${totalThickness}, 재료비단가: ${totalMaterialUnitPrice}, 노무비단가: ${totalLaborUnitPrice}, 경비단가: ${totalExpenseUnitPrice}`);
 
     return `
         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
@@ -1689,15 +1712,19 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalLaborUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalExpenseUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalExpenseCost).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
             <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
             <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="number-cell">${Math.round(totalMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalExpenseUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalExpenseCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
             <td></td>
         </tr>
     `;
@@ -2017,13 +2044,28 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
     // ✅ 수량 컬럼: 모든 자재 동일하게 면적만 표시
     const displayQuantity = area;
 
-    // ✅ 단가: component에 이미 소요량이 반영된 단가가 들어있음
-    const materialUnitPrice = parseFloat(component.materialPrice) || 0;
-    const laborUnitPrice = parseFloat(component.laborPrice) || 0;
+    // ✅ 조정비율 가져오기 (기본값 1.2)
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
 
-    // ✅ 금액: 단가 × 면적
-    const materialAmount = materialUnitPrice * area;
-    const laborTotalAmount = laborUnitPrice * area;
+    // ✅ 발주단가 (기준값)
+    const orderMaterialUnitPrice = parseFloat(component.materialPrice) || 0;
+    const orderLaborUnitPrice = parseFloat(component.laborPrice) || 0;
+
+    // ✅ 계약도급 단가 (발주단가 × 조정비율)
+    const contractMaterialUnitPrice = orderMaterialUnitPrice * contractRatio;
+    const contractLaborUnitPrice = orderLaborUnitPrice * contractRatio;
+
+    // ✅ 금액 계산
+    const contractMaterialAmount = contractMaterialUnitPrice * area;
+    const contractLaborAmount = contractLaborUnitPrice * area;
+    const orderMaterialAmount = orderMaterialUnitPrice * area;
+    const orderLaborAmount = orderLaborUnitPrice * area;
+
+    // ✅ 합계
+    const contractTotalUnitPrice = contractMaterialUnitPrice + contractLaborUnitPrice;
+    const contractTotalAmount = contractMaterialAmount + contractLaborAmount;
+    const orderTotalUnitPrice = orderMaterialUnitPrice + orderLaborUnitPrice;
+    const orderTotalAmount = orderMaterialAmount + orderLaborAmount;
 
     // 석고보드 장 수량 재계산: 실제수량 ÷ 1장당m2 (0단위 반올림)
     if (isGypsumBoard(componentName) && conversionM2) {
@@ -2035,22 +2077,25 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
         }
     }
 
-    // 합계
-    const totalUnitPrice = materialUnitPrice + laborUnitPrice;
-    const totalAmount = materialAmount + laborTotalAmount;
-
     console.log(`  💰 단가 계산 (${componentName}):`, {
-        '재료비단가': materialUnitPrice,
-        '재료비금액': materialAmount,
-        '노무비단가': laborUnitPrice,
-        '노무비금액': laborTotalAmount,
-        '합계단가': totalUnitPrice,
-        '합계금액': totalAmount
+        '조정비율': contractRatio,
+        '계약도급_재료비단가': contractMaterialUnitPrice,
+        '계약도급_재료비금액': contractMaterialAmount,
+        '계약도급_노무비단가': contractLaborUnitPrice,
+        '계약도급_노무비금액': contractLaborAmount,
+        '계약도급_합계단가': contractTotalUnitPrice,
+        '계약도급_합계금액': contractTotalAmount,
+        '발주단가_재료비단가': orderMaterialUnitPrice,
+        '발주단가_재료비금액': orderMaterialAmount,
+        '발주단가_노무비단가': orderLaborUnitPrice,
+        '발주단가_노무비금액': orderLaborAmount,
+        '발주단가_합계단가': orderTotalUnitPrice,
+        '발주단가_합계금액': orderTotalAmount
     });
 
     // E. HTML 생성
     return `
-        <tr style="background: white;">
+        <tr style="background: white;" data-row="${rowNumber}">
             <td>${rowNumber}</td>
             <td></td>
             <td>${displayName}</td>
@@ -2065,20 +2110,24 @@ async function generateComponentRow(component, unitPriceItem, result, rowNumber,
             <td>${conversionM2}</td>
             <td>${sheetQuantity ? parseInt(sheetQuantity).toLocaleString() : ''}</td>
             <td>M2</td>
-            <td>${displayQuantity.toFixed(2)}</td>
-            <td class="number-cell">${Math.round(materialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(materialAmount).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(laborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(laborTotalAmount).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalAmount).toLocaleString()}</td>
+            <td class="quantity-cell">${displayQuantity.toFixed(2)}</td>
+            <td class="number-cell contract-material-price">${Math.round(contractMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${Math.round(contractMaterialAmount).toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${Math.round(contractLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${Math.round(contractLaborAmount).toLocaleString()}</td>
+            <td><input type="text" class="expense-input contract-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
+            <td class="number-cell expense-amount contract-expense-amount" data-row="${rowNumber}">0</td>
+            <td class="number-cell contract-total-price" data-row="${rowNumber}">${Math.round(contractTotalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-total-amount" data-row="${rowNumber}">${Math.round(contractTotalAmount).toLocaleString()}</td>
             <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="number-cell order-material-price">${Math.round(orderMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${Math.round(orderMaterialAmount).toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${Math.round(orderLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${Math.round(orderLaborAmount).toLocaleString()}</td>
+            <td><input type="text" class="expense-input order-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
+            <td class="number-cell expense-amount order-expense-amount" data-row="${rowNumber}">0</td>
+            <td class="number-cell order-total-price" data-row="${rowNumber}">${Math.round(orderTotalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-total-amount" data-row="${rowNumber}">${Math.round(orderTotalAmount).toLocaleString()}</td>
             <td></td>
         </tr>
     `;
@@ -2200,7 +2249,7 @@ async function generateOrderFormDataRows() {
     if (calculationResults.length === 0) {
         return `
             <tr>
-                <td colspan="29" style="padding: 20px; text-align: center; color: #6c757d;">
+                <td colspan="33" style="padding: 20px; text-align: center; color: #6c757d;">
                     벽체 계산 데이터가 없습니다. 먼저 벽체를 선택하고 계산하기를 실행하세요.
                 </td>
             </tr>
@@ -2242,9 +2291,14 @@ function generateOrderFormHeader() {
             <th colspan="3">환산</th>
             <th rowspan="3">단위</th>
             <th rowspan="3">수량</th>
-            <th colspan="6">계약도급</th>
+            <th colspan="8">
+                계약도급
+                <input type="text" id="contractRatioInput" value="1.2"
+                       style="width: 50px; margin-left: 5px; text-align: center; font-size: 0.9em;"
+                       placeholder="1.2" />
+            </th>
             <th rowspan="3">비고</th>
-            <th colspan="6">발주단가</th>
+            <th colspan="8">발주단가</th>
             <th rowspan="3">비고</th>
         </tr>
 
@@ -2262,9 +2316,11 @@ function generateOrderFormHeader() {
             <th rowspan="2">장</th>
             <th colspan="2">자재비</th>
             <th colspan="2">노무비</th>
+            <th colspan="2">경비</th>
             <th colspan="2">합계</th>
             <th colspan="2">자재비</th>
             <th colspan="2">노무비</th>
+            <th colspan="2">경비</th>
             <th colspan="2">합계</th>
         </tr>
 
@@ -2282,8 +2338,103 @@ function generateOrderFormHeader() {
             <th>금액</th>
             <th>단가</th>
             <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
+            <th>단가</th>
+            <th>금액</th>
         </tr>
     `;
+}
+
+/**
+ * 경비 입력 필드 이벤트 리스너 추가
+ * 경비 단가 입력 시 자동으로 금액 및 합계 계산
+ */
+function attachExpenseInputListeners() {
+    console.log('💰 경비 입력 이벤트 리스너 추가');
+
+    // 모든 경비 입력 필드 선택
+    const expenseInputs = document.querySelectorAll('.expense-input');
+
+    expenseInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const rowNumber = this.getAttribute('data-row');
+            const isContract = this.classList.contains('contract-expense-price');
+
+            // 입력값 가져오기
+            const expensePrice = parseFloat(this.value) || 0;
+
+            // 해당 행 찾기
+            const row = document.querySelector(`tr[data-row="${rowNumber}"]`);
+            if (!row) return;
+
+            // 경비 금액 계산 (경비는 단가 그대로 사용, 수량 곱하지 않음)
+            const expenseAmount = Math.round(expensePrice);
+
+            if (isContract) {
+                // 계약도급 경비 금액 업데이트
+                const expenseAmountCell = row.querySelector('.contract-expense-amount');
+                if (expenseAmountCell) {
+                    expenseAmountCell.textContent = expenseAmount.toLocaleString();
+                }
+
+                // 계약도급 자재비, 노무비 가져오기 (클래스 선택자 사용)
+                const materialAmountCell = row.querySelector('.contract-material-amount');
+                const laborAmountCell = row.querySelector('.contract-labor-amount');
+                const materialAmount = parseFloat(materialAmountCell?.textContent.replace(/,/g, '')) || 0;
+                const laborAmount = parseFloat(laborAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+                // 계약도급 합계 단가 계산
+                const materialPriceCell = row.querySelector('.contract-material-price');
+                const laborPriceCell = row.querySelector('.contract-labor-price');
+                const materialPrice = parseFloat(materialPriceCell?.textContent.replace(/,/g, '')) || 0;
+                const laborPrice = parseFloat(laborPriceCell?.textContent.replace(/,/g, '')) || 0;
+                const totalPrice = Math.round(materialPrice + laborPrice + expensePrice);
+
+                // 계약도급 합계 금액 계산
+                const totalAmount = Math.round(materialAmount + laborAmount + expenseAmount);
+
+                // 합계 셀 업데이트
+                const totalPriceCell = row.querySelector('.contract-total-price');
+                const totalAmountCell = row.querySelector('.contract-total-amount');
+
+                if (totalPriceCell) totalPriceCell.textContent = totalPrice.toLocaleString();
+                if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
+
+            } else {
+                // 발주단가 경비 금액 업데이트
+                const expenseAmountCell = row.querySelector('.order-expense-amount');
+                if (expenseAmountCell) {
+                    expenseAmountCell.textContent = expenseAmount.toLocaleString();
+                }
+
+                // 발주단가 자재비, 노무비 가져오기 (클래스 선택자 사용)
+                const materialAmountCell = row.querySelector('.order-material-amount');
+                const laborAmountCell = row.querySelector('.order-labor-amount');
+                const materialAmount = parseFloat(materialAmountCell?.textContent.replace(/,/g, '')) || 0;
+                const laborAmount = parseFloat(laborAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+                // 발주단가 합계 단가 계산
+                const materialPriceCell = row.querySelector('.order-material-price');
+                const laborPriceCell = row.querySelector('.order-labor-price');
+                const materialPrice = parseFloat(materialPriceCell?.textContent.replace(/,/g, '')) || 0;
+                const laborPrice = parseFloat(laborPriceCell?.textContent.replace(/,/g, '')) || 0;
+                const totalPrice = Math.round(materialPrice + laborPrice + expensePrice);
+
+                // 발주단가 합계 금액 계산
+                const totalAmount = Math.round(materialAmount + laborAmount + expenseAmount);
+
+                // 합계 셀 업데이트
+                const totalPriceCell = row.querySelector('.order-total-price');
+                const totalAmountCell = row.querySelector('.order-total-amount');
+
+                if (totalPriceCell) totalPriceCell.textContent = totalPrice.toLocaleString();
+                if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
+            }
+        });
+    });
+
+    console.log(`✅ ${expenseInputs.length}개 경비 입력 필드에 리스너 추가 완료`);
 }
 
 /**
@@ -3676,7 +3827,7 @@ async function exportOrderFormToExcel() {
  * HTML 구조와 정확히 일치: 29개 컬럼, 개수 5개(F~J), 환산 3개(K~M)
  */
 function createOrderFormExcelHeader(worksheet) {
-    // 29개 컬럼 설정
+    // 33개 컬럼 설정
     worksheet.columns = [
         { key: 'no', width: 6 },           // A: NO
         { key: 'category', width: 12 },   // B: 구분
@@ -3697,16 +3848,20 @@ function createOrderFormExcelHeader(worksheet) {
         { key: 'matCost', width: 12 },    // Q: 계약도급 - 자재비 금액
         { key: 'labPrice', width: 10 },   // R: 계약도급 - 노무비 단가
         { key: 'labCost', width: 12 },    // S: 계약도급 - 노무비 금액
-        { key: 'totalPrice', width: 10 }, // T: 계약도급 - 합계 단가
-        { key: 'totalCost', width: 12 },  // U: 계약도급 - 합계 금액
-        { key: 'note1', width: 10 },      // V: 비고
-        { key: 'ordMatPrice', width: 10 },// W: 발주단가 - 자재비 단가
-        { key: 'ordMatCost', width: 12 }, // X: 발주단가 - 자재비 금액
-        { key: 'ordLabPrice', width: 10 },// Y: 발주단가 - 노무비 단가
-        { key: 'ordLabCost', width: 12 }, // Z: 발주단가 - 노무비 금액
-        { key: 'ordTotalPrice', width: 10 }, // AA: 발주단가 - 합계 단가
-        { key: 'ordTotalCost', width: 12 },  // AB: 발주단가 - 합계 금액
-        { key: 'note2', width: 10 }       // AC: 비고
+        { key: 'expPrice', width: 10 },   // T: 계약도급 - 경비 단가
+        { key: 'expCost', width: 12 },    // U: 계약도급 - 경비 금액
+        { key: 'totalPrice', width: 10 }, // V: 계약도급 - 합계 단가
+        { key: 'totalCost', width: 12 },  // W: 계약도급 - 합계 금액
+        { key: 'note1', width: 10 },      // X: 비고
+        { key: 'ordMatPrice', width: 10 },// Y: 발주단가 - 자재비 단가
+        { key: 'ordMatCost', width: 12 }, // Z: 발주단가 - 자재비 금액
+        { key: 'ordLabPrice', width: 10 },// AA: 발주단가 - 노무비 단가
+        { key: 'ordLabCost', width: 12 }, // AB: 발주단가 - 노무비 금액
+        { key: 'ordExpPrice', width: 10 },// AC: 발주단가 - 경비 단가
+        { key: 'ordExpCost', width: 12 }, // AD: 발주단가 - 경비 금액
+        { key: 'ordTotalPrice', width: 10 }, // AE: 발주단가 - 합계 단가
+        { key: 'ordTotalCost', width: 12 },  // AF: 발주단가 - 합계 금액
+        { key: 'note2', width: 10 }       // AG: 비고
     ];
 
     // ✅ A1:C3 영역에 "발주서" 제목 추가
@@ -3716,19 +3871,19 @@ function createOrderFormExcelHeader(worksheet) {
     titleCell.font = { bold: true, size: 22 };
     titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-    // ✅ Row 4: 메인 헤더 (1~3행은 빈칸)
+    // ✅ Row 4: 메인 헤더 (1~3행은 빈칸) - 33개
     const row4 = worksheet.getRow(4);
-    row4.values = ['NO', '구분', '품명 및 규격', 'WALL', '', '개수', '', '', '', '', '환산', '', '', '단위', '수량', '계약도급', '', '', '', '', '', '비고', '발주단가', '', '', '', '', '', '비고'];
+    row4.values = ['NO', '구분', '품명 및 규격', 'WALL', '', '개수', '', '', '', '', '환산', '', '', '단위', '수량', '계약도급', '', '', '', '', '', '', '', '비고', '발주단가', '', '', '', '', '', '', '', '비고'];
 
-    // ✅ Row 5: 서브 헤더 (A, B, C는 빈 값 - Row 4와 병합됨)
+    // ✅ Row 5: 서브 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 33개
     const row5 = worksheet.getRow(5);
-    row5.values = ['', '', '', 'THK', 'Type', '@', '두께', '넓이', '높이', 'M', '제공자', '1장->m2', '장', '', '', '자재비', '', '노무비', '', '합계', '', '', '자재비', '', '노무비', '', '합계', '', ''];
+    row5.values = ['', '', '', 'THK', 'Type', '@', '두께', '넓이', '높이', 'M', '제공자', '1장->m2', '장', '', '', '자재비', '', '노무비', '', '경비', '', '합계', '', '', '자재비', '', '노무비', '', '경비', '', '합계', '', ''];
 
-    // ✅ Row 6: 세부 헤더 (A, B, C는 빈 값 - Row 4와 병합됨)
+    // ✅ Row 6: 세부 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 33개
     const row6 = worksheet.getRow(6);
-    row6.values = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '', '단가', '금액', '단가', '금액', '단가', '금액', ''];
+    row6.values = ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '단가', '금액', '', '단가', '금액', '단가', '금액', '단가', '금액', '단가', '금액', ''];
 
-    // ✅ 병합 (4~6행으로 변경)
+    // ✅ 병합 (4~6행으로 변경) - 33개 컬럼
     worksheet.mergeCells('A4:A6'); // NO (4,5,6 row 병합)
     worksheet.mergeCells('B4:B6'); // 구분 (4,5,6 row 병합)
     worksheet.mergeCells('C4:C6'); // 품명 및 규격 (4,5,6 row 병합)
@@ -3737,10 +3892,10 @@ function createOrderFormExcelHeader(worksheet) {
     worksheet.mergeCells('K4:M4'); // 환산 (3개: 제공자, 1장->m2, 장)
     worksheet.mergeCells('N4:N6'); // 단위 (4,5,6 row 병합)
     worksheet.mergeCells('O4:O6'); // 수량 (4,5,6 row 병합)
-    worksheet.mergeCells('P4:U4'); // 계약도급 (6개)
-    worksheet.mergeCells('V4:V6'); // 비고 (4,5,6 row 병합)
-    worksheet.mergeCells('W4:AB4'); // 발주단가 (6개)
-    worksheet.mergeCells('AC4:AC6'); // 비고 (4,5,6 row 병합)
+    worksheet.mergeCells('P4:W4'); // 계약도급 (8개: 자재비2 + 노무비2 + 경비2 + 합계2)
+    worksheet.mergeCells('X4:X6'); // 비고 (4,5,6 row 병합)
+    worksheet.mergeCells('Y4:AF4'); // 발주단가 (8개: 자재비2 + 노무비2 + 경비2 + 합계2)
+    worksheet.mergeCells('AG4:AG6'); // 비고 (4,5,6 row 병합)
 
     // Row 5와 Row 6 병합
     worksheet.mergeCells('D5:D6'); // THK
@@ -3755,10 +3910,12 @@ function createOrderFormExcelHeader(worksheet) {
     worksheet.mergeCells('M5:M6'); // 장
     worksheet.mergeCells('P5:Q5'); // 계약도급 - 자재비
     worksheet.mergeCells('R5:S5'); // 계약도급 - 노무비
-    worksheet.mergeCells('T5:U5'); // 계약도급 - 합계
-    worksheet.mergeCells('W5:X5'); // 발주단가 - 자재비
-    worksheet.mergeCells('Y5:Z5'); // 발주단가 - 노무비
-    worksheet.mergeCells('AA5:AB5'); // 발주단가 - 합계
+    worksheet.mergeCells('T5:U5'); // 계약도급 - 경비
+    worksheet.mergeCells('V5:W5'); // 계약도급 - 합계
+    worksheet.mergeCells('Y5:Z5'); // 발주단가 - 자재비
+    worksheet.mergeCells('AA5:AB5'); // 발주단가 - 노무비
+    worksheet.mergeCells('AC5:AD5'); // 발주단가 - 경비
+    worksheet.mergeCells('AE5:AF5'); // 발주단가 - 합계
 
     // ✅ 헤더 스타일 적용 (폰트 크기 12) - Row 4, 5, 6
     [row4, row5, row6].forEach(row => {
@@ -3791,9 +3948,9 @@ async function addOrderFormDataToExcel(worksheet) {
     const siteNameInput = document.getElementById('orderFormSiteName');
     const siteName = siteNameInput ? siteNameInput.value : '현장명을 입력하세요';
 
-    // 현장명 입력 행 (29개 컬럼)
+    // 현장명 입력 행 (33개 컬럼)
     const siteRow = worksheet.getRow(currentRow);
-    siteRow.values = ['1', siteName, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+    siteRow.values = ['1', siteName, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
 
     // 현장명 행 스타일 적용
     siteRow.eachCell({ includeEmpty: true }, (cell) => {
@@ -3838,10 +3995,10 @@ async function addOrderFormDataToExcel(worksheet) {
                 right: { style: 'thin' }
             };
 
-            // ✅ 타입 요약 행도 숫자 포맷 적용
+            // ✅ 타입 요약 행도 숫자 포맷 적용 (33개 컬럼)
             if (colNumber === 15 ||
-                (colNumber >= 16 && colNumber <= 21) ||
-                (colNumber >= 23 && colNumber <= 28)) {
+                (colNumber >= 16 && colNumber <= 23) ||
+                (colNumber >= 25 && colNumber <= 32)) {
                 if (cell.value && !isNaN(cell.value)) {
                     cell.numFmt = '#,##0';
                 }
@@ -3872,27 +4029,29 @@ async function addOrderFormDataToExcel(worksheet) {
                 } else if (colNumber === 2 || colNumber === 3) {
                     // 구분, 품명 및 규격: 왼쪽 정렬
                     cell.alignment = { vertical: 'middle', horizontal: 'left' };
-                } else if ((colNumber >= 16 && colNumber <= 21) ||
-                           (colNumber >= 23 && colNumber <= 28)) {
-                    // ✅ 단가/금액 컬럼 (P~U, W~AB): 오른쪽 정렬
+                } else if ((colNumber >= 16 && colNumber <= 23) ||
+                           (colNumber >= 25 && colNumber <= 32)) {
+                    // ✅ 단가/금액 컬럼 (P~W, Y~AF): 오른쪽 정렬
                     // P(16): 자재비단가, Q(17): 자재비금액
                     // R(18): 노무비단가, S(19): 노무비금액
-                    // T(20): 합계단가, U(21): 합계금액
-                    // W(23): 발주단가 자재비단가, X(24): 발주단가 자재비금액
-                    // Y(25): 발주단가 노무비단가, Z(26): 발주단가 노무비금액
-                    // AA(27): 발주단가 합계단가, AB(28): 발주단가 합계금액
+                    // T(20): 경비단가, U(21): 경비금액
+                    // V(22): 합계단가, W(23): 합계금액
+                    // Y(25): 발주단가 자재비단가, Z(26): 발주단가 자재비금액
+                    // AA(27): 발주단가 노무비단가, AB(28): 발주단가 노무비금액
+                    // AC(29): 발주단가 경비단가, AD(30): 발주단가 경비금액
+                    // AE(31): 발주단가 합계단가, AF(32): 발주단가 합계금액
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                 } else {
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
                 }
 
-                // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위
+                // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위 (33개 컬럼)
                 // G(7): 두께 - 소수점 1자리
                 // H(8), I(9), J(10): 넓이, 높이, M - 정수
                 // M(13): 장 수량 - 정수
                 // O(15): 수량 - 소수점 2자리
-                // P~U(16~21): 계약도급 - 정수
-                // W~AB(23~28): 발주단가 - 정수
+                // P~W(16~23): 계약도급 - 정수
+                // Y~AF(25~32): 발주단가 - 정수
                 if (cell.value && !isNaN(cell.value)) {
                     if (colNumber === 7) {
                         // 두께: 소수점 1자리 표시
@@ -3902,8 +4061,8 @@ async function addOrderFormDataToExcel(worksheet) {
                         cell.numFmt = '#,##0.00';
                     } else if ((colNumber >= 8 && colNumber <= 10) ||
                                colNumber === 13 ||
-                               (colNumber >= 16 && colNumber <= 21) ||
-                               (colNumber >= 23 && colNumber <= 28)) {
+                               (colNumber >= 16 && colNumber <= 23) ||
+                               (colNumber >= 25 && colNumber <= 32)) {
                         // 나머지: 정수 천단위 구분
                         cell.numFmt = '#,##0';
                     }
@@ -3978,10 +4137,12 @@ async function generateTypeSummaryRowData(typeName, results, typeIndex) {
 
     const totalMaterialCost = totalMaterialUnitPrice * totalArea;
     const totalLaborCost = totalLaborUnitPrice * totalArea;
-    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice;
-    const totalCost = totalMaterialCost + totalLaborCost;
+    const totalExpenseUnitPrice = 0; // 경비 단가 (기본값 0)
+    const totalExpenseCost = 0; // 경비 금액 (기본값 0)
+    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice + totalExpenseUnitPrice;
+    const totalCost = totalMaterialCost + totalLaborCost + totalExpenseCost;
 
-    // 29개 컬럼 데이터 배열 반환 (HTML TD 순서와 일치)
+    // 33개 컬럼 데이터 배열 반환 (HTML TD 순서와 일치)
     return [
         `1-${typeIndex}`,           // A: NO
         typeName,                   // B: 구분
@@ -4002,16 +4163,20 @@ async function generateTypeSummaryRowData(typeName, results, typeIndex) {
         Math.round(totalMaterialCost),      // Q: 계약도급 자재비 금액
         Math.round(totalLaborUnitPrice),    // R: 계약도급 노무비 단가
         Math.round(totalLaborCost),         // S: 계약도급 노무비 금액
-        Math.round(totalUnitPrice),         // T: 계약도급 합계 단가
-        Math.round(totalCost),              // U: 계약도급 합계 금액
-        '',                         // V: 비고
-        '',                         // W: 발주단가 자재비 단가
-        '',                         // X: 발주단가 자재비 금액
-        '',                         // Y: 발주단가 노무비 단가
-        '',                         // Z: 발주단가 노무비 금액
-        '',                         // AA: 발주단가 합계 단가
-        '',                         // AB: 발주단가 합계 금액
-        ''                          // AC: 비고
+        Math.round(totalExpenseUnitPrice),  // T: 계약도급 경비 단가
+        Math.round(totalExpenseCost),       // U: 계약도급 경비 금액
+        Math.round(totalUnitPrice),         // V: 계약도급 합계 단가
+        Math.round(totalCost),              // W: 계약도급 합계 금액
+        '',                         // X: 비고
+        '',                         // Y: 발주단가 자재비 단가
+        '',                         // Z: 발주단가 자재비 금액
+        '',                         // AA: 발주단가 노무비 단가
+        '',                         // AB: 발주단가 노무비 금액
+        '',                         // AC: 발주단가 경비 단가
+        '',                         // AD: 발주단가 경비 금액
+        '',                         // AE: 발주단가 합계 단가
+        '',                         // AF: 발주단가 합계 금액
+        ''                          // AG: 비고
     ];
 }
 
@@ -4148,14 +4313,39 @@ async function generateComponentRowData(component, unitPriceItem, result, layerN
 
     const materialPrice = parseFloat(component.materialPrice) || 0;
     const laborPrice = parseFloat(component.laborPrice) || 0;
-    const totalPrice = materialPrice + laborPrice;
+
+    // ✅ 경비 입력값 가져오기 (HTML에서)
+    const contractExpenseInput = document.querySelector(
+        `.contract-expense-price[data-row="${layerNumber}"]`
+    );
+    const contractExpensePrice = contractExpenseInput
+        ? parseFloat(contractExpenseInput.value) || 0 : 0;
+
+    const orderExpenseInput = document.querySelector(
+        `.order-expense-price[data-row="${layerNumber}"]`
+    );
+    const orderExpensePrice = orderExpenseInput
+        ? parseFloat(orderExpenseInput.value) || 0 : 0;
 
     // ✅ 금액 = 단가 × 면적합계
     const materialCost = materialPrice * totalArea;
     const laborCost = laborPrice * totalArea;
-    const totalCost = materialCost + laborCost;
+    const contractExpenseCost = contractExpensePrice * totalArea;
+    const orderExpenseCost = orderExpensePrice * totalArea;
 
-    // 29개 컬럼 데이터 배열 반환 (HTML TD 순서와 정확히 일치)
+    // 계약도급 합계
+    const totalPrice = materialPrice + laborPrice + contractExpensePrice;
+    const totalCost = materialCost + laborCost + contractExpenseCost;
+
+    // 발주단가 합계 (입력값 기준)
+    const orderTotalPriceInput = document.querySelector(
+        `.order-total-price[data-row="${layerNumber}"]`
+    );
+    const orderTotalPrice = orderTotalPriceInput
+        ? parseFloat(orderTotalPriceInput.value) || 0 : 0;
+    const orderTotalCost = orderTotalPrice * totalArea;
+
+    // 33개 컬럼 데이터 배열 반환 (HTML TD 순서와 정확히 일치)
     return [
         layerNumber,                    // A: NO
         '',                             // B: 구분
@@ -4176,22 +4366,26 @@ async function generateComponentRowData(component, unitPriceItem, result, layerN
         Math.round(materialCost),       // Q: 계약도급 자재비 금액
         Math.round(laborPrice),         // R: 계약도급 노무비 단가
         Math.round(laborCost),          // S: 계약도급 노무비 금액
-        Math.round(totalPrice),         // T: 계약도급 합계 단가
-        Math.round(totalCost),          // U: 계약도급 합계 금액
-        '',                             // V: 비고
-        '',                             // W: 발주단가 자재비 단가
-        '',                             // X: 발주단가 자재비 금액
-        '',                             // Y: 발주단가 노무비 단가
-        '',                             // Z: 발주단가 노무비 금액
-        '',                             // AA: 발주단가 합계 단가
-        '',                             // AB: 발주단가 합계 금액
-        ''                              // AC: 비고
+        Math.round(contractExpensePrice), // T: 계약도급 경비 단가
+        Math.round(contractExpenseCost),  // U: 계약도급 경비 금액
+        Math.round(totalPrice),         // V: 계약도급 합계 단가
+        Math.round(totalCost),          // W: 계약도급 합계 금액
+        '',                             // X: 비고
+        '',                             // Y: 발주단가 자재비 단가
+        '',                             // Z: 발주단가 자재비 금액
+        '',                             // AA: 발주단가 노무비 단가
+        '',                             // AB: 발주단가 노무비 금액
+        Math.round(orderExpensePrice),  // AC: 발주단가 경비 단가
+        Math.round(orderExpenseCost),   // AD: 발주단가 경비 금액
+        Math.round(orderTotalPrice),    // AE: 발주단가 합계 단가
+        Math.round(orderTotalCost),     // AF: 발주단가 합계 금액
+        ''                              // AG: 비고
     ];
 }
 
 /**
  * 발주서 Excel 스타일 적용
- * 29개 컬럼 기준 (A~AC)
+ * 33개 컬럼 기준 (A~AG)
  */
 function applyOrderFormExcelStyles(worksheet) {
     // 모든 데이터 행에 테두리 적용

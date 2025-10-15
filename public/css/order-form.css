@@ -12,7 +12,7 @@
 
 /* 테이블 기본 스타일 */
 .order-form-table {
-    min-width: 2120px; /* 29개 컬럼 총 너비 (1880px + 240px) */
+    min-width: 2500px; /* 33개 컬럼 총 너비 (경비 4개 컬럼 추가: 380px) */
     width: 100%; /* 화면 전체 너비 사용 */
     border-collapse: collapse;
     font-size: 11px;
@@ -82,6 +82,11 @@
     vertical-align: middle;
 }
 
+/* 경비 입력 필드 오른쪽 정렬 */
+.order-form-table td input.expense-input {
+    text-align: right !important;
+}
+
 /* 숫자 셀 오른쪽 정렬 */
 .order-form-table td.number-cell {
     text-align: right !important;
@@ -100,20 +105,24 @@
 }
 
 /* 단가 및 금액 컬럼 오른쪽 정렬 */
-/* 계약도급: 단가(16,18,20), 금액(17,19,21) */
+/* 계약도급: 자재(16,17), 노무(18,19), 경비(20,21), 합계(22,23) = 8개 */
 .order-form-table tbody td:nth-child(16),
 .order-form-table tbody td:nth-child(17),
 .order-form-table tbody td:nth-child(18),
 .order-form-table tbody td:nth-child(19),
 .order-form-table tbody td:nth-child(20),
 .order-form-table tbody td:nth-child(21),
-/* 발주단가: 단가(23,25,27), 금액(24,26,28) */
+.order-form-table tbody td:nth-child(22),
 .order-form-table tbody td:nth-child(23),
-.order-form-table tbody td:nth-child(24),
+/* 발주단가: 자재(25,26), 노무(27,28), 경비(29,30), 합계(31,32) = 8개 */
 .order-form-table tbody td:nth-child(25),
 .order-form-table tbody td:nth-child(26),
 .order-form-table tbody td:nth-child(27),
-.order-form-table tbody td:nth-child(28) {
+.order-form-table tbody td:nth-child(28),
+.order-form-table tbody td:nth-child(29),
+.order-form-table tbody td:nth-child(30),
+.order-form-table tbody td:nth-child(31),
+.order-form-table tbody td:nth-child(32) {
     text-align: right !important;
     padding-right: 12px;
 }
@@ -170,7 +179,7 @@
     min-width: 80px;
 }
 
-/* tbody 데이터 행 너비 (29개 컬럼) */
+/* tbody 데이터 행 너비 (33개 컬럼) */
 .order-form-table tbody td:nth-child(1) {
     width: 40px;
     min-width: 40px;
@@ -227,23 +236,29 @@
     min-width: 70px;
 }
 
-/* Row 3: 단가/금액 (계약도급 6개 + 발주단가 6개 = 12개) */
+/* Row 3: 단가/금액 (계약도급 8개 + 발주단가 8개 = 16개) */
+/* 단가: 자재, 노무, 경비, 합계 */
 .order-form-table thead tr:nth-child(3) th:nth-child(1),
 .order-form-table thead tr:nth-child(3) th:nth-child(3),
 .order-form-table thead tr:nth-child(3) th:nth-child(5),
 .order-form-table thead tr:nth-child(3) th:nth-child(7),
 .order-form-table thead tr:nth-child(3) th:nth-child(9),
-.order-form-table thead tr:nth-child(3) th:nth-child(11) {
+.order-form-table thead tr:nth-child(3) th:nth-child(11),
+.order-form-table thead tr:nth-child(3) th:nth-child(13),
+.order-form-table thead tr:nth-child(3) th:nth-child(15) {
     width: 70px;
     min-width: 70px;
 }
 
+/* 금액: 자재, 노무, 경비, 합계 */
 .order-form-table thead tr:nth-child(3) th:nth-child(2),
 .order-form-table thead tr:nth-child(3) th:nth-child(4),
 .order-form-table thead tr:nth-child(3) th:nth-child(6),
 .order-form-table thead tr:nth-child(3) th:nth-child(8),
 .order-form-table thead tr:nth-child(3) th:nth-child(10),
-.order-form-table thead tr:nth-child(3) th:nth-child(12) {
+.order-form-table thead tr:nth-child(3) th:nth-child(12),
+.order-form-table thead tr:nth-child(3) th:nth-child(14),
+.order-form-table thead tr:nth-child(3) th:nth-child(16) {
     width: 120px;
     min-width: 120px;
 }
@@ -267,44 +282,52 @@
     min-width: 70px;
 }
 
-/* tbody 데이터 행: 계약도급 단가(16,18,20), 금액(17,19,21) */
+/* tbody 데이터 행: 계약도급 단가(16,18,20,22), 금액(17,19,21,23) */
+/* 자재 단가(16), 노무 단가(18), 경비 단가(20), 합계 단가(22) */
 .order-form-table tbody td:nth-child(16),
 .order-form-table tbody td:nth-child(18),
-.order-form-table tbody td:nth-child(20) {
+.order-form-table tbody td:nth-child(20),
+.order-form-table tbody td:nth-child(22) {
     width: 70px;
     min-width: 70px;
 }
 
+/* 자재 금액(17), 노무 금액(19), 경비 금액(21), 합계 금액(23) */
 .order-form-table tbody td:nth-child(17),
 .order-form-table tbody td:nth-child(19),
-.order-form-table tbody td:nth-child(21) {
+.order-form-table tbody td:nth-child(21),
+.order-form-table tbody td:nth-child(23) {
     width: 120px;
     min-width: 120px;
 }
 
-/* tbody 데이터 행: 비고(22) */
-.order-form-table tbody td:nth-child(22) {
+/* tbody 데이터 행: 계약도급 비고(24) */
+.order-form-table tbody td:nth-child(24) {
     width: 80px;
     min-width: 80px;
 }
 
-/* tbody 데이터 행: 발주단가 단가(23,25,27), 금액(24,26,28) */
-.order-form-table tbody td:nth-child(23),
+/* tbody 데이터 행: 발주단가 단가(25,27,29,31), 금액(26,28,30,32) */
+/* 자재 단가(25), 노무 단가(27), 경비 단가(29), 합계 단가(31) */
 .order-form-table tbody td:nth-child(25),
-.order-form-table tbody td:nth-child(27) {
+.order-form-table tbody td:nth-child(27),
+.order-form-table tbody td:nth-child(29),
+.order-form-table tbody td:nth-child(31) {
     width: 70px;
     min-width: 70px;
 }
 
-.order-form-table tbody td:nth-child(24),
+/* 자재 금액(26), 노무 금액(28), 경비 금액(30), 합계 금액(32) */
 .order-form-table tbody td:nth-child(26),
-.order-form-table tbody td:nth-child(28) {
+.order-form-table tbody td:nth-child(28),
+.order-form-table tbody td:nth-child(30),
+.order-form-table tbody td:nth-child(32) {
     width: 120px;
     min-width: 120px;
 }
 
-/* tbody 데이터 행: 비고(29) */
-.order-form-table tbody td:nth-child(29) {
+/* tbody 데이터 행: 발주단가 비고(33) */
+.order-form-table tbody td:nth-child(33) {
     width: 80px;
     min-width: 80px;
 }
