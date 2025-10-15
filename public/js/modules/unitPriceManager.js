@@ -1234,6 +1234,9 @@ function createDetailModalHTML(itemSummary) {
                 <button class="btn btn-primary btn-sm" onclick="openBulkQuantityCalculator()" style="margin-left: 8px;">
                     <i class="fas fa-calculator"></i> 소요량 계산
                 </button>
+                <button class="btn btn-info btn-sm" onclick="exportUnitPriceDetailToExcel()" style="margin-left: 8px;">
+                    <i class="fas fa-file-excel"></i> Excel로 내보내기
+                </button>
             </div>
             
             <!-- 세부 아이템 테이블 (석고보드 스타일) -->
@@ -5147,6 +5150,464 @@ async function convertToWallTypeMaster(oldWallType) {
     return wallTypeMaster;
 }
 
+// =============================================================================
+// Excel 내보내기 기능
+// =============================================================================
+
+/**
+ * 현재 세부 아이템의 구성품 테이블을 Excel로 내보내기
+ */
+async function exportUnitPriceDetailToExcel() {
+    console.log('📊 세부 아이템 Excel 내보내기 시작');
+
+    // 현재 편집 중인 데이터 확인
+    if (!currentUnitPriceData || !currentUnitPriceData.id) {
+        alert('세부 아이템 데이터가 없습니다. 먼저 세부 아이템을 선택해주세요.');
+        return;
+    }
+
+    try {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('세부 아이템');
+
+        // 데이터 가져오기
+        const data = currentUnitPriceData;
+        const basic = data.basic || {};
+        const components = data.components || [];
+        const fixedRows = data.fixedRows || {};
+
+        // =============================================================================
+        // 1. 타이틀 행 (행1) - 확장된 정보 포함
+        // =============================================================================
+        const titleText = `${basic.itemName || '세부아이템'} | ${basic.location || ''} | ${basic.workType1 || ''}/${basic.workType2 || ''} | ${basic.unit || ''}`;
+        const titleRow = worksheet.addRow([titleText]);
+        titleRow.font = { bold: true, size: 16, color: { argb: 'FF8B5CF6' } };
+        titleRow.alignment = { vertical: 'middle', horizontal: 'center' };
+        titleRow.height = 30;
+        worksheet.mergeCells(1, 1, 1, 12); // 12개 컬럼 병합
+
+        // =============================================================================
+        // 2. 빈 행 (행2)
+        // =============================================================================
+        worksheet.addRow([]);
+
+        // =============================================================================
+        // 3-4. 헤더 행 생성 (getRow 방식으로 변경)
+        // =============================================================================
+
+        // 빈 행 2개 추가
+        worksheet.addRow([]);  // 3행
+        worksheet.addRow([]);  // 4행
+
+        // 3행 설정 (메인 헤더)
+        const headerRow1 = worksheet.getRow(3);
+        headerRow1.values = ['품명', '싸이즈', '단위', '수량', '재료비', '', '노무비', '', '경비', '', '합계', ''];
+
+        // 4행 설정 (서브 헤더)
+        const headerRow2 = worksheet.getRow(4);
+        headerRow2.values = ['', '', '', '', '단가', '금액', '단가', '금액', '단가', '금액', '단가', '금액'];
+
+        // 병합 (3-4행 사이)
+        worksheet.mergeCells(3, 1, 4, 1); // 품명
+        worksheet.mergeCells(3, 2, 4, 2); // 싸이즈
+        worksheet.mergeCells(3, 3, 4, 3); // 단위
+        worksheet.mergeCells(3, 4, 4, 4); // 수량
+        worksheet.mergeCells(3, 5, 3, 6); // 재료비 (가로 병합)
+        worksheet.mergeCells(3, 7, 3, 8); // 노무비 (가로 병합)
+        worksheet.mergeCells(3, 9, 3, 10); // 경비 (가로 병합)
+        worksheet.mergeCells(3, 11, 3, 12); // 합계 (가로 병합)
+
+        // 3행 스타일 적용 (모든 컬럼)
+        for (let i = 1; i <= 12; i++) {
+            const cell = headerRow1.getCell(i);
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF667EEA' }
+            };
+            cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 12 };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                right: { style: 'thin' },
+                bottom: { style: 'thin' }
+            };
+        }
+        headerRow1.height = 20;
+
+        // 4행 스타일 적용 (5-12번 컬럼만)
+        for (let i = 5; i <= 12; i++) {
+            const cell = headerRow2.getCell(i);
+
+            // 컬럼별 색상
+            let bgColor = 'FFECFDF5'; // 재료비 (녹색)
+            let textColor = 'FF065F46';
+
+            if (i === 7 || i === 8) { // 노무비
+                bgColor = 'FFEFF6FF'; // 파란색
+                textColor = 'FF1E40AF';
+            } else if (i === 9 || i === 10) { // 경비
+                bgColor = 'FFFEFBEB'; // 노란색
+                textColor = 'FF92400E';
+            } else if (i === 11 || i === 12) { // 합계
+                bgColor = 'FFFEF2F2'; // 빨간색
+                textColor = 'FFB91C1C';
+            }
+
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: bgColor }
+            };
+            cell.font = { bold: true, color: { argb: textColor }, size: 12 };
+            cell.alignment = { vertical: 'middle', horizontal: 'center' };
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                right: { style: 'thin' },
+                bottom: { style: 'thin' }
+            };
+        }
+        headerRow2.height = 18;
+
+        // =============================================================================
+        // 5. 구성품 데이터 행들 (행5부터)
+        // =============================================================================
+        let currentRow = 5;
+
+        // 구성품 합계 누적 변수
+        let materialTotal = 0;
+        let laborTotal = 0;
+        let expenseTotal = 0;
+
+        components.forEach((comp, index) => {
+            // 실제 저장된 데이터 구조에 맞게 추출
+            const quantity = comp.quantity || 0;
+            const materialPrice = comp.materialPrice || 0;  // 재료비 단가
+            const laborPrice = comp.laborPrice || 0;        // 노무비 단가 (저장된 값 사용)
+            const laborAmount = comp.laborAmount || 0;      // 노무비 금액 (고정)
+            const expensePrice = comp.expensePrice || 0;    // 경비 단가
+
+            // 계산 필요한 값들 (반올림 적용)
+            const materialAmount = Math.round(materialPrice * quantity);
+            const expenseAmount = Math.round(expensePrice * quantity);
+            const totalPrice = Math.round(materialPrice + laborPrice + expensePrice);
+            const totalAmount = Math.round(materialAmount + laborAmount + expenseAmount);
+
+            // 합계 누적
+            materialTotal += materialAmount;
+            laborTotal += laborAmount;
+            expenseTotal += expenseAmount;
+
+            const dataRow = worksheet.addRow([
+                comp.name || '',
+                comp.spec || '',  // 싸이즈는 spec 필드
+                comp.unit || '',
+                quantity,
+                materialPrice,
+                materialAmount,
+                laborPrice,
+                laborAmount,
+                expensePrice,
+                expenseAmount,
+                totalPrice,
+                totalAmount
+            ]);
+
+            // 스타일 적용
+            dataRow.eachCell((cell, colNum) => {
+                // 배경색 (홀수/짝수)
+                const bgColor = index % 2 === 0 ? 'FFFFFFFF' : 'FFF8FAFC';
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: bgColor }
+                };
+
+                // 정렬 (품명은 왼쪽, 싸이즈/단위는 중앙, 수량/금액은 오른쪽)
+                if (colNum === 1) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                } else if (colNum === 2 || colNum === 3) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+
+                    // 숫자 포맷
+                    if (colNum === 4) {
+                        // 수량: 포맷 미적용 (Excel 기본 숫자 표시, 점 제거)
+                        // 4 → "4", 2.33 → "2.33"
+                    } else {
+                        // 단가, 금액: 모두 정수 (소수점 없음)
+                        cell.numFmt = '#,##0';
+                    }
+                }
+
+                // 테두리
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    right: { style: 'thin' },
+                    bottom: { style: 'thin' }
+                };
+
+                // 폰트
+                cell.font = { size: 11 };
+            });
+
+            dataRow.height = 18;
+            currentRow++;
+        });
+
+        // =============================================================================
+        // 6. 고정 행들 (자재로스, 운반비, 이윤, 공구손료, 총합계)
+        // =============================================================================
+
+        // 고정비율 가져오기
+        const fixedRates = data.fixedRates || {
+            materialLoss: 3,
+            transportCost: 1.5,
+            materialProfit: 15,
+            toolExpense: 2
+        };
+
+        // 고정비용 계산
+        const materialLoss = Math.round(materialTotal * fixedRates.materialLoss / 100);
+        const transportCost = Math.round(materialTotal * fixedRates.transportCost / 100);
+        const materialProfitBase = materialTotal + materialLoss + transportCost;
+        const materialProfit = Math.round(materialProfitBase * fixedRates.materialProfit / 100);
+        const toolExpense = Math.round(laborTotal * fixedRates.toolExpense / 100);
+
+        // 최종 합계
+        const finalMaterial = materialTotal + materialLoss + transportCost + materialProfit;
+        const finalLabor = laborTotal + toolExpense;  // 공구손료는 노무비에 포함
+        const finalExpense = expenseTotal;            // 경비는 경비 합계만
+        const finalTotal = finalMaterial + finalLabor + finalExpense;
+
+        // 단수정리 계산: 재료비/노무비/경비 각각 100원 단위 절사
+        const roundedMaterial = Math.floor(finalMaterial / 100) * 100;
+        const roundedLabor = Math.floor(finalLabor / 100) * 100;
+        const roundedExpense = Math.floor(finalExpense / 100) * 100;
+
+        const materialRounding = roundedMaterial - finalMaterial;
+        const laborRounding = roundedLabor - finalLabor;
+        const expenseRounding = roundedExpense - finalExpense;
+        const totalRounding = materialRounding + laborRounding + expenseRounding;
+
+        const roundedTotal = roundedMaterial + roundedLabor + roundedExpense;
+
+        // 고정 행 데이터 배열
+        const fixedRowsData = [
+            {
+                name: '자재로스',
+                spec: '자재비의',
+                unit: '%',
+                quantity: fixedRates.materialLoss,
+                materialPrice: materialTotal,
+                materialAmount: materialLoss,
+                totalPrice: materialTotal,
+                totalAmount: materialLoss
+            },
+            {
+                name: '자재운반비 및 양중비',
+                spec: '자재비의',
+                unit: '%',
+                quantity: fixedRates.transportCost,
+                materialPrice: materialTotal,
+                materialAmount: transportCost,
+                totalPrice: materialTotal,
+                totalAmount: transportCost
+            },
+            {
+                name: '자재비 이윤',
+                spec: '자재비의',
+                unit: '%',
+                quantity: fixedRates.materialProfit,
+                materialPrice: materialProfitBase,
+                materialAmount: materialProfit,
+                totalPrice: materialProfitBase,
+                totalAmount: materialProfit
+            },
+            {
+                name: '공구손료 및 기계경비',
+                spec: '자재비의',
+                unit: '%',
+                quantity: fixedRates.toolExpense,
+                laborPrice: laborTotal,
+                laborAmount: toolExpense,
+                totalPrice: laborTotal,
+                totalAmount: toolExpense
+            },
+            {
+                name: '단수정리',
+                spec: '원미만',
+                unit: '절사',
+                quantity: '',
+                materialAmount: materialRounding,  // 6열: 재료비 단수정리
+                laborAmount: laborRounding,        // 8열: 노무비 단수정리
+                expenseAmount: expenseRounding,    // 10열: 경비 단수정리
+                totalAmount: totalRounding         // 12열: 합계 단수정리
+            }
+        ];
+
+        // 고정 행 추가
+        fixedRowsData.forEach((rowData, index) => {
+            const fixedRow = worksheet.addRow([
+                rowData.name,
+                rowData.spec || '', // 싸이즈 (자재비의)
+                rowData.unit || '', // 단위 (%)
+                rowData.quantity,
+                rowData.materialPrice || '',
+                rowData.materialAmount || '',
+                rowData.laborPrice || '',
+                rowData.laborAmount || '',
+                rowData.expensePrice || '',      // 경비 단가
+                rowData.expenseAmount || '',     // 경비 금액 (단수정리에서 사용)
+                rowData.totalPrice || '',
+                rowData.totalAmount || ''
+            ]);
+
+            // 스타일 적용
+            fixedRow.eachCell((cell, colNum) => {
+                // 배경색 (연한 노란색)
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFFFF3CD' }
+                };
+
+                // 정렬
+                if (colNum === 1) {
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                    cell.font = { bold: true, size: 11, color: { argb: 'FF8B5CF6' } };
+                } else if (colNum === 2 || colNum === 3) {
+                    // B열(싸이즈), C열(단위) - 중앙 정렬
+                    cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    cell.font = { bold: true, size: 11 };
+                } else if (colNum === 4) {
+                    // D열(수량) - 오른쪽 정렬, 포맷 미적용 (Excel 기본 숫자 표시)
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    cell.font = { bold: true, size: 11 };
+                    // 포맷 미적용 - 4 → "4", 2.33 → "2.33" (점 제거)
+                } else {
+                    cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                    cell.font = { bold: true, size: 11 };
+
+                    // 숫자 포맷 (단가/금액 모두 정수)
+                    if (colNum === 5 || colNum === 6 || colNum === 7 || colNum === 8 || colNum === 11 || colNum === 12) {
+                        cell.numFmt = '#,##0';
+                    }
+                }
+
+                // 테두리
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    right: { style: 'thin' },
+                    bottom: { style: 'thin' }
+                };
+            });
+
+            fixedRow.height = 20;
+        });
+
+        // =============================================================================
+        // 7. 총합계 행
+        // =============================================================================
+        const totalRow = worksheet.addRow([
+            '총합계',          // 1열: 품명
+            '',                // 2열: 싸이즈
+            '',                // 3열: 단위
+            '',                // 4열: 수량
+            '',                // 5열: 재료비 단가
+            roundedMaterial,   // 6열: 재료비 금액 (단수정리 적용)
+            '',                // 7열: 노무비 단가
+            roundedLabor,      // 8열: 노무비 금액 (단수정리 적용)
+            '',                // 9열: 경비 단가
+            roundedExpense,    // 10열: 경비 금액 (단수정리 적용)
+            '',                // 11열: 합계 단가
+            roundedTotal       // 12열: 합계 금액 (단수정리 적용)
+        ]);
+
+        // 총합계 행 스타일
+        totalRow.eachCell((cell, colNum) => {
+            // 배경색 (진한 주황색)
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFFFE0B2' }
+            };
+
+            // 정렬
+            if (colNum === 1) {
+                cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                cell.font = { bold: true, size: 12, color: { argb: 'FFD32F2F' } };
+            } else {
+                cell.alignment = { vertical: 'middle', horizontal: 'right' };
+                cell.font = { bold: true, size: 12, color: { argb: 'FFD32F2F' } };
+
+                // 숫자 포맷 (금액만)
+                if (colNum === 6 || colNum === 8 || colNum === 10 || colNum === 12) {
+                    cell.numFmt = '#,##0';
+                }
+            }
+
+            // 테두리
+            cell.border = {
+                top: { style: 'thin' },
+                left: { style: 'thin' },
+                right: { style: 'thin' },
+                bottom: { style: 'thin' }
+            };
+        });
+
+        totalRow.height = 24;
+
+        // =============================================================================
+        // 9. 컬럼 너비 설정
+        // =============================================================================
+        worksheet.columns = [
+            { width: 25 },  // 품명
+            { width: 20 },  // 싸이즈
+            { width: 10 },  // 단위
+            { width: 12 },  // 수량
+            { width: 15 },  // 재료비 단가
+            { width: 15 },  // 재료비 금액
+            { width: 15 },  // 노무비 단가
+            { width: 15 },  // 노무비 금액
+            { width: 15 },  // 경비 단가
+            { width: 15 },  // 경비 금액
+            { width: 15 },  // 합계 단가
+            { width: 15 }   // 합계 금액
+        ];
+
+        // =============================================================================
+        // 10. 파일 다운로드
+        // =============================================================================
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        // 파일명 생성
+        const today = new Date().toISOString().split('T')[0];
+        const itemName = (basic.itemName || '세부아이템').replace(/[/\\?%*:|"<>]/g, '-');
+        const fileName = `일위대가_세부아이템_${itemName}_${today}.xlsx`;
+
+        // 다운로드
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.click();
+
+        console.log(`✅ Excel 파일 다운로드 완료: ${fileName}`);
+
+    } catch (error) {
+        console.error('❌ Excel 내보내기 실패:', error);
+        alert('Excel 파일을 생성하는 중 오류가 발생했습니다.\n' + error.message);
+    }
+}
+
 // 벽체 타입 마스터 전역 함수들
 window.migrateWallTypesToIndexedDB = migrateWallTypesToIndexedDB;
 window.getAllWallTypeMasters = () => unitPriceDB.getAllWallTypeMasters();
@@ -5154,6 +5615,9 @@ window.getWallTypeMasterById = (id) => unitPriceDB.getWallTypeMasterById(id);
 window.saveWallTypeMaster = (wallTypeData) => unitPriceDB.saveWallTypeMaster(wallTypeData);
 window.deleteWallTypeMaster = (id) => unitPriceDB.deleteWallTypeMaster(id);
 window.searchWallTypeMasters = (query) => unitPriceDB.searchWallTypeMasters(query);
+
+// Excel 내보내기 전역 함수 등록
+window.exportUnitPriceDetailToExcel = exportUnitPriceDetailToExcel;
 
 console.log('✅ unitPriceManager.js 로드 완료 - 일위대가 관리 전담 모듈, 자재 선택 기능, 수량 계산기, 벽체 타입 마스터 포함');
 
