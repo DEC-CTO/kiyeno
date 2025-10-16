@@ -7,6 +7,8 @@ let calculationResults = [];
 window.calculationResults = calculationResults;  // 전역 노출
 let isResultsPanelOpen = false;
 let currentActiveTab = 'comparison';
+let isOrderFormRendered = false;
+let isPriceComparisonRendered = false;
 
 /**
  * 벽체 비용 계산 시작
@@ -30,6 +32,11 @@ window.calculateWallCosts = async function() {
         // 3. 벽체별 계산 수행
         calculationResults = [];
         window.calculationResults = calculationResults;  // 전역 동기화
+
+        // 렌더링 플래그 리셋 (새 계산 시 재렌더링되도록)
+        isOrderFormRendered = false;
+        isPriceComparisonRendered = false;
+
         for (let i = 0; i < selectedWalls.length; i++) {
             const wall = selectedWalls[i];
             const result = await calculateSingleWallCost(wall, i + 1);
@@ -930,11 +937,17 @@ window.switchResultTab = function(tabName) {
 
     currentActiveTab = tabName;
 
-    // 탭별 렌더링
+    // 탭별 렌더링 (최초 1회만)
     if (tabName === 'priceComparison') {
-        renderPriceComparisonTab();
+        if (!isPriceComparisonRendered) {
+            renderPriceComparisonTab();
+            isPriceComparisonRendered = true;
+        }
     } else if (tabName === 'orderForm') {
-        renderOrderFormTab();
+        if (!isOrderFormRendered) {
+            renderOrderFormTab();
+            isOrderFormRendered = true;
+        }
     } else if (tabName === 'estimate') {
         renderEstimateTab();
     }
