@@ -1522,10 +1522,10 @@ async function renderOrderFormTab() {
     // 조정비율 입력 필드 이벤트 리스너
     const contractRatioInput = document.getElementById('contractRatioInput');
     if (contractRatioInput) {
-        contractRatioInput.addEventListener('input', async function() {
+        contractRatioInput.addEventListener('input', function() {
             console.log('🔄 조정비율 변경됨:', this.value);
-            // 테이블 전체 재렌더링
-            await renderOrderFormTab();
+            // 실시간 업데이트 (재렌더링 없이 DOM만 수정)
+            updateContractPricesRealtime();
         });
     }
 }
@@ -1677,19 +1677,34 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
         }
     }
 
-    // ✅ 금액 계산 (단가 × 면적)
-    const totalMaterialCost = totalMaterialUnitPrice * totalArea;
-    const totalLaborCost = totalLaborUnitPrice * totalArea;
+    // ✅ 조정비율 가져오기 (기본값 1.2)
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
 
-    // ✅ 경비 계산 (타입 요약 행은 경비 0)
-    const totalExpenseUnitPrice = 0; // 경비 단가 (기본값 0)
-    const totalExpenseCost = 0; // 경비 금액 (기본값 0)
+    // ✅ 발주단가 (기준값)
+    const orderMaterialUnitPrice = totalMaterialUnitPrice;
+    const orderLaborUnitPrice = totalLaborUnitPrice;
 
-    // ✅ 합계 계산 (자재비 + 노무비 + 경비)
-    const totalUnitPrice = totalMaterialUnitPrice + totalLaborUnitPrice + totalExpenseUnitPrice;
-    const totalCost = totalMaterialCost + totalLaborCost + totalExpenseCost;
+    // ✅ 계약도급 단가 (발주단가 × 조정비율)
+    const contractMaterialUnitPrice = orderMaterialUnitPrice * contractRatio;
+    const contractLaborUnitPrice = orderLaborUnitPrice * contractRatio;
 
-    console.log(`📐 ${typeName} THK: ${totalThickness}, 재료비단가: ${totalMaterialUnitPrice}, 노무비단가: ${totalLaborUnitPrice}, 경비단가: ${totalExpenseUnitPrice}`);
+    // ✅ 금액 계산
+    const orderMaterialCost = orderMaterialUnitPrice * totalArea;
+    const orderLaborCost = orderLaborUnitPrice * totalArea;
+    const contractMaterialCost = contractMaterialUnitPrice * totalArea;
+    const contractLaborCost = contractLaborUnitPrice * totalArea;
+
+    // ✅ 경비 (타입 요약 행은 경비 0)
+    const expenseUnitPrice = 0;
+    const expenseCost = 0;
+
+    // ✅ 합계 계산
+    const contractTotalUnitPrice = contractMaterialUnitPrice + contractLaborUnitPrice + expenseUnitPrice;
+    const contractTotalCost = contractMaterialCost + contractLaborCost + expenseCost;
+    const orderTotalUnitPrice = orderMaterialUnitPrice + orderLaborUnitPrice + expenseUnitPrice;
+    const orderTotalCost = orderMaterialCost + orderLaborCost + expenseCost;
+
+    console.log(`📐 ${typeName} THK: ${totalThickness}, 조정비율: ${contractRatio}, 계약도급 자재비: ${contractMaterialUnitPrice}, 발주단가 자재비: ${orderMaterialUnitPrice}`);
 
     return `
         <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
@@ -1708,23 +1723,23 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td>M2</td>
             <td></td>
-            <td class="number-cell">${Math.round(totalMaterialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalLaborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalExpenseUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalExpenseCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
+            <td class="number-cell contract-material-price">${Math.round(contractMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${Math.round(contractMaterialCost).toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${Math.round(contractLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${Math.round(contractLaborCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(expenseUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(expenseCost).toLocaleString()}</td>
+            <td class="number-cell contract-total-price">${Math.round(contractTotalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-total-amount">${Math.round(contractTotalCost).toLocaleString()}</td>
             <td></td>
-            <td class="number-cell">${Math.round(totalMaterialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalMaterialCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalLaborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalLaborCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalExpenseUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalExpenseCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(totalCost).toLocaleString()}</td>
+            <td class="number-cell order-material-price">${Math.round(orderMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${Math.round(orderMaterialCost).toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${Math.round(orderLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${Math.round(orderLaborCost).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(expenseUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(expenseCost).toLocaleString()}</td>
+            <td class="number-cell order-total-price">${Math.round(orderTotalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell order-total-amount">${Math.round(orderTotalCost).toLocaleString()}</td>
             <td></td>
         </tr>
     `;
@@ -2347,6 +2362,117 @@ function generateOrderFormHeader() {
 }
 
 /**
+ * 타입 요약 행의 경비 합계 업데이트
+ * @param {HTMLElement} currentRow - 경비가 입력된 데이터 행
+ * @param {boolean} isContract - 계약도급 여부
+ */
+function updateTypeSummaryRowExpense(currentRow, isContract) {
+    // 현재 행의 타입명 가져오기 (5번째 컬럼)
+    const typeName = currentRow.cells[4]?.textContent.trim();
+    if (!typeName) return;
+
+    // 타입 요약 행 찾기 (보라색 배경 행 중 해당 타입)
+    const summaryRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient"]');
+    let summaryRow = null;
+
+    for (const row of summaryRows) {
+        const rowTypeName = row.cells[1]?.textContent.trim();
+        if (rowTypeName === typeName) {
+            summaryRow = row;
+            break;
+        }
+    }
+
+    if (!summaryRow) {
+        console.warn(`⚠️ 타입 요약 행을 찾을 수 없음: ${typeName}`);
+        return;
+    }
+
+    // 해당 타입의 모든 데이터 행 찾기 (흰색 배경 행 중 같은 타입)
+    const allDataRows = document.querySelectorAll('.order-form-table tbody tr[data-row]');
+    const typeDataRows = Array.from(allDataRows).filter(row => {
+        const rowType = row.cells[4]?.textContent.trim();
+        return rowType === typeName;
+    });
+
+    // 계약도급 또는 발주단가 경비 합계 계산
+    let totalExpenseAmount = 0;
+
+    typeDataRows.forEach(row => {
+        const expenseCell = isContract
+            ? row.querySelector('.contract-expense-amount')
+            : row.querySelector('.order-expense-amount');
+
+        const expenseValue = parseFloat(expenseCell?.textContent.replace(/,/g, '')) || 0;
+        totalExpenseAmount += expenseValue;
+    });
+
+    // 타입 요약 행의 경비 셀 업데이트 (계약도급 또는 발주단가)
+    // 계약도급: 20번째 컬럼 (경비 단가), 21번째 컬럼 (경비 금액)
+    // 발주단가: 28번째 컬럼 (경비 단가), 29번째 컬럼 (경비 금액)
+    const expensePriceColIndex = isContract ? 19 : 27;  // 0-based index
+    const expenseAmountColIndex = isContract ? 20 : 28;
+
+    // 경비 단가는 0으로 유지 (요약 행은 단가 개념 없음)
+    if (summaryRow.cells[expensePriceColIndex]) {
+        summaryRow.cells[expensePriceColIndex].textContent = '0';
+    }
+
+    // 경비 금액 업데이트
+    if (summaryRow.cells[expenseAmountColIndex]) {
+        summaryRow.cells[expenseAmountColIndex].textContent = Math.round(totalExpenseAmount).toLocaleString();
+    }
+
+    // 타입 요약 행의 합계 재계산 (자재비 + 노무비 + 경비)
+    // 1. 단가 읽기
+    const materialPriceCell = isContract
+        ? summaryRow.querySelector('.contract-material-price')
+        : summaryRow.querySelector('.order-material-price');
+    const laborPriceCell = isContract
+        ? summaryRow.querySelector('.contract-labor-price')
+        : summaryRow.querySelector('.order-labor-price');
+
+    const materialPrice = parseFloat(materialPriceCell?.textContent.replace(/,/g, '')) || 0;
+    const laborPrice = parseFloat(laborPriceCell?.textContent.replace(/,/g, '')) || 0;
+
+    // 2. 금액 읽기
+    const materialAmountCell = isContract
+        ? summaryRow.querySelector('.contract-material-amount')
+        : summaryRow.querySelector('.order-material-amount');
+    const laborAmountCell = isContract
+        ? summaryRow.querySelector('.contract-labor-amount')
+        : summaryRow.querySelector('.order-labor-amount');
+
+    const materialAmount = parseFloat(materialAmountCell?.textContent.replace(/,/g, '')) || 0;
+    const laborAmount = parseFloat(laborAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+    // 3. 합계 단가 계산 (자재비 단가 + 노무비 단가 + 경비 단가)
+    // 경비 단가 = 경비 금액 합계
+    const totalPrice = Math.round(materialPrice + laborPrice + totalExpenseAmount);
+
+    // 4. 합계 금액 계산 (자재비 금액 + 노무비 금액 + 경비 금액)
+    const totalAmount = Math.round(materialAmount + laborAmount + totalExpenseAmount);
+
+    // 5. 합계 단가 셀 업데이트
+    const totalPriceCell = isContract
+        ? summaryRow.querySelector('.contract-total-price')
+        : summaryRow.querySelector('.order-total-price');
+
+    if (totalPriceCell) {
+        totalPriceCell.textContent = totalPrice.toLocaleString();
+    }
+
+    // 6. 합계 금액 셀 업데이트
+    const totalAmountCell = isContract
+        ? summaryRow.querySelector('.contract-total-amount')
+        : summaryRow.querySelector('.order-total-amount');
+
+    if (totalAmountCell) {
+        totalAmountCell.textContent = totalAmount.toLocaleString();
+    }
+}
+
+/**
  * 경비 입력 필드 이벤트 리스너 추가
  * 경비 단가 입력 시 자동으로 금액 및 합계 계산
  */
@@ -2358,11 +2484,14 @@ function attachExpenseInputListeners() {
 
     expenseInputs.forEach(input => {
         input.addEventListener('input', function() {
+            // 천단위 콤마 포맷 적용
+            formatNumberInput(this);
+
             const rowNumber = this.getAttribute('data-row');
             const isContract = this.classList.contains('contract-expense-price');
 
-            // 입력값 가져오기
-            const expensePrice = parseFloat(this.value) || 0;
+            // 입력값 가져오기 (콤마 제거)
+            const expensePrice = parseFloat(this.dataset.numericValue || this.value.replace(/,/g, '')) || 0;
 
             // 해당 행 찾기
             const row = document.querySelector(`tr[data-row="${rowNumber}"]`);
@@ -2431,10 +2560,138 @@ function attachExpenseInputListeners() {
                 if (totalPriceCell) totalPriceCell.textContent = totalPrice.toLocaleString();
                 if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
             }
+
+            // ✅ 타입 요약 행 업데이트
+            updateTypeSummaryRowExpense(row, isContract);
         });
     });
 
     console.log(`✅ ${expenseInputs.length}개 경비 입력 필드에 리스너 추가 완료`);
+}
+
+/**
+ * 숫자 입력 필드에 천단위 콤마 포맷 적용
+ * @param {HTMLInputElement} input - 입력 필드 요소
+ */
+function formatNumberInput(input) {
+    // 숫자만 추출
+    let value = input.value.replace(/[^0-9]/g, '');
+
+    // 숫자를 콤마 포맷으로 변환
+    if (value) {
+        value = parseInt(value).toLocaleString();
+    }
+
+    input.value = value;
+
+    // 실제 숫자 값을 data 속성에 저장 (계산용)
+    input.dataset.numericValue = value.replace(/,/g, '');
+}
+
+/**
+ * 조정비율 변경 시 계약도급 단가 실시간 업데이트
+ * 전체 재렌더링 없이 DOM의 숫자만 변경하여 포커스 유지
+ */
+function updateContractPricesRealtime() {
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+    console.log('💰 조정비율 실시간 업데이트:', contractRatio);
+
+    // 모든 데이터 행 순회
+    const allRows = document.querySelectorAll('.order-form-table tbody tr[data-row]');
+
+    allRows.forEach(row => {
+        // 발주단가 읽기
+        const orderMatPriceCell = row.querySelector('.order-material-price');
+        const orderLabPriceCell = row.querySelector('.order-labor-price');
+
+        const orderMatPrice = parseFloat(orderMatPriceCell?.textContent.replace(/,/g, '')) || 0;
+        const orderLabPrice = parseFloat(orderLabPriceCell?.textContent.replace(/,/g, '')) || 0;
+
+        // 계약도급 단가 계산 (발주단가 × 조정비율)
+        const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+        const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+
+        // 계약도급 단가 업데이트
+        const contractMatPriceCell = row.querySelector('.contract-material-price');
+        const contractLabPriceCell = row.querySelector('.contract-labor-price');
+        if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
+        if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
+
+        // 수량 가져오기
+        const quantityCell = row.querySelector('.quantity-cell');
+        const quantity = parseFloat(quantityCell?.textContent.replace(/,/g, '')) || 0;
+
+        // 계약도급 금액 계산
+        const contractMatAmount = Math.round(contractMatPrice * quantity);
+        const contractLabAmount = Math.round(contractLabPrice * quantity);
+
+        // 계약도급 금액 업데이트
+        const contractMatAmountCell = row.querySelector('.contract-material-amount');
+        const contractLabAmountCell = row.querySelector('.contract-labor-amount');
+        if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+        if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+
+        // 경비 가져오기 (경비는 단가 그대로)
+        const expenseAmountCell = row.querySelector('.contract-expense-amount');
+        const expensePrice = parseFloat(expenseAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+        // 합계 계산
+        const totalPrice = Math.round(contractMatPrice + contractLabPrice);
+        const totalAmount = Math.round(contractMatAmount + contractLabAmount + expensePrice);
+
+        // 합계 업데이트
+        const totalPriceCell = row.querySelector('.contract-total-price');
+        const totalAmountCell = row.querySelector('.contract-total-amount');
+        if (totalPriceCell) totalPriceCell.textContent = totalPrice.toLocaleString();
+        if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
+    });
+
+    // 타입 요약 행도 업데이트 (보라색 배경 행)
+    const summaryRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient"]');
+
+    summaryRows.forEach(row => {
+        // 발주단가 읽기
+        const orderMatPriceCell = row.querySelector('.order-material-price');
+        const orderLabPriceCell = row.querySelector('.order-labor-price');
+        const orderMatAmountCell = row.querySelector('.order-material-amount');
+        const orderLabAmountCell = row.querySelector('.order-labor-amount');
+
+        const orderMatPrice = parseFloat(orderMatPriceCell?.textContent.replace(/,/g, '')) || 0;
+        const orderLabPrice = parseFloat(orderLabPriceCell?.textContent.replace(/,/g, '')) || 0;
+        const orderMatAmount = parseFloat(orderMatAmountCell?.textContent.replace(/,/g, '')) || 0;
+        const orderLabAmount = parseFloat(orderLabAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+        // 계약도급 단가 계산 (발주단가 × 조정비율)
+        const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+        const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+
+        // 계약도급 금액 계산 (발주금액 × 조정비율)
+        const contractMatAmount = Math.round(orderMatAmount * contractRatio);
+        const contractLabAmount = Math.round(orderLabAmount * contractRatio);
+
+        // 계약도급 단가 업데이트
+        const contractMatPriceCell = row.querySelector('.contract-material-price');
+        const contractLabPriceCell = row.querySelector('.contract-labor-price');
+        if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
+        if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
+
+        // 계약도급 금액 업데이트
+        const contractMatAmountCell = row.querySelector('.contract-material-amount');
+        const contractLabAmountCell = row.querySelector('.contract-labor-amount');
+        if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+        if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+
+        // 합계 업데이트
+        const totalPrice = Math.round(contractMatPrice + contractLabPrice);
+        const totalAmount = Math.round(contractMatAmount + contractLabAmount);
+
+        const totalPriceCell = row.querySelector('.contract-total-price');
+        const totalAmountCell = row.querySelector('.contract-total-amount');
+        if (totalPriceCell) totalPriceCell.textContent = totalPrice.toLocaleString();
+        if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
+    });
+
+    console.log(`✅ 데이터 행 ${allRows.length}개, 타입 요약 행 ${summaryRows.length}개 업데이트 완료`);
 }
 
 /**
