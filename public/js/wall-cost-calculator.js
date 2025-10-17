@@ -2398,6 +2398,7 @@ async function collectAndGroupComponents(results) {
                 unit: component.unit || 'EA',
                 materialPrice: parseFloat(component.materialPrice) || 0,
                 laborPrice: parseFloat(component.laborPrice) || 0,
+                laborAmount: parseFloat(component.laborAmount) || 0,
                 quantity: parseFloat(component.quantity) || 0,
                 area: totalArea,
                 parentCategory: parentCategory,
@@ -2434,6 +2435,8 @@ function groupComponentsByName(components) {
                 unit: comp.unit,
                 materialPrice: comp.materialPrice,
                 laborPrice: comp.laborPrice,
+                laborAmount: comp.laborAmount,
+                quantity: comp.quantity,
                 totalQuantity: 0,
                 area: comp.area,
                 parentCategory: comp.parentCategory,
@@ -2551,23 +2554,25 @@ function generateSubtotalRow(components, label) {
     const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
 
     for (const comp of components) {
-        const quantity = comp.totalQuantity * comp.area;
+        // 1m² 단가 계산
+        const matPrice1m2 = comp.materialPrice * comp.quantity;
+        const labPrice1m2 = comp.laborAmount;
 
         // 발주단가 - 단가 합계
-        orderMaterialPriceSum += comp.materialPrice;
-        orderLaborPriceSum += comp.laborPrice;
+        orderMaterialPriceSum += matPrice1m2;
+        orderLaborPriceSum += labPrice1m2;
 
-        // 발주단가 - 금액 합계
-        orderMaterialAmountSum += comp.materialPrice * quantity;
-        orderLaborAmountSum += comp.laborPrice * quantity;
+        // 발주단가 - 금액 합계 (1m² 단가 × 면적)
+        orderMaterialAmountSum += matPrice1m2 * comp.area;
+        orderLaborAmountSum += labPrice1m2 * comp.area;
 
         // 계약도급 - 단가 합계 (발주단가 × 조정비율)
-        contractMaterialPriceSum += comp.materialPrice * contractRatio;
-        contractLaborPriceSum += comp.laborPrice * contractRatio;
+        contractMaterialPriceSum += matPrice1m2 * contractRatio;
+        contractLaborPriceSum += labPrice1m2 * contractRatio;
 
-        // 계약도급 - 금액 합계 (단가 × 조정비율 × 수량)
-        contractMaterialAmountSum += (comp.materialPrice * contractRatio) * quantity;
-        contractLaborAmountSum += (comp.laborPrice * contractRatio) * quantity;
+        // 계약도급 - 금액 합계 (발주 금액 × 조정비율)
+        contractMaterialAmountSum += (matPrice1m2 * comp.area) * contractRatio;
+        contractLaborAmountSum += (labPrice1m2 * comp.area) * contractRatio;
     }
 
     // 합계 계산
@@ -2579,8 +2584,8 @@ function generateSubtotalRow(components, label) {
     return `
         <tr style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-weight: 600;">
             <td></td>
-            <td>${label}</td>
             <td></td>
+            <td>${label}</td>
             <td></td>
             <td></td>
             <td></td>
@@ -2619,7 +2624,248 @@ function generateSubtotalRow(components, label) {
 }
 
 /**
- * 합계 행 생성 (파란색 배경)
+ * 카테고리별 간접비 계산
+ * @param {string} categoryName - 카테고리명 ("스터드" or "석고보드")
+ * @param {number} materialTotal - 해당 카테고리 자재비 합계
+ * @param {number} laborTotal - 해당 카테고리 노무비 합계
+ * @param {Object} fixedRates - 간접비 비율
+ * @returns {Array} - 간접비 항목 배열
+ */
+function calculateIndirectCosts(categoryName, materialTotal, laborTotal, fixedRates) {
+    console.log(`💰 [${categoryName}] 간접비 계산 시작`);
+    console.log(`  - 자재비 합계: ${materialTotal.toLocaleString()}`);
+    console.log(`  - 노무비 합계: ${laborTotal.toLocaleString()}`);
+    console.log(`  - fixedRates:`, fixedRates);
+
+    const materialLoss = Math.round(materialTotal * fixedRates.materialLoss / 100);
+    const transportCost = Math.round(materialTotal * fixedRates.transportCost / 100);
+    const materialProfitBase = materialTotal + materialLoss + transportCost;
+    const materialProfit = Math.round(materialProfitBase * fixedRates.materialProfit / 100);
+    const toolExpense = Math.round(laborTotal * fixedRates.toolExpense / 100);
+
+    console.log(`  ✅ 자재로스: ${materialLoss.toLocaleString()}`);
+    console.log(`  ✅ 자재운반비: ${transportCost.toLocaleString()}`);
+    console.log(`  ✅ 자재비 이윤: ${materialProfit.toLocaleString()}`);
+    console.log(`  ✅ 공구손료: ${toolExpense.toLocaleString()}`);
+
+    return [
+        {
+            name: `${categoryName} 자재로스`,
+            spec: '자재비의',
+            unit: '%',
+            rate: fixedRates.materialLoss,
+            amount: materialLoss
+        },
+        {
+            name: `${categoryName} 자재운반비 및 양중비`,
+            spec: '자재비의',
+            unit: '%',
+            rate: fixedRates.transportCost,
+            amount: transportCost
+        },
+        {
+            name: `${categoryName} 자재비 이윤`,
+            spec: '자재비의',
+            unit: '%',
+            rate: fixedRates.materialProfit,
+            amount: materialProfit
+        },
+        {
+            name: `${categoryName} 공구손료 및 기계경비`,
+            spec: '노무비의',
+            unit: '%',
+            rate: fixedRates.toolExpense,
+            amount: toolExpense
+        }
+    ];
+}
+
+/**
+ * 간접비 행 생성 (노란색 배경)
+ * @param {Object} item - 간접비 항목 객체
+ * @param {number} rowNumber - 행 번호
+ * @returns {string} - HTML 문자열
+ */
+function generateIndirectCostRow(item, rowNumber) {
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+    const contractAmount = Math.round(item.amount * contractRatio);
+
+    return `
+        <tr style="background: #fffacd;">
+            <td>${rowNumber}</td>
+            <td></td>
+            <td>${item.name}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>${item.spec}</td>
+            <td>${item.rate}%</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${contractAmount.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${contractAmount.toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${item.amount.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${item.amount.toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 간접비 소계 행 생성 (노란색 배경)
+ * @param {Array} indirectCostItems - 간접비 항목 배열
+ * @returns {string} - HTML 문자열
+ */
+function generateIndirectCostSubtotalRow(indirectCostItems) {
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+    // 간접비 합계 계산
+    let orderExpenseSum = 0;
+    for (const item of indirectCostItems) {
+        orderExpenseSum += item.amount;
+    }
+    const contractExpenseSum = Math.round(orderExpenseSum * contractRatio);
+
+    return `
+        <tr style="background: #fff9c4; font-weight: 600;">
+            <td></td>
+            <td></td>
+            <td>소계 (간접비)</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${contractExpenseSum.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${contractExpenseSum.toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${orderExpenseSum.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${orderExpenseSum.toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 전체 합계 행 생성 (초록색 배경)
+ * @param {Array} directCosts - 직접비 배열
+ * @param {Array} indirectCostItems - 간접비 항목 배열
+ * @returns {string} - HTML 문자열
+ */
+function generateGrandTotalRow(directCosts, indirectCostItems) {
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+    // 직접비 합계 계산
+    let orderMaterialTotal = 0;
+    let orderLaborTotal = 0;
+    for (const comp of directCosts) {
+        const quantity = comp.totalQuantity * comp.area;
+        orderMaterialTotal += comp.materialPrice * quantity;
+        orderLaborTotal += comp.laborPrice * quantity;
+    }
+
+    // 간접비 합계 계산
+    let orderExpenseTotal = 0;
+    for (const item of indirectCostItems) {
+        orderExpenseTotal += item.amount;
+    }
+
+    // 발주단가 총계
+    const orderGrandTotal = orderMaterialTotal + orderLaborTotal + orderExpenseTotal;
+
+    // 계약도급 총계
+    const contractMaterialTotal = Math.round(orderMaterialTotal * contractRatio);
+    const contractLaborTotal = Math.round(orderLaborTotal * contractRatio);
+    const contractExpenseTotal = Math.round(orderExpenseTotal * contractRatio);
+    const contractGrandTotal = contractMaterialTotal + contractLaborTotal + contractExpenseTotal;
+
+    return `
+        <tr style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: white; font-weight: 700; font-size: 1.1em;">
+            <td></td>
+            <td>총 계</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td></td>
+            <td class="number-cell">${contractMaterialTotal.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${contractLaborTotal.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${contractExpenseTotal.toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${contractGrandTotal.toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td></td>
+            <td class="number-cell">${Math.round(orderMaterialTotal).toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${Math.round(orderLaborTotal).toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${Math.round(orderExpenseTotal).toLocaleString()}</td>
+            <td></td>
+            <td class="number-cell">${Math.round(orderGrandTotal).toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 합계 행 생성 (파란색 배경) - 기존 함수 (호환성 유지)
  * @param {Array} directCosts - 직접비 배열
  * @param {Array} indirectCosts - 간접비 배열
  * @returns {string} - HTML 문자열
@@ -2633,9 +2879,15 @@ function generateTotalRow(directCosts, indirectCosts) {
     let orderTotal = 0;
 
     for (const comp of allCosts) {
-        const quantity = comp.totalQuantity * comp.area;
-        orderTotal += (comp.materialPrice + comp.laborPrice) * quantity;
-        contractTotal += ((comp.materialPrice + comp.laborPrice) * contractRatio) * quantity;
+        // 1m² 단가 계산
+        const matPrice1m2 = comp.materialPrice * comp.quantity;
+        const labPrice1m2 = comp.laborAmount;
+
+        // 발주 총액 = 1m² 단가 × 면적
+        orderTotal += (matPrice1m2 + labPrice1m2) * comp.area;
+
+        // 계약도급 총액 = 발주 총액 × 조정비율
+        contractTotal += ((matPrice1m2 + labPrice1m2) * comp.area) * contractRatio;
     }
 
     return `
@@ -2778,17 +3030,17 @@ function generateGroupedComponentRow(component, rowNumber) {
     }
     const quantity = component.totalQuantity * area;
 
-    // 발주단가
-    const orderMatPrice = component.materialPrice;
-    const orderLabPrice = component.laborPrice;
-    const orderMatAmount = orderMatPrice * quantity;
-    const orderLabAmount = orderLabPrice * quantity;
+    // 발주단가 - 1m² 단가 계산
+    const orderMatPrice = component.materialPrice * component.quantity;  // 1m² 자재비 = 단가 × 수량
+    const orderLabPrice = component.laborAmount;                         // 1m² 노무비
+    const orderMatAmount = orderMatPrice * area;  // 총 자재비 = 1m² 단가 × 면적
+    const orderLabAmount = orderLabPrice * area;  // 총 노무비 = 1m² 단가 × 면적
 
     // 계약도급
     const contractMatPrice = orderMatPrice * contractRatio;
     const contractLabPrice = orderLabPrice * contractRatio;
-    const contractMatAmount = contractMatPrice * quantity;
-    const contractLabAmount = contractLabPrice * quantity;
+    const contractMatAmount = orderMatAmount * contractRatio;
+    const contractLabAmount = orderLabAmount * contractRatio;
 
     // 품명 표시
     let displayName = component.name;
@@ -2896,23 +3148,79 @@ async function generateOrderFormDataRows() {
         // 5. ✅ 직접비 소계
         html += generateSubtotalRow(sortedDirectCosts, '소계 (직접자재)');
 
-        // 6. ✅ 간접비 정렬 및 행 생성
-        const sortedIndirectCosts = sortComponents(indirectCosts);
+        // 6. 🆕 간접비 계산 및 행 생성 (카테고리별 분리)
+        const unitPriceItem = sortedDirectCosts[0]?.unitPriceItem;
+        const fixedRates = unitPriceItem?.fixedRates || {
+            materialLoss: 3,
+            transportCost: 1.5,
+            materialProfit: 15,
+            toolExpense: 2
+        };
 
-        // ✅ 6-1. 간접비에도 석고보드 수량 전달
-        for (const comp of sortedIndirectCosts) {
-            comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
-            html += generateGroupedComponentRow(comp, rowNumber);
+        // 6-1. 직접비를 카테고리별로 분리
+        console.log(`🔍 전체 직접비 구성품:`, sortedDirectCosts.map(c => ({ name: c.name, parentCategory: c.parentCategory })));
+
+        const lightWeightCosts = sortedDirectCosts.filter(comp => comp.parentCategory === 'STUD');
+        const gypsumCosts = sortedDirectCosts.filter(comp => comp.parentCategory === '석고보드');
+
+        console.log(`📦 경량자재 개수: ${lightWeightCosts.length}, 석고보드 개수: ${gypsumCosts.length}`);
+
+        // 6-2. 스터드(경량자재) 직접비 합계
+        let studMaterialTotal = 0;
+        let studLaborTotal = 0;
+        console.log(`📊 스터드 구성품 상세:`);
+        for (const comp of lightWeightCosts) {
+            // ✅ 1m² 단가 = materialPrice × quantity
+            const materialPricePerM2 = comp.materialPrice * comp.quantity;
+            // ✅ 1m² 노무비 = laborAmount (이미 계산된 값)
+            const laborPricePerM2 = comp.laborAmount;
+
+            console.log(`  - ${comp.name}: 자재(${comp.materialPrice}×${comp.quantity}=${materialPricePerM2.toFixed(2)}), 노무(${laborPricePerM2}), 면적(${comp.area}m²)`);
+
+            // ✅ 총 금액 = 1m² 단가 × 면적
+            studMaterialTotal += materialPricePerM2 * comp.area;
+            studLaborTotal += laborPricePerM2 * comp.area;
+        }
+        console.log(`📊 스터드 직접비 합계 - 자재: ${studMaterialTotal.toLocaleString()}, 노무: ${studLaborTotal.toLocaleString()}`);
+
+        // 6-3. 석고보드 직접비 합계
+        let gypsumMaterialTotal = 0;
+        let gypsumLaborTotal = 0;
+        console.log(`📊 석고보드 구성품 상세:`);
+        for (const comp of gypsumCosts) {
+            // ✅ 1m² 단가 = materialPrice × quantity
+            const materialPricePerM2 = comp.materialPrice * comp.quantity;
+            // ✅ 1m² 노무비 = laborAmount (이미 계산된 값)
+            const laborPricePerM2 = comp.laborAmount;
+
+            console.log(`  - ${comp.name}: 자재(${comp.materialPrice}×${comp.quantity}=${materialPricePerM2.toFixed(2)}), 노무(${laborPricePerM2}), 면적(${comp.area}m²)`);
+
+            // ✅ 총 금액 = 1m² 단가 × 면적
+            gypsumMaterialTotal += materialPricePerM2 * comp.area;
+            gypsumLaborTotal += laborPricePerM2 * comp.area;
+        }
+        console.log(`📊 석고보드 직접비 합계 - 자재: ${gypsumMaterialTotal.toLocaleString()}, 노무: ${gypsumLaborTotal.toLocaleString()}`);
+        console.log(`🔧 fixedRates:`, unitPriceItem?.fixedRates);
+        console.log(`🔧 사용할 fixedRates:`, fixedRates);
+
+        // 6-4. 스터드 간접비 계산
+        const studIndirectCosts = calculateIndirectCosts('스터드', studMaterialTotal, studLaborTotal, fixedRates);
+
+        // 6-5. 석고보드 간접비 계산
+        const gypsumIndirectCosts = calculateIndirectCosts('석고보드', gypsumMaterialTotal, gypsumLaborTotal, fixedRates);
+
+        // 6-6. 간접비 행 생성 (스터드 4개 + 석고보드 4개 = 총 8개)
+        const allIndirectCosts = [...studIndirectCosts, ...gypsumIndirectCosts];
+        for (const item of allIndirectCosts) {
+            html += generateIndirectCostRow(item, rowNumber);
             rowNumber++;
         }
 
-        // 7. ✅ 간접비 소계
-        if (sortedIndirectCosts.length > 0) {
-            html += generateSubtotalRow(sortedIndirectCosts, '소계 (간접비)');
-        }
+        // 7. 🆕 간접비 소계 (8개 항목 합계)
+        html += generateIndirectCostSubtotalRow(allIndirectCosts);
 
-        // 8. ✅ 전체 합계
-        html += generateTotalRow(sortedDirectCosts, sortedIndirectCosts);
+        // 8. 🆕 전체 합계 (직접비 + 간접비)
+        html += generateGrandTotalRow(sortedDirectCosts, allIndirectCosts);
 
         typeIndex++;
     }
@@ -3397,10 +3705,38 @@ function updateContractPricesRealtime() {
         if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
     });
 
-    // 타입 요약 행도 업데이트 (보라색 배경 행)
+    // 타입 요약 행 및 소계/총계 행도 업데이트 (보라색/회색/노란색/초록색 배경 행)
     const summaryRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient"]');
 
     summaryRows.forEach(row => {
+        // ✅ 타입 요약 행인지 확인 (1-1, 1-2 같은 NO를 가짐)
+        const noCell = row.cells[0];
+        const noText = noCell?.textContent.trim();
+
+        // 타입 요약 행은 "1-1", "1-2" 같은 형식
+        if (noText && /^\d+-\d+$/.test(noText)) {
+            console.log(`⏭️ 타입 요약 행 자재비/노무비 건너뛰기: ${noText}`);
+
+            // ✅ 타입 요약 행은 합계만 업데이트 (자재비/노무비는 빈칸 유지)
+            const orderTotalPriceCell = row.querySelector('.order-total-price');
+            const orderTotalAmountCell = row.querySelector('.order-total-amount');
+
+            const orderTotalPrice = parseFloat(orderTotalPriceCell?.textContent.replace(/,/g, '')) || 0;
+            const orderTotalAmount = parseFloat(orderTotalAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+            const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
+            const contractTotalAmount = Math.round(orderTotalAmount * contractRatio);
+
+            const contractTotalPriceCell = row.querySelector('.contract-total-price');
+            const contractTotalAmountCell = row.querySelector('.contract-total-amount');
+
+            if (contractTotalPriceCell) contractTotalPriceCell.textContent = contractTotalPrice.toLocaleString();
+            if (contractTotalAmountCell) contractTotalAmountCell.textContent = contractTotalAmount.toLocaleString();
+
+            return;  // 자재비/노무비 업데이트는 건너뛰기
+        }
+
+        // ✅ 소계/총계 행만 자재비/노무비 업데이트
         // 발주단가 읽기
         const orderMatPriceCell = row.querySelector('.order-material-price');
         const orderLabPriceCell = row.querySelector('.order-labor-price');
