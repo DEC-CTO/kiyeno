@@ -1520,6 +1520,7 @@ async function renderOrderFormTab() {
                             <td></td>
                             <td></td>
                             <td></td>
+                            <td></td>
                         </tr>
                         <!-- 데이터 행 -->
                         ${dataRowsHtml}
@@ -1734,25 +1735,26 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td></td>
             <td></td>
+            <td></td>
             <td>M2</td>
             <td></td>
-            <td class="number-cell contract-material-price">${Math.round(contractMaterialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-material-amount">${Math.round(contractMaterialCost).toLocaleString()}</td>
-            <td class="number-cell contract-labor-price">${Math.round(contractLaborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-labor-amount">${Math.round(contractLaborCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(expenseUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(expenseCost).toLocaleString()}</td>
-            <td class="number-cell contract-total-price">${Math.round(contractTotalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-total-amount">${Math.round(contractTotalCost).toLocaleString()}</td>
+            <td class="number-cell contract-material-price"></td>
+            <td class="number-cell contract-material-amount"></td>
+            <td class="number-cell contract-labor-price"></td>
+            <td class="number-cell contract-labor-amount"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell contract-total-price"></td>
+            <td class="number-cell contract-total-amount"></td>
             <td></td>
-            <td class="number-cell order-material-price">${Math.round(orderMaterialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell order-material-amount">${Math.round(orderMaterialCost).toLocaleString()}</td>
-            <td class="number-cell order-labor-price">${Math.round(orderLaborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell order-labor-amount">${Math.round(orderLaborCost).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(expenseUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(expenseCost).toLocaleString()}</td>
-            <td class="number-cell order-total-price">${Math.round(orderTotalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell order-total-amount">${Math.round(orderTotalCost).toLocaleString()}</td>
+            <td class="number-cell order-material-price"></td>
+            <td class="number-cell order-material-amount"></td>
+            <td class="number-cell order-labor-price"></td>
+            <td class="number-cell order-labor-amount"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell order-total-price"></td>
+            <td class="number-cell order-total-amount"></td>
             <td></td>
         </tr>
     `;
@@ -1775,6 +1777,18 @@ function isGypsumBoard(name) {
 
 function isGlassWool(name) {
     return name && (name.includes('그라스울') || name.toUpperCase().includes('GLASSWOOL'));
+}
+
+function isMagazinePiece(name) {
+    return name && name.includes('피스') && !name.includes('석고피스');
+}
+
+function isNailingBullet(name) {
+    return name && name.includes('타정총알');
+}
+
+function isWeldingRod(name) {
+    return name && name.includes('용접봉');
 }
 
 /**
@@ -2271,13 +2285,569 @@ async function generateLayerDetailRows(result, allResults) {
 }
 
 /**
+ * ============================================
+ * Phase 1: 데이터 수집 및 분류 함수들
+ * ============================================
+ */
+
+/**
+ * 일위대가 ID에서 상위 카테고리 추출
+ * @param {string} unitPriceId - 일위대가 ID
+ * @returns {string} - 카테고리 (STUD, 석고보드, RUNNER, 그라스울, ETC)
+ */
+function extractParentCategory(unitPriceId) {
+    if (!unitPriceId) return 'ETC';
+
+    const id = unitPriceId.toUpperCase();
+
+    if (id.includes('STUD')) return 'STUD';
+    if (id.includes('석고보드') || id.includes('GYPSUM')) return '석고보드';
+    if (id.includes('RUNNER') || id.includes('런너')) return 'RUNNER';
+    if (id.includes('그라스울') || id.includes('GLASSWOOL')) return '그라스울';
+
+    return 'ETC';
+}
+
+/**
+ * 컴포넌트 이름에서 자재 타입 추출
+ * @param {string} componentName - 컴포넌트 이름
+ * @returns {string} - 자재 타입
+ */
+function getComponentType(componentName) {
+    if (!componentName) return 'ETC';
+
+    const name = componentName.toUpperCase();
+
+    if (name.includes('스터드') || name.includes('STUD')) return 'STUD';
+    if (name.includes('런너') || name.includes('RUNNER')) return 'RUNNER';
+    if (name.includes('석고보드') || name.includes('GYPSUM')) return '석고보드';
+    if (name.includes('그라스울') || name.includes('GLASSWOOL')) return '그라스울';
+    if (name.includes('피스') || name.includes('PIECE')) return 'PIECE';
+    if (name.includes('총알') || name.includes('BULLET')) return 'BULLET';
+    if (name.includes('용접') || name.includes('WELDING')) return 'WELDING';
+
+    return 'ETC';
+}
+
+/**
+ * 간접비 여부 판별
+ * @param {string} componentName - 컴포넌트 이름
+ * @returns {boolean} - 간접비 여부
+ */
+function isIndirectCost(componentName) {
+    const indirectKeywords = [
+        '로스', '코스트',
+        '운반비', '할증',
+        '공수', '보조',
+        '타수정리', '세'
+    ];
+
+    return indirectKeywords.some(keyword => componentName.includes(keyword));
+}
+
+/**
+ * 간접비 이름 생성 (카테고리 접두사 추가)
+ * @param {string} indirectCostName - 간접비 이름
+ * @param {string} parentCategory - 상위 카테고리
+ * @returns {string} - 생성된 이름 (예: "STUD 자재로스")
+ */
+function generateIndirectCostName(indirectCostName, parentCategory) {
+    if (parentCategory === 'ETC') {
+        return indirectCostName;
+    }
+
+    return `${parentCategory} ${indirectCostName}`;
+}
+
+/**
+ * 타입별 모든 구성품 수집 및 그룹핑
+ * @param {Array} results - 같은 타입의 계산 결과 배열
+ * @returns {Array} - 그룹핑된 구성품 배열
+ */
+async function collectAndGroupComponents(results) {
+    const allComponents = [];
+    const totalArea = results.reduce((sum, r) => sum + r.area, 0);
+    const result = results[0];
+
+    const layerOrder = [
+        'layer3_1', 'layer2_1', 'layer1_1',
+        'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2',
+        'column2', 'channel', 'runner'
+    ];
+
+    // 각 레이어 순회
+    for (const layerKey of layerOrder) {
+        const layer = result.layerPricing[layerKey];
+        if (!layer || !layer.materialName) continue;
+
+        const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
+        if (!unitPriceItem?.components) continue;
+
+        // 상위 카테고리 추출
+        const parentCategory = extractParentCategory(unitPriceItem.id);
+
+        // ✅ 모든 구성품 수집 (필터링 제거)
+        for (const component of unitPriceItem.components) {
+            // 자재 DB 조회
+            const materialData = await findMaterialByIdInDB(component.materialId);
+
+            allComponents.push({
+                name: component.name || '',
+                spec: component.spec || '',
+                unit: component.unit || 'EA',
+                materialPrice: parseFloat(component.materialPrice) || 0,
+                laborPrice: parseFloat(component.laborPrice) || 0,
+                quantity: parseFloat(component.quantity) || 0,
+                area: totalArea,
+                parentCategory: parentCategory,
+                unitPriceId: unitPriceItem.id,
+                // ✅ 추가 데이터
+                size: component.size || materialData?.size || '',
+                materialData: materialData,
+                unitPriceItem: unitPriceItem,
+                wallType: result.wallType,
+            });
+        }
+    }
+
+    // 그룹핑
+    return groupComponentsByName(allComponents);
+}
+
+/**
+ * 품명+규격+단위+카테고리로 그룹핑
+ * @param {Array} components - 구성품 배열
+ * @returns {Array} - 그룹핑된 구성품 배열
+ */
+function groupComponentsByName(components) {
+    const grouped = {};
+
+    for (const comp of components) {
+        // 그룹핑 키: 품명 + 규격 + 단위 + 카테고리
+        const key = `${comp.name}|${comp.spec}|${comp.unit}|${comp.parentCategory}`;
+
+        if (!grouped[key]) {
+            grouped[key] = {
+                name: comp.name,
+                spec: comp.spec,
+                unit: comp.unit,
+                materialPrice: comp.materialPrice,
+                laborPrice: comp.laborPrice,
+                totalQuantity: 0,
+                area: comp.area,
+                parentCategory: comp.parentCategory,
+                // ✅ 추가 데이터 보존 (첫 번째 것 사용)
+                size: comp.size,
+                materialData: comp.materialData,
+                unitPriceItem: comp.unitPriceItem,
+                wallType: comp.wallType,
+            };
+        }
+
+        // 수량 합산
+        grouped[key].totalQuantity += comp.quantity;
+    }
+
+    return Object.values(grouped);
+}
+
+/**
+ * 직접비/간접비 분리
+ * @param {Array} groupedComponents - 그룹핑된 구성품 배열
+ * @returns {Object} - { directCosts, indirectCosts }
+ */
+function separateDirectAndIndirectCosts(groupedComponents) {
+    const directCosts = [];
+    const indirectCosts = [];
+
+    for (const comp of groupedComponents) {
+        if (isIndirectCost(comp.name)) {
+            // 간접비: 카테고리별 이름 생성
+            const newName = generateIndirectCostName(comp.name, comp.parentCategory);
+
+            indirectCosts.push({
+                ...comp,
+                name: newName,
+                displayCategory: comp.parentCategory,
+            });
+        } else {
+            // 직접비
+            directCosts.push(comp);
+        }
+    }
+
+    return {
+        directCosts,
+        indirectCosts,
+    };
+}
+
+/**
+ * 자재 종류별 정렬
+ * @param {Array} components - 구성품 배열
+ * @returns {Array} - 정렬된 구성품 배열
+ */
+function sortComponents(components) {
+    const priority = {
+        'STUD': 1,
+        'RUNNER': 2,
+        '석고보드': 3,
+        '그라스울': 4,
+        'PIECE': 5,
+        'BULLET': 6,
+        'WELDING': 7,
+        'ETC': 99,
+    };
+
+    return components.sort((a, b) => {
+        const typeA = getComponentType(a.name);
+        const typeB = getComponentType(b.name);
+
+        const priorityA = priority[typeA] || 50;
+        const priorityB = priority[typeB] || 50;
+
+        if (priorityA !== priorityB) {
+            return priorityA - priorityB;
+        }
+
+        return a.name.localeCompare(b.name, 'ko');
+    });
+}
+
+/**
+ * ============================================
+ * Phase 2: 소계/합계 행 생성 함수들
+ * ============================================
+ */
+
+/**
+ * 소계 행 생성 (회색 배경)
+ * @param {Array} components - 구성품 배열
+ * @param {string} label - 소계 라벨 (예: "소계 (직접자재)")
+ * @returns {string} - HTML 문자열
+ */
+function generateSubtotalRow(components, label) {
+    // 계약도급 단가 합계
+    let contractMaterialPriceSum = 0;
+    let contractLaborPriceSum = 0;
+    let contractExpensePriceSum = 0;
+
+    // 계약도급 금액 합계
+    let contractMaterialAmountSum = 0;
+    let contractLaborAmountSum = 0;
+    let contractExpenseAmountSum = 0;
+
+    // 발주단가 단가 합계
+    let orderMaterialPriceSum = 0;
+    let orderLaborPriceSum = 0;
+    let orderExpensePriceSum = 0;
+
+    // 발주단가 금액 합계
+    let orderMaterialAmountSum = 0;
+    let orderLaborAmountSum = 0;
+    let orderExpenseAmountSum = 0;
+
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+    for (const comp of components) {
+        const quantity = comp.totalQuantity * comp.area;
+
+        // 발주단가 - 단가 합계
+        orderMaterialPriceSum += comp.materialPrice;
+        orderLaborPriceSum += comp.laborPrice;
+
+        // 발주단가 - 금액 합계
+        orderMaterialAmountSum += comp.materialPrice * quantity;
+        orderLaborAmountSum += comp.laborPrice * quantity;
+
+        // 계약도급 - 단가 합계 (발주단가 × 조정비율)
+        contractMaterialPriceSum += comp.materialPrice * contractRatio;
+        contractLaborPriceSum += comp.laborPrice * contractRatio;
+
+        // 계약도급 - 금액 합계 (단가 × 조정비율 × 수량)
+        contractMaterialAmountSum += (comp.materialPrice * contractRatio) * quantity;
+        contractLaborAmountSum += (comp.laborPrice * contractRatio) * quantity;
+    }
+
+    // 합계 계산
+    const contractTotalPriceSum = contractMaterialPriceSum + contractLaborPriceSum + contractExpensePriceSum;
+    const contractTotalAmountSum = contractMaterialAmountSum + contractLaborAmountSum + contractExpenseAmountSum;
+    const orderTotalPriceSum = orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum;
+    const orderTotalAmountSum = orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum;
+
+    return `
+        <tr style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-weight: 600;">
+            <td></td>
+            <td>${label}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td class="number-cell">${Math.round(contractMaterialPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(contractMaterialAmountSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(contractLaborPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(contractLaborAmountSum).toLocaleString()}</td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${Math.round(contractTotalPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(contractTotalAmountSum).toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td class="number-cell">${Math.round(orderMaterialPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(orderMaterialAmountSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(orderLaborPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(orderLaborAmountSum).toLocaleString()}</td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${Math.round(orderTotalPriceSum).toLocaleString()}</td>
+            <td class="number-cell">${Math.round(orderTotalAmountSum).toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 합계 행 생성 (파란색 배경)
+ * @param {Array} directCosts - 직접비 배열
+ * @param {Array} indirectCosts - 간접비 배열
+ * @returns {string} - HTML 문자열
+ */
+function generateTotalRow(directCosts, indirectCosts) {
+    const allCosts = [...directCosts, ...indirectCosts];
+
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+    let contractTotal = 0;
+    let orderTotal = 0;
+
+    for (const comp of allCosts) {
+        const quantity = comp.totalQuantity * comp.area;
+        orderTotal += (comp.materialPrice + comp.laborPrice) * quantity;
+        contractTotal += ((comp.materialPrice + comp.laborPrice) * contractRatio) * quantity;
+    }
+
+    return `
+        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 700; font-size: 1.1em;">
+            <td></td>
+            <td>합 계</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">${Math.round(contractTotal).toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">${Math.round(orderTotal).toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
+ * 그룹핑된 구성품 행 생성
+ * @param {Object} component - 구성품 객체
+ * @param {number} rowNumber - 행 번호
+ * @returns {string} - HTML 문자열
+ */
+function generateGroupedComponentRow(component, rowNumber) {
+    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+    const area = component.area;
+    const componentName = component.name;
+    const materialData = component.materialData;
+    const unitPriceItem = component.unitPriceItem;
+
+    // ✅ WALL 및 개수 컬럼 채우기
+    const wallTypeCode = component.wallType?.wallType || '';
+    const sizeData = parseSizeField(component.size);
+    const spacingValue = extractSpacingValue(unitPriceItem?.basic?.spacing);
+
+    let wallThk = '';
+    let atValue = '';
+    let thicknessValue = '';
+    let widthValue = '';
+    let heightValue = '';
+    let mValue = '';
+
+    // ✅ 환산 컬럼: 석고보드만
+    let conversionM2 = '';
+    let sheetQuantity = '';
+    let gypsumBoardDisplayQuantity = null;  // 석고보드 16번 컬럼 값 저장용
+
+    if (isStud(componentName)) {
+        // 스터드: @, 두께, 넓이, 높이, 수량
+        atValue = spacingValue || '';
+        thicknessValue = sizeData.thickness || '';
+        widthValue = sizeData.width || '';
+        heightValue = sizeData.height || '';
+        const mValueRaw = Math.round(component.totalQuantity * area);
+        mValue = mValueRaw.toLocaleString();
+
+    } else if (isRunner(componentName)) {
+        // 런너: 두께, 넓이, 높이, 수량
+        atValue = '';
+        thicknessValue = sizeData.thickness || '';
+        widthValue = sizeData.width || '';
+        heightValue = sizeData.height || '';
+        const mValueRaw = Math.round(component.totalQuantity * area);
+        mValue = mValueRaw.toLocaleString();
+
+    } else if (isGypsumBoard(componentName)) {
+        // 석고보드: THK만, 11번 컬럼(수량)은 빈칸
+        wallThk = materialData?.t || sizeData.thickness || '';
+        mValue = ''; // 석고보드는 11번 컬럼 빈칸
+
+        // ✅ 석고보드 환산 계산
+        if (materialData) {
+            const w = parseFloat(materialData.w) || 0;
+            const h = parseFloat(materialData.h) || 0;
+            if (w > 0 && h > 0) {
+                conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
+                const m2PerSheet = parseFloat(conversionM2);
+                if (m2PerSheet > 0) {
+                    // ✅ 석고보드 수량: area × totalQuantity (렌더링 루프에서 전달됨)
+                    if (component.gypsumBoardDisplayQuantity) {
+                        gypsumBoardDisplayQuantity = component.gypsumBoardDisplayQuantity;
+                    } else {
+                        gypsumBoardDisplayQuantity = area * component.totalQuantity;
+                    }
+                    // 14번 컬럼 장: displayQuantity ÷ m2PerSheet
+                    sheetQuantity = Math.round(gypsumBoardDisplayQuantity / m2PerSheet);
+                }
+            }
+        }
+
+    } else if (isMagazinePiece(componentName) || isNailingBullet(componentName)) {
+        // 매거진피스, 타정총알: 11번 컬럼에 수량 표시 (정수)
+        const mValueRaw = Math.round(component.totalQuantity * area);
+        mValue = mValueRaw.toLocaleString();
+
+    } else if (isWeldingRod(componentName)) {
+        // 용접봉: 11번 컬럼에 수량 표시 (소수점 둘째자리)
+        const mValueRaw = (component.totalQuantity * area).toFixed(2);
+        mValue = parseFloat(mValueRaw).toLocaleString('ko-KR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // 수량 계산
+    let displayQuantity = area;
+    // ✅ 석고보드: 16번 컬럼에 area × component.totalQuantity
+    if (isGypsumBoard(componentName)) {
+        displayQuantity = component.gypsumBoardDisplayQuantity || (area * component.totalQuantity);
+    } else if (component.parentCategory === '석고보드' && component.gypsumBoardDisplayQuantity !== null) {
+        // ✅ 석고보드 카테고리의 모든 자재: 석고보드 수량 그대로 사용
+        displayQuantity = component.gypsumBoardDisplayQuantity;
+    }
+    const quantity = component.totalQuantity * area;
+
+    // 발주단가
+    const orderMatPrice = component.materialPrice;
+    const orderLabPrice = component.laborPrice;
+    const orderMatAmount = orderMatPrice * quantity;
+    const orderLabAmount = orderLabPrice * quantity;
+
+    // 계약도급
+    const contractMatPrice = orderMatPrice * contractRatio;
+    const contractLabPrice = orderLabPrice * contractRatio;
+    const contractMatAmount = contractMatPrice * quantity;
+    const contractLabAmount = contractLabPrice * quantity;
+
+    // 품명 표시
+    let displayName = component.name;
+    if (component.spec) {
+        displayName += ` ${component.spec}`;
+    }
+
+    return `
+        <tr style="background: white;" data-row="${rowNumber}">
+            <td>${rowNumber}</td>
+            <td></td>
+            <td>${displayName}</td>
+            <td>${wallThk}</td>
+            <td>${wallTypeCode}</td>
+            <td>${atValue}</td>
+            <td>${thicknessValue}</td>
+            <td>${widthValue}</td>
+            <td>${heightValue}</td>
+            <td>${component.unit}</td>
+            <td>${mValue}</td>
+            <td><input type="text" class="supplier-input" data-row="${rowNumber}" placeholder="제공자" style="width: 100%; text-align: center; border: 1px solid #ddd; padding: 4px;"></td>
+            <td>${conversionM2}</td>
+            <td>${sheetQuantity ? parseInt(sheetQuantity).toLocaleString() : ''}</td>
+            <td>M2</td>
+            <td class="quantity-cell">${displayQuantity.toFixed(2)}</td>
+
+            <!-- 계약도급 -->
+            <td class="number-cell contract-material-price">${Math.round(contractMatPrice).toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${Math.round(contractMatAmount).toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${Math.round(contractLabPrice).toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${Math.round(contractLabAmount).toLocaleString()}</td>
+            <td><input type="text" class="expense-input contract-expense-price" data-row="${rowNumber}" placeholder="0" style="text-align: right;"></td>
+            <td class="number-cell contract-expense-amount">0</td>
+            <td class="number-cell contract-total-price">${Math.round(contractMatPrice + contractLabPrice).toLocaleString()}</td>
+            <td class="number-cell contract-total-amount">${Math.round(contractMatAmount + contractLabAmount).toLocaleString()}</td>
+            <td></td>
+
+            <!-- 발주단가 -->
+            <td class="number-cell order-material-price">${Math.round(orderMatPrice).toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${Math.round(orderMatAmount).toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${Math.round(orderLabPrice).toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${Math.round(orderLabAmount).toLocaleString()}</td>
+            <td><input type="text" class="expense-input order-expense-price" data-row="${rowNumber}" placeholder="0" style="text-align: right;"></td>
+            <td class="number-cell order-expense-amount">0</td>
+            <td class="number-cell order-total-price">${Math.round(orderMatPrice + orderLabPrice).toLocaleString()}</td>
+            <td class="number-cell order-total-amount">${Math.round(orderMatAmount + orderLabAmount).toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+}
+
+/**
  * 발주서 데이터 행 생성
  */
 async function generateOrderFormDataRows() {
     if (calculationResults.length === 0) {
         return `
             <tr>
-                <td colspan="33" style="padding: 20px; text-align: center; color: #6c757d;">
+                <td colspan="34" style="padding: 20px; text-align: center; color: #6c757d;">
                     벽체 계산 데이터가 없습니다. 먼저 벽체를 선택하고 계산하기를 실행하세요.
                 </td>
             </tr>
@@ -2286,17 +2856,63 @@ async function generateOrderFormDataRows() {
 
     let html = '';
     let typeIndex = 1;
+    let rowNumber = 2; // 1번은 현장명 행
 
     // 타입별로 그룹핑
     const groupedByType = groupResultsByType(calculationResults);
 
     // 각 타입별 처리
     for (const [typeName, results] of Object.entries(groupedByType)) {
-        // 타입 합계 행
+        // 1. 타입 요약 행
         html += await generateTypeSummaryRow(typeName, results, typeIndex);
 
-        // 레이어별 상세 행 (첫 번째 결과의 레이어 구조 사용, 모든 results의 면적 합계 사용)
-        html += await generateLayerDetailRows(results[0], results);
+        // 2. ✅ Phase 1 함수 사용: 구성품 수집 및 그룹핑
+        const groupedComponents = await collectAndGroupComponents(results);
+
+        // 3. ✅ 직접비/간접비 분리
+        const { directCosts, indirectCosts } = separateDirectAndIndirectCosts(groupedComponents);
+
+        // 4. ✅ 직접비 정렬 및 행 생성
+        const sortedDirectCosts = sortComponents(directCosts);
+
+        // ✅ 4-1. 먼저 석고보드 찾아서 displayQuantity 계산
+        let gypsumBoardQty = null;
+        for (const comp of sortedDirectCosts) {
+            if (isGypsumBoard(comp.name)) {
+                // 석고보드의 16번 컬럼 값 계산: area × totalQuantity
+                gypsumBoardQty = comp.area * comp.totalQuantity;
+                console.log(`📦 석고보드 수량 계산: ${comp.area} × ${comp.totalQuantity} = ${gypsumBoardQty}`);
+                break;
+            }
+        }
+
+        // ✅ 4-2. 석고보드 수량을 모든 구성품에 전달
+        for (const comp of sortedDirectCosts) {
+            comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+            html += generateGroupedComponentRow(comp, rowNumber);
+            rowNumber++;
+        }
+
+        // 5. ✅ 직접비 소계
+        html += generateSubtotalRow(sortedDirectCosts, '소계 (직접자재)');
+
+        // 6. ✅ 간접비 정렬 및 행 생성
+        const sortedIndirectCosts = sortComponents(indirectCosts);
+
+        // ✅ 6-1. 간접비에도 석고보드 수량 전달
+        for (const comp of sortedIndirectCosts) {
+            comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+            html += generateGroupedComponentRow(comp, rowNumber);
+            rowNumber++;
+        }
+
+        // 7. ✅ 간접비 소계
+        if (sortedIndirectCosts.length > 0) {
+            html += generateSubtotalRow(sortedIndirectCosts, '소계 (간접비)');
+        }
+
+        // 8. ✅ 전체 합계
+        html += generateTotalRow(sortedDirectCosts, sortedIndirectCosts);
 
         typeIndex++;
     }
@@ -2315,7 +2931,7 @@ function generateOrderFormHeader() {
             <th rowspan="3">구분</th>
             <th rowspan="3">품명 및 규격</th>
             <th colspan="2">WALL</th>
-            <th colspan="5">개수</th>
+            <th colspan="6">개수</th>
             <th colspan="3">환산</th>
             <th rowspan="3">단위</th>
             <th rowspan="3">수량</th>
@@ -2338,7 +2954,8 @@ function generateOrderFormHeader() {
             <th rowspan="2">두께</th>
             <th rowspan="2">넓이</th>
             <th rowspan="2">높이</th>
-            <th rowspan="2">M</th>
+            <th rowspan="2">단위</th>
+            <th rowspan="2">수량</th>
             <th rowspan="2">제공자</th>
             <th rowspan="2">1장->m2</th>
             <th rowspan="2">장</th>
@@ -2486,6 +3103,127 @@ function updateTypeSummaryRowExpense(currentRow, isContract) {
 }
 
 /**
+ * 소계 행들 업데이트 (경비 포함)
+ */
+function updateSubtotalRows() {
+    // 모든 소계 행 찾기 (회색 배경)
+    const subtotalRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #f5f7fa"]');
+
+    subtotalRows.forEach(subtotalRow => {
+        const label = subtotalRow.cells[1]?.textContent.trim();
+
+        // 소계 라벨 확인 (예: "소계 (직접자재)", "소계 (간접비)")
+        if (!label || !label.includes('소계')) return;
+
+        // 이 소계 행의 범위 결정 (타입 요약 행부터 다음 소계/합계 행까지)
+        const allRows = Array.from(document.querySelectorAll('.order-form-table tbody tr'));
+        const subtotalIndex = allRows.indexOf(subtotalRow);
+
+        // 역방향으로 타입 요약 행 찾기
+        let startIndex = -1;
+        for (let i = subtotalIndex - 1; i >= 0; i--) {
+            const row = allRows[i];
+            // 타입 요약 행은 1-1, 1-2 등의 NO를 가짐
+            const firstCell = row.cells[0]?.textContent.trim();
+            if (firstCell && /^\d+-\d+$/.test(firstCell)) {
+                startIndex = i + 1;  // 타입 요약 행 다음부터
+                break;
+            }
+        }
+
+        if (startIndex === -1) return;
+
+        // 해당 범위의 데이터 행들 (흰색 배경 행, data-row 속성 있음)
+        const dataRows = [];
+        for (let i = startIndex; i < subtotalIndex; i++) {
+            const row = allRows[i];
+            if (row.hasAttribute('data-row')) {
+                dataRows.push(row);
+            }
+        }
+
+        // 계약도급 합계 계산
+        let contractMaterialPriceSum = 0;
+        let contractLaborPriceSum = 0;
+        let contractExpensePriceSum = 0;
+        let contractMaterialAmountSum = 0;
+        let contractLaborAmountSum = 0;
+        let contractExpenseAmountSum = 0;
+
+        // 발주단가 합계 계산
+        let orderMaterialPriceSum = 0;
+        let orderLaborPriceSum = 0;
+        let orderExpensePriceSum = 0;
+        let orderMaterialAmountSum = 0;
+        let orderLaborAmountSum = 0;
+        let orderExpenseAmountSum = 0;
+
+        dataRows.forEach(row => {
+            // 계약도급
+            const contractMatPrice = parseFloat(row.querySelector('.contract-material-price')?.textContent.replace(/,/g, '')) || 0;
+            const contractLabPrice = parseFloat(row.querySelector('.contract-labor-price')?.textContent.replace(/,/g, '')) || 0;
+            const contractExpPrice = parseFloat(row.querySelector('.contract-expense-price')?.value.replace(/,/g, '')) || 0;
+
+            const contractMatAmount = parseFloat(row.querySelector('.contract-material-amount')?.textContent.replace(/,/g, '')) || 0;
+            const contractLabAmount = parseFloat(row.querySelector('.contract-labor-amount')?.textContent.replace(/,/g, '')) || 0;
+            const contractExpAmount = parseFloat(row.querySelector('.contract-expense-amount')?.textContent.replace(/,/g, '')) || 0;
+
+            contractMaterialPriceSum += contractMatPrice;
+            contractLaborPriceSum += contractLabPrice;
+            contractExpensePriceSum += contractExpPrice;
+            contractMaterialAmountSum += contractMatAmount;
+            contractLaborAmountSum += contractLabAmount;
+            contractExpenseAmountSum += contractExpAmount;
+
+            // 발주단가
+            const orderMatPrice = parseFloat(row.querySelector('.order-material-price')?.textContent.replace(/,/g, '')) || 0;
+            const orderLabPrice = parseFloat(row.querySelector('.order-labor-price')?.textContent.replace(/,/g, '')) || 0;
+            const orderExpPrice = parseFloat(row.querySelector('.order-expense-price')?.value.replace(/,/g, '')) || 0;
+
+            const orderMatAmount = parseFloat(row.querySelector('.order-material-amount')?.textContent.replace(/,/g, '')) || 0;
+            const orderLabAmount = parseFloat(row.querySelector('.order-labor-amount')?.textContent.replace(/,/g, '')) || 0;
+            const orderExpAmount = parseFloat(row.querySelector('.order-expense-amount')?.textContent.replace(/,/g, '')) || 0;
+
+            orderMaterialPriceSum += orderMatPrice;
+            orderLaborPriceSum += orderLabPrice;
+            orderExpensePriceSum += orderExpPrice;
+            orderMaterialAmountSum += orderMatAmount;
+            orderLaborAmountSum += orderLabAmount;
+            orderExpenseAmountSum += orderExpAmount;
+        });
+
+        // 합계 계산
+        const contractTotalPriceSum = contractMaterialPriceSum + contractLaborPriceSum + contractExpensePriceSum;
+        const contractTotalAmountSum = contractMaterialAmountSum + contractLaborAmountSum + contractExpenseAmountSum;
+        const orderTotalPriceSum = orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum;
+        const orderTotalAmountSum = orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum;
+
+        // 소계 행 업데이트 (16번 컬럼부터 시작)
+        const cells = subtotalRow.cells;
+
+        // 계약도급 (17번 셀부터 - 인덱스 16)
+        if (cells[16]) cells[16].textContent = Math.round(contractMaterialPriceSum).toLocaleString();
+        if (cells[17]) cells[17].textContent = Math.round(contractMaterialAmountSum).toLocaleString();
+        if (cells[18]) cells[18].textContent = Math.round(contractLaborPriceSum).toLocaleString();
+        if (cells[19]) cells[19].textContent = Math.round(contractLaborAmountSum).toLocaleString();
+        if (cells[20]) cells[20].textContent = Math.round(contractExpensePriceSum).toLocaleString();
+        if (cells[21]) cells[21].textContent = Math.round(contractExpenseAmountSum).toLocaleString();
+        if (cells[22]) cells[22].textContent = Math.round(contractTotalPriceSum).toLocaleString();
+        if (cells[23]) cells[23].textContent = Math.round(contractTotalAmountSum).toLocaleString();
+
+        // 발주단가 (25번 셀부터 - 인덱스 24, 24번은 비고)
+        if (cells[25]) cells[25].textContent = Math.round(orderMaterialPriceSum).toLocaleString();
+        if (cells[26]) cells[26].textContent = Math.round(orderMaterialAmountSum).toLocaleString();
+        if (cells[27]) cells[27].textContent = Math.round(orderLaborPriceSum).toLocaleString();
+        if (cells[28]) cells[28].textContent = Math.round(orderLaborAmountSum).toLocaleString();
+        if (cells[29]) cells[29].textContent = Math.round(orderExpensePriceSum).toLocaleString();
+        if (cells[30]) cells[30].textContent = Math.round(orderExpenseAmountSum).toLocaleString();
+        if (cells[31]) cells[31].textContent = Math.round(orderTotalPriceSum).toLocaleString();
+        if (cells[32]) cells[32].textContent = Math.round(orderTotalAmountSum).toLocaleString();
+    });
+}
+
+/**
  * 경비 입력 필드 이벤트 리스너 추가
  * 경비 단가 입력 시 자동으로 금액 및 합계 계산
  */
@@ -2574,8 +3312,8 @@ function attachExpenseInputListeners() {
                 if (totalAmountCell) totalAmountCell.textContent = totalAmount.toLocaleString();
             }
 
-            // ✅ 타입 요약 행 업데이트
-            updateTypeSummaryRowExpense(row, isContract);
+            // ✅ 소계 행 업데이트 (타입 요약 행은 빈칸으로 유지)
+            updateSubtotalRows();
         });
     });
 
@@ -4218,9 +4956,9 @@ async function addOrderFormDataToExcel(worksheet) {
     const siteNameInput = document.getElementById('orderFormSiteName');
     const siteName = siteNameInput ? siteNameInput.value : '현장명을 입력하세요';
 
-    // 현장명 입력 행 (33개 컬럼)
+    // 현장명 입력 행 (34개 컬럼)
     const siteRow = worksheet.getRow(currentRow);
-    siteRow.values = ['1', siteName, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
+    siteRow.values = ['1', siteName, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''];
 
     // 현장명 행 스타일 적용
     siteRow.eachCell({ includeEmpty: true }, (cell) => {

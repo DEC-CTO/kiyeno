@@ -12,7 +12,7 @@
 
 /* 테이블 기본 스타일 */
 .order-form-table {
-    min-width: 2500px; /* 33개 컬럼 총 너비 (경비 4개 컬럼 추가: 380px) */
+    min-width: 2560px; /* 33개 컬럼 총 너비 (11번 열 수량만 +60px) */
     width: 100%; /* 화면 전체 너비 사용 */
     border-collapse: collapse;
     font-size: 11px;
@@ -151,10 +151,16 @@
     min-width: 80px;
 }
 
-/* Row 1: 개수 (5=@~M) - colspan=5 */
+/* Row 1: 개수 (5=@~수량) - colspan=6 */
 .order-form-table thead tr:first-child th:nth-child(5) {
-    width: 240px; /* 40px × 4 + 80px(M) */
-    min-width: 240px;
+    width: 280px; /* 40px×4 + 40px(단위) + 120px(수량) */
+    min-width: 280px;
+}
+
+/* Row 1: 환산 (6=제공자~장) - colspan=3 */
+.order-form-table thead tr:first-child th:nth-child(6) {
+    width: 180px; /* 60px × 3 */
+    min-width: 180px;
 }
 
 /* Row 2: THK(1), Type(2) - rowspan=2 */
@@ -173,10 +179,16 @@
     min-width: 40px;
 }
 
-/* Row 2: M(7) - rowspan=2, 80px */
+/* Row 2: 단위(7) - rowspan=2, 40px */
 .order-form-table thead tr:nth-child(2) th:nth-child(7) {
-    width: 80px;
-    min-width: 80px;
+    width: 40px;
+    min-width: 40px;
+}
+
+/* Row 2: 수량(8) - rowspan=2, 120px (2배) */
+.order-form-table thead tr:nth-child(2) th:nth-child(8) {
+    width: 120px;
+    min-width: 120px;
 }
 
 /* tbody 데이터 행 너비 (33개 컬럼) */
@@ -211,16 +223,16 @@
     min-width: 40px;
 }
 
-/* 개수: M(10) - 80px */
+/* 개수: 단위(10) - 40px */
 .order-form-table tbody td:nth-child(10) {
-    width: 80px;
-    min-width: 80px;
+    width: 40px;
+    min-width: 40px;
 }
 
-/* Row 2: 제공자(8), 1장->m2(9), 장(10) - rowspan=2 */
-.order-form-table thead tr:nth-child(2) th:nth-child(8),
+/* Row 2: 제공자(9), 1장->m2(10), 장(11) - rowspan=2 */
 .order-form-table thead tr:nth-child(2) th:nth-child(9),
-.order-form-table thead tr:nth-child(2) th:nth-child(10) {
+.order-form-table thead tr:nth-child(2) th:nth-child(10),
+.order-form-table thead tr:nth-child(2) th:nth-child(11) {
     width: 60px;
     min-width: 60px;
 }
@@ -263,8 +275,13 @@
     min-width: 120px;
 }
 
-/* tbody 데이터 행: 환산(11-13) */
-.order-form-table tbody td:nth-child(11),
+/* tbody 데이터 행: M 수량(11) - 2배 크기 */
+.order-form-table tbody td:nth-child(11) {
+    width: 120px;
+    min-width: 120px;
+}
+
+/* tbody 데이터 행: 환산(12-13) */
 .order-form-table tbody td:nth-child(12),
 .order-form-table tbody td:nth-child(13) {
     width: 60px;
