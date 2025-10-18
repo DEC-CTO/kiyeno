@@ -1533,6 +1533,9 @@ async function renderOrderFormTab() {
     // 경비 입력 이벤트 리스너 추가
     attachExpenseInputListeners();
 
+    // ✅ 최초 렌더링 후 소계 행 업데이트 (정확한 테이블 값으로 재계산)
+    updateSubtotalRows();
+
     // 조정비율 입력 필드 이벤트 리스너
     const contractRatioInput = document.getElementById('contractRatioInput');
     if (contractRatioInput) {
@@ -2551,6 +2554,11 @@ function generateSubtotalRow(components, label) {
     let orderLaborAmountSum = 0;
     let orderExpenseAmountSum = 0;
 
+    // 수량 합계
+    let mValueSum = 0;           // 11번 칸럼 (mValue) 합계
+    let sheetQuantitySum = 0;    // 14번 칸럼 (매/장) 합계
+    let displayQuantitySum = 0;  // 16번 칸럼 (displayQuantity) 합계
+
     const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
 
     for (const comp of components) {
@@ -2573,6 +2581,37 @@ function generateSubtotalRow(components, label) {
         // 계약도급 - 금액 합계 (발주 금액 × 조정비율)
         contractMaterialAmountSum += (matPrice1m2 * comp.area) * contractRatio;
         contractLaborAmountSum += (labPrice1m2 * comp.area) * contractRatio;
+
+        // 수량 합산
+        mValueSum += comp.totalQuantity * comp.area;  // 11번 칸럼 (mValue)
+
+        // 16번 칸럼 (displayQuantity) - 석고보드는 area × totalQuantity
+        let currentDisplayQuantity = 0;
+        if (comp.gypsumBoardDisplayQuantity !== undefined && comp.gypsumBoardDisplayQuantity !== null) {
+            currentDisplayQuantity = comp.gypsumBoardDisplayQuantity;
+            displayQuantitySum += comp.gypsumBoardDisplayQuantity;
+        } else if (comp.parentCategory === '석고보드') {
+            currentDisplayQuantity = comp.area * comp.totalQuantity;
+            displayQuantitySum += comp.area * comp.totalQuantity;
+        } else {
+            displayQuantitySum += comp.area;
+        }
+
+        // 14번 칸럼 (매/장) - 석고보드만 계산
+        if (comp.parentCategory === '석고보드' && comp.materialData) {
+            console.log(`📦 석고보드 장 계산: ${comp.name}`);
+            console.log(`  - materialData:`, comp.materialData);
+            const width = parseFloat(comp.materialData.width) || 0;
+            const height = parseFloat(comp.materialData.height) || 0;
+            const m2PerSheet = width * height;
+            console.log(`  - width: ${width}, height: ${height}, m2PerSheet: ${m2PerSheet}`);
+            console.log(`  - currentDisplayQuantity: ${currentDisplayQuantity}`);
+            if (m2PerSheet > 0 && currentDisplayQuantity > 0) {
+                const sheetCount = Math.round(currentDisplayQuantity / m2PerSheet);
+                console.log(`  - 장 수량: ${sheetCount}`);
+                sheetQuantitySum += sheetCount;
+            }
+        }
     }
 
     // 합계 계산
@@ -2580,6 +2619,8 @@ function generateSubtotalRow(components, label) {
     const contractTotalAmountSum = contractMaterialAmountSum + contractLaborAmountSum + contractExpenseAmountSum;
     const orderTotalPriceSum = orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum;
     const orderTotalAmountSum = orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum;
+
+    console.log(`✅ 소계 수량 합계 - 11번: ${mValueSum}, 14번(장): ${sheetQuantitySum}, 16번: ${displayQuantitySum}`);
 
     return `
         <tr style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-weight: 600;">
@@ -2593,12 +2634,12 @@ function generateSubtotalRow(components, label) {
             <td></td>
             <td></td>
             <td></td>
+            <td class="number-cell">${Math.round(mValueSum).toLocaleString()}</td>
             <td></td>
             <td></td>
+            <td class="number-cell">${Math.round(sheetQuantitySum).toLocaleString()}</td>
             <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="number-cell">${displayQuantitySum.toFixed(2)}</td>
             <!-- 계약도급 -->
             <td class="number-cell">${Math.round(contractMaterialPriceSum).toLocaleString()}</td>
             <td class="number-cell">${Math.round(contractMaterialAmountSum).toLocaleString()}</td>
@@ -3030,17 +3071,17 @@ function generateGroupedComponentRow(component, rowNumber) {
     }
     const quantity = component.totalQuantity * area;
 
-    // 발주단가 - 1m² 단가 계산
-    const orderMatPrice = component.materialPrice * component.quantity;  // 1m² 자재비 = 단가 × 수량
-    const orderLabPrice = component.laborAmount;                         // 1m² 노무비
-    const orderMatAmount = orderMatPrice * area;  // 총 자재비 = 1m² 단가 × 면적
-    const orderLabAmount = orderLabPrice * area;  // 총 노무비 = 1m² 단가 × 면적
+    // 발주단가 - 1m² 단가 계산 (반올림 적용)
+    const orderMatPrice = Math.round(component.materialPrice * component.quantity);  // 1m² 자재비 = 단가 × 수량 (반올림)
+    const orderLabPrice = Math.round(component.laborAmount);                         // 1m² 노무비 (반올림)
+    const orderMatAmount = orderMatPrice * displayQuantity;  // 총 자재비 = 반올림된 1m² 단가 × 수량(16번 칸럼)
+    const orderLabAmount = orderLabPrice * displayQuantity;  // 총 노무비 = 반올림된 1m² 단가 × 수량(16번 칸럼)
 
-    // 계약도급
-    const contractMatPrice = orderMatPrice * contractRatio;
-    const contractLabPrice = orderLabPrice * contractRatio;
-    const contractMatAmount = orderMatAmount * contractRatio;
-    const contractLabAmount = orderLabAmount * contractRatio;
+    // 계약도급 (단가 반올림 후 수량 곱하기)
+    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+    const contractMatAmount = contractMatPrice * displayQuantity;
+    const contractLabAmount = contractLabPrice * displayQuantity;
 
     // 품명 표시
     let displayName = component.name;
@@ -3414,14 +3455,22 @@ function updateTypeSummaryRowExpense(currentRow, isContract) {
  * 소계 행들 업데이트 (경비 포함)
  */
 function updateSubtotalRows() {
+    console.log('🔄 소계 행 업데이트 시작');
+
     // 모든 소계 행 찾기 (회색 배경)
     const subtotalRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #f5f7fa"]');
+    console.log(`📊 찾은 소계 행 개수: ${subtotalRows.length}`);
 
-    subtotalRows.forEach(subtotalRow => {
-        const label = subtotalRow.cells[1]?.textContent.trim();
+    subtotalRows.forEach((subtotalRow, idx) => {
+        console.log(`🔍 소계 행 ${idx + 1} 처리 중...`);
+        const label = subtotalRow.cells[2]?.textContent.trim();
 
         // 소계 라벨 확인 (예: "소계 (직접자재)", "소계 (간접비)")
-        if (!label || !label.includes('소계')) return;
+        console.log(`  📝 라벨: "${label}"`);
+        if (!label || !label.includes('소계')) {
+            console.log(`  ⏭️ 소계 행이 아님, 건너뜀`);
+            return;
+        }
 
         // 이 소계 행의 범위 결정 (타입 요약 행부터 다음 소계/합계 행까지)
         const allRows = Array.from(document.querySelectorAll('.order-form-table tbody tr'));
@@ -3449,6 +3498,7 @@ function updateSubtotalRows() {
                 dataRows.push(row);
             }
         }
+        console.log(`  📦 데이터 행 개수: ${dataRows.length}`);
 
         // 계약도급 합계 계산
         let contractMaterialPriceSum = 0;
@@ -3465,6 +3515,11 @@ function updateSubtotalRows() {
         let orderMaterialAmountSum = 0;
         let orderLaborAmountSum = 0;
         let orderExpenseAmountSum = 0;
+
+        // 수량 합계
+        let mValueSum = 0;           // 11번 칸럼
+        let sheetQuantitySum = 0;    // 14번 칸럼
+        let displayQuantitySum = 0;  // 16번 칸럼
 
         dataRows.forEach(row => {
             // 계약도급
@@ -3498,6 +3553,15 @@ function updateSubtotalRows() {
             orderMaterialAmountSum += orderMatAmount;
             orderLaborAmountSum += orderLabAmount;
             orderExpenseAmountSum += orderExpAmount;
+
+            // 수량 합산 (테이블 셀에서 직접 읽기)
+            const mValue = parseFloat(row.cells[10]?.textContent.replace(/,/g, '')) || 0;
+            const sheetQuantity = parseFloat(row.cells[13]?.textContent.replace(/,/g, '')) || 0;
+            const displayQuantity = parseFloat(row.cells[15]?.textContent.replace(/,/g, '')) || 0;
+
+            mValueSum += mValue;
+            sheetQuantitySum += sheetQuantity;
+            displayQuantitySum += displayQuantity;
         });
 
         // 합계 계산
@@ -3506,8 +3570,16 @@ function updateSubtotalRows() {
         const orderTotalPriceSum = orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum;
         const orderTotalAmountSum = orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum;
 
-        // 소계 행 업데이트 (16번 컬럼부터 시작)
+        console.log(`  💰 계약도급 경비: 단가=${contractExpensePriceSum.toLocaleString()}, 금액=${contractExpenseAmountSum.toLocaleString()}`);
+        console.log(`  💰 발주단가 경비: 단가=${orderExpensePriceSum.toLocaleString()}, 금액=${orderExpenseAmountSum.toLocaleString()}`);
+
+        // 소계 행 업데이트
         const cells = subtotalRow.cells;
+
+        // 수량 칸럼 업데이트
+        if (cells[10]) cells[10].textContent = Math.round(mValueSum).toLocaleString();
+        if (cells[13]) cells[13].textContent = Math.round(sheetQuantitySum).toLocaleString();
+        if (cells[15]) cells[15].textContent = displayQuantitySum.toFixed(2);
 
         // 계약도급 (17번 셀부터 - 인덱스 16)
         if (cells[16]) cells[16].textContent = Math.round(contractMaterialPriceSum).toLocaleString();
@@ -3779,6 +3851,9 @@ function updateContractPricesRealtime() {
     });
 
     console.log(`✅ 데이터 행 ${allRows.length}개, 타입 요약 행 ${summaryRows.length}개 업데이트 완료`);
+
+    // ✅ 소계 행 업데이트 (경비 포함)
+    updateSubtotalRows();
 }
 
 /**
