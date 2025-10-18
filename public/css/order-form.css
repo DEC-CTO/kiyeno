@@ -192,9 +192,13 @@
 }
 
 /* tbody 데이터 행 너비 (33개 컬럼) */
+/* NO 컬럼 (1번째) - 중앙정렬 */
 .order-form-table tbody td:nth-child(1) {
     width: 40px;
     min-width: 40px;
+    text-align: center !important;
+    padding-right: 0;
+    padding-left: 0;
 }
 
 .order-form-table tbody td:nth-child(2) {
