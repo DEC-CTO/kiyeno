@@ -3148,10 +3148,23 @@ function calculateIndirectCosts(
  * @param {number} rowNumber - 행 번호
  * @returns {string} - HTML 문자열
  */
-function generateIndirectCostRow(item, rowNumber) {
+function generateIndirectCostRow(item, rowNumber, totalArea) {
   const contractRatio =
     parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
-  const contractAmount = Math.round(item.amount * contractRatio);
+
+  // 1m² 단가
+  const orderUnitPrice = item.unitPrice || 0;
+  const contractUnitPrice = Math.round(orderUnitPrice * contractRatio);
+
+  // 총 금액 = 단가 × 면적
+  const orderAmount = Math.round(orderUnitPrice * totalArea);
+  const contractAmount = Math.round(contractUnitPrice * totalArea);
+
+  // 자재비 항목인지 노무비 항목인지 구분
+  const isMaterialCost = item.name.includes('자재로스') ||
+                         item.name.includes('운반비') ||
+                         item.name.includes('이윤');
+  const isLaborCost = item.name.includes('공구손료');
 
   return `
         <tr style="background: #fffacd;">
@@ -3169,27 +3182,27 @@ function generateIndirectCostRow(item, rowNumber) {
             <td></td>
             <td></td>
             <td></td>
-            <td></td>
-            <td></td>
+            <td>M2</td>
+            <td class="quantity-cell">${totalArea.toFixed(2)}</td>
             <!-- 계약도급 -->
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="number-cell">${isMaterialCost ? contractUnitPrice.toLocaleString() : ''}</td>
+            <td class="number-cell">${isMaterialCost ? contractAmount.toLocaleString() : ''}</td>
+            <td class="number-cell">${isLaborCost ? contractUnitPrice.toLocaleString() : ''}</td>
+            <td class="number-cell">${isLaborCost ? contractAmount.toLocaleString() : ''}</td>
             <td class="number-cell">0</td>
-            <td class="number-cell">${contractAmount.toLocaleString()}</td>
-            <td></td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${contractUnitPrice.toLocaleString()}</td>
             <td class="number-cell">${contractAmount.toLocaleString()}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : ''}</td>
+            <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString() : ''}</td>
+            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : ''}</td>
+            <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString() : ''}</td>
             <td class="number-cell">0</td>
-            <td class="number-cell">${item.amount.toLocaleString()}</td>
-            <td></td>
-            <td class="number-cell">${item.amount.toLocaleString()}</td>
+            <td class="number-cell">0</td>
+            <td class="number-cell">${orderUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${orderAmount.toLocaleString()}</td>
             <td></td>
         </tr>
     `;
@@ -3846,19 +3859,16 @@ async function generateOrderFormDataRows() {
       totalArea       // ✨ 총 면적 전달
     );
 
-    // 6-6. 간접비 행 생성 (스터드 4개 + 단수정리 + 석고보드 4개 + 단수정리)
+    // 6-6. 간접비 행 생성 (스터드 4개 + 석고보드 4개 + 단수정리)
     // 스터드 간접비 4개
     for (const item of studIndirectCosts) {
-      html += generateIndirectCostRow(item, rowNumber);
+      html += generateIndirectCostRow(item, rowNumber, totalArea);
       rowNumber++;
     }
-    // 스터드 단수정리
-    html += generateRoundingAdjustmentRow('스터드', studIndirectCosts, rowNumber);
-    rowNumber++;
 
     // 석고보드 간접비 4개
     for (const item of gypsumIndirectCosts) {
-      html += generateIndirectCostRow(item, rowNumber);
+      html += generateIndirectCostRow(item, rowNumber, totalArea);
       rowNumber++;
     }
     // 석고보드 단수정리
