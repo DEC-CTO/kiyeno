@@ -3331,7 +3331,7 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
             <td></td>
             <td></td>
             <td>M2</td>
-            <td class="quantity-cell">${totalArea.toFixed(2)}</td>
+            <td class="quantity-cell"></td>
             <!-- 계약도급 -->
             <td class="number-cell">${contractMaterialUnitPrice.toLocaleString()}</td>
             <td class="number-cell">${contractMaterialAmount.toLocaleString()}</td>
@@ -3760,13 +3760,6 @@ async function generateOrderFormDataRows() {
     rowNumber++;
 
     // 6. 🆕 간접비 계산 및 행 생성 (카테고리별 분리)
-    const unitPriceItem = sortedDirectCosts[0]?.unitPriceItem;
-    const fixedRates = unitPriceItem?.fixedRates || {
-      materialLoss: 3,
-      transportCost: 1.5,
-      materialProfit: 15,
-      toolExpense: 2,
-    };
 
     // 6-1. 직접비를 카테고리별로 분리
     console.log(
@@ -3787,6 +3780,28 @@ async function generateOrderFormDataRows() {
     console.log(
       `📦 경량자재 개수: ${lightWeightCosts.length}, 석고보드 개수: ${gypsumCosts.length}`
     );
+
+    // ✅ 카테고리별 unitPriceItem 분리
+    const studUnitPriceItem = lightWeightCosts[0]?.unitPriceItem;
+    const gypsumUnitPriceItem = gypsumCosts[0]?.unitPriceItem;
+
+    const studFixedRates = studUnitPriceItem?.fixedRates || {
+      materialLoss: 3,
+      transportCost: 1.5,
+      materialProfit: 15,
+      toolExpense: 2,
+    };
+    const gypsumFixedRates = gypsumUnitPriceItem?.fixedRates || {
+      materialLoss: 3,
+      transportCost: 1.5,
+      materialProfit: 15,
+      toolExpense: 2,
+    };
+
+    console.log(`🔧 스터드 unitPriceItem:`, studUnitPriceItem?.id);
+    console.log(`🔧 스터드 fixedRates:`, studFixedRates);
+    console.log(`🔧 석고보드 unitPriceItem:`, gypsumUnitPriceItem?.id);
+    console.log(`🔧 석고보드 fixedRates:`, gypsumFixedRates);
 
     // 6-2. 스터드(경량자재) 직접비 합계
     let studMaterialTotal = 0;
@@ -3839,30 +3854,28 @@ async function generateOrderFormDataRows() {
     console.log(
       `📊 석고보드 직접비 합계 - 자재: ${gypsumMaterialTotal.toLocaleString()}, 노무: ${gypsumLaborTotal.toLocaleString()}`
     );
-    console.log(`🔧 fixedRates:`, unitPriceItem?.fixedRates);
-    console.log(`🔧 사용할 fixedRates:`, fixedRates);
 
     // ✨ 총 면적 계산
     const totalArea = results.reduce((sum, r) => sum + r.area, 0);
 
-    // 6-4. 스터드 간접비 계산
+    // 6-4. 스터드 간접비 계산 (✅ 스터드 unitPriceItem 사용)
     const studIndirectCosts = calculateIndirectCosts(
       '스터드',
       studMaterialTotal,
       studLaborTotal,
-      fixedRates,
-      unitPriceItem,  // ✨ 일위대가 아이템 전달
-      totalArea       // ✨ 총 면적 전달
+      studFixedRates,      // ✅ 스터드 비율
+      studUnitPriceItem,   // ✅ 스터드 일위대가 아이템
+      totalArea
     );
 
-    // 6-5. 석고보드 간접비 계산
+    // 6-5. 석고보드 간접비 계산 (✅ 석고보드 unitPriceItem 사용)
     const gypsumIndirectCosts = calculateIndirectCosts(
       '석고보드',
       gypsumMaterialTotal,
       gypsumLaborTotal,
-      fixedRates,
-      unitPriceItem,  // ✨ 일위대가 아이템 전달
-      totalArea       // ✨ 총 면적 전달
+      gypsumFixedRates,    // ✅ 석고보드 비율
+      gypsumUnitPriceItem, // ✅ 석고보드 일위대가 아이템
+      totalArea
     );
 
     // 6-6. 간접비 행 생성 (스터드 4개 + 석고보드 4개 + 소계 + 단수정리)
@@ -4192,6 +4205,12 @@ function updateSubtotalRows() {
     console.log(`  📝 라벨: "${label}"`);
     if (!label || !label.includes('소계')) {
       console.log(`  ⏭️ 소계 행이 아님, 건너뜀`);
+      return;
+    }
+
+    // ✅ 간접비 소계는 이미 generateIndirectCostSubtotalRow()에서 계산되어 있으므로 재계산 제외
+    if (label.includes('간접비')) {
+      console.log(`  ⏭️ 간접비 소계는 재계산 안 함 (이미 계산된 값 사용)`);
       return;
     }
 
