@@ -1790,16 +1790,25 @@ function collectCurrentComponents() {
         const laborAmount = getElementValue(laborAmountElementForSave, true); // 노무비 금액 (고정값)
         const laborPrice = quantity > 0 ? laborAmount / quantity : 0; // 노무비 단가 = 금액 ÷ 수량
         
+        const materialPrice = getElementValue(row.querySelector('.material-price'), true) || getElementValue(row.querySelector('.component-material-price'), true) || 0;
+
+        // ✨ 1m² 단가 계산 (반올림)
+        const materialPricePerM2 = Math.round(materialPrice * quantity);
+        const laborPricePerM2 = Math.round(laborAmount);
+
         const component = {
             name: componentName,
             materialId: row.getAttribute('data-material-id') || null, // materialId 수집
             spec: getElementValue(row.querySelector('.component-spec')) || '',
             unit: getElementValue(row.querySelector('.component-unit')) || '',
             quantity: quantity,
-            materialPrice: getElementValue(row.querySelector('.material-price'), true) || getElementValue(row.querySelector('.component-material-price'), true) || 0,
+            materialPrice: materialPrice,
             laborPrice: laborPrice,
             laborAmount: laborAmount,
-            expensePrice: getElementValue(row.querySelector('.expense-price'), true) || 0
+            expensePrice: getElementValue(row.querySelector('.expense-price'), true) || 0,
+            // ✨ 1m² 단가 저장
+            materialPricePerM2: materialPricePerM2,
+            laborPricePerM2: laborPricePerM2
         };
         
         if (component.name.trim()) { // 품명이 있는 것만 저장
@@ -1820,20 +1829,43 @@ async function saveUnitPriceItem() {
     const totalLabor = parseFloat(document.getElementById('totalLabor')?.textContent.replace(/[,원]/g, '') || 0);
     const totalExpense = parseFloat(document.getElementById('totalExpense')?.textContent.replace(/[,원]/g, '') || 0);
     const grandTotal = parseFloat(document.getElementById('grandTotal')?.textContent.replace(/[,원]/g, '') || 0);
-    
-    currentUnitPriceData.totalCosts = {
-        material: totalMaterial,
-        labor: totalLabor,
-        expense: totalExpense,
-        total: grandTotal
-    };
-    
+
     // 고정 비용 비율 저장
-    currentUnitPriceData.fixedRates = {
+    const fixedRates = {
         materialLoss: parseFloat(document.querySelector('.material-loss-row .fixed-quantity')?.value) || 3,
         transportCost: parseFloat(document.querySelector('.transport-cost-row .fixed-quantity')?.value) || 1.5,
         materialProfit: parseFloat(document.querySelector('.material-profit-row .fixed-quantity')?.value) || 15,
         toolExpense: parseFloat(document.querySelector('.tool-expense-row .fixed-quantity')?.value) || 2
+    };
+    currentUnitPriceData.fixedRates = fixedRates;
+
+    // ✨ 1m² 단가 계산 (구성품 합산)
+    const materialUnitPrice = currentUnitPriceData.components.reduce((sum, c) => sum + (c.materialPricePerM2 || 0), 0);
+    const laborUnitPrice = currentUnitPriceData.components.reduce((sum, c) => sum + (c.laborPricePerM2 || 0), 0);
+
+    // ✨ 간접비 1m² 단가 계산
+    const materialLossUnitPrice = Math.round(materialUnitPrice * fixedRates.materialLoss / 100);
+    const transportCostUnitPrice = Math.round(materialUnitPrice * fixedRates.transportCost / 100);
+    const materialProfitBase = materialUnitPrice + materialLossUnitPrice + transportCostUnitPrice;
+    const materialProfitUnitPrice = Math.round(materialProfitBase * fixedRates.materialProfit / 100);
+    const toolExpenseUnitPrice = Math.round(laborUnitPrice * fixedRates.toolExpense / 100);
+
+    currentUnitPriceData.totalCosts = {
+        material: totalMaterial,
+        labor: totalLabor,
+        expense: totalExpense,
+        total: grandTotal,
+        // ✨ 1m² 단가 추가
+        materialUnitPrice: materialUnitPrice,
+        laborUnitPrice: laborUnitPrice,
+        totalUnitPrice: materialUnitPrice + laborUnitPrice,
+        // ✨ 간접비 1m² 단가 추가
+        indirectCosts: {
+            materialLoss: materialLossUnitPrice,
+            transportCost: transportCostUnitPrice,
+            materialProfit: materialProfitUnitPrice,
+            toolExpense: toolExpenseUnitPrice
+        }
     };
     
     // 새 아이템이면 ID와 생성일 설정
