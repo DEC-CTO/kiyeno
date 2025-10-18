@@ -2369,8 +2369,6 @@ function generateIndirectCostName(indirectCostName, parentCategory) {
  */
 async function collectAndGroupComponents(results) {
     const allComponents = [];
-    const totalArea = results.reduce((sum, r) => sum + r.area, 0);
-    const result = results[0];
 
     const layerOrder = [
         'layer3_1', 'layer2_1', 'layer1_1',
@@ -2379,39 +2377,44 @@ async function collectAndGroupComponents(results) {
         'column2', 'channel', 'runner'
     ];
 
-    // 각 레이어 순회
-    for (const layerKey of layerOrder) {
-        const layer = result.layerPricing[layerKey];
-        if (!layer || !layer.materialName) continue;
+    // ✅ 모든 results 순회 (첫 번째만이 아니라)
+    for (const result of results) {
+        const individualArea = result.area;  // 각 결과의 개별 면적
 
-        const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
-        if (!unitPriceItem?.components) continue;
+        // 각 레이어 순회
+        for (const layerKey of layerOrder) {
+            const layer = result.layerPricing[layerKey];
+            if (!layer || !layer.materialName) continue;
 
-        // 상위 카테고리 추출
-        const parentCategory = extractParentCategory(unitPriceItem.id);
+            const unitPriceItem = await findUnitPriceItemByIdOrName(layer.materialName);
+            if (!unitPriceItem?.components) continue;
 
-        // ✅ 모든 구성품 수집 (필터링 제거)
-        for (const component of unitPriceItem.components) {
-            // 자재 DB 조회
-            const materialData = await findMaterialByIdInDB(component.materialId);
+            // 상위 카테고리 추출
+            const parentCategory = extractParentCategory(unitPriceItem.id);
 
-            allComponents.push({
-                name: component.name || '',
-                spec: component.spec || '',
-                unit: component.unit || 'EA',
-                materialPrice: parseFloat(component.materialPrice) || 0,
-                laborPrice: parseFloat(component.laborPrice) || 0,
-                laborAmount: parseFloat(component.laborAmount) || 0,
-                quantity: parseFloat(component.quantity) || 0,
-                area: totalArea,
-                parentCategory: parentCategory,
-                unitPriceId: unitPriceItem.id,
-                // ✅ 추가 데이터
-                size: component.size || materialData?.size || '',
-                materialData: materialData,
-                unitPriceItem: unitPriceItem,
-                wallType: result.wallType,
-            });
+            // ✅ 모든 구성품 수집 (필터링 제거)
+            for (const component of unitPriceItem.components) {
+                // 자재 DB 조회
+                const materialData = await findMaterialByIdInDB(component.materialId);
+
+                allComponents.push({
+                    name: component.name || '',
+                    spec: component.spec || '',
+                    unit: component.unit || 'EA',
+                    materialPrice: parseFloat(component.materialPrice) || 0,
+                    laborPrice: parseFloat(component.laborPrice) || 0,
+                    laborAmount: parseFloat(component.laborAmount) || 0,
+                    quantity: parseFloat(component.quantity) || 0,
+                    area: individualArea,  // ✅ totalArea 대신 개별 면적 사용
+                    parentCategory: parentCategory,
+                    unitPriceId: unitPriceItem.id,
+                    // ✅ 추가 데이터
+                    size: component.size || materialData?.size || '',
+                    materialData: materialData,
+                    unitPriceItem: unitPriceItem,
+                    wallType: result.wallType,
+                });
+            }
         }
     }
 
@@ -2427,11 +2430,14 @@ async function collectAndGroupComponents(results) {
 function groupComponentsByName(components) {
     const grouped = {};
 
+    console.log('🔍 그룹핑 시작 - 총 구성품 수:', components.length);
+
     for (const comp of components) {
         // 그룹핑 키: 품명 + 규격 + 단위 + 카테고리
         const key = `${comp.name}|${comp.spec}|${comp.unit}|${comp.parentCategory}`;
 
         if (!grouped[key]) {
+            console.log(`  ✨ 새 그룹 생성: ${comp.name} (${comp.spec}) - 카테고리: ${comp.parentCategory}`);
             grouped[key] = {
                 name: comp.name,
                 spec: comp.spec,
@@ -2439,9 +2445,8 @@ function groupComponentsByName(components) {
                 materialPrice: comp.materialPrice,
                 laborPrice: comp.laborPrice,
                 laborAmount: comp.laborAmount,
-                quantity: comp.quantity,
-                totalQuantity: 0,
-                area: comp.area,
+                quantity: comp.quantity,  // ✅ 1m² 수량 (합산하지 않음, 첫 번째 값 유지)
+                area: 0,  // ✅ 합산할 것이므로 0으로 시작
                 parentCategory: comp.parentCategory,
                 // ✅ 추가 데이터 보존 (첫 번째 것 사용)
                 size: comp.size,
@@ -2451,11 +2456,24 @@ function groupComponentsByName(components) {
             };
         }
 
-        // 수량 합산
-        grouped[key].totalQuantity += comp.quantity;
+        // ✅ 면적만 합산 (quantity는 합산하지 않음)
+        const beforeArea = grouped[key].area;
+        grouped[key].area += comp.area;
+        console.log(`    ➕ ${comp.name}: 면적 ${beforeArea.toFixed(2)} + ${comp.area.toFixed(2)} = ${grouped[key].area.toFixed(2)}m²`);
     }
 
-    return Object.values(grouped);
+    const result = Object.values(grouped);
+    console.log('✅ 그룹핑 완료 - 결과:', result.length, '개 그룹');
+    console.table(result.map(r => ({
+        품명: r.name,
+        규격: r.spec,
+        단위: r.unit,
+        '1m² 수량': r.quantity,
+        '총 면적': r.area.toFixed(2),
+        카테고리: r.parentCategory
+    })));
+
+    return result;
 }
 
 /**
@@ -2495,7 +2513,12 @@ function separateDirectAndIndirectCosts(groupedComponents) {
  * @returns {Array} - 정렬된 구성품 배열
  */
 function sortComponents(components) {
-    const priority = {
+    const categoryPriority = {
+        'STUD': 1,        // 스터드 카테고리 먼저
+        '석고보드': 2      // 석고보드 카테고리 나중
+    };
+
+    const typePriority = {
         'STUD': 1,
         'RUNNER': 2,
         '석고보드': 3,
@@ -2507,16 +2530,26 @@ function sortComponents(components) {
     };
 
     return components.sort((a, b) => {
+        // 1단계: parentCategory로 먼저 정렬 (STUD → 석고보드)
+        const catPriorityA = categoryPriority[a.parentCategory] || 99;
+        const catPriorityB = categoryPriority[b.parentCategory] || 99;
+
+        if (catPriorityA !== catPriorityB) {
+            return catPriorityA - catPriorityB;
+        }
+
+        // 2단계: 같은 카테고리 내에서 타입별 정렬
         const typeA = getComponentType(a.name);
         const typeB = getComponentType(b.name);
 
-        const priorityA = priority[typeA] || 50;
-        const priorityB = priority[typeB] || 50;
+        const priorityA = typePriority[typeA] || 50;
+        const priorityB = typePriority[typeB] || 50;
 
         if (priorityA !== priorityB) {
             return priorityA - priorityB;
         }
 
+        // 3단계: 같은 타입이면 품명 가나다순
         return a.name.localeCompare(b.name, 'ko');
     });
 }
@@ -2583,16 +2616,16 @@ function generateSubtotalRow(components, label) {
         contractLaborAmountSum += (labPrice1m2 * comp.area) * contractRatio;
 
         // 수량 합산
-        mValueSum += comp.totalQuantity * comp.area;  // 11번 칸럼 (mValue)
+        mValueSum += comp.quantity * comp.area;  // ✅ 11번 칸럼 (mValue) - quantity 사용
 
-        // 16번 칸럼 (displayQuantity) - 석고보드는 area × totalQuantity
+        // 16번 칸럼 (displayQuantity) - 석고보드는 area × quantity
         let currentDisplayQuantity = 0;
         if (comp.gypsumBoardDisplayQuantity !== undefined && comp.gypsumBoardDisplayQuantity !== null) {
             currentDisplayQuantity = comp.gypsumBoardDisplayQuantity;
             displayQuantitySum += comp.gypsumBoardDisplayQuantity;
         } else if (comp.parentCategory === '석고보드') {
-            currentDisplayQuantity = comp.area * comp.totalQuantity;
-            displayQuantitySum += comp.area * comp.totalQuantity;
+            currentDisplayQuantity = comp.area * comp.quantity;  // ✅ quantity 사용
+            displayQuantitySum += comp.area * comp.quantity;  // ✅ quantity 사용
         } else {
             displayQuantitySum += comp.area;
         }
@@ -2843,7 +2876,7 @@ function generateGrandTotalRow(directCosts, indirectCostItems) {
     let orderMaterialTotal = 0;
     let orderLaborTotal = 0;
     for (const comp of directCosts) {
-        const quantity = comp.totalQuantity * comp.area;
+        const quantity = comp.quantity * comp.area;  // ✅ quantity 사용
         orderMaterialTotal += comp.materialPrice * quantity;
         orderLaborTotal += comp.laborPrice * quantity;
     }
@@ -3009,7 +3042,7 @@ function generateGroupedComponentRow(component, rowNumber) {
         thicknessValue = sizeData.thickness || '';
         widthValue = sizeData.width || '';
         heightValue = sizeData.height || '';
-        const mValueRaw = Math.round(component.totalQuantity * area);
+        const mValueRaw = Math.round(component.quantity * area);  // ✅ quantity × area
         mValue = mValueRaw.toLocaleString();
 
     } else if (isRunner(componentName)) {
@@ -3018,7 +3051,7 @@ function generateGroupedComponentRow(component, rowNumber) {
         thicknessValue = sizeData.thickness || '';
         widthValue = sizeData.width || '';
         heightValue = sizeData.height || '';
-        const mValueRaw = Math.round(component.totalQuantity * area);
+        const mValueRaw = Math.round(component.quantity * area);  // ✅ quantity × area
         mValue = mValueRaw.toLocaleString();
 
     } else if (isGypsumBoard(componentName)) {
@@ -3038,7 +3071,7 @@ function generateGroupedComponentRow(component, rowNumber) {
                     if (component.gypsumBoardDisplayQuantity) {
                         gypsumBoardDisplayQuantity = component.gypsumBoardDisplayQuantity;
                     } else {
-                        gypsumBoardDisplayQuantity = area * component.totalQuantity;
+                        gypsumBoardDisplayQuantity = area * component.quantity;  // ✅ quantity 사용
                     }
                     // 14번 컬럼 장: displayQuantity ÷ m2PerSheet
                     sheetQuantity = Math.round(gypsumBoardDisplayQuantity / m2PerSheet);
@@ -3048,12 +3081,12 @@ function generateGroupedComponentRow(component, rowNumber) {
 
     } else if (isMagazinePiece(componentName) || isNailingBullet(componentName)) {
         // 매거진피스, 타정총알: 11번 컬럼에 수량 표시 (정수)
-        const mValueRaw = Math.round(component.totalQuantity * area);
+        const mValueRaw = Math.round(component.quantity * area);  // ✅ quantity × area
         mValue = mValueRaw.toLocaleString();
 
     } else if (isWeldingRod(componentName)) {
         // 용접봉: 11번 컬럼에 수량 표시 (소수점 둘째자리)
-        const mValueRaw = (component.totalQuantity * area).toFixed(2);
+        const mValueRaw = (component.quantity * area).toFixed(2);  // ✅ quantity × area
         mValue = parseFloat(mValueRaw).toLocaleString('ko-KR', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
@@ -3062,14 +3095,14 @@ function generateGroupedComponentRow(component, rowNumber) {
 
     // 수량 계산
     let displayQuantity = area;
-    // ✅ 석고보드: 16번 컬럼에 area × component.totalQuantity
+    // ✅ 석고보드: 16번 컬럼에 area × component.quantity
     if (isGypsumBoard(componentName)) {
-        displayQuantity = component.gypsumBoardDisplayQuantity || (area * component.totalQuantity);
-    } else if (component.parentCategory === '석고보드' && component.gypsumBoardDisplayQuantity !== null) {
-        // ✅ 석고보드 카테고리의 모든 자재: 석고보드 수량 그대로 사용
-        displayQuantity = component.gypsumBoardDisplayQuantity;
+        displayQuantity = component.gypsumBoardDisplayQuantity || (area * component.quantity);  // ✅ quantity 사용
+    } else if (component.parentCategory === '석고보드') {
+        // ✅ 메거진피스 등 석고보드 카테고리의 다른 자재: area 사용 (그룹핑된 면적 합계)
+        displayQuantity = area;  // 120 + 120 = 240
     }
-    const quantity = component.totalQuantity * area;
+    const quantity = component.quantity * area;  // ✅ quantity 사용 (totalQuantity 제거됨)
 
     // 발주단가 - 1m² 단가 계산 (반올림 적용)
     const orderMatPrice = Math.round(component.materialPrice * component.quantity);  // 1m² 자재비 = 단가 × 수량 (반올림)
@@ -3172,9 +3205,9 @@ async function generateOrderFormDataRows() {
         let gypsumBoardQty = null;
         for (const comp of sortedDirectCosts) {
             if (isGypsumBoard(comp.name)) {
-                // 석고보드의 16번 컬럼 값 계산: area × totalQuantity
-                gypsumBoardQty = comp.area * comp.totalQuantity;
-                console.log(`📦 석고보드 수량 계산: ${comp.area} × ${comp.totalQuantity} = ${gypsumBoardQty}`);
+                // 석고보드의 16번 컬럼 값 계산: area × quantity
+                gypsumBoardQty = comp.area * comp.quantity;
+                console.log(`📦 석고보드 수량 계산: ${comp.area} × ${comp.quantity} = ${gypsumBoardQty}`);
                 break;
             }
         }
