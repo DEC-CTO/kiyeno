@@ -3289,9 +3289,11 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
   const contractRatio =
     parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
 
-  // 자재비 항목과 노무비 항목 분리
-  let orderMaterialUnitPrice = 0;
-  let orderLaborUnitPrice = 0;
+  console.log(`📊 간접비 소계 계산 시작 (총 ${indirectCostItems.length}개 항목)`);
+
+  // ✅ 각 간접비 항목의 amount를 직접 합산 (unitPrice × totalArea 방식 대신)
+  let orderMaterialAmount = 0;
+  let orderLaborAmount = 0;
 
   for (const item of indirectCostItems) {
     const isMaterialCost = item.name.includes('자재로스') ||
@@ -3299,27 +3301,33 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
                            item.name.includes('이윤');
     const isLaborCost = item.name.includes('공구손료');
 
+    console.log(`  - ${item.name}: amount=${(item.amount || 0).toLocaleString()}, unitPrice=${(item.unitPrice || 0).toLocaleString()}`);
+
     if (isMaterialCost) {
-      orderMaterialUnitPrice += item.unitPrice || 0;
+      orderMaterialAmount += item.amount || 0;
     }
     if (isLaborCost) {
-      orderLaborUnitPrice += item.unitPrice || 0;
+      orderLaborAmount += item.amount || 0;
     }
   }
 
-  // 금액 계산 = 단가 × 면적
-  const orderMaterialAmount = Math.round(orderMaterialUnitPrice * totalArea);
-  const orderLaborAmount = Math.round(orderLaborUnitPrice * totalArea);
+  console.log(`  ✅ 발주단가 합계 - 자재비: ${orderMaterialAmount.toLocaleString()}, 노무비: ${orderLaborAmount.toLocaleString()}`);
+
+  // 단가 역산 (금액 ÷ 면적)
+  const orderMaterialUnitPrice = totalArea > 0 ? Math.round(orderMaterialAmount / totalArea) : 0;
+  const orderLaborUnitPrice = totalArea > 0 ? Math.round(orderLaborAmount / totalArea) : 0;
   const orderTotalUnitPrice = orderMaterialUnitPrice + orderLaborUnitPrice;
   const orderTotalAmount = orderMaterialAmount + orderLaborAmount;
 
   // 계약도급 = 발주단가 × contractRatio
   const contractMaterialUnitPrice = Math.round(orderMaterialUnitPrice * contractRatio);
   const contractLaborUnitPrice = Math.round(orderLaborUnitPrice * contractRatio);
-  const contractMaterialAmount = Math.round(contractMaterialUnitPrice * totalArea);
-  const contractLaborAmount = Math.round(contractLaborUnitPrice * totalArea);
+  const contractMaterialAmount = Math.round(orderMaterialAmount * contractRatio);
+  const contractLaborAmount = Math.round(orderLaborAmount * contractRatio);
   const contractTotalUnitPrice = Math.round(orderTotalUnitPrice * contractRatio);
   const contractTotalAmount = contractMaterialAmount + contractLaborAmount;
+
+  console.log(`  ✅ 계약도급 합계 (${contractRatio}배) - 자재비: ${contractMaterialAmount.toLocaleString()}, 노무비: ${contractLaborAmount.toLocaleString()}`);
 
   return `
         <tr style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-weight: 600;">
@@ -3372,15 +3380,24 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
  * @returns {string} - HTML 문자열
  */
 function generateGrandTotalRow(directSubtotal, indirectSubtotal, roundingAmount, rowNumber) {
+  console.log(`💵 총계 행 생성 시작`);
+  console.log(`  📊 직접비 소계:`, directSubtotal);
+  console.log(`  📊 간접비 소계:`, indirectSubtotal);
+  console.log(`  📐 단수정리: ${roundingAmount.toLocaleString()}`);
+
   // 발주단가 총계 = 직접비 소계 + 간접비 소계 + 단수정리
   const orderMaterialTotal = directSubtotal.orderMaterialAmount + indirectSubtotal.orderMaterialAmount;
   const orderLaborTotal = directSubtotal.orderLaborAmount + indirectSubtotal.orderLaborAmount;
   const orderGrandTotal = orderMaterialTotal + orderLaborTotal + roundingAmount;
 
+  console.log(`  ✅ 발주단가 총계 - 자재: ${orderMaterialTotal.toLocaleString()}, 노무: ${orderLaborTotal.toLocaleString()}, 합계: ${orderGrandTotal.toLocaleString()}`);
+
   // 계약도급 총계
   const contractMaterialTotal = directSubtotal.contractMaterialAmount + indirectSubtotal.contractMaterialAmount;
   const contractLaborTotal = directSubtotal.contractLaborAmount + indirectSubtotal.contractLaborAmount;
   const contractGrandTotal = contractMaterialTotal + contractLaborTotal + Math.round(roundingAmount * 1.2);
+
+  console.log(`  ✅ 계약도급 총계 - 자재: ${contractMaterialTotal.toLocaleString()}, 노무: ${contractLaborTotal.toLocaleString()}, 합계: ${contractGrandTotal.toLocaleString()}`);
 
   return `
         <tr style="background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%); color: white; font-weight: 700; font-size: 1.1em;">
@@ -3927,24 +3944,36 @@ async function generateOrderFormDataRows() {
 
     const allIndirectCosts = [...studIndirectCosts, ...allGypsumIndirectCosts];
 
-    // 7. 간접비 소계 데이터 계산
+    // 7. 간접비 소계 데이터 계산 (✅ amount 직접 합산 방식으로 변경)
     const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
-    let indirectMaterialUnitPrice = 0;
-    let indirectLaborUnitPrice = 0;
+    let orderMaterialAmount = 0;
+    let orderLaborAmount = 0;
+
+    console.log(`💰 간접비 소계 객체 계산 시작 (총 ${allIndirectCosts.length}개 항목)`);
+
     for (const item of allIndirectCosts) {
       const isMaterialCost = item.name.includes('자재로스') || item.name.includes('운반비') || item.name.includes('이윤');
+      const isLaborCost = item.name.includes('공구손료');
+
       if (isMaterialCost) {
-        indirectMaterialUnitPrice += item.unitPrice || 0;
-      } else {
-        indirectLaborUnitPrice += item.unitPrice || 0;
+        orderMaterialAmount += item.amount || 0;
+        console.log(`  - [자재비] ${item.name}: amount=${(item.amount || 0).toLocaleString()}`);
+      } else if (isLaborCost) {
+        orderLaborAmount += item.amount || 0;
+        console.log(`  - [노무비] ${item.name}: amount=${(item.amount || 0).toLocaleString()}`);
       }
     }
+
+    console.log(`  ✅ 발주단가 합계 - 자재비: ${orderMaterialAmount.toLocaleString()}, 노무비: ${orderLaborAmount.toLocaleString()}`);
+
     const indirectSubtotal = {
-      orderMaterialAmount: Math.round(indirectMaterialUnitPrice * totalArea),
-      orderLaborAmount: Math.round(indirectLaborUnitPrice * totalArea),
-      contractMaterialAmount: Math.round(indirectMaterialUnitPrice * contractRatio * totalArea),
-      contractLaborAmount: Math.round(indirectLaborUnitPrice * contractRatio * totalArea)
+      orderMaterialAmount: Math.round(orderMaterialAmount),
+      orderLaborAmount: Math.round(orderLaborAmount),
+      contractMaterialAmount: Math.round(orderMaterialAmount * contractRatio),
+      contractLaborAmount: Math.round(orderLaborAmount * contractRatio)
     };
+
+    console.log(`  ✅ 계약도급 합계 (${contractRatio}배) - 자재비: ${indirectSubtotal.contractMaterialAmount.toLocaleString()}, 노무비: ${indirectSubtotal.contractLaborAmount.toLocaleString()}`);
 
     // 8. 간접비 소계 HTML 생성
     html += generateIndirectCostSubtotalRow(allIndirectCosts, totalArea, rowNumber);
@@ -4488,6 +4517,103 @@ function updateSubtotalRows() {
     if (cells[32])
       cells[32].textContent = Math.round(orderTotalAmountSum).toLocaleString();
   });
+
+  // ✅ 총계 행 업데이트 (경비 포함)
+  console.log('🔄 총계 행 업데이트 시작');
+
+  // 총계 행 찾기 (초록색 배경, "총 계" 라벨)
+  const grandTotalRow = document.querySelector(
+    '.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]'
+  );
+
+  if (grandTotalRow) {
+    console.log('📊 총계 행 찾음');
+
+    // 모든 소계 행에서 경비 합산
+    let totalContractExpenseAmount = 0;
+    let totalOrderExpenseAmount = 0;
+
+    subtotalRows.forEach((subtotalRow) => {
+      const label = subtotalRow.cells[2]?.textContent.trim();
+      console.log(`  📝 소계 라벨: "${label}"`);
+
+      // 계약도급 경비 금액
+      const contractExpense =
+        parseFloat(subtotalRow.cells[21]?.textContent.replace(/,/g, '')) || 0;
+      // 발주단가 경비 금액
+      const orderExpense =
+        parseFloat(subtotalRow.cells[30]?.textContent.replace(/,/g, '')) || 0;
+
+      totalContractExpenseAmount += contractExpense;
+      totalOrderExpenseAmount += orderExpense;
+
+      console.log(
+        `  💰 경비 누적: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
+      );
+    });
+
+    console.log(
+      `  💰 총 경비: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
+    );
+
+    // 총계 행의 기존 자재비, 노무비 금액 읽기
+    const contractMaterialAmount =
+      parseFloat(grandTotalRow.cells[17]?.textContent.replace(/,/g, '')) || 0;
+    const contractLaborAmount =
+      parseFloat(grandTotalRow.cells[19]?.textContent.replace(/,/g, '')) || 0;
+    const orderMaterialAmount =
+      parseFloat(grandTotalRow.cells[26]?.textContent.replace(/,/g, '')) || 0;
+    const orderLaborAmount =
+      parseFloat(grandTotalRow.cells[28]?.textContent.replace(/,/g, '')) || 0;
+
+    // 단수정리 금액 읽기 (발주단가 기준)
+    const roundingRowIndex = Array.from(
+      document.querySelectorAll('.order-form-table tbody tr')
+    ).findIndex((row) => row.cells[2]?.textContent.trim() === '단수정리');
+
+    let roundingAmount = 0;
+    if (roundingRowIndex !== -1) {
+      const roundingRow = document.querySelectorAll('.order-form-table tbody tr')[roundingRowIndex];
+      roundingAmount = parseFloat(roundingRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
+    }
+
+    console.log(`  📐 단수정리: ${roundingAmount.toLocaleString()}`);
+
+    // 총계 금액 재계산 (자재비 + 노무비 + 경비 + 단수정리)
+    const orderGrandTotal = Math.round(
+      orderMaterialAmount + orderLaborAmount + totalOrderExpenseAmount + roundingAmount
+    );
+    const contractGrandTotal = Math.round(
+      contractMaterialAmount + contractLaborAmount + totalContractExpenseAmount + Math.round(roundingAmount * 1.2)
+    );
+
+    console.log(
+      `  💵 총계 금액: 계약도급=${contractGrandTotal.toLocaleString()}, 발주단가=${orderGrandTotal.toLocaleString()}`
+    );
+
+    // 총계 행 업데이트
+    // 계약도급 경비
+    if (grandTotalRow.cells[21]) {
+      grandTotalRow.cells[21].textContent = Math.round(totalContractExpenseAmount).toLocaleString();
+    }
+    // 계약도급 합계 금액
+    if (grandTotalRow.cells[23]) {
+      grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString();
+    }
+
+    // 발주단가 경비
+    if (grandTotalRow.cells[30]) {
+      grandTotalRow.cells[30].textContent = Math.round(totalOrderExpenseAmount).toLocaleString();
+    }
+    // 발주단가 합계 금액
+    if (grandTotalRow.cells[32]) {
+      grandTotalRow.cells[32].textContent = orderGrandTotal.toLocaleString();
+    }
+
+    console.log('✅ 총계 행 업데이트 완료');
+  } else {
+    console.log('❌ 총계 행을 찾을 수 없음');
+  }
 }
 
 /**
