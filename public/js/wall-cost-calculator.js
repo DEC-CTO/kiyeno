@@ -3865,12 +3865,19 @@ async function generateOrderFormDataRows() {
         toolExpense: 2,
       };
 
-      // 이 그룹의 직접비와 면적만 합산
+      // 이 그룹의 직접비와 면적
       let gypsumMaterialTotal = 0;
       let gypsumLaborTotal = 0;
-      let gypsumArea = 0;
 
-      console.log(`📊 석고보드 그룹 [${gypsumUnitPriceItem?.basic}] 구성품 상세:`);
+      // ✅ 면적은 첫 번째 구성품 것만 사용 (직접비 테이블 표시와 일치)
+      const gypsumArea = gypsumGroup[0]?.area || 0;
+
+      // ✅ basic 객체에서 이름 조합 (itemName + size)
+      const categoryName = gypsumUnitPriceItem?.basic
+        ? `${gypsumUnitPriceItem.basic.itemName} ${gypsumUnitPriceItem.basic.size}`
+        : (gypsumGroup[0]?.name || '석고보드');
+
+      console.log(`📊 석고보드 그룹 [${categoryName}] 구성품 상세:`);
       for (const comp of gypsumGroup) {
         const materialPricePerM2 = comp.materialPrice * comp.quantity;
         const laborPricePerM2 = comp.laborAmount;
@@ -3883,17 +3890,14 @@ async function generateOrderFormDataRows() {
           }m²)`
         );
 
+        // 금액 합산 (각 comp는 이미 자신의 area를 가지고 있음)
         gypsumMaterialTotal += materialPricePerM2 * comp.area;
         gypsumLaborTotal += laborPricePerM2 * comp.area;
-        gypsumArea += comp.area;
       }
 
       console.log(
-        `📊 석고보드 그룹 [${gypsumUnitPriceItem?.basic}] 직접비 합계 - 자재: ${gypsumMaterialTotal.toLocaleString()}, 노무: ${gypsumLaborTotal.toLocaleString()}, 면적: ${gypsumArea}m²`
+        `📊 석고보드 그룹 [${categoryName}] 직접비 합계 - 자재: ${gypsumMaterialTotal.toLocaleString()}, 노무: ${gypsumLaborTotal.toLocaleString()}, 면적: ${gypsumArea}m²`
       );
-
-      // 일위대가 이름 사용 (예: "일반석고보드 12.5T*1PLY")
-      const categoryName = gypsumUnitPriceItem?.basic || '석고보드';
 
       // 이 그룹의 간접비 계산
       const gypsumIndirectCosts = calculateIndirectCosts(
@@ -4798,6 +4802,30 @@ function updateContractPricesRealtime() {
   console.log(
     `✅ 데이터 행 ${allRows.length}개, 타입 요약 행 ${summaryRows.length}개 업데이트 완료`
   );
+
+  // ✅ 간접비 행 재계산 (노란색 배경 #fffacd)
+  const indirectRows = document.querySelectorAll('.order-form-table tbody tr[style*="#fffacd"]');
+
+  indirectRows.forEach(row => {
+    // 발주단가 자재비/노무비 (25-28번 셀)
+    const orderMatPrice = parseFloat(row.cells[25]?.textContent.replace(/,/g, '')) || 0;
+    const orderMatAmount = parseFloat(row.cells[26]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabPrice = parseFloat(row.cells[27]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabAmount = parseFloat(row.cells[28]?.textContent.replace(/,/g, '')) || 0;
+
+    // 계약도급 = 발주단가 × contractRatio (16-23번 셀)
+    if (row.cells[16]) row.cells[16].textContent = Math.round(orderMatPrice * contractRatio).toLocaleString();
+    if (row.cells[17]) row.cells[17].textContent = Math.round(orderMatAmount * contractRatio).toLocaleString();
+    if (row.cells[18]) row.cells[18].textContent = Math.round(orderLabPrice * contractRatio).toLocaleString();
+    if (row.cells[19]) row.cells[19].textContent = Math.round(orderLabAmount * contractRatio).toLocaleString();
+
+    const contractTotal = Math.round((orderMatPrice + orderLabPrice) * contractRatio);
+    const contractTotalAmount = Math.round((orderMatAmount + orderLabAmount) * contractRatio);
+    if (row.cells[22]) row.cells[22].textContent = contractTotal.toLocaleString();
+    if (row.cells[23]) row.cells[23].textContent = contractTotalAmount.toLocaleString();
+  });
+
+  console.log(`✅ 간접비 행 ${indirectRows.length}개 업데이트 완료`);
 
   // ✅ 소계 행 업데이트 (경비 포함)
   updateSubtotalRows();
