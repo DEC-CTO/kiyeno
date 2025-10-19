@@ -3148,6 +3148,95 @@ function calculateIndirectCosts(
 }
 
 /**
+ * 자재별 단수정리 행 생성 (회색 배경)
+ * @param {string} materialName - 자재 이름 (예: "스터드", "석고보드 9.5T", "그라스울 50T")
+ * @param {number} directMaterialAmount - 직접비 자재 금액
+ * @param {number} directLaborAmount - 직접비 노무비 금액
+ * @param {number} indirectMaterialAmount - 간접비 자재 금액
+ * @param {number} indirectLaborAmount - 간접비 노무비 금액
+ * @param {number} rowNumber - 행 번호
+ * @returns {Object} - { html: string, orderRounding: number, contractRounding: number }
+ */
+function generateMaterialRoundingRow(
+  materialName,
+  directMaterialAmount,
+  directLaborAmount,
+  indirectMaterialAmount,
+  indirectLaborAmount,
+  rowNumber
+) {
+  const contractRatio =
+    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+  // 발주단가 합계 (직접비 + 간접비)
+  const orderBeforeRounding =
+    directMaterialAmount +
+    directLaborAmount +
+    indirectMaterialAmount +
+    indirectLaborAmount;
+
+  // 계약도급 합계
+  const contractBeforeRounding =
+    (directMaterialAmount + indirectMaterialAmount) * contractRatio +
+    (directLaborAmount + indirectLaborAmount) * contractRatio;
+
+  // 1,000원 단위 단수정리
+  const orderRounding = -(orderBeforeRounding % 1000);
+  const contractRounding = -(contractBeforeRounding % 1000);
+
+  console.log(`📐 [${materialName}] 단수정리:`);
+  console.log(
+    `  발주단가 단수정리 전: ${orderBeforeRounding.toLocaleString()}, 단수정리: ${orderRounding.toLocaleString()}`
+  );
+  console.log(
+    `  계약도급 단수정리 전: ${contractBeforeRounding.toLocaleString()}, 단수정리: ${contractRounding.toLocaleString()}`
+  );
+
+  const html = `
+        <tr style="background: linear-gradient(135deg, #e0e0e0 0%, #eeeeee 100%);">
+            <td class="number-cell">${rowNumber}</td>
+            <td></td>
+            <td>단수정리 (${materialName})</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <!-- 계약도급 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">${contractRounding.toLocaleString()}</td>
+            <td></td>
+            <!-- 발주단가 -->
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="number-cell">${orderRounding.toLocaleString()}</td>
+            <td></td>
+        </tr>
+    `;
+
+  return { html, orderRounding, contractRounding };
+}
+
+/**
  * 간접비 행 생성 (노란색 배경)
  * @param {Object} item - 간접비 항목 객체
  * @param {number} rowNumber - 행 번호
@@ -3193,20 +3282,20 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
             <td>M2</td>
             <td class="quantity-cell">${area.toFixed(2)}</td>
             <!-- 계약도급 -->
-            <td class="number-cell">${isMaterialCost ? contractUnitPrice.toLocaleString() : ''}</td>
-            <td class="number-cell">${isMaterialCost ? contractAmount.toLocaleString() : ''}</td>
-            <td class="number-cell">${isLaborCost ? contractUnitPrice.toLocaleString() : ''}</td>
-            <td class="number-cell">${isLaborCost ? contractAmount.toLocaleString() : ''}</td>
+            <td class="number-cell">${isMaterialCost ? contractUnitPrice.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isMaterialCost ? contractAmount.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isLaborCost ? contractUnitPrice.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isLaborCost ? contractAmount.toLocaleString() : '0'}</td>
             <td class="number-cell">0</td>
             <td class="number-cell">0</td>
             <td class="number-cell">${contractUnitPrice.toLocaleString()}</td>
             <td class="number-cell">${contractAmount.toLocaleString()}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : ''}</td>
-            <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString() : ''}</td>
-            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : ''}</td>
-            <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString() : ''}</td>
+            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : '0'}</td>
+            <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString() : '0'}</td>
             <td class="number-cell">0</td>
             <td class="number-cell">0</td>
             <td class="number-cell">${orderUnitPrice.toLocaleString()}</td>
@@ -3783,9 +3872,9 @@ async function generateOrderFormDataRows() {
     html += generateSubtotalRow(sortedDirectCosts, '소계 (직접자재)', rowNumber);
     rowNumber++;
 
-    // 6. 🆕 간접비 계산 및 행 생성 (카테고리별 분리)
+    // 6. 🆕 간접비 계산 및 행 생성 (모든 카테고리 포함)
 
-    // 6-1. 직접비를 카테고리별로 분리
+    // 6-1. 직접비를 카테고리별로 완전히 그룹핑
     console.log(
       `🔍 전체 직접비 구성품:`,
       sortedDirectCosts.map((c) => ({
@@ -3794,86 +3883,89 @@ async function generateOrderFormDataRows() {
       }))
     );
 
-    const lightWeightCosts = sortedDirectCosts.filter(
-      (comp) => comp.parentCategory === 'STUD'
-    );
+    // ✅ 모든 카테고리별로 그룹핑 (스터드/런너, 석고보드, 그라스울 등)
+    const categorizedCosts = {
+      'STUD': [],  // 스터드와 런너를 함께 처리
+      '석고보드': {},
+      '그라스울': {},
+    };
 
-    // ✅ 석고보드를 unitPriceItem.id별로 그룹핑
-    const gypsumGroupsByUnitPrice = {};
     for (const comp of sortedDirectCosts) {
-      if (comp.parentCategory === '석고보드') {
+      const category = comp.parentCategory;
+
+      if (category === 'STUD' || category === 'RUNNER') {
+        // 스터드와 런너는 경량자재로 함께 처리
+        categorizedCosts['STUD'].push(comp);
+      } else if (category === '석고보드' || category === '그라스울') {
+        // 석고보드와 그라스울은 unitPriceId별로 그룹핑
         const unitPriceId = comp.unitPriceItem?.id || 'unknown';
-        if (!gypsumGroupsByUnitPrice[unitPriceId]) {
-          gypsumGroupsByUnitPrice[unitPriceId] = [];
+        if (!categorizedCosts[category][unitPriceId]) {
+          categorizedCosts[category][unitPriceId] = [];
         }
-        gypsumGroupsByUnitPrice[unitPriceId].push(comp);
+        categorizedCosts[category][unitPriceId].push(comp);
       }
     }
 
     console.log(
-      `📦 경량자재 개수: ${lightWeightCosts.length}, 석고보드 그룹 개수: ${Object.keys(gypsumGroupsByUnitPrice).length}`
-    );
-    console.log(`📦 석고보드 그룹 상세:`, Object.entries(gypsumGroupsByUnitPrice).map(([id, group]) => ({
-      unitPriceId: id,
-      name: group[0]?.unitPriceItem?.basic,
-      count: group.length
-    })));
-
-    // ✅ 스터드 unitPriceItem
-    const studUnitPriceItem = lightWeightCosts[0]?.unitPriceItem;
-    const studFixedRates = studUnitPriceItem?.fixedRates || {
-      materialLoss: 3,
-      transportCost: 1.5,
-      materialProfit: 15,
-      toolExpense: 2,
-    };
-
-    console.log(`🔧 스터드 unitPriceItem:`, studUnitPriceItem?.id);
-    console.log(`🔧 스터드 fixedRates:`, studFixedRates);
-
-    // 6-2. 스터드(경량자재) 직접비 합계
-    let studMaterialTotal = 0;
-    let studLaborTotal = 0;
-    console.log(`📊 스터드 구성품 상세:`);
-    for (const comp of lightWeightCosts) {
-      // ✅ 1m² 단가 = materialPrice × quantity
-      const materialPricePerM2 = comp.materialPrice * comp.quantity;
-      // ✅ 1m² 노무비 = laborAmount (이미 계산된 값)
-      const laborPricePerM2 = comp.laborAmount;
-
-      console.log(
-        `  - ${comp.name}: 자재(${comp.materialPrice}×${
-          comp.quantity
-        }=${materialPricePerM2.toFixed(2)}), 노무(${laborPricePerM2}), 면적(${
-          comp.area
-        }m²)`
-      );
-
-      // ✅ 총 금액 = 1m² 단가 × 면적
-      studMaterialTotal += materialPricePerM2 * comp.area;
-      studLaborTotal += laborPricePerM2 * comp.area;
-    }
-    console.log(
-      `📊 스터드 직접비 합계 - 자재: ${studMaterialTotal.toLocaleString()}, 노무: ${studLaborTotal.toLocaleString()}`
+      `📦 카테고리별 그룹 개수:`,
+      `경량자재=${categorizedCosts['STUD'].length}, ` +
+      `석고보드=${Object.keys(categorizedCosts['석고보드']).length}, ` +
+      `그라스울=${Object.keys(categorizedCosts['그라스울']).length}`
     );
 
     // ✨ 총 면적 계산
     const totalArea = results.reduce((sum, r) => sum + r.area, 0);
 
-    // 6-3. 스터드 간접비 계산 (✅ 스터드 unitPriceItem 사용)
-    const studIndirectCosts = calculateIndirectCosts(
-      '스터드',
-      studMaterialTotal,
-      studLaborTotal,
-      studFixedRates,      // ✅ 스터드 비율
-      studUnitPriceItem,   // ✅ 스터드 일위대가 아이템
-      totalArea
-    );
+    // 6-2. 스터드(경량자재) 간접비 계산
+    let studIndirectCosts = [];
+    let studMaterialTotal = 0;  // ✅ 스코프 확장
+    let studLaborTotal = 0;     // ✅ 스코프 확장
 
-    // 6-4. 석고보드 그룹별 간접비 계산
+    if (categorizedCosts['STUD'].length > 0) {
+      const studUnitPriceItem = categorizedCosts['STUD'][0]?.unitPriceItem;
+      const studFixedRates = studUnitPriceItem?.fixedRates || {
+        materialLoss: 3,
+        transportCost: 1.5,
+        materialProfit: 15,
+        toolExpense: 2,
+      };
+
+      console.log(`🔧 스터드 unitPriceItem:`, studUnitPriceItem?.id);
+      console.log(`🔧 스터드 fixedRates:`, studFixedRates);
+      console.log(`📊 스터드/런너 구성품 상세:`);
+      for (const comp of categorizedCosts['STUD']) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+
+        console.log(
+          `  - ${comp.name}: 자재(${comp.materialPrice}×${
+            comp.quantity
+          }=${materialPricePerM2.toFixed(2)}), 노무(${laborPricePerM2}), 면적(${
+            comp.area
+          }m²)`
+        );
+
+        studMaterialTotal += materialPricePerM2 * comp.area;
+        studLaborTotal += laborPricePerM2 * comp.area;
+      }
+      console.log(
+        `📊 스터드/런너 직접비 합계 - 자재: ${studMaterialTotal.toLocaleString()}, 노무: ${studLaborTotal.toLocaleString()}`
+      );
+
+      studIndirectCosts = calculateIndirectCosts(
+        '스터드',
+        studMaterialTotal,
+        studLaborTotal,
+        studFixedRates,
+        studUnitPriceItem,
+        totalArea
+      );
+    }
+
+    // 6-3. 석고보드 그룹별 간접비 계산
     const allGypsumIndirectCosts = [];
 
-    for (const [unitPriceId, gypsumGroup] of Object.entries(gypsumGroupsByUnitPrice)) {
+    for (const [unitPriceId, gypsumGroup] of Object.entries(categorizedCosts['석고보드'])) {
       const gypsumUnitPriceItem = gypsumGroup[0]?.unitPriceItem;
       const gypsumFixedRates = gypsumUnitPriceItem?.fixedRates || {
         materialLoss: 3,
@@ -3929,20 +4021,230 @@ async function generateOrderFormDataRows() {
       allGypsumIndirectCosts.push(...gypsumIndirectCosts);
     }
 
-    // 6-5. 간접비 행 생성 (스터드 4개 + 석고보드 그룹별 4개씩 + 소계)
-    // 스터드 간접비 4개
+    // 6-4. 그라스울 그룹별 간접비 계산
+    const allGlassWoolIndirectCosts = [];
+
+    for (const [unitPriceId, glassWoolGroup] of Object.entries(categorizedCosts['그라스울'])) {
+      const glassWoolUnitPriceItem = glassWoolGroup[0]?.unitPriceItem;
+      const glassWoolFixedRates = glassWoolUnitPriceItem?.fixedRates || {
+        materialLoss: 3,
+        transportCost: 1.5,
+        materialProfit: 15,
+        toolExpense: 2,
+      };
+
+      // 이 그룹의 직접비와 면적
+      let glassWoolMaterialTotal = 0;
+      let glassWoolLaborTotal = 0;
+
+      // ✅ 면적은 첫 번째 구성품 것만 사용
+      const glassWoolArea = glassWoolGroup[0]?.area || 0;
+
+      // ✅ basic 객체에서 이름 조합 또는 name 사용
+      const categoryName = glassWoolUnitPriceItem?.basic
+        ? `${glassWoolUnitPriceItem.basic.itemName || '그라스울'} ${glassWoolUnitPriceItem.basic.size || ''}`
+        : (glassWoolGroup[0]?.name || '그라스울');
+
+      console.log(`📊 그라스울 그룹 [${categoryName}] 구성품 상세:`);
+      for (const comp of glassWoolGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+
+        console.log(
+          `  - ${comp.name}: 자재(${comp.materialPrice}×${
+            comp.quantity
+          }=${materialPricePerM2.toFixed(2)}), 노무(${laborPricePerM2}), 면적(${
+            comp.area
+          }m²)`
+        );
+
+        // 금액 합산
+        glassWoolMaterialTotal += materialPricePerM2 * comp.area;
+        glassWoolLaborTotal += laborPricePerM2 * comp.area;
+      }
+
+      console.log(
+        `📊 그라스울 그룹 [${categoryName}] 직접비 합계 - 자재: ${glassWoolMaterialTotal.toLocaleString()}, 노무: ${glassWoolLaborTotal.toLocaleString()}, 면적: ${glassWoolArea}m²`
+      );
+
+      // 이 그룹의 간접비 계산
+      const glassWoolIndirectCosts = calculateIndirectCosts(
+        categoryName,
+        glassWoolMaterialTotal,
+        glassWoolLaborTotal,
+        glassWoolFixedRates,
+        glassWoolUnitPriceItem,
+        glassWoolArea
+      );
+
+      allGlassWoolIndirectCosts.push(...glassWoolIndirectCosts);
+    }
+
+    // 6-5. 간접비 행 생성 (스터드 + 석고보드 + 그라스울 + 소계)
+    // 🆕 자재별 단수정리 누적 변수
+    let totalRoundingOrder = 0;
+    let totalRoundingContract = 0;
+
+    // 스터드 간접비
     for (const item of studIndirectCosts) {
       html += generateIndirectCostRow(item, rowNumber, totalArea);
       rowNumber++;
     }
 
-    // 석고보드 간접비 (각 그룹별 4개씩)
-    for (const item of allGypsumIndirectCosts) {
-      html += generateIndirectCostRow(item, rowNumber, totalArea);
+    // 🆕 스터드 단수정리 행 추가
+    if (studIndirectCosts.length > 0) {
+      // 스터드 간접비 합계 계산
+      let studIndirectMaterial = 0;
+      let studIndirectLabor = 0;
+      for (const item of studIndirectCosts) {
+        const isMaterialCost =
+          item.name.includes('자재로스') ||
+          item.name.includes('운반비') ||
+          item.name.includes('이윤');
+        const isLaborCost = item.name.includes('공구손료');
+
+        if (isMaterialCost) studIndirectMaterial += item.amount || 0;
+        if (isLaborCost) studIndirectLabor += item.amount || 0;
+      }
+
+      // 스터드 직접비 합계는 이미 studMaterialTotal, studLaborTotal에 있음
+      const studRoundingResult = generateMaterialRoundingRow(
+        '스터드',
+        studMaterialTotal || 0,
+        studLaborTotal || 0,
+        studIndirectMaterial,
+        studIndirectLabor,
+        rowNumber
+      );
+      html += studRoundingResult.html;
+      totalRoundingOrder += studRoundingResult.orderRounding;
+      totalRoundingContract += studRoundingResult.contractRounding;
       rowNumber++;
     }
 
-    const allIndirectCosts = [...studIndirectCosts, ...allGypsumIndirectCosts];
+    // 석고보드 간접비 (각 그룹별 4개씩 + 단수정리)
+    // 🆕 그룹별로 처리하기 위해 다시 순회
+    for (const [unitPriceId, gypsumGroup] of Object.entries(categorizedCosts['석고보드'])) {
+      const gypsumUnitPriceItem = gypsumGroup[0]?.unitPriceItem;
+      const categoryName = gypsumUnitPriceItem?.basic
+        ? `${gypsumUnitPriceItem.basic.itemName} ${gypsumUnitPriceItem.basic.size}`
+        : (gypsumGroup[0]?.name || '석고보드');
+
+      // 이 그룹의 직접비 합계 (다시 계산)
+      let gypsumDirectMaterial = 0;
+      let gypsumDirectLabor = 0;
+      for (const comp of gypsumGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+        gypsumDirectMaterial += materialPricePerM2 * comp.area;
+        gypsumDirectLabor += laborPricePerM2 * comp.area;
+      }
+
+      // 이 그룹의 간접비만 필터링
+      const gypsumGroupIndirectCosts = allGypsumIndirectCosts.filter(
+        item => item.name.includes(categoryName)
+      );
+
+      // 간접비 행 생성
+      for (const item of gypsumGroupIndirectCosts) {
+        html += generateIndirectCostRow(item, rowNumber, totalArea);
+        rowNumber++;
+      }
+
+      // 🆕 이 그룹의 단수정리 행 추가
+      if (gypsumGroupIndirectCosts.length > 0) {
+        // 간접비 합계 계산
+        let gypsumIndirectMaterial = 0;
+        let gypsumIndirectLabor = 0;
+        for (const item of gypsumGroupIndirectCosts) {
+          const isMaterialCost =
+            item.name.includes('자재로스') ||
+            item.name.includes('운반비') ||
+            item.name.includes('이윤');
+          const isLaborCost = item.name.includes('공구손료');
+
+          if (isMaterialCost) gypsumIndirectMaterial += item.amount || 0;
+          if (isLaborCost) gypsumIndirectLabor += item.amount || 0;
+        }
+
+        const gypsumRoundingResult = generateMaterialRoundingRow(
+          categoryName,
+          gypsumDirectMaterial,
+          gypsumDirectLabor,
+          gypsumIndirectMaterial,
+          gypsumIndirectLabor,
+          rowNumber
+        );
+        html += gypsumRoundingResult.html;
+        totalRoundingOrder += gypsumRoundingResult.orderRounding;
+        totalRoundingContract += gypsumRoundingResult.contractRounding;
+        rowNumber++;
+      }
+    }
+
+    // 그라스울 간접비 (각 그룹별 4개씩 + 단수정리)
+    // 🆕 그룹별로 처리하기 위해 다시 순회
+    for (const [unitPriceId, glassWoolGroup] of Object.entries(categorizedCosts['그라스울'])) {
+      const glassWoolUnitPriceItem = glassWoolGroup[0]?.unitPriceItem;
+      const categoryName = glassWoolUnitPriceItem?.basic
+        ? `${glassWoolUnitPriceItem.basic.itemName || '그라스울'} ${
+            glassWoolUnitPriceItem.basic.size || ''
+          }`
+        : glassWoolGroup[0]?.name || '그라스울';
+
+      // 이 그룹의 직접비 합계 (다시 계산)
+      let glassWoolDirectMaterial = 0;
+      let glassWoolDirectLabor = 0;
+      for (const comp of glassWoolGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+        glassWoolDirectMaterial += materialPricePerM2 * comp.area;
+        glassWoolDirectLabor += laborPricePerM2 * comp.area;
+      }
+
+      // 이 그룹의 간접비만 필터링
+      const glassWoolGroupIndirectCosts = allGlassWoolIndirectCosts.filter(
+        item => item.name.includes(categoryName)
+      );
+
+      // 간접비 행 생성
+      for (const item of glassWoolGroupIndirectCosts) {
+        html += generateIndirectCostRow(item, rowNumber, totalArea);
+        rowNumber++;
+      }
+
+      // 🆕 이 그룹의 단수정리 행 추가
+      if (glassWoolGroupIndirectCosts.length > 0) {
+        // 간접비 합계 계산
+        let glassWoolIndirectMaterial = 0;
+        let glassWoolIndirectLabor = 0;
+        for (const item of glassWoolGroupIndirectCosts) {
+          const isMaterialCost =
+            item.name.includes('자재로스') ||
+            item.name.includes('운반비') ||
+            item.name.includes('이윤');
+          const isLaborCost = item.name.includes('공구손료');
+
+          if (isMaterialCost) glassWoolIndirectMaterial += item.amount || 0;
+          if (isLaborCost) glassWoolIndirectLabor += item.amount || 0;
+        }
+
+        const glassWoolRoundingResult = generateMaterialRoundingRow(
+          categoryName,
+          glassWoolDirectMaterial,
+          glassWoolDirectLabor,
+          glassWoolIndirectMaterial,
+          glassWoolIndirectLabor,
+          rowNumber
+        );
+        html += glassWoolRoundingResult.html;
+        totalRoundingOrder += glassWoolRoundingResult.orderRounding;
+        totalRoundingContract += glassWoolRoundingResult.contractRounding;
+        rowNumber++;
+      }
+    }
+
+    const allIndirectCosts = [...studIndirectCosts, ...allGypsumIndirectCosts, ...allGlassWoolIndirectCosts];
 
     // 7. 간접비 소계 데이터 계산 (✅ amount 직접 합산 방식으로 변경)
     const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
@@ -3995,11 +4297,13 @@ async function generateOrderFormDataRows() {
       contractLaborAmount: Math.round(directLaborTotal * contractRatio)
     };
 
-    // 10. 1000원 단위 단수정리 (총계 전)
-    const totalBeforeRounding = directSubtotal.orderMaterialAmount + directSubtotal.orderLaborAmount +
-                               indirectSubtotal.orderMaterialAmount + indirectSubtotal.orderLaborAmount;
-    const roundingAmount = -(totalBeforeRounding % 1000);  // 1000원 단위 절사
-    const contractRoundingAmount = Math.round(roundingAmount * contractRatio);
+    // 10. ✅ 자재별 단수정리의 합산 (타입별 단수정리)
+    const roundingAmount = totalRoundingOrder;
+    const contractRoundingAmount = totalRoundingContract;
+
+    console.log(`📐 타입별 단수정리 (자재별 합산):`);
+    console.log(`  발주단가: ${roundingAmount.toLocaleString()}`);
+    console.log(`  계약도급: ${contractRoundingAmount.toLocaleString()}`);
 
     html += `
         <tr style="background: #fff9c4;">
