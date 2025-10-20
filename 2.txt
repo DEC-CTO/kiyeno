@@ -1,0 +1,116 @@
+🔄 단수정리 행 2개 재계산 시작
+wall-cost-calculator.js:5510   🔍 행 1: "단수정리 (스터드)" - 타입별 단수정리 재계산 시작
+wall-cost-calculator.js:5521   📝 자재명: "스터드"
+wall-cost-calculator.js:5542     🔍 "스터드" (카테고리: STUD) 단수정리 계산을 위한 행 탐색 시작 (총 14개 행 검사)
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 3: "메탈 스터드 50형 ㉿ 50형"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 4: "메탈 런너 50형 ㉿ 50형"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 5: "메거진피스 3*21 (양날) 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 6: "타정총알 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 7: "용접봉 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 8: "일반석고보드 9.5T*1PLY"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 9: "메거진피스 3*21 (양날) 석고취부용"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 11: "스터드 자재로스"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 11: "스터드 자재로스" - 자재=41,640, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 12: "스터드 자재운반비 및 양중비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 12: "스터드 자재운반비 및 양중비" - 자재=74,880, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 13: "스터드 자재비 이윤"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 13: "스터드 자재비 이윤" - 자재=110,280, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 14: "스터드 공구손료 및 기계경비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="STUD"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 14: "스터드 공구손료 및 기계경비" - 자재=0, 노무=98,220
+wall-cost-calculator.js:5584     📊 "스터드" 합산 결과 - 자재=226,800, 노무=98,220, 경비=0
+wall-cost-calculator.js:5585     📊 총 합계: 325,020
+wall-cost-calculator.js:5586     📊 단수정리: -20
+wall-cost-calculator.js:5587     📊 1000단위 버림 전 금액: 325000
+wall-cost-calculator.js:5588     📊 1000으로 나눈 나머지: 20
+wall-cost-calculator.js:5594   💰 스터드 계약도급 - 자재: 226,800, 노무: 98,220, 경비: 0
+wall-cost-calculator.js:5595   💰 계약도급 합계: 325,020, 단수정리: -20
+wall-cost-calculator.js:5602   ✅ 단수정리 (스터드) 재계산 완료 (발주단가는 초기값 유지)
+wall-cost-calculator.js:5510   🔍 행 2: "단수정리 (일반석고보드 9.5T*1PLY)" - 타입별 단수정리 재계산 시작
+wall-cost-calculator.js:5521   📝 자재명: "일반석고보드 9.5T*1PLY"
+wall-cost-calculator.js:5542     🔍 "일반석고보드 9.5T*1PLY" (카테고리: 석고보드) 단수정리 계산을 위한 행 탐색 시작 (총 19개 행 검사)
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 3: "메탈 스터드 50형 ㉿ 50형"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 4: "메탈 런너 50형 ㉿ 50형"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 5: "메거진피스 3*21 (양날) 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 6: "타정총알 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 7: "용접봉 구조틀용(50형-75형)"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 8: "일반석고보드 9.5T*1PLY"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 9: "메거진피스 3*21 (양날) 석고취부용"
+wall-cost-calculator.js:5553           hasDataRow=true, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 11: "스터드 자재로스"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 12: "스터드 자재운반비 및 양중비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 13: "스터드 자재비 이윤"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 14: "스터드 공구손료 및 기계경비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 16: "일반석고보드 9.5T*1PLY 자재로스"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 16: "일반석고보드 9.5T*1PLY 자재로스" - 자재=33,360, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 17: "일반석고보드 9.5T*1PLY 자재운반비 및 양중비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 17: "일반석고보드 9.5T*1PLY 자재운반비 및 양중비" - 자재=33,360, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 18: "일반석고보드 9.5T*1PLY 자재비 이윤"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 18: "일반석고보드 9.5T*1PLY 자재비 이윤" - 자재=51,360, 노무=0
+wall-cost-calculator.js:5552       🔍 [DEBUG] 행 19: "일반석고보드 9.5T*1PLY 공구손료 및 기계경비"
+wall-cost-calculator.js:5553           hasDataRow=false, rowCategory="", targetCategory="석고보드"
+wall-cost-calculator.js:5554           매칭결과: false
+wall-cost-calculator.js:5577       ✅ [간접비] 행 19: "일반석고보드 9.5T*1PLY 공구손료 및 기계경비" - 자재=0, 노무=98,160
+wall-cost-calculator.js:5584     📊 "일반석고보드 9.5T*1PLY" 합산 결과 - 자재=118,080, 노무=98,160, 경비=0
+wall-cost-calculator.js:5585     📊 총 합계: 216,240
+wall-cost-calculator.js:5586     📊 단수정리: -240
+wall-cost-calculator.js:5587     📊 1000단위 버림 전 금액: 216000
+wall-cost-calculator.js:5588     📊 1000으로 나눈 나머지: 240
+wall-cost-calculator.js:5594   💰 일반석고보드 9.5T*1PLY 계약도급 - 자재: 118,080, 노무: 98,160, 경비: 0
+wall-cost-calculator.js:5595   💰 계약도급 합계: 216,240, 단수정리: -240
+wall-cost-calculator.js:5602   ✅ 단수정리 (일반석고보드 9.5T*1PLY) 재계산 완료 (발주단가는 초기값 유지)
+wall-cost-calculator.js:5605 ✅ 단수정리 행 2개 업데이트 완료
+wall-cost-calculator.js:5657 🔄 총계 행 재계산 시작 (소계 행들 합산 - 발주단가와 동일)
+wall-cost-calculator.js:5700   단수정리 발견: 단수정리 (스터드) - 계약: -20
+wall-cost-calculator.js:5700   단수정리 발견: 단수정리 (일반석고보드 9.5T*1PLY) - 계약: -240
+wall-cost-calculator.js:5707   💰 계약도급 - 자재: 1,287,540, 노무: 1,261,320, 단수정리: -260
+wall-cost-calculator.js:5708   💰 계약도급 총계: 2,548,600
+wall-cost-calculator.js:5717 ✅ 총계 행 업데이트 완료 (발주단가는 초기값 유지)
