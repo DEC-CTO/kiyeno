@@ -6694,7 +6694,7 @@ async function exportOrderFormToExcel() {
  * HTML 구조와 정확히 일치: 29개 컬럼, 개수 5개(F~J), 환산 3개(K~M)
  */
 function createOrderFormExcelHeader(worksheet) {
-  // 33개 컬럼 설정
+  // ✅ 34개 컬럼 설정 (HTML과 일치)
   worksheet.columns = [
     { key: 'no', width: 6 }, // A: NO
     { key: 'category', width: 12 }, // B: 구분
@@ -6705,30 +6705,31 @@ function createOrderFormExcelHeader(worksheet) {
     { key: 'thick', width: 8 }, // G: 개수 - 두께
     { key: 'width', width: 8 }, // H: 개수 - 넓이
     { key: 'height', width: 8 }, // I: 개수 - 높이
-    { key: 'length', width: 8 }, // J: 개수 - M
-    { key: 'supplier', width: 12 }, // K: 환산 - 제공자
-    { key: 'area', width: 10 }, // L: 환산 - 1장->m2
-    { key: 'sheets', width: 8 }, // M: 환산 - 장
-    { key: 'unit', width: 8 }, // N: 단위
-    { key: 'amount', width: 10 }, // O: 수량
-    { key: 'matPrice', width: 10 }, // P: 계약도급 - 자재비 단가
-    { key: 'matCost', width: 12 }, // Q: 계약도급 - 자재비 금액
-    { key: 'labPrice', width: 10 }, // R: 계약도급 - 노무비 단가
-    { key: 'labCost', width: 12 }, // S: 계약도급 - 노무비 금액
-    { key: 'expPrice', width: 10 }, // T: 계약도급 - 경비 단가
-    { key: 'expCost', width: 12 }, // U: 계약도급 - 경비 금액
-    { key: 'totalPrice', width: 10 }, // V: 계약도급 - 합계 단가
-    { key: 'totalCost', width: 12 }, // W: 계약도급 - 합계 금액
-    { key: 'note1', width: 10 }, // X: 비고
-    { key: 'ordMatPrice', width: 10 }, // Y: 발주단가 - 자재비 단가
-    { key: 'ordMatCost', width: 12 }, // Z: 발주단가 - 자재비 금액
-    { key: 'ordLabPrice', width: 10 }, // AA: 발주단가 - 노무비 단가
-    { key: 'ordLabCost', width: 12 }, // AB: 발주단가 - 노무비 금액
-    { key: 'ordExpPrice', width: 10 }, // AC: 발주단가 - 경비 단가
-    { key: 'ordExpCost', width: 12 }, // AD: 발주단가 - 경비 금액
-    { key: 'ordTotalPrice', width: 10 }, // AE: 발주단가 - 합계 단가
-    { key: 'ordTotalCost', width: 12 }, // AF: 발주단가 - 합계 금액
-    { key: 'note2', width: 10 }, // AG: 비고
+    { key: 'countUnit', width: 8 }, // J: 개수 - 단위 🆕 추가
+    { key: 'length', width: 8 }, // K: 개수 - 수량 (기존 M)
+    { key: 'supplier', width: 12 }, // L: 환산 - 제공자
+    { key: 'area', width: 10 }, // M: 환산 - 1장->m2
+    { key: 'sheets', width: 8 }, // N: 환산 - 장
+    { key: 'unit', width: 8 }, // O: 단위
+    { key: 'amount', width: 10 }, // P: 수량
+    { key: 'matPrice', width: 10 }, // Q: 계약도급 - 자재비 단가
+    { key: 'matCost', width: 12 }, // R: 계약도급 - 자재비 금액
+    { key: 'labPrice', width: 10 }, // S: 계약도급 - 노무비 단가
+    { key: 'labCost', width: 12 }, // T: 계약도급 - 노무비 금액
+    { key: 'expPrice', width: 10 }, // U: 계약도급 - 경비 단가
+    { key: 'expCost', width: 12 }, // V: 계약도급 - 경비 금액
+    { key: 'totalPrice', width: 10 }, // W: 계약도급 - 합계 단가
+    { key: 'totalCost', width: 12 }, // X: 계약도급 - 합계 금액
+    { key: 'note1', width: 10 }, // Y: 비고
+    { key: 'ordMatPrice', width: 10 }, // Z: 발주단가 - 자재비 단가
+    { key: 'ordMatCost', width: 12 }, // AA: 발주단가 - 자재비 금액
+    { key: 'ordLabPrice', width: 10 }, // AB: 발주단가 - 노무비 단가
+    { key: 'ordLabCost', width: 12 }, // AC: 발주단가 - 노무비 금액
+    { key: 'ordExpPrice', width: 10 }, // AD: 발주단가 - 경비 단가
+    { key: 'ordExpCost', width: 12 }, // AE: 발주단가 - 경비 금액
+    { key: 'ordTotalPrice', width: 10 }, // AF: 발주단가 - 합계 단가
+    { key: 'ordTotalCost', width: 12 }, // AG: 발주단가 - 합계 금액
+    { key: 'note2', width: 10 }, // AH: 비고
   ];
 
   // ✅ A1:C3 영역에 "발주서" 제목 추가
@@ -6738,118 +6739,121 @@ function createOrderFormExcelHeader(worksheet) {
   titleCell.font = { bold: true, size: 22 };
   titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
 
-  // ✅ Row 4: 메인 헤더 (1~3행은 빈칸) - 33개
+  // ✅ Row 4: 메인 헤더 (1~3행은 빈칸) - 34개
   const row4 = worksheet.getRow(4);
   row4.values = [
-    'NO',
-    '구분',
-    '품명 및 규격',
-    'WALL',
-    '',
-    '개수',
-    '',
-    '',
-    '',
-    '',
-    '환산',
-    '',
-    '',
-    '단위',
-    '수량',
-    '계약도급',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '비고',
-    '발주단가',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '비고',
+    'NO',          // A
+    '구분',         // B
+    '품명 및 규격',   // C
+    'WALL',        // D
+    '',            // E (WALL 병합)
+    '개수',         // F
+    '',            // G (개수 병합)
+    '',            // H (개수 병합)
+    '',            // I (개수 병합)
+    '',            // J (개수 병합)
+    '',            // K (개수 병합)
+    '환산',         // L
+    '',            // M (환산 병합)
+    '',            // N (환산 병합)
+    '단위',         // O
+    '수량',         // P
+    '계약도급',      // Q
+    '',            // R (계약도급 병합)
+    '',            // S (계약도급 병합)
+    '',            // T (계약도급 병합)
+    '',            // U (계약도급 병합)
+    '',            // V (계약도급 병합)
+    '',            // W (계약도급 병합)
+    '',            // X (계약도급 병합)
+    '비고',         // Y
+    '발주단가',      // Z
+    '',            // AA (발주단가 병합)
+    '',            // AB (발주단가 병합)
+    '',            // AC (발주단가 병합)
+    '',            // AD (발주단가 병합)
+    '',            // AE (발주단가 병합)
+    '',            // AF (발주단가 병합)
+    '',            // AG (발주단가 병합)
+    '비고',         // AH
   ];
 
-  // ✅ Row 5: 서브 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 33개
+  // ✅ Row 5: 서브 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 34개
   const row5 = worksheet.getRow(5);
   row5.values = [
-    '',
-    '',
-    '',
-    'THK',
-    'Type',
-    '@',
-    '두께',
-    '넓이',
-    '높이',
-    'M',
-    '제공자',
-    '1장->m2',
-    '장',
-    '',
-    '',
-    '자재비',
-    '',
-    '노무비',
-    '',
-    '경비',
-    '',
-    '합계',
-    '',
-    '',
-    '자재비',
-    '',
-    '노무비',
-    '',
-    '경비',
-    '',
-    '합계',
-    '',
-    '',
+    '',           // A (NO 병합)
+    '',           // B (구분 병합)
+    '',           // C (품명 및 규격 병합)
+    'THK',        // D
+    'Type',       // E
+    '@',          // F
+    '두께',        // G
+    '넓이',        // H
+    '높이',        // I
+    '단위',        // J 🆕 추가
+    '수량',        // K 🆕 수정 (기존 M)
+    '제공자',      // L 🆕 수정
+    '1장->m2',    // M 🆕 수정
+    '장',         // N 🆕 수정
+    '',           // O (단위 병합)
+    '',           // P (수량 병합)
+    '자재비',      // Q 🆕 수정
+    '',           // R (자재비 병합)
+    '노무비',      // S 🆕 수정
+    '',           // T (노무비 병합)
+    '경비',        // U 🆕 수정
+    '',           // V (경비 병합)
+    '합계',        // W 🆕 수정
+    '',           // X (합계 병합)
+    '',           // Y (비고 병합)
+    '자재비',      // Z 🆕 수정
+    '',           // AA (자재비 병합)
+    '노무비',      // AB 🆕 수정
+    '',           // AC (노무비 병합)
+    '경비',        // AD 🆕 수정
+    '',           // AE (경비 병합)
+    '합계',        // AF 🆕 수정
+    '',           // AG (합계 병합)
+    '',           // AH (비고 병합)
   ];
 
-  // ✅ Row 6: 세부 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 33개
+  // ✅ Row 6: 세부 헤더 (A, B, C는 빈 값 - Row 4와 병합됨) - 34개
   const row6 = worksheet.getRow(6);
   row6.values = [
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '단가',
-    '금액',
-    '',
+    '',           // A (NO 병합)
+    '',           // B (구분 병합)
+    '',           // C (품명 및 규격 병합)
+    '',           // D (THK 병합)
+    '',           // E (Type 병합)
+    '',           // F (@ 병합)
+    '',           // G (두께 병합)
+    '',           // H (넓이 병합)
+    '',           // I (높이 병합)
+    '',           // J (단위 병합) 🆕 추가
+    '',           // K (수량 병합) 🆕 수정
+    '',           // L (제공자 병합) 🆕 수정
+    '',           // M (1장->m2 병합) 🆕 수정
+    '',           // N (장 병합) 🆕 수정
+    '',           // O (단위 병합)
+    '',           // P (수량 병합)
+    '단가',        // Q 🆕 수정
+    '금액',        // R 🆕 수정
+    '단가',        // S 🆕 수정
+    '금액',        // T 🆕 수정
+    '단가',        // U 🆕 수정
+    '금액',        // V 🆕 수정
+    '단가',        // W 🆕 수정
+    '금액',        // X 🆕 수정
+    '',           // Y (비고 병합)
+    '단가',        // Z 🆕 수정
+    '금액',        // AA 🆕 수정
+    '단가',        // AB 🆕 수정
+    '금액',        // AC 🆕 수정
+    '단가',        // AD 🆕 수정
+    '금액',        // AE 🆕 수정
+    '단가',        // AF 🆕 수정
+    '금액',        // AG 🆕 수정
+    '',           // AH (비고 병합)
   ];
 
   // ✅ 병합 (4~6행으로 변경) - 33개 컬럼
@@ -6857,14 +6861,14 @@ function createOrderFormExcelHeader(worksheet) {
   worksheet.mergeCells('B4:B6'); // 구분 (4,5,6 row 병합)
   worksheet.mergeCells('C4:C6'); // 품명 및 규격 (4,5,6 row 병합)
   worksheet.mergeCells('D4:E4'); // WALL (2개)
-  worksheet.mergeCells('F4:J4'); // 개수 (5개: @, 두께, 넓이, 높이, M)
-  worksheet.mergeCells('K4:M4'); // 환산 (3개: 제공자, 1장->m2, 장)
-  worksheet.mergeCells('N4:N6'); // 단위 (4,5,6 row 병합)
-  worksheet.mergeCells('O4:O6'); // 수량 (4,5,6 row 병합)
-  worksheet.mergeCells('P4:W4'); // 계약도급 (8개: 자재비2 + 노무비2 + 경비2 + 합계2)
-  worksheet.mergeCells('X4:X6'); // 비고 (4,5,6 row 병합)
-  worksheet.mergeCells('Y4:AF4'); // 발주단가 (8개: 자재비2 + 노무비2 + 경비2 + 합계2)
-  worksheet.mergeCells('AG4:AG6'); // 비고 (4,5,6 row 병합)
+  worksheet.mergeCells('F4:K4'); // 개수 (6개: @, 두께, 넓이, 높이, 단위, 수량) 🆕 수정
+  worksheet.mergeCells('L4:N4'); // 환산 (3개: 제공자, 1장->m2, 장) 🆕 수정
+  worksheet.mergeCells('O4:O6'); // 단위 (4,5,6 row 병합) 🆕 수정
+  worksheet.mergeCells('P4:P6'); // 수량 (4,5,6 row 병합) 🆕 수정
+  worksheet.mergeCells('Q4:X4'); // 계약도급 (8개: 자재비2 + 노무비2 + 경비2 + 합계2) 🆕 수정
+  worksheet.mergeCells('Y4:Y6'); // 비고 (4,5,6 row 병합) 🆕 수정
+  worksheet.mergeCells('Z4:AG4'); // 발주단가 (8개: 자재비2 + 노무비2 + 경비2 + 합계2) 🆕 수정
+  worksheet.mergeCells('AH4:AH6'); // 비고 (4,5,6 row 병합) 🆕 수정
 
   // Row 5와 Row 6 병합
   worksheet.mergeCells('D5:D6'); // THK
@@ -6873,18 +6877,19 @@ function createOrderFormExcelHeader(worksheet) {
   worksheet.mergeCells('G5:G6'); // 두께
   worksheet.mergeCells('H5:H6'); // 넓이
   worksheet.mergeCells('I5:I6'); // 높이
-  worksheet.mergeCells('J5:J6'); // M
-  worksheet.mergeCells('K5:K6'); // 제공자
-  worksheet.mergeCells('L5:L6'); // 1장->m2
-  worksheet.mergeCells('M5:M6'); // 장
-  worksheet.mergeCells('P5:Q5'); // 계약도급 - 자재비
-  worksheet.mergeCells('R5:S5'); // 계약도급 - 노무비
-  worksheet.mergeCells('T5:U5'); // 계약도급 - 경비
-  worksheet.mergeCells('V5:W5'); // 계약도급 - 합계
-  worksheet.mergeCells('Y5:Z5'); // 발주단가 - 자재비
-  worksheet.mergeCells('AA5:AB5'); // 발주단가 - 노무비
-  worksheet.mergeCells('AC5:AD5'); // 발주단가 - 경비
-  worksheet.mergeCells('AE5:AF5'); // 발주단가 - 합계
+  worksheet.mergeCells('J5:J6'); // 단위 🆕 추가
+  worksheet.mergeCells('K5:K6'); // 수량 🆕 수정
+  worksheet.mergeCells('L5:L6'); // 제공자 🆕 수정
+  worksheet.mergeCells('M5:M6'); // 1장->m2 🆕 수정
+  worksheet.mergeCells('N5:N6'); // 장 🆕 수정
+  worksheet.mergeCells('Q5:R5'); // 계약도급 - 자재비 🆕 수정
+  worksheet.mergeCells('S5:T5'); // 계약도급 - 노무비 🆕 수정
+  worksheet.mergeCells('U5:V5'); // 계약도급 - 경비 🆕 수정
+  worksheet.mergeCells('W5:X5'); // 계약도급 - 합계 🆕 수정
+  worksheet.mergeCells('Z5:AA5'); // 발주단가 - 자재비 🆕 수정
+  worksheet.mergeCells('AB5:AC5'); // 발주단가 - 노무비 🆕 수정
+  worksheet.mergeCells('AD5:AE5'); // 발주단가 - 경비 🆕 수정
+  worksheet.mergeCells('AF5:AG5'); // 발주단가 - 합계 🆕 수정
 
   // ✅ 헤더 스타일 적용 (폰트 크기 12) - Row 4, 5, 6
   [row4, row5, row6].forEach((row) => {
@@ -6977,12 +6982,15 @@ async function addOrderFormDataToExcel(worksheet) {
   // 타입별로 그룹핑
   const groupedByType = groupResultsByType(calculationResults);
   let typeIndex = 1;
+  let layerNumber = 1; // 전체 행 번호 추적
 
   // 각 타입별 처리
   for (const [typeName, results] of Object.entries(groupedByType)) {
-    console.log(`📋 타입 처리: ${typeName} (${results.length}개 벽체)`);
+    console.log(`📋 Excel 타입 처리: ${typeName} (${results.length}개 벽체)`);
 
-    // 타입 합계 행 추가
+    const totalArea = results.reduce((sum, r) => sum + r.area, 0);
+
+    // 1. 타입 합계 행 추가
     const summaryRowData = await generateTypeSummaryRowData(
       typeName,
       results,
@@ -7007,11 +7015,11 @@ async function addOrderFormDataToExcel(worksheet) {
         right: { style: 'thin' },
       };
 
-      // ✅ 타입 요약 행도 숫자 포맷 적용 (33개 컬럼)
+      // ✅ 타입 요약 행도 숫자 포맷 적용 (34개 컬럼)
       if (
-        colNumber === 15 ||
-        (colNumber >= 16 && colNumber <= 23) ||
-        (colNumber >= 25 && colNumber <= 32)
+        colNumber === 16 ||
+        (colNumber >= 17 && colNumber <= 24) ||
+        (colNumber >= 26 && colNumber <= 33)
       ) {
         if (cell.value && !isNaN(cell.value)) {
           cell.numFmt = '#,##0';
@@ -7020,9 +7028,40 @@ async function addOrderFormDataToExcel(worksheet) {
     });
     currentRow++;
 
-    // 레이어별 상세 행 추가
-    const detailRows = await generateLayerDetailRowsData(results[0], results);
-    for (const rowData of detailRows) {
+    // 2. 직접비 구성품 수집 및 그룹핑 (HTML 로직과 동일)
+    console.log(`📦 Excel: collectAndGroupComponents() 호출 중...`);
+    const groupedComponents = await collectAndGroupComponents(results);
+    console.log(`✅ Excel: 그룹핑 완료: ${groupedComponents.length}개 구성품`);
+
+    // 3. 직접비/간접비 분리
+    const { directCosts, indirectCosts } =
+      separateDirectAndIndirectCosts(groupedComponents);
+
+    // 4. 직접비 정렬
+    const sortedDirectCosts = sortComponents(directCosts);
+
+    // 4-1. 석고보드 displayQuantity 계산
+    let gypsumBoardQty = null;
+    for (const comp of sortedDirectCosts) {
+      if (isGypsumBoard(comp.name)) {
+        gypsumBoardQty = comp.area * comp.quantity;
+        console.log(
+          `📦 Excel 석고보드 수량: ${comp.area} × ${comp.quantity} = ${gypsumBoardQty}`
+        );
+        break;
+      }
+    }
+
+    // 4-2. 모든 구성품에 석고보드 수량 전달하고 행 추가
+    const directCostStartRow = currentRow;
+    for (const comp of sortedDirectCosts) {
+      comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+
+      const rowData = await generateComponentRowDataFromGrouped(
+        comp,
+        layerNumber,
+        currentRow
+      );
       const dataRow = worksheet.getRow(currentRow);
       dataRow.values = rowData;
 
@@ -7044,42 +7083,43 @@ async function addOrderFormDataToExcel(worksheet) {
           // 구분, 품명 및 규격: 왼쪽 정렬
           cell.alignment = { vertical: 'middle', horizontal: 'left' };
         } else if (
-          (colNumber >= 16 && colNumber <= 23) ||
-          (colNumber >= 25 && colNumber <= 32)
+          (colNumber >= 17 && colNumber <= 24) ||
+          (colNumber >= 26 && colNumber <= 33)
         ) {
-          // ✅ 단가/금액 컬럼 (P~W, Y~AF): 오른쪽 정렬
-          // P(16): 자재비단가, Q(17): 자재비금액
-          // R(18): 노무비단가, S(19): 노무비금액
-          // T(20): 경비단가, U(21): 경비금액
-          // V(22): 합계단가, W(23): 합계금액
-          // Y(25): 발주단가 자재비단가, Z(26): 발주단가 자재비금액
-          // AA(27): 발주단가 노무비단가, AB(28): 발주단가 노무비금액
-          // AC(29): 발주단가 경비단가, AD(30): 발주단가 경비금액
-          // AE(31): 발주단가 합계단가, AF(32): 발주단가 합계금액
+          // ✅ 단가/금액 컬럼 (Q~X, Z~AG): 오른쪽 정렬
+          // Q(17): 자재비단가, R(18): 자재비금액
+          // S(19): 노무비단가, T(20): 노무비금액
+          // U(21): 경비단가, V(22): 경비금액
+          // W(23): 합계단가, X(24): 합계금액
+          // Z(26): 발주단가 자재비단가, AA(27): 발주단가 자재비금액
+          // AB(28): 발주단가 노무비단가, AC(29): 발주단가 노무비금액
+          // AD(30): 발주단가 경비단가, AE(31): 발주단가 경비금액
+          // AF(32): 발주단가 합계단가, AG(33): 발주단가 합계금액
           cell.alignment = { vertical: 'middle', horizontal: 'right' };
         } else {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         }
 
-        // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위 (33개 컬럼)
+        // ✅ 숫자 포맷 (천단위 콤마) - 확장된 범위 (34개 컬럼)
         // G(7): 두께 - 소수점 1자리
-        // H(8), I(9), J(10): 넓이, 높이, M - 정수
-        // M(13): 장 수량 - 정수
-        // O(15): 수량 - 소수점 2자리
-        // P~W(16~23): 계약도급 - 정수
-        // Y~AF(25~32): 발주단가 - 정수
+        // H(8), I(9), K(11): 넓이, 높이, M - 정수
+        // N(14): 장 수량 - 정수
+        // P(16): 수량 - 소수점 2자리
+        // Q~X(17~24): 계약도급 - 정수
+        // Z~AG(26~33): 발주단가 - 정수
         if (cell.value && !isNaN(cell.value)) {
           if (colNumber === 7) {
             // 두께: 소수점 1자리 표시
             cell.numFmt = '0.0';
-          } else if (colNumber === 15) {
+          } else if (colNumber === 16) {
             // 수량: 소수점 2자리 표시
             cell.numFmt = '#,##0.00';
           } else if (
-            (colNumber >= 8 && colNumber <= 10) ||
-            colNumber === 13 ||
-            (colNumber >= 16 && colNumber <= 23) ||
-            (colNumber >= 25 && colNumber <= 32)
+            (colNumber >= 8 && colNumber <= 9) ||
+            colNumber === 11 ||
+            colNumber === 14 ||
+            (colNumber >= 17 && colNumber <= 24) ||
+            (colNumber >= 26 && colNumber <= 33)
           ) {
             // 나머지: 정수 천단위 구분
             cell.numFmt = '#,##0';
@@ -7088,12 +7128,539 @@ async function addOrderFormDataToExcel(worksheet) {
       });
 
       currentRow++;
+      layerNumber++;
+    }
+    const directCostEndRow = currentRow - 1;
+
+    // 5. 직접비 소계 행 추가
+    const directSubtotalRowData = generateDirectCostSubtotalRowData(
+      '소계 (직접자재)',
+      layerNumber,
+      currentRow,
+      directCostStartRow,
+      directCostEndRow
+    );
+    const directSubtotalRow = worksheet.getRow(currentRow);
+    directSubtotalRow.values = directSubtotalRowData;
+
+    // 직접비 소계 행 스타일 (연두색 배경)
+    directSubtotalRow.eachCell({ includeEmpty: true }, (cell) => {
+      cell.font = { bold: true, size: 11 };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFD4EDDA' }, // 연두색
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' },
+      };
+    });
+
+    const directSubtotalRowNumber = currentRow;
+    currentRow++;
+    layerNumber++;
+
+    // 6. 간접비 및 단수정리 행 추가 (HTML 로직과 동일)
+    const indirectCostStartRow = currentRow;
+    const roundingRowNumbers = []; // 자재별 단수정리 행 번호 추적
+
+    // 구성품을 카테고리별로 분류 (스터드, 석고보드, 그라스울)
+    const categorizedCosts = {
+      STUD: [],
+      '석고보드': {},
+      '그라스울': {},
+    };
+
+    // results[0]의 layerPricing을 순회하여 구성품 수집
+    const result = results[0];
+    const layerOrder = [
+      'layer3_1',
+      'layer2_1',
+      'layer1_1',
+      'column1',
+      'infill',
+      'layer1_2',
+      'layer2_2',
+      'layer3_2',
+      'column2',
+      'channel',
+      'runner',
+    ];
+
+    for (const layerKey of layerOrder) {
+      const layer = result.layerPricing[layerKey];
+      if (!layer || !layer.materialName) continue;
+
+      const unitPriceItem = await findUnitPriceItemByIdOrName(
+        layer.materialName
+      );
+
+      if (
+        unitPriceItem &&
+        unitPriceItem.components &&
+        unitPriceItem.components.length > 0
+      ) {
+        for (const component of unitPriceItem.components) {
+          if (!shouldDisplayComponent(component.name)) continue;
+
+          const materialData = await findMaterialByIdInDB(
+            component.materialId
+          );
+
+          const comp = {
+            name: component.name,
+            materialPrice: component.materialPrice || 0,
+            laborAmount: component.laborPrice || 0,
+            quantity: component.quantity || 0,
+            area: totalArea,
+            unitPriceItem: unitPriceItem,
+            materialData: materialData,
+          };
+
+          // 카테고리 분류
+          const componentName = component.name || '';
+          if (isStud(componentName) || isRunner(componentName)) {
+            categorizedCosts['STUD'].push(comp);
+          } else if (isGypsumBoard(componentName)) {
+            const category = '석고보드';
+            const unitPriceId = unitPriceItem.id;
+            if (!categorizedCosts[category][unitPriceId]) {
+              categorizedCosts[category][unitPriceId] = [];
+            }
+            categorizedCosts[category][unitPriceId].push(comp);
+          } else if (isGlassWool(componentName)) {
+            const category = '그라스울';
+            const unitPriceId = unitPriceItem.id;
+            if (!categorizedCosts[category][unitPriceId]) {
+              categorizedCosts[category][unitPriceId] = [];
+            }
+            categorizedCosts[category][unitPriceId].push(comp);
+          }
+        }
+      }
+    }
+
+    // 3. 스터드 간접비 계산 및 추가
+    const studDirectStartRow = currentRow - layerNumber + 1; // 직접비 시작 행 추적
+    let studMaterialTotal = 0;
+    let studLaborTotal = 0;
+
+    for (const comp of categorizedCosts['STUD']) {
+      const materialPricePerM2 = comp.materialPrice * comp.quantity;
+      const laborPricePerM2 = comp.laborAmount;
+      studMaterialTotal += materialPricePerM2 * comp.area;
+      studLaborTotal += laborPricePerM2 * comp.area;
+    }
+
+    let studIndirectCosts = [];
+    if (categorizedCosts['STUD'].length > 0) {
+      const studUnitPriceItem = categorizedCosts['STUD'][0]?.unitPriceItem;
+      const studFixedRates = studUnitPriceItem?.fixedRates || {
+        materialLoss: 3,
+        transportCost: 1.5,
+        materialProfit: 15,
+        toolExpense: 2,
+      };
+
+      studIndirectCosts = calculateIndirectCosts(
+        '스터드',
+        studMaterialTotal,
+        studLaborTotal,
+        studFixedRates,
+        studUnitPriceItem,
+        totalArea
+      );
+
+      // 스터드 간접비 행 추가
+      const studIndirectStartRow = currentRow;
+      for (const item of studIndirectCosts) {
+        const indirectRowData = generateIndirectCostRowData(
+          item,
+          layerNumber,
+          totalArea,
+          currentRow
+        );
+        const indirectRow = worksheet.getRow(currentRow);
+        indirectRow.values = indirectRowData;
+
+        // 간접비 행 스타일 (노란색 배경)
+        indirectRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFFFCD' }, // 노란색
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
+
+      // 스터드 단수정리 행 추가
+      if (studIndirectCosts.length > 0) {
+        const studIndirectEndRow = currentRow - 1;
+        const roundingRowData = generateMaterialRoundingRowData(
+          '스터드',
+          layerNumber,
+          currentRow,
+          studDirectStartRow,
+          studIndirectEndRow
+        );
+        const roundingRow = worksheet.getRow(currentRow);
+        roundingRow.values = roundingRowData;
+
+        // 단수정리 행 스타일 (회색 배경)
+        roundingRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' }, // 회색
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
+    }
+
+    // 4. 석고보드 타입별 간접비 및 단수정리 추가
+    for (const [unitPriceId, gypsumGroup] of Object.entries(
+      categorizedCosts['석고보드']
+    )) {
+      const gypsumUnitPriceItem = gypsumGroup[0]?.unitPriceItem;
+      const categoryName =
+        gypsumUnitPriceItem?.basic
+          ? `${gypsumUnitPriceItem.basic.itemName} ${gypsumUnitPriceItem.basic.size}`
+          : gypsumGroup[0]?.name || '석고보드';
+
+      let gypsumMaterialTotal = 0;
+      let gypsumLaborTotal = 0;
+      const gypsumArea = gypsumGroup[0]?.area || 0;
+
+      for (const comp of gypsumGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+        gypsumMaterialTotal += materialPricePerM2 * comp.area;
+        gypsumLaborTotal += laborPricePerM2 * comp.area;
+      }
+
+      const gypsumFixedRates = gypsumUnitPriceItem?.fixedRates || {
+        materialLoss: 5,
+        transportCost: 1.5,
+        materialProfit: 15,
+        toolExpense: 0,
+      };
+
+      const gypsumIndirectCosts = calculateIndirectCosts(
+        categoryName,
+        gypsumMaterialTotal,
+        gypsumLaborTotal,
+        gypsumFixedRates,
+        gypsumUnitPriceItem,
+        gypsumArea
+      );
+
+      // 석고보드 간접비 행 추가
+      const gypsumDirectStartRow = currentRow; // TODO: 정확한 시작 행 계산 필요
+      const gypsumIndirectStartRow = currentRow;
+      for (const item of gypsumIndirectCosts) {
+        const indirectRowData = generateIndirectCostRowData(
+          item,
+          layerNumber,
+          totalArea,
+          currentRow
+        );
+        const indirectRow = worksheet.getRow(currentRow);
+        indirectRow.values = indirectRowData;
+
+        // 간접비 행 스타일
+        indirectRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFFFCD' },
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
+
+      // 석고보드 단수정리 행 추가
+      if (gypsumIndirectCosts.length > 0) {
+        const gypsumIndirectEndRow = currentRow - 1;
+        const roundingRowData = generateMaterialRoundingRowData(
+          categoryName,
+          layerNumber,
+          currentRow,
+          gypsumIndirectStartRow,
+          gypsumIndirectEndRow
+        );
+        const roundingRow = worksheet.getRow(currentRow);
+        roundingRow.values = roundingRowData;
+
+        // 단수정리 행 스타일
+        roundingRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' },
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
+    }
+
+    // 5. 그라스울 타입별 간접비 및 단수정리 추가
+    for (const [unitPriceId, glassWoolGroup] of Object.entries(
+      categorizedCosts['그라스울']
+    )) {
+      const glassWoolUnitPriceItem = glassWoolGroup[0]?.unitPriceItem;
+      const categoryName =
+        glassWoolUnitPriceItem?.basic
+          ? `${glassWoolUnitPriceItem.basic.itemName || '그라스울'} ${glassWoolUnitPriceItem.basic.size || ''}`
+          : glassWoolGroup[0]?.name || '그라스울';
+
+      let glassWoolMaterialTotal = 0;
+      let glassWoolLaborTotal = 0;
+      const glassWoolArea = glassWoolGroup[0]?.area || 0;
+
+      for (const comp of glassWoolGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+        glassWoolMaterialTotal += materialPricePerM2 * comp.area;
+        glassWoolLaborTotal += laborPricePerM2 * comp.area;
+      }
+
+      const glassWoolFixedRates = glassWoolUnitPriceItem?.fixedRates || {
+        materialLoss: 3,
+        transportCost: 1.5,
+        materialProfit: 15,
+        toolExpense: 0,
+      };
+
+      const glassWoolIndirectCosts = calculateIndirectCosts(
+        categoryName,
+        glassWoolMaterialTotal,
+        glassWoolLaborTotal,
+        glassWoolFixedRates,
+        glassWoolUnitPriceItem,
+        glassWoolArea
+      );
+
+      // 그라스울 간접비 행 추가
+      const glassWoolIndirectStartRow = currentRow;
+      for (const item of glassWoolIndirectCosts) {
+        const indirectRowData = generateIndirectCostRowData(
+          item,
+          layerNumber,
+          totalArea,
+          currentRow
+        );
+        const indirectRow = worksheet.getRow(currentRow);
+        indirectRow.values = indirectRowData;
+
+        // 간접비 행 스타일
+        indirectRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFFFFFCD' },
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
+
+      // 그라스울 단수정리 행 추가
+      if (glassWoolIndirectCosts.length > 0) {
+        const glassWoolIndirectEndRow = currentRow - 1;
+        const roundingRowData = generateMaterialRoundingRowData(
+          categoryName,
+          layerNumber,
+          currentRow,
+          glassWoolIndirectStartRow,
+          glassWoolIndirectEndRow
+        );
+        const roundingRow = worksheet.getRow(currentRow);
+        roundingRow.values = roundingRowData;
+
+        // 단수정리 행 스타일
+        roundingRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE0E0E0' },
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+        roundingRowNumbers.push(currentRow - 1);
+      }
+    }
+
+    // 7. 간접비 소계 행 추가
+    const indirectCostEndRow = currentRow - 1;
+    if (indirectCostEndRow >= indirectCostStartRow) {
+      const indirectSubtotalRowData = generateIndirectCostSubtotalRowData(
+        '소계 (간접비)',
+        layerNumber,
+        currentRow,
+        indirectCostStartRow,
+        indirectCostEndRow
+      );
+      const indirectSubtotalRow = worksheet.getRow(currentRow);
+      indirectSubtotalRow.values = indirectSubtotalRowData;
+
+      // 간접비 소계 행 스타일 (연두색 배경)
+      indirectSubtotalRow.eachCell({ includeEmpty: true }, (cell) => {
+        cell.font = { bold: true, size: 11 };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFD4EDDA' },
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+
+      const indirectSubtotalRowNumber = currentRow;
+      currentRow++;
+      layerNumber++;
+
+      // 8. 타입별 단수정리 합계 행 추가
+      if (roundingRowNumbers.length > 0) {
+        const typeTotalRoundingRowData = generateTypeTotalRoundingRowData(
+          '단수정리',
+          layerNumber,
+          currentRow,
+          roundingRowNumbers
+        );
+        const typeTotalRoundingRow = worksheet.getRow(currentRow);
+        typeTotalRoundingRow.values = typeTotalRoundingRowData;
+
+        // 단수정리 합계 행 스타일 (밝은 회색 배경)
+        typeTotalRoundingRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { bold: true, size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF9C4E1' }, // 밝은 회색
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        const typeTotalRoundingRowNumber = currentRow;
+        currentRow++;
+        layerNumber++;
+
+        // 9. 전체 합계 행 추가
+        const grandTotalRowData = generateGrandTotalRowData(
+          '합계',
+          layerNumber,
+          currentRow,
+          directSubtotalRowNumber,
+          indirectSubtotalRowNumber,
+          typeTotalRoundingRowNumber
+        );
+        const grandTotalRow = worksheet.getRow(currentRow);
+        grandTotalRow.values = grandTotalRowData;
+
+        // 전체 합계 행 스타일 (초록색 배경)
+        grandTotalRow.eachCell({ includeEmpty: true }, (cell) => {
+          cell.font = { bold: true, size: 11 };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF90EE90' }, // 초록색
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+        });
+
+        currentRow++;
+        layerNumber++;
+      }
     }
 
     typeIndex++;
   }
 
-  console.log(`✅ 총 ${currentRow - 7}개 데이터 행 추가 완료`);
+  console.log(
+    `✅ 총 ${currentRow - 7}개 데이터 행 추가 완료 (직접비+소계+간접비+소계+단수정리+합계)`
+  );
 }
 
 /**
@@ -7171,7 +7738,7 @@ async function generateTypeSummaryRowData(typeName, results, typeIndex) {
     totalMaterialUnitPrice + totalLaborUnitPrice + totalExpenseUnitPrice;
   const totalCost = totalMaterialCost + totalLaborCost + totalExpenseCost;
 
-  // 33개 컬럼 데이터 배열 반환 (HTML TD 순서와 일치)
+  // 34개 컬럼 데이터 배열 반환 (HTML TD 순서와 일치)
   return [
     `1-${typeIndex}`, // A: NO
     typeName, // B: 구분
@@ -7182,37 +7749,41 @@ async function generateTypeSummaryRowData(typeName, results, typeIndex) {
     '', // G: 두께 (개수 그룹)
     '', // H: 넓이 (개수 그룹)
     '', // I: 높이 (개수 그룹)
-    '', // J: M (개수 그룹)
-    '', // K: 제공자 (환산 그룹)
-    '', // L: 1장->m2 (환산 그룹)
-    '', // M: 장 (환산 그룹)
-    'M2', // N: 단위
-    '', // O: 수량 (타입 요약 행은 빈칸)
-    Math.round(totalMaterialUnitPrice), // P: 계약도급 자재비 단가
-    Math.round(totalMaterialCost), // Q: 계약도급 자재비 금액
-    Math.round(totalLaborUnitPrice), // R: 계약도급 노무비 단가
-    Math.round(totalLaborCost), // S: 계약도급 노무비 금액
-    Math.round(totalExpenseUnitPrice), // T: 계약도급 경비 단가
-    Math.round(totalExpenseCost), // U: 계약도급 경비 금액
-    Math.round(totalUnitPrice), // V: 계약도급 합계 단가
-    Math.round(totalCost), // W: 계약도급 합계 금액
-    '', // X: 비고
-    '', // Y: 발주단가 자재비 단가
-    '', // Z: 발주단가 자재비 금액
-    '', // AA: 발주단가 노무비 단가
-    '', // AB: 발주단가 노무비 금액
-    '', // AC: 발주단가 경비 단가
-    '', // AD: 발주단가 경비 금액
-    '', // AE: 발주단가 합계 단가
-    '', // AF: 발주단가 합계 금액
-    '', // AG: 비고
+    '', // J: 단위 (개수 그룹) - 🆕 ADDED
+    '', // K: M (개수 그룹)
+    '', // L: 제공자 (환산 그룹)
+    '', // M: 1장->m2 (환산 그룹)
+    '', // N: 장 (환산 그룹)
+    'M2', // O: 단위
+    '', // P: 수량 (타입 요약 행은 빈칸)
+    Math.round(totalMaterialUnitPrice), // Q: 계약도급 자재비 단가
+    Math.round(totalMaterialCost), // R: 계약도급 자재비 금액
+    Math.round(totalLaborUnitPrice), // S: 계약도급 노무비 단가
+    Math.round(totalLaborCost), // T: 계약도급 노무비 금액
+    Math.round(totalExpenseUnitPrice), // U: 계약도급 경비 단가
+    Math.round(totalExpenseCost), // V: 계약도급 경비 금액
+    Math.round(totalUnitPrice), // W: 계약도급 합계 단가
+    Math.round(totalCost), // X: 계약도급 합계 금액
+    '', // Y: 비고
+    '', // Z: 발주단가 자재비 단가
+    '', // AA: 발주단가 자재비 금액
+    '', // AB: 발주단가 노무비 단가
+    '', // AC: 발주단가 노무비 금액
+    '', // AD: 발주단가 경비 단가
+    '', // AE: 발주단가 경비 금액
+    '', // AF: 발주단가 합계 단가
+    '', // AG: 발주단가 합계 금액
+    '', // AH: 비고
   ];
 }
 
 /**
  * 레이어 상세 행 데이터 생성 (Excel용)
+ * @param {Object} result - 첫 번째 결과 객체
+ * @param {Array} allResults - 모든 결과 배열
+ * @param {number} startRow - Excel 시작 행 번호
  */
-async function generateLayerDetailRowsData(result, allResults) {
+async function generateLayerDetailRowsData(result, allResults, startRow) {
   const layerOrder = [
     'layer3_1',
     'layer2_1',
@@ -7230,6 +7801,7 @@ async function generateLayerDetailRowsData(result, allResults) {
   const totalArea = allResults.reduce((sum, r) => sum + (r.area || 0), 0);
   const rows = [];
   let layerNumber = 1;
+  let currentExcelRow = startRow; // 실제 Excel 행 번호 추적
 
   for (const layerKey of layerOrder) {
     const layer = result.layerPricing[layerKey];
@@ -7250,10 +7822,12 @@ async function generateLayerDetailRowsData(result, allResults) {
           unitPriceItem,
           result,
           layerNumber,
-          totalArea
+          totalArea,
+          currentExcelRow // 실제 Excel 행 번호 전달
         );
         rows.push(rowData);
         layerNumber++;
+        currentExcelRow++; // 행 번호 증가
       }
     }
   }
@@ -7263,13 +7837,20 @@ async function generateLayerDetailRowsData(result, allResults) {
 
 /**
  * 컴포넌트 행 데이터 생성 (Excel용)
+ * @param {Object} component - 구성품 객체
+ * @param {Object} unitPriceItem - 일위대가 아이템
+ * @param {Object} result - 결과 객체
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} totalArea - 총 면적
+ * @param {number} excelRow - 실제 Excel 행 번호
  */
 async function generateComponentRowData(
   component,
   unitPriceItem,
   result,
   layerNumber,
-  totalArea
+  totalArea,
+  excelRow
 ) {
   const materialData = await findMaterialByIdInDB(component.materialId);
   const componentName = component.name || '';
@@ -7399,7 +7980,9 @@ async function generateComponentRowData(
     : 0;
   const orderTotalCost = orderTotalPrice * totalArea;
 
-  // 33개 컬럼 데이터 배열 반환 (HTML TD 순서와 정확히 일치)
+  // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
+  // excelRow는 실제 Excel 행 번호 (호출자로부터 전달받음)
+
   return [
     layerNumber, // A: NO
     '', // B: 구분
@@ -7410,36 +7993,526 @@ async function generateComponentRowData(
     thick, // G: 두께 (스터드/런너만, 개수 그룹)
     width, // H: 넓이 (스터드/런너만, 개수 그룹)
     height, // I: 높이 (스터드/런너만, 개수 그룹)
-    length, // J: M (스터드/런너만, 개수 그룹)
-    supplier, // K: 제공자 (환산 그룹)
-    areaPerSheet, // L: 1장->m2 (석고보드만, 환산 그룹)
-    sheets, // M: 장 (석고보드만, 환산 그룹)
-    unit, // N: 단위
-    finalQuantity, // O: 수량
-    Math.round(materialPrice), // P: 계약도급 자재비 단가
-    Math.round(materialCost), // Q: 계약도급 자재비 금액
-    Math.round(laborPrice), // R: 계약도급 노무비 단가
-    Math.round(laborCost), // S: 계약도급 노무비 금액
-    Math.round(contractExpensePrice), // T: 계약도급 경비 단가
-    Math.round(contractExpenseCost), // U: 계약도급 경비 금액
-    Math.round(totalPrice), // V: 계약도급 합계 단가
-    Math.round(totalCost), // W: 계약도급 합계 금액
-    '', // X: 비고
-    '', // Y: 발주단가 자재비 단가
-    '', // Z: 발주단가 자재비 금액
-    '', // AA: 발주단가 노무비 단가
-    '', // AB: 발주단가 노무비 금액
-    Math.round(orderExpensePrice), // AC: 발주단가 경비 단가
-    Math.round(orderExpenseCost), // AD: 발주단가 경비 금액
-    Math.round(orderTotalPrice), // AE: 발주단가 합계 단가
-    Math.round(orderTotalCost), // AF: 발주단가 합계 금액
-    '', // AG: 비고
+    '', // J: 단위 (개수 그룹)
+    length, // K: M (스터드/런너만, 개수 그룹)
+    supplier, // L: 제공자 (환산 그룹)
+    areaPerSheet, // M: 1장->m2 (석고보드만, 환산 그룹)
+    sheets, // N: 장 (석고보드만, 환산 그룹)
+    unit, // O: 단위
+    finalQuantity, // P: 수량
+
+    // 계약도급 (Q~X)
+    Math.round(materialPrice), // Q: 계약도급 자재비 단가
+    { formula: `=ROUND(Q${excelRow}*P${excelRow},0)` }, // R: 계약도급 자재비 금액 = 단가×수량
+    Math.round(laborPrice), // S: 계약도급 노무비 단가
+    { formula: `=ROUND(S${excelRow}*P${excelRow},0)` }, // T: 계약도급 노무비 금액 = 단가×수량
+    Math.round(contractExpensePrice), // U: 계약도급 경비 단가
+    { formula: `=ROUND(U${excelRow}*P${excelRow},0)` }, // V: 계약도급 경비 금액 = 단가×수량
+    { formula: `=Q${excelRow}+S${excelRow}+U${excelRow}` }, // W: 계약도급 합계 단가 = 자재+노무+경비
+    { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액 = 자재+노무+경비
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    '', // Z: 발주단가 자재비 단가 (입력값)
+    { formula: `=ROUND(Z${excelRow}*P${excelRow},0)` }, // AA: 발주단가 자재비 금액 = 단가×수량
+    '', // AB: 발주단가 노무비 단가 (입력값)
+    { formula: `=ROUND(AB${excelRow}*P${excelRow},0)` }, // AC: 발주단가 노무비 금액 = 단가×수량
+    Math.round(orderExpensePrice), // AD: 발주단가 경비 단가
+    { formula: `=ROUND(AD${excelRow}*P${excelRow},0)` }, // AE: 발주단가 경비 금액 = 단가×수량
+    Math.round(orderTotalPrice), // AF: 발주단가 합계 단가
+    { formula: `=ROUND(AF${excelRow}*P${excelRow},0)` }, // AG: 발주단가 합계 금액 = 단가×수량
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 그룹핑된 구성품 행 데이터 생성 (Excel용)
+ * HTML의 generateGroupedComponentRow와 동일한 로직
+ * @param {Object} comp - 그룹핑된 구성품 객체
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) {
+  const contractRatio =
+    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const area = comp.area;
+  const componentName = comp.name;
+  const materialData = comp.materialData;
+  const unitPriceItem = comp.unitPriceItem;
+
+  // WALL 및 개수 컬럼 채우기
+  const wallTypeCode = comp.wallType?.wallType || '';
+  const sizeData = parseSizeField(comp.size);
+  const spacingValue = extractSpacingValue(unitPriceItem?.basic?.spacing);
+
+  let wallThk = '';
+  let atValue = '';
+  let thicknessValue = '';
+  let widthValue = '';
+  let heightValue = '';
+  let mValue = '';
+
+  // 환산 컬럼: 석고보드만
+  let conversionM2 = '';
+  let sheetQuantity = '';
+
+  if (isStud(componentName)) {
+    atValue = spacingValue || '';
+    thicknessValue = sizeData.thickness || '';
+    widthValue = sizeData.width || '';
+    heightValue = sizeData.height || '';
+    const mValueRaw = Math.round(comp.quantity * area);
+    mValue = mValueRaw;
+  } else if (isRunner(componentName)) {
+    atValue = '';
+    thicknessValue = sizeData.thickness || '';
+    widthValue = sizeData.width || '';
+    heightValue = sizeData.height || '';
+    const mValueRaw = Math.round(comp.quantity * area);
+    mValue = mValueRaw;
+  } else if (isGypsumBoard(componentName)) {
+    wallThk = materialData?.t || sizeData.thickness || '';
+    mValue = '';
+
+    if (materialData) {
+      const w = parseFloat(materialData.w) || 0;
+      const h = parseFloat(materialData.h) || 0;
+      if (w > 0 && h > 0) {
+        conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
+        const m2PerSheet = parseFloat(conversionM2);
+        if (m2PerSheet > 0) {
+          const gypsumBoardDisplayQuantity =
+            comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+          sheetQuantity = Math.round(gypsumBoardDisplayQuantity / m2PerSheet);
+        }
+      }
+    }
+  } else if (isMagazinePiece(componentName) || isNailingBullet(componentName)) {
+    const mValueRaw = Math.round(comp.quantity * area);
+    mValue = mValueRaw;
+  } else if (isWeldingRod(componentName)) {
+    const mValueRaw = (comp.quantity * area).toFixed(2);
+    mValue = parseFloat(mValueRaw);
+  }
+
+  // 수량 계산
+  let displayQuantity = area;
+  if (isGypsumBoard(componentName)) {
+    displayQuantity = comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+  } else if (comp.parentCategory === '석고보드') {
+    displayQuantity = area;
+  }
+
+  // 발주단가 - 1m² 단가
+  const orderMatPrice =
+    comp.materialPricePerM2 ||
+    Math.round(comp.materialPrice * comp.quantity);
+  const orderLabPrice = comp.laborPricePerM2 || Math.round(comp.laborAmount);
+
+  // 계약도급 단가
+  const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+  const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+
+  // 품명 표시
+  let displayName = comp.name;
+  if (comp.spec) {
+    displayName += ` ${comp.spec}`;
+  }
+
+  // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    displayName, // C: 품명 및 규격
+    wallThk, // D: THK
+    wallTypeCode, // E: Type
+    atValue, // F: @
+    thicknessValue, // G: 두께
+    widthValue, // H: 넓이
+    heightValue, // I: 높이
+    comp.unit, // J: 단위
+    mValue, // K: M
+    '', // L: 제공자 (입력값)
+    conversionM2, // M: 1장->m2
+    sheetQuantity, // N: 장
+    'M2', // O: 단위
+    displayQuantity, // P: 수량
+
+    // 계약도급 (Q~X)
+    contractMatPrice, // Q: 계약도급 자재비 단가
+    { formula: `=ROUND(Q${excelRow}*P${excelRow},0)` }, // R: 계약도급 자재비 금액
+    contractLabPrice, // S: 계약도급 노무비 단가
+    { formula: `=ROUND(S${excelRow}*P${excelRow},0)` }, // T: 계약도급 노무비 금액
+    0, // U: 계약도급 경비 단가 (입력값)
+    { formula: `=ROUND(U${excelRow}*P${excelRow},0)` }, // V: 계약도급 경비 금액
+    { formula: `=Q${excelRow}+S${excelRow}+U${excelRow}` }, // W: 계약도급 합계 단가
+    { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG) - 수정: Z, AB에 값 입력
+    orderMatPrice, // Z: 발주단가 자재비 단가
+    { formula: `=ROUND(Z${excelRow}*P${excelRow},0)` }, // AA: 발주단가 자재비 금액
+    orderLabPrice, // AB: 발주단가 노무비 단가
+    { formula: `=ROUND(AB${excelRow}*P${excelRow},0)` }, // AC: 발주단가 노무비 금액
+    0, // AD: 발주단가 경비 단가 (입력값)
+    { formula: `=ROUND(AD${excelRow}*P${excelRow},0)` }, // AE: 발주단가 경비 금액
+    { formula: `=Z${excelRow}+AB${excelRow}+AD${excelRow}` }, // AF: 발주단가 합계 단가
+    { formula: `=AA${excelRow}+AC${excelRow}+AE${excelRow}` }, // AG: 발주단가 합계 금액
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 간접비 행 데이터 생성 (Excel용)
+ * @param {Object} item - 간접비 항목 객체
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} totalArea - 총 면적
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateIndirectCostRowData(item, layerNumber, totalArea, excelRow) {
+  const contractRatio =
+    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
+  // item.area가 있으면 사용, 없으면 totalArea 사용
+  const area = item.area || totalArea;
+
+  // 1m² 단가
+  const orderUnitPrice = item.unitPrice || 0;
+  const contractUnitPrice = Math.round(orderUnitPrice * contractRatio);
+
+  // 자재비 항목인지 노무비 항목인지 구분
+  const isMaterialCost =
+    item.name.includes('자재로스') ||
+    item.name.includes('운반비') ||
+    item.name.includes('이윤');
+  const isLaborCost = item.name.includes('공구손료');
+
+  // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    item.name, // C: 품명 및 규격
+    '', // D: THK
+    '', // E: Type
+    '', // F: @
+    '', // G: 두께
+    '', // H: 넓이
+    '', // I: 높이
+    item.spec, // J: 단위 - 간접비는 spec (예: %)
+    `${item.rate}%`, // K: M - 간접비는 rate (예: 10%)
+    '', // L: 제공자
+    '', // M: 1장->m2
+    '', // N: 장
+    'M2', // O: 단위
+    area, // P: 수량
+
+    // 계약도급 (Q~X)
+    isMaterialCost ? contractUnitPrice : 0, // Q: 계약도급 자재비 단가
+    isMaterialCost
+      ? { formula: `=ROUND(Q${excelRow}*P${excelRow},0)` }
+      : 0, // R: 계약도급 자재비 금액
+    isLaborCost ? contractUnitPrice : 0, // S: 계약도급 노무비 단가
+    isLaborCost
+      ? { formula: `=ROUND(S${excelRow}*P${excelRow},0)` }
+      : 0, // T: 계약도급 노무비 금액
+    0, // U: 계약도급 경비 단가
+    0, // V: 계약도급 경비 금액
+    contractUnitPrice, // W: 계약도급 합계 단가
+    { formula: `=ROUND(W${excelRow}*P${excelRow},0)` }, // X: 계약도급 합계 금액
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    isMaterialCost ? orderUnitPrice : 0, // Z: 발주단가 자재비 단가
+    isMaterialCost ? { formula: `=ROUND(Z${excelRow}*P${excelRow},0)` } : 0, // AA: 발주단가 자재비 금액
+    isLaborCost ? orderUnitPrice : 0, // AB: 발주단가 노무비 단가
+    isLaborCost ? { formula: `=ROUND(AB${excelRow}*P${excelRow},0)` } : 0, // AC: 발주단가 노무비 금액
+    0, // AD: 발주단가 경비 단가
+    0, // AE: 발주단가 경비 금액
+    orderUnitPrice, // AF: 발주단가 합계 단가
+    { formula: `=ROUND(AF${excelRow}*P${excelRow},0)` }, // AG: 발주단가 합계 금액
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 직접비 소계 행 데이터 생성 (Excel용)
+ * @param {string} label - 라벨 (예: "소계 (직접자재)")
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @param {number} startRow - 합계 시작 행
+ * @param {number} endRow - 합계 종료 행
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateDirectCostSubtotalRowData(
+  label,
+  layerNumber,
+  excelRow,
+  startRow,
+  endRow
+) {
+  // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    label, // C: 품명 및 규격
+    '', // D: THK
+    '', // E: Type
+    '', // F: @
+    '', // G: 두께
+    '', // H: 넓이
+    '', // I: 높이
+    '', // J: 단위
+    '', // K: M
+    '', // L: 제공자
+    '', // M: 1장->m2
+    '', // N: 장
+    '', // O: 단위
+    '', // P: 수량
+
+    // 계약도급 (Q~X)
+    '', // Q: 계약도급 자재비 단가
+    { formula: `=SUM(R${startRow}:R${endRow})` }, // R: 계약도급 자재비 금액
+    '', // S: 계약도급 노무비 단가
+    { formula: `=SUM(T${startRow}:T${endRow})` }, // T: 계약도급 노무비 금액
+    '', // U: 계약도급 경비 단가
+    { formula: `=SUM(V${startRow}:V${endRow})` }, // V: 계약도급 경비 금액
+    '', // W: 계약도급 합계 단가
+    { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    '', // Z: 발주단가 자재비 단가
+    { formula: `=SUM(AA${startRow}:AA${endRow})` }, // AA: 발주단가 자재비 금액
+    '', // AB: 발주단가 노무비 단가
+    { formula: `=SUM(AC${startRow}:AC${endRow})` }, // AC: 발주단가 노무비 금액
+    '', // AD: 발주단가 경비 단가
+    { formula: `=SUM(AE${startRow}:AE${endRow})` }, // AE: 발주단가 경비 금액
+    '', // AF: 발주단가 합계 단가
+    { formula: `=AA${excelRow}+AC${excelRow}+AE${excelRow}` }, // AG: 발주단가 합계 금액
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 간접비 소계 행 데이터 생성 (Excel용)
+ * @param {string} label - 라벨 (예: "소계 (간접비)")
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @param {number} startRow - 합계 시작 행
+ * @param {number} endRow - 합계 종료 행
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateIndirectCostSubtotalRowData(
+  label,
+  layerNumber,
+  excelRow,
+  startRow,
+  endRow
+) {
+  // 직접비 소계와 동일한 구조
+  return generateDirectCostSubtotalRowData(
+    label,
+    layerNumber,
+    excelRow,
+    startRow,
+    endRow
+  );
+}
+
+/**
+ * 타입별 단수정리 합계 행 데이터 생성 (Excel용)
+ * @param {string} label - 라벨 (예: "단수정리")
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @param {Array<number>} roundingRows - 자재별 단수정리 행 번호 배열
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateTypeTotalRoundingRowData(
+  label,
+  layerNumber,
+  excelRow,
+  roundingRows
+) {
+  // 각 자재별 단수정리 행들의 X, AG 컬럼 합산
+  const contractRoundingFormula = roundingRows
+    .map((row) => `X${row}`)
+    .join('+');
+  const orderRoundingFormula = roundingRows.map((row) => `AG${row}`).join('+');
+
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    label, // C: 품명 및 규격
+    '', // D: THK
+    '', // E: Type
+    '', // F: @
+    '', // G: 두께
+    '', // H: 넓이
+    '', // I: 높이
+    '', // J: 단위
+    '', // K: M
+    '', // L: 제공자
+    '', // M: 1장->m2
+    '', // N: 장
+    '', // O: 단위
+    '', // P: 수량
+
+    // 계약도급 (Q~X)
+    '', // Q: 계약도급 자재비 단가
+    '', // R: 계약도급 자재비 금액
+    '', // S: 계약도급 노무비 단가
+    '', // T: 계약도급 노무비 금액
+    '', // U: 계약도급 경비 단가
+    '', // V: 계약도급 경비 금액
+    '', // W: 계약도급 합계 단가
+    { formula: `=${contractRoundingFormula}` }, // X: 계약도급 합계 금액 (자재별 단수정리 합)
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    '', // Z: 발주단가 자재비 단가
+    '', // AA: 발주단가 자재비 금액
+    '', // AB: 발주단가 노무비 단가
+    '', // AC: 발주단가 노무비 금액
+    '', // AD: 발주단가 경비 단가
+    '', // AE: 발주단가 경비 금액
+    '', // AF: 발주단가 합계 단가
+    { formula: `=${orderRoundingFormula}` }, // AG: 발주단가 합계 금액 (자재별 단수정리 합)
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 전체 합계 행 데이터 생성 (Excel용)
+ * @param {string} label - 라벨 (예: "합계")
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @param {number} directSubtotalRow - 직접비 소계 행 번호
+ * @param {number} indirectSubtotalRow - 간접비 소계 행 번호
+ * @param {number} roundingRow - 단수정리 행 번호
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateGrandTotalRowData(
+  label,
+  layerNumber,
+  excelRow,
+  directSubtotalRow,
+  indirectSubtotalRow,
+  roundingRow
+) {
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    label, // C: 품명 및 규격
+    '', // D: THK
+    '', // E: Type
+    '', // F: @
+    '', // G: 두께
+    '', // H: 넓이
+    '', // I: 높이
+    '', // J: 단위
+    '', // K: M
+    '', // L: 제공자
+    '', // M: 1장->m2
+    '', // N: 장
+    '', // O: 단위
+    '', // P: 수량
+
+    // 계약도급 (Q~X)
+    '', // Q: 계약도급 자재비 단가
+    { formula: `=R${directSubtotalRow}+R${indirectSubtotalRow}` }, // R: 계약도급 자재비 금액
+    '', // S: 계약도급 노무비 단가
+    { formula: `=T${directSubtotalRow}+T${indirectSubtotalRow}` }, // T: 계약도급 노무비 금액
+    '', // U: 계약도급 경비 단가
+    '', // V: 계약도급 경비 금액
+    '', // W: 계약도급 합계 단가
+    { formula: `=X${directSubtotalRow}+X${indirectSubtotalRow}+X${roundingRow}` }, // X: 계약도급 합계 금액
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    '', // Z: 발주단가 자재비 단가
+    { formula: `=AA${directSubtotalRow}+AA${indirectSubtotalRow}` }, // AA: 발주단가 자재비 금액
+    '', // AB: 발주단가 노무비 단가
+    { formula: `=AC${directSubtotalRow}+AC${indirectSubtotalRow}` }, // AC: 발주단가 노무비 금액
+    '', // AD: 발주단가 경비 단가
+    '', // AE: 발주단가 경비 금액
+    '', // AF: 발주단가 합계 단가
+    { formula: `=AG${directSubtotalRow}+AG${indirectSubtotalRow}+AG${roundingRow}` }, // AG: 발주단가 합계 금액
+    '', // AH: 비고
+  ];
+}
+
+/**
+ * 자재별 단수정리 행 데이터 생성 (Excel용)
+ * @param {string} materialName - 자재 이름 (예: "스터드", "석고보드 9.5T")
+ * @param {number} layerNumber - 레이어 번호
+ * @param {number} excelRow - 실제 Excel 행 번호
+ * @param {number} startRow - 합계 시작 행 (직접비 첫 행)
+ * @param {number} endRow - 합계 종료 행 (간접비 마지막 행)
+ * @returns {Array} - 34개 컬럼 데이터 배열
+ */
+function generateMaterialRoundingRowData(
+  materialName,
+  layerNumber,
+  excelRow,
+  startRow,
+  endRow
+) {
+  // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
+  // 단수정리: -(합계 MOD 1000)
+  // Excel에서는 MOD(number, divisor) 함수 사용
+  // 1,000원 단위 단수정리 = -MOD(SUM(...), 1000)
+
+  return [
+    layerNumber, // A: NO
+    '', // B: 구분
+    `단수정리 (${materialName})`, // C: 품명 및 규격
+    '', // D: THK
+    '', // E: Type
+    '', // F: @
+    '', // G: 두께
+    '', // H: 넓이
+    '', // I: 높이
+    '', // J: 단위
+    '', // K: M
+    '', // L: 제공자
+    '', // M: 1장->m2
+    '', // N: 장
+    '', // O: 단위
+    '', // P: 수량
+
+    // 계약도급 (Q~X)
+    '', // Q: 계약도급 자재비 단가
+    '', // R: 계약도급 자재비 금액
+    '', // S: 계약도급 노무비 단가
+    '', // T: 계약도급 노무비 금액
+    '', // U: 계약도급 경비 단가
+    '', // V: 계약도급 경비 금액
+    '', // W: 계약도급 합계 단가
+    {
+      formula: `=-MOD(SUM(X${startRow}:X${endRow}),1000)`,
+    }, // X: 계약도급 합계 금액 - 1,000원 단위 단수정리
+    '', // Y: 비고
+
+    // 발주단가 (Z~AG)
+    '', // Z: 발주단가 자재비 단가
+    '', // AA: 발주단가 자재비 금액
+    '', // AB: 발주단가 노무비 단가
+    '', // AC: 발주단가 노무비 금액
+    '', // AD: 발주단가 경비 단가
+    '', // AE: 발주단가 경비 금액
+    '', // AF: 발주단가 합계 단가
+    {
+      formula: `=-MOD(SUM(AG${startRow}:AG${endRow}),1000)`,
+    }, // AG: 발주단가 합계 금액 - 1,000원 단위 단수정리
+    '', // AH: 비고
   ];
 }
 
 /**
  * 발주서 Excel 스타일 적용
- * 33개 컬럼 기준 (A~AG)
+ * 34개 컬럼 기준 (A~AH)
  */
 function applyOrderFormExcelStyles(worksheet) {
   // 모든 데이터 행에 테두리 적용
