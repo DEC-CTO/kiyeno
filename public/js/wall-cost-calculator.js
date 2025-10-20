@@ -4631,11 +4631,7 @@ function updateSubtotalRows() {
       return;
     }
 
-    // ✅ 간접비 소계는 이미 generateIndirectCostSubtotalRow()에서 계산되어 있으므로 재계산 제외
-    if (label.includes('간접비')) {
-      console.log(`  ⏭️ 간접비 소계는 재계산 안 함 (이미 계산된 값 사용)`);
-      return;
-    }
+    // ✅ 간접비 소계도 재계산 (계약도급 비율 변경 시 필요)
 
     // 이 소계 행의 범위 결정 (타입 요약 행부터 다음 소계/합계 행까지)
     const allRows = Array.from(
@@ -4643,29 +4639,52 @@ function updateSubtotalRows() {
     );
     const subtotalIndex = allRows.indexOf(subtotalRow);
 
-    // 역방향으로 타입 요약 행 찾기
+    // 역방향으로 시작 행 찾기
     let startIndex = -1;
-    for (let i = subtotalIndex - 1; i >= 0; i--) {
-      const row = allRows[i];
-      // 타입 요약 행은 1-1, 1-2 등의 NO를 가짐
-      const firstCell = row.cells[0]?.textContent.trim();
-      if (firstCell && /^\d+-\d+$/.test(firstCell)) {
-        startIndex = i + 1; // 타입 요약 행 다음부터
-        break;
+    const isIndirectSubtotal = label.includes('간접비');
+
+    if (isIndirectSubtotal) {
+      // 간접비 소계: 직접비 소계 행 다음부터
+      for (let i = subtotalIndex - 1; i >= 0; i--) {
+        const row = allRows[i];
+        const rowLabel = row.cells[2]?.textContent.trim();
+        if (rowLabel && rowLabel.includes('소계') && rowLabel.includes('직접')) {
+          startIndex = i + 1;
+          break;
+        }
+      }
+    } else {
+      // 직접비 소계: 타입 요약 행 다음부터
+      for (let i = subtotalIndex - 1; i >= 0; i--) {
+        const row = allRows[i];
+        const firstCell = row.cells[0]?.textContent.trim();
+        if (firstCell && /^\d+-\d+$/.test(firstCell)) {
+          startIndex = i + 1;
+          break;
+        }
       }
     }
 
     if (startIndex === -1) return;
 
-    // 해당 범위의 데이터 행들 (흰색 배경 행, data-row 속성 있음)
+    // 해당 범위의 행들 수집
     const dataRows = [];
     for (let i = startIndex; i < subtotalIndex; i++) {
       const row = allRows[i];
-      if (row.hasAttribute('data-row')) {
-        dataRows.push(row);
+      if (isIndirectSubtotal) {
+        // 간접비 소계: 노란색 배경 행들 (#fffacd)
+        const style = row.getAttribute('style') || '';
+        if (style.includes('#fffacd')) {
+          dataRows.push(row);
+        }
+      } else {
+        // 직접비 소계: data-row 속성 있는 행들
+        if (row.hasAttribute('data-row')) {
+          dataRows.push(row);
+        }
       }
     }
-    console.log(`  📦 데이터 행 개수: ${dataRows.length}`);
+    console.log(`  📦 ${isIndirectSubtotal ? '간접비' : '직접비'} 행 개수: ${dataRows.length}`);
 
     // 계약도급 합계 계산
     let contractMaterialPriceSum = 0;
@@ -4689,42 +4708,42 @@ function updateSubtotalRows() {
     let displayQuantitySum = 0; // 16번 칸럼
 
     dataRows.forEach((row) => {
-      // 계약도급
-      const contractMatPrice =
-        parseFloat(
-          row
-            .querySelector('.contract-material-price')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const contractLabPrice =
-        parseFloat(
-          row
-            .querySelector('.contract-labor-price')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const contractExpPrice =
-        parseFloat(
-          row.querySelector('.contract-expense-price')?.value.replace(/,/g, '')
-        ) || 0;
+      let contractMatPrice, contractLabPrice, contractExpPrice;
+      let contractMatAmount, contractLabAmount, contractExpAmount;
+      let orderMatPrice, orderLabPrice, orderExpPrice;
+      let orderMatAmount, orderLabAmount, orderExpAmount;
 
-      const contractMatAmount =
-        parseFloat(
-          row
-            .querySelector('.contract-material-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const contractLabAmount =
-        parseFloat(
-          row
-            .querySelector('.contract-labor-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const contractExpAmount =
-        parseFloat(
-          row
-            .querySelector('.contract-expense-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
+      if (isIndirectSubtotal) {
+        // 간접비 행: 셀 인덱스로 읽기
+        contractMatPrice = parseFloat(row.cells[16]?.textContent.replace(/,/g, '')) || 0;
+        contractMatAmount = parseFloat(row.cells[17]?.textContent.replace(/,/g, '')) || 0;
+        contractLabPrice = parseFloat(row.cells[18]?.textContent.replace(/,/g, '')) || 0;
+        contractLabAmount = parseFloat(row.cells[19]?.textContent.replace(/,/g, '')) || 0;
+        contractExpPrice = 0; // 간접비는 경비 없음
+        contractExpAmount = 0;
+
+        orderMatPrice = parseFloat(row.cells[25]?.textContent.replace(/,/g, '')) || 0;
+        orderMatAmount = parseFloat(row.cells[26]?.textContent.replace(/,/g, '')) || 0;
+        orderLabPrice = parseFloat(row.cells[27]?.textContent.replace(/,/g, '')) || 0;
+        orderLabAmount = parseFloat(row.cells[28]?.textContent.replace(/,/g, '')) || 0;
+        orderExpPrice = 0;
+        orderExpAmount = 0;
+      } else {
+        // 직접비 행: CSS 클래스로 읽기
+        contractMatPrice = parseFloat(row.querySelector('.contract-material-price')?.textContent.replace(/,/g, '')) || 0;
+        contractLabPrice = parseFloat(row.querySelector('.contract-labor-price')?.textContent.replace(/,/g, '')) || 0;
+        contractExpPrice = parseFloat(row.querySelector('.contract-expense-price')?.value.replace(/,/g, '')) || 0;
+        contractMatAmount = parseFloat(row.querySelector('.contract-material-amount')?.textContent.replace(/,/g, '')) || 0;
+        contractLabAmount = parseFloat(row.querySelector('.contract-labor-amount')?.textContent.replace(/,/g, '')) || 0;
+        contractExpAmount = parseFloat(row.querySelector('.contract-expense-amount')?.textContent.replace(/,/g, '')) || 0;
+
+        orderMatPrice = parseFloat(row.querySelector('.order-material-price')?.textContent.replace(/,/g, '')) || 0;
+        orderLabPrice = parseFloat(row.querySelector('.order-labor-price')?.textContent.replace(/,/g, '')) || 0;
+        orderExpPrice = parseFloat(row.querySelector('.order-expense-price')?.value.replace(/,/g, '')) || 0;
+        orderMatAmount = parseFloat(row.querySelector('.order-material-amount')?.textContent.replace(/,/g, '')) || 0;
+        orderLabAmount = parseFloat(row.querySelector('.order-labor-amount')?.textContent.replace(/,/g, '')) || 0;
+        orderExpAmount = parseFloat(row.querySelector('.order-expense-amount')?.textContent.replace(/,/g, '')) || 0;
+      }
 
       contractMaterialPriceSum += contractMatPrice;
       contractLaborPriceSum += contractLabPrice;
@@ -4733,41 +4752,6 @@ function updateSubtotalRows() {
       contractLaborAmountSum += contractLabAmount;
       contractExpenseAmountSum += contractExpAmount;
 
-      // 발주단가
-      const orderMatPrice =
-        parseFloat(
-          row
-            .querySelector('.order-material-price')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const orderLabPrice =
-        parseFloat(
-          row.querySelector('.order-labor-price')?.textContent.replace(/,/g, '')
-        ) || 0;
-      const orderExpPrice =
-        parseFloat(
-          row.querySelector('.order-expense-price')?.value.replace(/,/g, '')
-        ) || 0;
-
-      const orderMatAmount =
-        parseFloat(
-          row
-            .querySelector('.order-material-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const orderLabAmount =
-        parseFloat(
-          row
-            .querySelector('.order-labor-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-      const orderExpAmount =
-        parseFloat(
-          row
-            .querySelector('.order-expense-amount')
-            ?.textContent.replace(/,/g, '')
-        ) || 0;
-
       orderMaterialPriceSum += orderMatPrice;
       orderLaborPriceSum += orderLabPrice;
       orderExpensePriceSum += orderExpPrice;
@@ -4775,17 +4759,19 @@ function updateSubtotalRows() {
       orderLaborAmountSum += orderLabAmount;
       orderExpenseAmountSum += orderExpAmount;
 
-      // 수량 합산 (테이블 셀에서 직접 읽기)
-      const mValue =
-        parseFloat(row.cells[10]?.textContent.replace(/,/g, '')) || 0;
-      const sheetQuantity =
-        parseFloat(row.cells[13]?.textContent.replace(/,/g, '')) || 0;
-      const displayQuantity =
-        parseFloat(row.cells[15]?.textContent.replace(/,/g, '')) || 0;
+      // 수량 합산 (직접비만 해당, 간접비는 건너뜀)
+      if (!isIndirectSubtotal) {
+        const mValue =
+          parseFloat(row.cells[10]?.textContent.replace(/,/g, '')) || 0;
+        const sheetQuantity =
+          parseFloat(row.cells[13]?.textContent.replace(/,/g, '')) || 0;
+        const displayQuantity =
+          parseFloat(row.cells[15]?.textContent.replace(/,/g, '')) || 0;
 
-      mValueSum += mValue;
-      sheetQuantitySum += sheetQuantity;
-      displayQuantitySum += displayQuantity;
+        mValueSum += mValue;
+        sheetQuantitySum += sheetQuantity;
+        displayQuantitySum += displayQuantity;
+      }
     });
 
     // 합계 계산
@@ -5319,6 +5305,112 @@ function updateContractPricesRealtime() {
 
   // ✅ 소계 행 업데이트 (경비 포함)
   updateSubtotalRows();
+
+  // ✅ 단수정리 행 업데이트 (회색 배경 #e0e0e0)
+  const roundingRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #e0e0e0"]');
+  console.log(`🔄 단수정리 행 ${roundingRows.length}개 재계산 시작`);
+
+  roundingRows.forEach(row => {
+    const label = row.cells[2]?.textContent.trim();
+    if (!label || !label.includes('단수정리')) return;
+
+    // 역방향 탐색: 이 단수정리 행 이전의 소계 행들 찾기
+    const allRows = Array.from(document.querySelectorAll('.order-form-table tbody tr'));
+    const roundingIndex = allRows.indexOf(row);
+
+    let directSubtotalRow = null;
+    let indirectSubtotalRow = null;
+
+    // 역방향으로 소계 행 찾기 (직접비 소계, 간접비 소계)
+    for (let i = roundingIndex - 1; i >= 0; i--) {
+      const checkRow = allRows[i];
+      const rowLabel = checkRow.cells[2]?.textContent.trim();
+
+      if (rowLabel && rowLabel.includes('소계')) {
+        if (rowLabel.includes('간접비') && !indirectSubtotalRow) {
+          indirectSubtotalRow = checkRow;
+        } else if (rowLabel.includes('직접') && !directSubtotalRow) {
+          directSubtotalRow = checkRow;
+          break; // 직접비 소계까지 찾으면 종료
+        }
+      }
+    }
+
+    if (!directSubtotalRow || !indirectSubtotalRow) {
+      console.log(`  ⚠️ ${label}: 소계 행을 찾을 수 없음`);
+      return;
+    }
+
+    // 발주단가 합계 = 소계(직접비) + 소계(간접비)
+    const orderDirectTotal = parseFloat(directSubtotalRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
+    const orderIndirectTotal = parseFloat(indirectSubtotalRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
+    const orderTotalBeforeRounding = orderDirectTotal + orderIndirectTotal;
+
+    // 계약도급 합계 = 발주단가 합계 × contractRatio
+    const contractTotalBeforeRounding = Math.round(orderTotalBeforeRounding * contractRatio);
+
+    // 계약도급 단수정리 = -(계약도급합계 % 1000)
+    const contractRounding = -(contractTotalBeforeRounding % 1000);
+
+    console.log(`  📐 ${label}:`);
+    console.log(`    발주단가 합계: ${orderTotalBeforeRounding.toLocaleString()}`);
+    console.log(`    계약도급 합계: ${contractTotalBeforeRounding.toLocaleString()}`);
+    console.log(`    계약도급 단수정리: ${contractRounding.toLocaleString()}`);
+
+    // 계약도급 단수정리 업데이트
+    if (row.cells[23]) {
+      row.cells[23].textContent = contractRounding.toLocaleString();
+    }
+  });
+
+  console.log(`✅ 단수정리 행 ${roundingRows.length}개 업데이트 완료`);
+
+  // ✅ 타입별 단수정리 합산 행 업데이트 (회색 배경, "단수정리" 라벨만)
+  const typeTotalRoundingRow = Array.from(document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #e0e0e0"]'))
+    .find(row => {
+      const label = row.cells[2]?.textContent.trim();
+      return label === '단수정리'; // 자재명 없이 "단수정리"만 있는 행
+    });
+
+  if (typeTotalRoundingRow) {
+    console.log('🔄 타입별 단수정리 합산 행 재계산 시작');
+
+    // 모든 자재별 단수정리 행의 계약도급 값을 합산
+    let contractRoundingSum = 0;
+    roundingRows.forEach(row => {
+      const label = row.cells[2]?.textContent.trim();
+      if (label && label.includes('단수정리') && label !== '단수정리') { // "단수정리 (스터드)" 등
+        const contractRounding = parseFloat(row.cells[23]?.textContent.replace(/,/g, '')) || 0;
+        contractRoundingSum += contractRounding;
+      }
+    });
+
+    // 계약도급 단수정리 합산 업데이트
+    if (typeTotalRoundingRow.cells[23]) {
+      typeTotalRoundingRow.cells[23].textContent = contractRoundingSum.toLocaleString();
+    }
+
+    console.log(`  계약도급 단수정리 합산: ${contractRoundingSum.toLocaleString()}`);
+    console.log('✅ 타입별 단수정리 합산 행 업데이트 완료');
+  }
+
+  // ✅ 총계 행 업데이트 (초록색 배경 #56ab2f)
+  const grandTotalRow = document.querySelector('.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]');
+  if (grandTotalRow) {
+    // 발주단가 자재비/노무비/경비/합계 금액
+    const orderMatAmount = parseFloat(grandTotalRow.cells[26]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabAmount = parseFloat(grandTotalRow.cells[28]?.textContent.replace(/,/g, '')) || 0;
+    const orderExpAmount = parseFloat(grandTotalRow.cells[30]?.textContent.replace(/,/g, '')) || 0;
+    const orderTotalAmount = parseFloat(grandTotalRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
+
+    // 계약도급 = 발주단가 × contractRatio
+    if (grandTotalRow.cells[17]) grandTotalRow.cells[17].textContent = Math.round(orderMatAmount * contractRatio).toLocaleString();
+    if (grandTotalRow.cells[19]) grandTotalRow.cells[19].textContent = Math.round(orderLabAmount * contractRatio).toLocaleString();
+    if (grandTotalRow.cells[21]) grandTotalRow.cells[21].textContent = Math.round(orderExpAmount * contractRatio).toLocaleString();
+    if (grandTotalRow.cells[23]) grandTotalRow.cells[23].textContent = Math.round(orderTotalAmount * contractRatio).toLocaleString();
+
+    console.log('✅ 총계 행 업데이트 완료');
+  }
 }
 
 /**
