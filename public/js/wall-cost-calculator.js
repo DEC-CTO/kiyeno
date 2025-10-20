@@ -3889,9 +3889,9 @@ async function generateOrderFormDataRows() {
     for (const comp of sortedDirectCosts) {
       const category = comp.parentCategory;
       if (category === 'STUD' || category === 'RUNNER') {
-        comp.dataCategory = 'STUD'; // ✅ HTML data-category 속성용
-      } else if (category === '석고보드' || category === '그라스울') {
-        comp.dataCategory = category; // ✅ HTML data-category 속성용
+        comp.dataCategory = 'STUD'; // ✅ 스터드+런너 통합
+      } else if (category) {
+        comp.dataCategory = category; // ✅ 모든 자재 자동 처리 (석고보드, 그라스울, 방화재 등)
       }
     }
 
@@ -4357,6 +4357,8 @@ async function generateOrderFormDataRows() {
 
       // 🆕 이 그룹의 단수정리 행 추가
       if (glassWoolGroupIndirectCosts.length > 0) {
+        const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+
         // 간접비 합계 계산
         let glassWoolIndirectMaterial = 0;
         let glassWoolIndirectLabor = 0;
@@ -5539,14 +5541,24 @@ function updateContractPricesRealtime() {
     let contractLaborSum = 0;
     let contractExpenseSum = 0;
 
-    // ✅ 자재명에서 카테고리 결정
+    // ✅ 자재명에서 카테고리 결정 (동적 처리)
     let targetCategory = '';
     if (materialName === '스터드') {
-      targetCategory = 'STUD';
-    } else if (materialName.includes('석고보드')) {
-      targetCategory = '석고보드';
-    } else if (materialName.includes('그라스울')) {
-      targetCategory = '그라스울';
+      targetCategory = 'STUD'; // 스터드는 특수 처리 (STUD+RUNNER 통합)
+    } else {
+      // ✅ 직접비 행들을 순회하며 materialName과 매칭되는 행의 data-category 찾기
+      for (let i = 0; i < roundingIndex; i++) {
+        const checkRow = allTableRows[i];
+        if (checkRow.hasAttribute('data-row')) {
+          const rowLabel = checkRow.cells[2]?.textContent.trim() || '';
+          const rowCategory = checkRow.getAttribute('data-category') || '';
+          // materialName이 rowLabel에 포함되면 해당 카테고리 사용
+          if (rowLabel.includes(materialName) && rowCategory) {
+            targetCategory = rowCategory;
+            break; // 첫 번째 매칭된 카테고리 사용
+          }
+        }
+      }
     }
 
     console.log(`    🔍 "${materialName}" (카테고리: ${targetCategory}) 단수정리 계산을 위한 행 탐색 시작 (총 ${roundingIndex}개 행 검사)`);
