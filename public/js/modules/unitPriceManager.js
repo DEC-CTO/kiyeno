@@ -1606,13 +1606,12 @@ function calculateGrandTotal() {
         const roundedMaterial = Math.floor(totalMaterial / roundingUnit) * roundingUnit;
         const roundedLabor = Math.floor(totalLabor / roundingUnit) * roundingUnit;
         const roundedExpense = Math.floor(totalExpense / roundingUnit) * roundingUnit;
-        const roundedGrandTotal = Math.floor(grandTotal / roundingUnit) * roundingUnit;
-        
+
         // 단수 정리 차액 계산
         const materialDiff = totalMaterial - roundedMaterial;
         const laborDiff = totalLabor - roundedLabor;
         const expenseDiff = totalExpense - roundedExpense;
-        const totalDiff = grandTotal - roundedGrandTotal;
+        const totalDiff = materialDiff + laborDiff + expenseDiff;  // ✅ 카테고리별 단수정리 합산
         
         // 단수 정리 로우에 차액 표시
         const roundingMaterialElement = roundingRow.querySelector('.rounding-material-amount');
@@ -1629,7 +1628,7 @@ function calculateGrandTotal() {
         totalMaterial = roundedMaterial;
         totalLabor = roundedLabor;
         totalExpense = roundedExpense;
-        grandTotal = roundedGrandTotal;
+        grandTotal = roundedMaterial + roundedLabor + roundedExpense;  // ✅ 단수정리된 카테고리 합산
     }
     
     // 합계 표시 업데이트
@@ -1850,6 +1849,20 @@ async function saveUnitPriceItem() {
     const materialProfitUnitPrice = Math.round(materialProfitBase * fixedRates.materialProfit / 100);
     const toolExpenseUnitPrice = Math.round(laborUnitPrice * fixedRates.toolExpense / 100);
 
+    // ✨ 1m² 기준 항목별 합계 계산
+    const materialTotal = materialUnitPrice + materialLossUnitPrice +
+                          transportCostUnitPrice + materialProfitUnitPrice;
+    const laborTotal = laborUnitPrice + toolExpenseUnitPrice;
+    const expenseTotal = 0; // 경비는 보통 0
+
+    // ✨ 각 항목별로 100원 단위 단수정리
+    const materialRounding = -(materialTotal % 100);
+    const laborRounding = -(laborTotal % 100);
+    const expenseRounding = -(expenseTotal % 100);
+
+    // ✨ 총 단수정리 (자재비 + 노무비 + 경비)
+    const roundingPerM2 = materialRounding + laborRounding + expenseRounding;
+
     currentUnitPriceData.totalCosts = {
         material: totalMaterial,
         labor: totalLabor,
@@ -1865,7 +1878,9 @@ async function saveUnitPriceItem() {
             transportCost: transportCostUnitPrice,
             materialProfit: materialProfitUnitPrice,
             toolExpense: toolExpenseUnitPrice
-        }
+        },
+        // ✨ 단수정리 1m² 단가 추가
+        roundingPerM2: roundingPerM2
     };
     
     // 새 아이템이면 ID와 생성일 설정
