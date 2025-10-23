@@ -5950,12 +5950,15 @@ function getSiteNameFromOrderForm() {
  */
 function updateEstimateTotalAmount() {
   const grandTotal = calculateEstimateGrandTotal();
+  // 1000단위 절사 (버림)
+  const roundedTotal = Math.floor(grandTotal / 1000) * 1000;
+
   const amountElement = document.getElementById('estimateTotalAmount');
   const numberElement = document.querySelector('.amount-number');
 
   if (amountElement && numberElement) {
-    amountElement.textContent = `일금 ${numberToKorean(grandTotal)} 원정`;
-    numberElement.textContent = `₩ ${Math.round(grandTotal).toLocaleString()}`;
+    amountElement.textContent = `일금 ${numberToKorean(roundedTotal)} 원정`;
+    numberElement.textContent = `₩ ${roundedTotal.toLocaleString()}`;
   }
 }
 
@@ -14988,32 +14991,196 @@ async function createEstimateDetailSheet(workbook) {
   // 직접공사비 항목들
   const detailRows = generateEstimateDetailRowsData();
 
+  // SUB TOTAL 행 번호 매핑 생성 (1차 패스)
+  const subtotalRowMapping = {};
+  let tempRow = 4; // 헤더 3행 다음부터 시작
   detailRows.forEach((row) => {
+    if (row.type === 'subtotal' && row.name.includes('SUB TOTAL')) {
+      // "A. 인테리어 설계비 SUB TOTAL" → "A. 인테리어 설계비"
+      const sectionName = row.name.replace(' SUB TOTAL', '').trim();
+      subtotalRowMapping[sectionName] = tempRow;
+    }
+    tempRow++;
+  });
+
+  // 섹션 경계 추적을 위한 변수
+  let sectionStartRow = null;
+  let lastItemRow = null;
+
+  detailRows.forEach((row, index) => {
     const dataRow = sheet.getRow(currentRow);
 
+    // 기본 정보 (항상 정적 값)
     dataRow.getCell(1).value = row.no || itemNo++;
     dataRow.getCell(2).value = row.name;
     dataRow.getCell(3).value = row.spec || '';
     dataRow.getCell(4).value = row.unit || '';
-    dataRow.getCell(5).value = row.quantity || '';
-    dataRow.getCell(6).value = row.materialUnitPrice || '';
-    dataRow.getCell(7).value = row.materialAmount || '';
-    dataRow.getCell(8).value = row.laborUnitPrice || '';
-    dataRow.getCell(9).value = row.laborAmount || '';
-    dataRow.getCell(10).value = row.expenseUnitPrice || '';
-    dataRow.getCell(11).value = row.expenseAmount || '';
-    dataRow.getCell(12).value = row.totalUnitPrice || '';
-    dataRow.getCell(13).value = row.totalAmount || '';
     dataRow.getCell(14).value = row.remark || '';
-    dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
-    dataRow.getCell(16).value = row.orderMaterialAmount || '';
-    dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
-    dataRow.getCell(18).value = row.orderLaborAmount || '';
-    dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
-    dataRow.getCell(20).value = row.orderExpenseAmount || '';
-    dataRow.getCell(21).value = row.orderTotalUnitPrice || '';
-    dataRow.getCell(22).value = row.orderTotalAmount || '';
     dataRow.getCell(23).value = row.remark2 || '';
+
+    // 섹션 헤더 추적
+    if (row.type === 'section-header') {
+      sectionStartRow = currentRow + 1; // 다음 행부터 항목 시작
+      dataRow.getCell(5).value = row.quantity || '';
+      dataRow.getCell(6).value = row.materialUnitPrice || '';
+      dataRow.getCell(7).value = row.materialAmount || '';
+      dataRow.getCell(8).value = row.laborUnitPrice || '';
+      dataRow.getCell(9).value = row.laborAmount || '';
+      dataRow.getCell(10).value = row.expenseUnitPrice || '';
+      dataRow.getCell(11).value = row.expenseAmount || '';
+      dataRow.getCell(12).value = row.totalUnitPrice || '';
+      dataRow.getCell(13).value = row.totalAmount || '';
+      dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
+      dataRow.getCell(16).value = row.orderMaterialAmount || '';
+      dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
+      dataRow.getCell(18).value = row.orderLaborAmount || '';
+      dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
+      dataRow.getCell(20).value = row.orderExpenseAmount || '';
+      dataRow.getCell(21).value = row.orderTotalUnitPrice || '';
+      dataRow.getCell(22).value = row.orderTotalAmount || '';
+    }
+    // 일반 항목: 수식 적용
+    else if (row.type === 'item') {
+      lastItemRow = currentRow;
+
+      // 수량 (정적 값)
+      dataRow.getCell(5).value = row.quantity || '';
+
+      // A~I 항목인지 확인 (직접공사비 아래 항목들)
+      const isMainSection = subtotalRowMapping[row.name];
+
+      if (isMainSection) {
+        // A~I 항목: 단가 빈칸, 금액은 SUB TOTAL 참조
+        const subtotalRow = subtotalRowMapping[row.name];
+
+        // 도급내역서 - 단가 빈칸
+        dataRow.getCell(6).value = '';
+        dataRow.getCell(8).value = '';
+        dataRow.getCell(10).value = '';
+        dataRow.getCell(12).value = '';
+
+        // 도급내역서 - 금액 (SUB TOTAL 참조)
+        dataRow.getCell(7).value = { formula: `=IFERROR(G${subtotalRow},0)` };
+        dataRow.getCell(9).value = { formula: `=IFERROR(I${subtotalRow},0)` };
+        dataRow.getCell(11).value = { formula: `=IFERROR(K${subtotalRow},0)` };
+        dataRow.getCell(13).value = { formula: `=IFERROR(M${subtotalRow},0)` };
+
+        // 발주단가내역서 - 단가 빈칸
+        dataRow.getCell(15).value = '';
+        dataRow.getCell(17).value = '';
+        dataRow.getCell(19).value = '';
+        dataRow.getCell(21).value = '';
+
+        // 발주단가내역서 - 금액 (SUB TOTAL 참조)
+        dataRow.getCell(16).value = { formula: `=IFERROR(P${subtotalRow},0)` };
+        dataRow.getCell(18).value = { formula: `=IFERROR(R${subtotalRow},0)` };
+        dataRow.getCell(20).value = { formula: `=IFERROR(T${subtotalRow},0)` };
+        dataRow.getCell(22).value = { formula: `=IFERROR(V${subtotalRow},0)` };
+      } else {
+        // 일반 항목: 기존 로직 (수량 × 단가)
+
+        // 도급내역서 - 단가 (정적 값)
+        dataRow.getCell(6).value = row.materialUnitPrice || '';
+        dataRow.getCell(8).value = row.laborUnitPrice || '';
+        dataRow.getCell(10).value = row.expenseUnitPrice || '';
+
+        // 도급내역서 - 금액 (수식: 수량 × 단가, 항상 적용)
+        dataRow.getCell(7).value = { formula: `=IFERROR(E${currentRow}*F${currentRow},0)` };
+        dataRow.getCell(9).value = { formula: `=IFERROR(E${currentRow}*H${currentRow},0)` };
+        dataRow.getCell(11).value = { formula: `=IFERROR(E${currentRow}*J${currentRow},0)` };
+
+        // 도급내역서 - 합계 단가 (수식: 자재비+노무비+경비)
+        dataRow.getCell(12).value = { formula: `=IFERROR(F${currentRow}+H${currentRow}+J${currentRow},0)` };
+
+        // 도급내역서 - 합계 금액 (수식: 자재비금액+노무비금액+경비금액)
+        dataRow.getCell(13).value = { formula: `=IFERROR(G${currentRow}+I${currentRow}+K${currentRow},0)` };
+
+        // 발주단가내역서 - 단가 (정적 값)
+        dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
+        dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
+        dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
+
+        // 발주단가내역서 - 금액 (수식: 수량 × 단가, 항상 적용)
+        dataRow.getCell(16).value = { formula: `=IFERROR(E${currentRow}*O${currentRow},0)` };
+        dataRow.getCell(18).value = { formula: `=IFERROR(E${currentRow}*Q${currentRow},0)` };
+        dataRow.getCell(20).value = { formula: `=IFERROR(E${currentRow}*S${currentRow},0)` };
+
+        // 발주단가내역서 - 합계 단가 (수식: 자재비+노무비+경비)
+        dataRow.getCell(21).value = { formula: `=IFERROR(O${currentRow}+Q${currentRow}+S${currentRow},0)` };
+
+        // 발주단가내역서 - 합계 금액 (수식: 자재비금액+노무비금액+경비금액)
+        dataRow.getCell(22).value = { formula: `=IFERROR(P${currentRow}+R${currentRow}+T${currentRow},0)` };
+      }
+    }
+    // SUB TOTAL: SUM 수식
+    else if (row.type === 'subtotal') {
+      dataRow.getCell(5).value = row.quantity || '';
+
+      // 섹션에 항목이 있는 경우 SUM 수식 적용
+      if (sectionStartRow && lastItemRow) {
+        // 도급내역서 - 단가와 금액 모두 SUM
+        dataRow.getCell(6).value = { formula: `=IFERROR(SUM(F${sectionStartRow}:F${lastItemRow}),0)` };
+        dataRow.getCell(7).value = { formula: `=IFERROR(SUM(G${sectionStartRow}:G${lastItemRow}),0)` };
+        dataRow.getCell(8).value = { formula: `=IFERROR(SUM(H${sectionStartRow}:H${lastItemRow}),0)` };
+        dataRow.getCell(9).value = { formula: `=IFERROR(SUM(I${sectionStartRow}:I${lastItemRow}),0)` };
+        dataRow.getCell(10).value = { formula: `=IFERROR(SUM(J${sectionStartRow}:J${lastItemRow}),0)` };
+        dataRow.getCell(11).value = { formula: `=IFERROR(SUM(K${sectionStartRow}:K${lastItemRow}),0)` };
+        dataRow.getCell(12).value = { formula: `=IFERROR(SUM(L${sectionStartRow}:L${lastItemRow}),0)` };
+        dataRow.getCell(13).value = { formula: `=IFERROR(SUM(M${sectionStartRow}:M${lastItemRow}),0)` };
+
+        // 발주단가내역서 - 단가와 금액 모두 SUM
+        dataRow.getCell(15).value = { formula: `=IFERROR(SUM(O${sectionStartRow}:O${lastItemRow}),0)` };
+        dataRow.getCell(16).value = { formula: `=IFERROR(SUM(P${sectionStartRow}:P${lastItemRow}),0)` };
+        dataRow.getCell(17).value = { formula: `=IFERROR(SUM(Q${sectionStartRow}:Q${lastItemRow}),0)` };
+        dataRow.getCell(18).value = { formula: `=IFERROR(SUM(R${sectionStartRow}:R${lastItemRow}),0)` };
+        dataRow.getCell(19).value = { formula: `=IFERROR(SUM(S${sectionStartRow}:S${lastItemRow}),0)` };
+        dataRow.getCell(20).value = { formula: `=IFERROR(SUM(T${sectionStartRow}:T${lastItemRow}),0)` };
+        dataRow.getCell(21).value = { formula: `=IFERROR(SUM(U${sectionStartRow}:U${lastItemRow}),0)` };
+        dataRow.getCell(22).value = { formula: `=IFERROR(SUM(V${sectionStartRow}:V${lastItemRow}),0)` };
+      } else {
+        // 섹션에 항목이 없는 경우 정적 값
+        dataRow.getCell(6).value = row.materialUnitPrice || '';
+        dataRow.getCell(7).value = row.materialAmount || '';
+        dataRow.getCell(8).value = row.laborUnitPrice || '';
+        dataRow.getCell(9).value = row.laborAmount || '';
+        dataRow.getCell(10).value = row.expenseUnitPrice || '';
+        dataRow.getCell(11).value = row.expenseAmount || '';
+        dataRow.getCell(12).value = row.totalUnitPrice || '';
+        dataRow.getCell(13).value = row.totalAmount || '';
+        dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
+        dataRow.getCell(16).value = row.orderMaterialAmount || '';
+        dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
+        dataRow.getCell(18).value = row.orderLaborAmount || '';
+        dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
+        dataRow.getCell(20).value = row.orderExpenseAmount || '';
+        dataRow.getCell(21).value = row.orderTotalUnitPrice || '';
+        dataRow.getCell(22).value = row.orderTotalAmount || '';
+      }
+
+      // SUB TOTAL 후 섹션 초기화
+      sectionStartRow = null;
+      lastItemRow = null;
+    }
+    // 간접공사비, 총합계 등: 정적 값
+    else {
+      dataRow.getCell(5).value = row.quantity || '';
+      dataRow.getCell(6).value = row.materialUnitPrice || '';
+      dataRow.getCell(7).value = row.materialAmount || '';
+      dataRow.getCell(8).value = row.laborUnitPrice || '';
+      dataRow.getCell(9).value = row.laborAmount || '';
+      dataRow.getCell(10).value = row.expenseUnitPrice || '';
+      dataRow.getCell(11).value = row.expenseAmount || '';
+      dataRow.getCell(12).value = row.totalUnitPrice || '';
+      dataRow.getCell(13).value = row.totalAmount || '';
+      dataRow.getCell(15).value = row.orderMaterialUnitPrice || '';
+      dataRow.getCell(16).value = row.orderMaterialAmount || '';
+      dataRow.getCell(17).value = row.orderLaborUnitPrice || '';
+      dataRow.getCell(18).value = row.orderLaborAmount || '';
+      dataRow.getCell(19).value = row.orderExpenseUnitPrice || '';
+      dataRow.getCell(20).value = row.orderExpenseAmount || '';
+      dataRow.getCell(21).value = row.orderTotalUnitPrice || '';
+      dataRow.getCell(22).value = row.orderTotalAmount || '';
+    }
 
     // Excel 그룹화: 자식 행 판별 (D-1, D-2, E-1, E-2 등)
     if (row.no && typeof row.no === 'string' && row.no.includes('-')) {
@@ -15068,19 +15235,20 @@ async function createEstimateDetailSheet(workbook) {
       };
     });
 
-    // 숫자 셀 오른쪽 정렬 및 천단위 구분
+    // 숫자 셀 오른쪽 정렬 및 천단위 구분 (모든 숫자 컬럼)
     [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22].forEach(
       (colNum) => {
         const cell = dataRow.getCell(colNum);
         cell.alignment = { horizontal: 'right', vertical: 'middle' };
-        if (typeof cell.value === 'number') {
-          cell.numFmt = '#,##0';
-        }
+        cell.numFmt = '#,##0'; // 조건 없이 모든 숫자 컬럼에 포맷 적용
       }
     );
 
     // 품명 왼쪽 정렬
     dataRow.getCell(2).alignment = { horizontal: 'left', vertical: 'middle' };
+
+    // 단위 중앙정렬
+    dataRow.getCell(4).alignment = { horizontal: 'center', vertical: 'middle' };
 
     currentRow++;
   });
