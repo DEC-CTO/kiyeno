@@ -9167,6 +9167,1290 @@ function generateIndirectCostRows() {
     `;
   });
 
+  // [전략기획팀] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[전략기획팀]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems34 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems34.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [전략기획팀] - 회의실-8인 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[전략기획팀] - 회의실-8인</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems35 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems35.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [CFO] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[CFO]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems36 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems36.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [오스카] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[오스카]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems37 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems37.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [로고] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[로고]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems38 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems38.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 16인-1] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 16인-1]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems39 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems39.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-9] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-9]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems40 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems40.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [OA-3] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[OA-3]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems41 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems41.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-10] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-10]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems42 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems42.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [CANTEEN] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[CANTEEN]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems43 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems43.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [서버룸] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[서버룸]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems44 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems44.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [자금 금고] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[자금 금고]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems45 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems45.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-11] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-11]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems46 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems46.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [CANTEEN] 서브섹션 (25.png)
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[CANTEEN]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems47 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems47.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 16인-2] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 16인-2]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems48 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems48.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-12] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-12]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems49 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems49.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-13] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-13]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems50 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems50.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [창고] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[창고]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems51 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems51.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-14] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-14]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems52 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems52.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
   return html;
 }
 
@@ -11769,6 +13053,853 @@ function generateEstimateDetailRowsData() {
   ];
 
   wallFinishItems33.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [전략기획팀] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[전략기획팀]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems34 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems34.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [전략기획팀] - 회의실-8인 서브섹션
+  rows.push({
+    no: '*',
+    name: '[전략기획팀] - 회의실-8인',
+    type: 'section-header',
+  });
+
+  const wallFinishItems35 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems35.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [CFO] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[CFO]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems36 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems36.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [오스카] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[오스카]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems37 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems37.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [로고] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[로고]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems38 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems38.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 16인-1] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 16인-1]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems39 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems39.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-9] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-9]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems40 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems40.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [OA-3] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[OA-3]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems41 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems41.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-10] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-10]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems42 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems42.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [CANTEEN] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[CANTEEN]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems43 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems43.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [서버룸] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[서버룸]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems44 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems44.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [자금 금고] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[자금 금고]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems45 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems45.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-11] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-11]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems46 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems46.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [CANTEEN] 서브섹션 (25.png)
+  rows.push({
+    no: '*',
+    name: '[CANTEEN]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems47 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems47.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 16인-2] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 16인-2]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems48 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems48.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-12] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-12]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems49 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems49.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-13] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-13]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems50 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems50.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [창고] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[창고]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems51 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems51.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-14] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-14]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems52 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems52.forEach((item) => {
     rows.push({
       no: item.no,
       name: item.name,
