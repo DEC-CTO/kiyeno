@@ -6426,7 +6426,7 @@ function generateIndirectCostRows() {
         </tr>
         <tr class="subtotal-row">
             <td></td>
-            <td class="left-align">A. 인테리어 설계비 SUB TORAL</td>
+            <td class="left-align">A. 인테리어 설계비 SUB TOTAL</td>
             <td></td>
             <td></td>
             <td></td>
@@ -6528,7 +6528,7 @@ function generateIndirectCostRows() {
   html += `
         <tr class="subtotal-row">
             <td></td>
-            <td class="left-align">B. 가설 및 공사준비 작업 SUB TORAL</td>
+            <td class="left-align">B. 가설 및 공사준비 작업 SUB TOTAL</td>
             <td></td>
             <td></td>
             <td></td>
@@ -6625,11 +6625,11 @@ function generateIndirectCostRows() {
     `;
   });
 
-  // C. 철거공사 SUB TORAL
+  // C. 철거공사 SUB TOTAL
   html += `
         <tr class="subtotal-row">
             <td></td>
-            <td class="left-align">C. 철거공사 SUB TORAL</td>
+            <td class="left-align">C. 철거공사 SUB TOTAL</td>
             <td></td>
             <td></td>
             <td></td>
@@ -6762,11 +6762,11 @@ function generateIndirectCostRows() {
     `;
   });
 
-  // 바닥공사 SUB TORAL
+  // 바닥공사 SUB TOTAL
   html += `
         <tr class="subtotal-row">
             <td></td>
-            <td class="left-align">바닥공사 SUB TORAL</td>
+            <td class="left-align">바닥공사 SUB TOTAL</td>
             <td></td>
             <td></td>
             <td></td>
@@ -6865,11 +6865,11 @@ function generateIndirectCostRows() {
     `;
   });
 
-  // 벽체공사 SUB TORAL
+  // 벽체공사 SUB TOTAL
   html += `
         <tr class="subtotal-row">
             <td></td>
-            <td class="left-align">벽체공사 SUB TORAL</td>
+            <td class="left-align">벽체공사 SUB TOTAL</td>
             <td></td>
             <td></td>
             <td></td>
@@ -10451,6 +10451,4162 @@ function generateIndirectCostRows() {
     `;
   });
 
+  // [OA-3] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[OA-3]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems53 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems53.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-15] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-15]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems54 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems54.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [창고] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[창고]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems55 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems55.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실 8인-16] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실 8인-16]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems56 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems56.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [사이먼] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[사이먼]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems57 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems57.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [코난] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[코난]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems58 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems58.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [디렉터룸-1] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[디렉터룸-1]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems59 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems59.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [디렉터룸-2] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[디렉터룸-2]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems60 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems60.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [윤리경영] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[윤리경영]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems61 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems61.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [디렉터룸-3] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[디렉터룸-3]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems62 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems62.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [디렉터룸-4] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[디렉터룸-4]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems63 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems63.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [공통공사] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[공통공사]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const wallFinishItems64 = [
+    { no: '', name: '신규벽체 도장', spec: 'ALL PUTTY 포함', unit: 'M2' },
+    { no: '', name: '기존벽체 재도장', spec: '전체면적의 *60%', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+    { no: '', name: 'FCU 재도장', spec: '전체면적의 *50%', unit: 'M2' },
+  ];
+
+  wallFinishItems64.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 벽체마감공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">벽체마감공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [D-4 유리벽체공사] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">D-4 유리벽체공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const glassWallItems = [
+    { no: '', name: 'STL FRAME', spec: 'ㅁ50*150', unit: 'M' },
+    { no: '', name: 'STL FRAME PAINT', spec: '', unit: 'M' },
+    { no: '', name: 'GLASS', spec: 'T:10', unit: 'M2' },
+    { no: '', name: 'FROST SHEET', spec: '', unit: 'M2' },
+    { no: '', name: 'TEMPERED GLASS 상부 보강', spec: 'ㅁ50*50', unit: 'M' },
+  ];
+
+  glassWallItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 유리벽체공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">유리벽체공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [D-5 창호 및 하드웨어 공사] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">D-5 창호 및 하드웨어 공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const windowHardwareItems = [
+    { no: '', name: 'GLASS DOOR', spec: '900*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '2000*2400', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '3740*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '4530*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '2000*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+  ];
+
+  windowHardwareItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [*HARD WARE*] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">*HARD WARE*</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const hardwareItems = [
+    { no: '', name: 'GLASS DOOR & H/W', spec: '', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & H/W', spec: '가마찌도어', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & H/W', spec: '편개', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & H/W', spec: '양개', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & H/W', spec: '', unit: 'EA' },
+    { no: '', name: 'SLIDING DOOR & H/W', spec: '', unit: 'EA' },
+  ];
+
+  hardwareItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 창호 및 하드웨어 공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">창호 및 하드웨어 공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [D-6 천정공사] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">D-6 천정공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const ceilingItems = [
+    { no: '', name: '기존 천정 보수 및 커튼박스몰딩도장', spec: '', unit: 'M2' },
+    { no: '', name: '**기커튼박스재사용**', spec: '', unit: '' },
+  ];
+
+  ceilingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 천정공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">천정공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [D-7 천정마감공사] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">D-7 천정마감공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [ENT-1.2] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[ENT-1.2]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const ent12Items = [
+    { no: '', name: '각파이프구조틀', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '구조철판 마감', spec: '', unit: 'M2' },
+    { no: '', name: '간접박스', spec: 'STL 50*50*50', unit: 'M' },
+    { no: '', name: '간접박스 도장', spec: 'STL 50*50*50', unit: 'M' },
+    { no: '', name: '구조철판 JOINT MOULDING', spec: '', unit: 'M' },
+  ];
+
+  ent12Items.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [PHONE RM.-1~12] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[PHONE RM.-1~12]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const phoneRmItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*1PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*1PLY', unit: 'M2' },
+    { no: '', name: '다노라인', spec: '', unit: 'M2' },
+    { no: '', name: '다노라인 취부', spec: '', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  phoneRmItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실10인실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실10인실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const meeting10Items = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  meeting10Items.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [회의실8인실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[회의실8인실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const meeting8Items = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  meeting8Items.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [미화실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[미화실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const cleaningRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '마이텍스', spec: '', unit: 'M2' },
+    { no: '', name: '마이텍스취부', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+  ];
+
+  cleaningRoomItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [CORRIDOR] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[CORRIDOR]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const corridorItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: 'JOINT MOULDING', spec: '', unit: 'M' },
+    { no: '', name: 'PAINT (부분퍼티포함)', spec: '', unit: 'M2' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  corridorItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [[CEO-ZONE]] 섹션 헤더
+  html += `
+    <tr>
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">[[CEO-ZONE]]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // [CEO 대기실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[CEO 대기실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const ceoWaitingRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  ceoWaitingRoomItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [ROOM] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[ROOM]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const roomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '팬덴트 타공 및 보강', spec: '', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  roomItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [STO] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[STO]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const stoItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  stoItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [화장실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[화장실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const bathroomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  bathroomItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [대표회의실] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[대표회의실]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const ceoConferenceRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 200*100*50', unit: 'M' },
+    { no: '', name: '간접박스', spec: 'STL 200*100*200', unit: 'M' },
+    { no: '', name: '간접박스 도장', spec: 'STL 200*100*200', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M2' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  ceoConferenceRoomItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // [[전락기획팀-ZONE]] 서브섹션
+  html += `
+    <tr>
+        <td>*</td>
+        <td class="left-align indent-1" style="font-weight: bold;">[[전락기획팀-ZONE]]</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const strategyPlanningZoneItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  strategyPlanningZoneItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 천정마감공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">천정마감공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // D-8 조명기구공사
+  html += `
+    <tr>
+        <td>D-8</td>
+        <td class="left-align" style="font-weight: bold;">조명기구공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const lightingItems = [
+    { no: '', name: 'LT-01', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-01-1', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-02', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-03', spec: '', unit: 'M' },
+    { no: '', name: 'LT-04', spec: '', unit: 'M' },
+    { no: '', name: 'PD-01', spec: '', unit: 'M' },
+    { no: '', name: 'PD-05', spec: '', unit: 'EA' },
+    { no: '', name: 'IL-01', spec: '', unit: 'M' },
+    { no: '', name: '기존조명 보완', spec: '', unit: 'LOT' },
+    { no: '', name: 'STAND LIGHT', spec: 'PHONE RM', unit: 'EA' },
+  ];
+
+  lightingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 조명기구공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">조명기구공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // D-9 블라인드공사
+  html += `
+    <tr>
+        <td>D-9</td>
+        <td class="left-align" style="font-weight: bold;">블라인드공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const blindItems = [
+    { no: '', name: '기존 블라인드 보수 및 수정', spec: '', unit: 'EA' },
+    { no: '', name: '지정 블라인드 / 시공', spec: '', unit: 'M2' },
+  ];
+
+  blindItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 블라인드공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">블라인드공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // D-10 실내싸인공사
+  html += `
+    <tr>
+        <td>D-10</td>
+        <td class="left-align" style="font-weight: bold;">실내싸인공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const interiorSignItems = [
+    { no: '', name: 'MAIN ENT SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'ROOM SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'PICTOGRAM SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'EVACUATION INFORMATION SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'GRAPHICS SHEET', spec: '', unit: 'LOT' },
+    { no: '', name: 'LOBOR COST', spec: '', unit: 'LOT' },
+    { no: '', name: '실내싸인보완작업', spec: '', unit: 'LOT' },
+  ];
+
+  interiorSignItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 실내싸인공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">실내싸인공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // E. 기계설비공사
+  html += `
+    <tr>
+        <td></td>
+        <td class="left-align" style="font-weight: bold;">E. 기계설비공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  // E-1 공조 및 환기덕트 공사
+  html += `
+    <tr>
+        <td>E-1</td>
+        <td class="left-align" style="font-weight: bold;">공조 및 환기덕트 공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const airConditioningItems = [
+    { no: '', name: '덕트제작 및 설치', spec: '0.5T', unit: 'M2' },
+    { no: '', name: '트랜스퍼덕트(내부 흡음재설치)', spec: '', unit: 'EA' },
+    { no: '', name: '원형디퓨져 신설', spec: 'ND200', unit: 'EA' },
+    { no: '', name: '보온플렉시블덕트', spec: '200mm', unit: 'M' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '덕트공', unit: '인' },
+    { no: '', name: '철거비', spec: '', unit: '식' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  airConditioningItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 공조 및 환기덕트 공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">공조 및 환기덕트 공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // E-2 위생설비 공사
+  html += `
+    <tr>
+        <td>E-2</td>
+        <td class="left-align" style="font-weight: bold;">위생설비 공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const sanitaryItems = [
+    { no: '', name: '양변기 외 휴지걸이 셋트', spec: '', unit: 'SET' },
+    { no: '', name: '세면기 셋트', spec: '', unit: 'SET' },
+    { no: '', name: '저탕식 전기온수기', spec: '15리터', unit: 'EA' },
+    { no: '', name: '싱크드레인펌프', spec: 'PD53', unit: 'EA' },
+    { no: '', name: '일반배관용 스테인리스 강관', spec: 'K-TYPE, D15', unit: 'M' },
+    { no: '', name: '일반배관용 스테인리스 강관', spec: 'K-TYPE, D25', unit: 'M' },
+    { no: '', name: '관부속(SR)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD15', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD25', unit: 'M' },
+    { no: '', name: '볼 밸브(STS)', spec: '10kg, D15', unit: 'EA' },
+    { no: '', name: '볼 밸브(STS)', spec: '10kg, D25', unit: 'EA' },
+    { no: '', name: '각압 밸브', spec: '냉온수 난사, 10kg, D15', unit: 'EA' },
+    { no: '', name: '원격검침기', spec: 'D25', unit: 'EA' },
+    { no: '', name: '배관배선', spec: '', unit: '식' },
+    { no: '', name: '프로그램 업그레이드', spec: '', unit: '식' },
+    { no: '', name: '일반용 경질염화비닐관', spec: 'PVC관(VG1,DRF) D50', unit: 'M' },
+    { no: '', name: '일반용 경질염화비닐관', spec: 'PVC관(VG1,DRF) D100', unit: 'M' },
+    { no: '', name: '관부속(DRF)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD100', unit: 'M' },
+    { no: '', name: '급수차단밸브', spec: '', unit: 'EA' },
+    { no: '', name: '누수탐지설비', spec: '', unit: 'EA' },
+    { no: '', name: 'STS판', spec: '', unit: 'EA' },
+    { no: '', name: '실링팬', spec: '', unit: 'EA' },
+    { no: '', name: '스파이럴덕트', spec: 'D150', unit: 'EA' },
+    { no: '', name: '스파이럴덕트 부속류', spec: '', unit: '식' },
+    { no: '', name: '벽체 코어링', spec: 'D150', unit: '개소' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '배관공', unit: '인' },
+    { no: '', name: '노무비', spec: '보통인부', unit: '인' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  sanitaryItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 위생설비 공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">위생설비 공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // E-3 기계 소화설비 공사
+  html += `
+    <tr>
+        <td>E-3</td>
+        <td class="left-align" style="font-weight: bold;">기계 소화설비 공사</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const fireExtinguishingItems = [
+    { no: '', name: '배관용 탄소강관', spec: 'D25', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D32', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D40', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D50', unit: 'M' },
+    { no: '', name: '관부속(강관)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD25', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD32', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD40', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD50', unit: 'M' },
+    { no: '', name: '소방용헤드(FLUSH-TV), 이설', spec: '하향식 72℃', unit: 'EA' },
+    { no: '', name: '소방용헤드(FLUSH-TV), 신설', spec: '하향식 72℃', unit: 'EA' },
+    { no: '', name: '후렉시블조인트(펌조)', spec: '2.3M', unit: 'SET' },
+    { no: '', name: '스프링클러 퇴수 및 중수비용', spec: '', unit: '식' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '배관공', unit: '인' },
+    { no: '', name: '노무비', spec: '보통인부', unit: '인' },
+    { no: '', name: '철거노무비', spec: '', unit: '식' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  fireExtinguishingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // 기계 소화설비 공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">기계 소화설비 공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td></td>
+    </tr>
+  `;
+
+  // E-4 기타
+  html += `
+    <tr>
+        <td>E-4</td>
+        <td class="left-align" style="font-weight: bold;">기타</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+  `;
+
+  const etcItems = [
+    { no: '', name: 'T.A.B', spec: '', unit: '식' },
+    { no: '', name: '[냉난방]', spec: '', unit: '' },
+    { no: '', name: '[냉난방]', spec: '', unit: '' },
+    { no: '', name: '1-WAY 카세트 실내기', spec: 'AM023BN1PBH1', unit: 'EA' },
+    { no: '', name: '1-WAY 카세트 실내기', spec: 'AM032BN1PBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM060BN4DBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM083BN4DBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM130BN4DBH1', unit: 'EA' },
+    { no: '', name: '1-WAY 판넬', spec: 'PC1NWSK3NW', unit: 'EA' },
+    { no: '', name: '4-WAY 판넬', spec: 'PC4NUFK1NW', unit: 'EA' },
+    { no: '', name: '표준형 냉난방 실외기', spec: 'AM180AXVGHH1', unit: 'EA' },
+    { no: '', name: '유선리모컨', spec: 'AWR-WE13N', unit: 'EA' },
+    { no: '', name: 'Y-분기관', spec: 'AXJ-YA2815M 外', unit: 'EA' },
+    { no: '', name: '16살 제어기', spec: 'ACM-A202DN', unit: 'EA' },
+    { no: '', name: '실외기 발칠대', spec: '멀티용', unit: 'EA' },
+  ];
+
+  etcItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align indent-1">${item.name}</td>
+            <td>${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+        </tr>
+    `;
+  });
+
+  // E-4 기타 추가 항목들
+  const additionalEtcItems = [
+    { no: '', name: '냉난방 설치공사비', spec: '신규라인', unit: '' },
+    { no: '', name: '냉매배관 공사비', spec: '동관,EPDM보온재作', unit: 'SET' },
+    { no: '', name: '드레인배관 공사비', spec: 'PVC,보온재作', unit: 'SET' },
+    { no: '', name: '실내기 통신공사', spec: 'CVVSB2.0SQx3C', unit: 'SET' },
+    { no: '', name: '냉매', spec: 'R-410', unit: 'LOT' },
+    { no: '', name: '기밀시험', spec: '질소차징', unit: 'SET' },
+    { no: '', name: '기타 공과잡비', spec: '행거,전산볼트外', unit: 'LOT' },
+    { no: '', name: '인건비', spec: '기계설치공', unit: '명' },
+    { no: '', name: '인건비', spec: '배관공', unit: '명' },
+    { no: '', name: '인건비', spec: '용접공', unit: '명' },
+    { no: '', name: '인건비', spec: '보온공', unit: '명' },
+    { no: '', name: '인건비', spec: '내전선공', unit: '명' },
+    { no: '', name: '인건비', spec: '보통인부', unit: '명' },
+    { no: '', name: '기타 공과잡비', spec: '공구손료 外', unit: 'LOT' },
+    { no: '', name: '이전설치', spec: '동관,EPDM보온재外 (장비벽경포함)', unit: 'SET' },
+    { no: '', name: '기타공사비', spec: '', unit: '' },
+    { no: '', name: '실외기 배관 COVER 및 TRAY', spec: '제작설치', unit: 'LOT' },
+    { no: '', name: '16살 제어공사', spec: '', unit: 'LOT' },
+    { no: '', name: '타공 공사비', spec: '', unit: 'LOT' },
+    { no: '', name: '실외기양중', spec: '크레인 및 도비비', unit: 'LOT' },
+    { no: '', name: '기타 공과잡비', spec: '', unit: 'LOT' },
+  ];
+
+  additionalEtcItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 기타 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">기타 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F. 전기공사
+  html += `
+    <tr>
+        <td>F.</td>
+        <td class="left-align" style="font-weight: bold;">전기공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-1 동력전원설비공사
+  html += `
+    <tr>
+        <td>F-1</td>
+        <td class="left-align" style="font-weight: bold;">동력전원설비공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const powerSupplyItems = [
+    { no: '', name: '450/750V 저독성난연가교폴리올레핀절연선', spec: 'HFIX, 4 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 10SQ * 4C', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 4SQ * 4C', unit: 'M' },
+    { no: '', name: '접지용전선', spec: 'F-GV 10SQ', unit: 'M' },
+    { no: '', name: '접지용전선', spec: 'F-GV 4SQ', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 22mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 28mm, 방수', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 36mm, 방수', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '풀박스', spec: '풀박스, 400*400*400mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 동근형-매입형, 접지', unit: '개' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관지지행거(단독)', spec: '28 C', unit: '개소' },
+    { no: '', name: '전선관지지행거(단독)', spec: '36 C', unit: '개소' },
+    { no: '', name: '실내기전원 이설', spec: '', unit: '식' },
+    { no: '', name: '분전함 신설', spec: 'LN-9-에어컨', unit: '식' },
+    { no: '', name: '분전함 이설', spec: 'LN-9-1F, 1E, 2G, 2F', unit: '식' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+  ];
+
+  powerSupplyItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // F-1 동력전원설비공사 추가 항목들
+  const additionalPowerSupplyItems = [
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalPowerSupplyItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 동력전원설비공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">동력전원설비공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-2 전열설비공사
+  html += `
+    <tr>
+        <td>F-2</td>
+        <td class="left-align" style="font-weight: bold;">전열설비공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const electricalHeatingItems = [
+    { no: '', name: '450/750V 저독성난연가교폴리올레핀절연선', spec: 'HFIX, 4 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 4SQ * 3C', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 22mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '풀박스', spec: '300*300*200', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 동근형-매입형, 접지', unit: '개' },
+    { no: '', name: '콘센트', spec: '방수콘센트, 2구, 15A, 250V', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 노출', unit: '개' },
+    { no: '', name: '플러그', spec: '노출, 15A, 250V', unit: '개' },
+    { no: '', name: '석고구멍따기', spec: '', unit: '개소' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+  ];
+
+  electricalHeatingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // F-2 전열설비공사 추가 항목들
+  const additionalElectricalHeatingItems = [
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalElectricalHeatingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 전열설비공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">전열설비공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-3 전등설비공사
+  html += `
+    <tr>
+        <td>F-3</td>
+        <td class="left-align" style="font-weight: bold;">전등설비공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const lightingEquipmentItems = [
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 2.5SQ * 3C', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '스위치', spec: '1구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: '2구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: '3구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: 'PROGRAM S/W , 4구 , 매입형', unit: '개' },
+    { no: '', name: '석고구멍따기', spec: '', unit: '개소' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+  ];
+
+  lightingEquipmentItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // F-3 전등설비공사 추가 항목들
+  const additionalLightingEquipmentItems = [
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalLightingEquipmentItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 전등설비공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">전등설비공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-4 철거맞이설공사
+  html += `
+    <tr>
+        <td>F-4</td>
+        <td class="left-align" style="font-weight: bold;">철거맞이설공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const dismantlingItems = [
+    { no: '', name: '철거 및 이설', spec: '', unit: '식' },
+  ];
+
+  dismantlingItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 철거맞이설공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">철거맞이설공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-5 자탐 및 유도등공사
+  html += `
+    <tr>
+        <td>F-5</td>
+        <td class="left-align" style="font-weight: bold;">자탐 및 유도등공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const smokeDetectorGuideItems = [
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '케이블', spec: 'TSP AWG16', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '연기감지기', spec: '', unit: '개' },
+    { no: '', name: '유도등', spec: '유도등, 천정형(단면), 60분용, 피난구유도등, 고휘도, LED', unit: '개' },
+    { no: '', name: '유도등', spec: '유도등, 중형(단면), 60분용, 피난구유도등, 고휘도, LED', unit: '개' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+  ];
+
+  smokeDetectorGuideItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // F-5 자탐 및 유도등공사 추가 항목들
+  const additionalSmokeDetectorGuideItems = [
+    { no: '', name: '내선전공', spec: '알박공사 직종', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalSmokeDetectorGuideItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 자탐 및 유도등공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">자탐 및 유도등공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // F-6 전관방송설비공사
+  html += `
+    <tr>
+        <td>F-6</td>
+        <td class="left-align" style="font-weight: bold;">전관방송설비공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const broadcastEquipmentItems = [
+    { no: '', name: '스피커', spec: '천정형', unit: '개' },
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '케이블', spec: 'TSP AWG16', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '내선전공', spec: '알박공사 직종', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  broadcastEquipmentItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // 전관방송설비공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">전관방송설비공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // G. 재작가구공사
+  html += `
+    <tr>
+        <td>G.</td>
+        <td class="left-align" style="font-weight: bold;">재작가구공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const customFurnitureItems = [
+    { no: '', name: 'Table 1~13', spec: 'D:500*H:750', unit: 'M' },
+  ];
+
+  customFurnitureItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // G. 재작가구공사 추가 항목들
+  const additionalCustomFurnitureItems = [
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: 'OA상부장-1', spec: 'W:4300', unit: 'SET' },
+    { no: '', name: 'OA하부장-1', spec: 'W:2560', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: 'OA상부장-2', spec: '1820*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-2', spec: '1820*600*2650', unit: 'SET' },
+    { no: '', name: 'Booth Sofa', spec: '1610*700*850', unit: 'SET' },
+    { no: '', name: 'Booth Table', spec: '1610*600*750', unit: 'SET' },
+    { no: '', name: 'OA상부장-3', spec: '1600*350*750', unit: 'SET' },
+    { no: '', name: '붙박이장', spec: '2100*750*2600', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '세면대 하부장', spec: 'W:2400', unit: 'SET' },
+    { no: '', name: '안내데스크', spec: '2600*800*1100', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: 'OA상부장-4', spec: '1250*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-4', spec: '1250*600*2650', unit: 'SET' },
+    { no: '', name: 'OA상부장-5', spec: '3560*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-5', spec: '1820*600*850', unit: 'SET' },
+  ];
+
+  additionalCustomFurnitureItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // G. 재작가구공사 추가 항목들 (54.png)
+  const moreCustomFurnitureItems = [
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: 'OA상부장-6', spec: '1760*350*750', unit: 'SET' },
+    { no: '', name: '캐비닛', spec: 'W:3600', unit: 'SET' },
+    { no: '', name: '운반비 및 셋팅비', spec: '', unit: '식' },
+  ];
+
+  moreCustomFurnitureItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // G. 재작가구공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">G. 재작가구공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // H. 이동식가구공사
+  html += `
+    <tr>
+        <td>H.</td>
+        <td class="left-align" style="font-weight: bold;">이동식가구공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // H. 이동식가구공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">H. 이동식가구공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  // I. 기타공사
+  html += `
+    <tr>
+        <td>I.</td>
+        <td class="left-align" style="font-weight: bold;">기타공사</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
+  const otherConstructionItems = [
+    { no: '', name: '기존사방실 철거(FMS 판넬 철거)', spec: '', unit: '식' },
+  ];
+
+  otherConstructionItems.forEach((item) => {
+    html += `
+        <tr>
+            <td>${item.no}</td>
+            <td class="left-align">${item.name}</td>
+            <td class="left-align">${item.spec}</td>
+            <td>${item.unit}</td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="left-align"></td>
+        </tr>
+    `;
+  });
+
+  // I. 기타공사 SUB TOTAL
+  html += `
+    <tr class="subtotal-row">
+        <td></td>
+        <td class="left-align" style="padding-left: 20px;">I. 기타공사 SUB TOTAL</td>
+        <td></td>
+        <td></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="number-cell"></td>
+        <td class="left-align"></td>
+    </tr>
+  `;
+
   return html;
 }
 
@@ -11238,7 +15394,7 @@ function generateEstimateDetailRowsData() {
 
   rows.push({
     no: '',
-    name: 'A. 인테리어 설계비 SUB TORAL',
+    name: 'A. 인테리어 설계비 SUB TOTAL',
     spec: '',
     unit: '',
     quantity: '',
@@ -11316,7 +15472,7 @@ function generateEstimateDetailRowsData() {
 
   rows.push({
     no: '',
-    name: 'B. 가설 및 공사준비 작업 SUB TORAL',
+    name: 'B. 가설 및 공사준비 작업 SUB TOTAL',
     spec: '',
     unit: '',
     quantity: '',
@@ -11388,7 +15544,7 @@ function generateEstimateDetailRowsData() {
 
   rows.push({
     no: '',
-    name: 'C. 철거공사 SUB TORAL',
+    name: 'C. 철거공사 SUB TOTAL',
     spec: '',
     unit: '',
     quantity: '',
@@ -11479,10 +15635,10 @@ function generateEstimateDetailRowsData() {
     });
   });
 
-  // 바닥공사 SUB TORAL
+  // 바닥공사 SUB TOTAL
   rows.push({
     no: '',
-    name: '바닥공사 SUB TORAL',
+    name: '바닥공사 SUB TOTAL',
     spec: '',
     unit: '',
     quantity: '',
@@ -11558,10 +15714,10 @@ function generateEstimateDetailRowsData() {
     });
   });
 
-  // 벽체공사 SUB TORAL
+  // 벽체공사 SUB TOTAL
   rows.push({
     no: '',
-    name: '벽체공사 SUB TORAL',
+    name: '벽체공사 SUB TOTAL',
     spec: '',
     unit: '',
     quantity: '',
@@ -13926,6 +18082,2949 @@ function generateEstimateDetailRowsData() {
       remark2: '',
       type: 'item',
     });
+  });
+
+  // [OA-3] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[OA-3]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems53 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '타공판넬설치', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems53.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-15] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-15]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems54 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems54.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [창고] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[창고]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems55 = [
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems55.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실 8인-16] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실 8인-16]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems56 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems56.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [사이먼] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[사이먼]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems57 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems57.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [코난] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[코난]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems58 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems58.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [디렉터룸-1] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[디렉터룸-1]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems59 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems59.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [디렉터룸-2] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[디렉터룸-2]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems60 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems60.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [윤리경영] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[윤리경영]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems61 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems61.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [디렉터룸-3] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[디렉터룸-3]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems62 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems62.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [디렉터룸-4] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[디렉터룸-4]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems63 = [
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS', spec: '', unit: 'M2' },
+    { no: '', name: 'BACK PAINT GLASS 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+  ];
+
+  wallFinishItems63.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [공통공사] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[공통공사]',
+    type: 'section-header',
+  });
+
+  const wallFinishItems64 = [
+    { no: '', name: '신규벽체 도장', spec: 'ALL PUTTY 포함', unit: 'M2' },
+    { no: '', name: '기존벽체 재도장', spec: '전체면적의 *60%', unit: 'M2' },
+    { no: '', name: '걸레받이', spec: '', unit: 'M' },
+    { no: '', name: 'FCU 재도장', spec: '전체면적의 *50%', unit: 'M2' },
+  ];
+
+  wallFinishItems64.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 벽체마감공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '벽체마감공사 SUB TOTAL',
+    type: 'subtotal',
+  });
+
+  // D-4 유리벽체공사 서브섹션
+  rows.push({
+    no: '*',
+    name: 'D-4 유리벽체공사',
+    type: 'section-header',
+  });
+
+  const glassWallItems = [
+    { no: '', name: 'STL FRAME', spec: 'ㅁ50*150', unit: 'M' },
+    { no: '', name: 'STL FRAME PAINT', spec: '', unit: 'M' },
+    { no: '', name: 'GLASS', spec: 'T:10', unit: 'M2' },
+    { no: '', name: 'FROST SHEET', spec: '', unit: 'M2' },
+    { no: '', name: 'TEMPERED GLASS 상부 보강', spec: 'ㅁ50*50', unit: 'M' },
+  ];
+
+  glassWallItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 유리벽체공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '유리벽체공사 SUB TOTAL',
+    type: 'subtotal',
+  });
+
+  // D-5 창호 및 하드웨어 공사 서브섹션
+  rows.push({
+    no: '*',
+    name: 'D-5 창호 및 하드웨어 공사',
+    type: 'section-header',
+  });
+
+  const windowHardwareItems = [
+    { no: '', name: 'GLASS DOOR', spec: '900*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR - >가마찌도어', spec: '850*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '2000*2400', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '3740*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '4530*2600', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & FRAME', spec: '2000*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & FRAME', spec: '960*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'WOOD SLIDING DOOR & FRAME', spec: '950*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & FRAME + H/W포함', spec: '1650*2600', unit: 'EA' },
+  ];
+
+  windowHardwareItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // *HARD WARE* 서브섹션
+  rows.push({
+    no: '*',
+    name: '*HARD WARE*',
+    type: 'section-header',
+  });
+
+  const hardwareItems = [
+    { no: '', name: 'GLASS DOOR & H/W', spec: '', unit: 'EA' },
+    { no: '', name: 'GLASS DOOR & H/W', spec: '가마찌도어', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & H/W', spec: '편개', unit: 'EA' },
+    { no: '', name: 'AUTO DOOR & H/W', spec: '양개', unit: 'EA' },
+    { no: '', name: 'WOOD DOOR & H/W', spec: '', unit: 'EA' },
+    { no: '', name: 'SLIDING DOOR & H/W', spec: '', unit: 'EA' },
+  ];
+
+  hardwareItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 창호 및 하드웨어 공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '창호 및 하드웨어 공사 SUB TOTAL',
+    type: 'subtotal',
+  });
+
+  // D-6 천정공사 서브섹션
+  rows.push({
+    no: '*',
+    name: 'D-6 천정공사',
+    type: 'section-header',
+  });
+
+  const ceilingItems = [
+    { no: '', name: '기존 천정 보수 및 커튼박스몰딩도장', spec: '', unit: 'M2' },
+    { no: '', name: '**기커튼박스재사용**', spec: '', unit: '' },
+  ];
+
+  ceilingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 천정공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '천정공사 SUB TOTAL',
+    type: 'subtotal',
+  });
+
+  // D-7 천정마감공사 서브섹션
+  rows.push({
+    no: '*',
+    name: 'D-7 천정마감공사',
+    type: 'section-header',
+  });
+
+  // [ENT-1.2] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[ENT-1.2]',
+    type: 'section-header',
+  });
+
+  const ent12Items = [
+    { no: '', name: '각파이프구조틀', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '합판보강', spec: '', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '패브릭판넬 취부', spec: 'MDF+패브릭', unit: 'M2' },
+    { no: '', name: '구조철판 마감', spec: '', unit: 'M2' },
+    { no: '', name: '간접박스', spec: 'STL 50*50*50', unit: 'M' },
+    { no: '', name: '간접박스 도장', spec: 'STL 50*50*50', unit: 'M' },
+    { no: '', name: '구조철판 JOINT MOULDING', spec: '', unit: 'M' },
+  ];
+
+  ent12Items.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [PHONE RM.-1~12] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[PHONE RM.-1~12]',
+    type: 'section-header',
+  });
+
+  const phoneRmItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*1PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*1PLY', unit: 'M2' },
+    { no: '', name: '다노라인', spec: '', unit: 'M2' },
+    { no: '', name: '다노라인 취부', spec: '', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  phoneRmItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실10인실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실10인실]',
+    type: 'section-header',
+  });
+
+  const meeting10Items = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  meeting10Items.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [회의실8인실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[회의실8인실]',
+    type: 'section-header',
+  });
+
+  const meeting8Items = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  meeting8Items.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [미화실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[미화실]',
+    type: 'section-header',
+  });
+
+  const cleaningRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '마이텍스', spec: '', unit: 'M2' },
+    { no: '', name: '마이텍스취부', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+  ];
+
+  cleaningRoomItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [CORRIDOR] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[CORRIDOR]',
+    type: 'section-header',
+  });
+
+  const corridorItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: 'JOINT MOULDING', spec: '', unit: 'M' },
+    { no: '', name: 'PAINT (부분퍼티포함)', spec: '', unit: 'M2' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'ST\'L 450*450', unit: 'EA' },
+  ];
+
+  corridorItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [[CEO-ZONE]] 섹션 헤더
+  rows.push({
+    no: '',
+    name: '[[CEO-ZONE]]',
+    type: 'section-header',
+  });
+
+  // [CEO 대기실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[CEO 대기실]',
+    type: 'section-header',
+  });
+
+  const ceoWaitingRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  ceoWaitingRoomItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [ROOM] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[ROOM]',
+    type: 'section-header',
+  });
+
+  const roomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '팬덴트 타공 및 보강', spec: '', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  roomItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [STO] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[STO]',
+    type: 'section-header',
+  });
+
+  const stoItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  stoItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [화장실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[화장실]',
+    type: 'section-header',
+  });
+
+  const bathroomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 300*200*100*50', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  bathroomItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [대표회의실] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[대표회의실]',
+    type: 'section-header',
+  });
+
+  const ceoConferenceRoomItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: '간접등박스', spec: 'STL 200*100*50', unit: 'M' },
+    { no: '', name: '간접등박스 도장', spec: 'STL 200*100*50', unit: 'M' },
+    { no: '', name: '간접박스', spec: 'STL 200*100*200', unit: 'M' },
+    { no: '', name: '간접박스 도장', spec: 'STL 200*100*200', unit: 'M' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M2' },
+    { no: '', name: '라인디퓨져', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '라인디퓨져 취부', spec: 'STL 30*30*30*30*30 (이중) + 타공판포함', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  ceoConferenceRoomItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // [[전락기획팀-ZONE]] 서브섹션
+  rows.push({
+    no: '*',
+    name: '[[전락기획팀-ZONE]]',
+    type: 'section-header',
+  });
+
+  const strategyPlanningZoneItems = [
+    { no: '', name: '경량천정구조틀', spec: 'M-BAR', unit: 'M2' },
+    { no: '', name: '석고보드', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: '석고보드 취부', spec: '9.5T*2PLY', unit: 'M2' },
+    { no: '', name: 'ALL PUTTY', spec: '', unit: 'M2' },
+    { no: '', name: 'PAINT', spec: '', unit: 'M2' },
+    { no: '', name: 'AL 몰딩', spec: '', unit: 'M' },
+    { no: '', name: '디퓨져 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '등기구 타공 및 보강', spec: '', unit: 'M2' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+    { no: '', name: '점검구', spec: 'STL 450*450', unit: 'EA' },
+  ];
+
+  strategyPlanningZoneItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 천정마감공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '천정마감공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // D-8 조명기구공사
+  rows.push({
+    no: 'D-8',
+    name: '조명기구공사',
+    type: 'section-header',
+  });
+
+  const lightingItems = [
+    { no: '', name: 'LT-01', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-01-1', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-02', spec: '', unit: 'EA' },
+    { no: '', name: 'LT-03', spec: '', unit: 'M' },
+    { no: '', name: 'LT-04', spec: '', unit: 'M' },
+    { no: '', name: 'PD-01', spec: '', unit: 'M' },
+    { no: '', name: 'PD-05', spec: '', unit: 'EA' },
+    { no: '', name: 'IL-01', spec: '', unit: 'M' },
+    { no: '', name: '기존조명 보완', spec: '', unit: 'LOT' },
+    { no: '', name: 'STAND LIGHT', spec: 'PHONE RM', unit: 'EA' },
+  ];
+
+  lightingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 조명기구공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '조명기구공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // D-9 블라인드공사
+  rows.push({
+    no: 'D-9',
+    name: '블라인드공사',
+    type: 'section-header',
+  });
+
+  const blindItems = [
+    { no: '', name: '기존 블라인드 보수 및 수정', spec: '', unit: 'EA' },
+    { no: '', name: '지정 블라인드 / 시공', spec: '', unit: 'M2' },
+  ];
+
+  blindItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 블라인드공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '블라인드공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // D-10 실내싸인공사
+  rows.push({
+    no: 'D-10',
+    name: '실내싸인공사',
+    type: 'section-header',
+  });
+
+  const interiorSignItems = [
+    { no: '', name: 'MAIN ENT SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'ROOM SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'PICTOGRAM SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'EVACUATION INFORMATION SIGN', spec: '', unit: 'LOT' },
+    { no: '', name: 'GRAPHICS SHEET', spec: '', unit: 'LOT' },
+    { no: '', name: 'LOBOR COST', spec: '', unit: 'LOT' },
+    { no: '', name: '실내싸인보완작업', spec: '', unit: 'LOT' },
+  ];
+
+  interiorSignItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 실내싸인공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '실내싸인공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // E. 기계설비공사
+  rows.push({
+    no: '',
+    name: 'E. 기계설비공사',
+    type: 'section-header',
+  });
+
+  // E-1 공조 및 환기덕트 공사
+  rows.push({
+    no: 'E-1',
+    name: '공조 및 환기덕트 공사',
+    type: 'section-header',
+  });
+
+  const airConditioningItems = [
+    { no: '', name: '덕트제작 및 설치', spec: '0.5T', unit: 'M2' },
+    { no: '', name: '트랜스퍼덕트(내부 흡음재설치)', spec: '', unit: 'EA' },
+    { no: '', name: '원형디퓨져 신설', spec: 'ND200', unit: 'EA' },
+    { no: '', name: '보온플렉시블덕트', spec: '200mm', unit: 'M' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '덕트공', unit: '인' },
+    { no: '', name: '철거비', spec: '', unit: '식' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  airConditioningItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 공조 및 환기덕트 공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '공조 및 환기덕트 공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // E-2 위생설비 공사
+  rows.push({
+    no: 'E-2',
+    name: '위생설비 공사',
+    type: 'section-header',
+  });
+
+  const sanitaryItems = [
+    { no: '', name: '양변기 외 휴지걸이 셋트', spec: '', unit: 'SET' },
+    { no: '', name: '세면기 셋트', spec: '', unit: 'SET' },
+    { no: '', name: '저탕식 전기온수기', spec: '15리터', unit: 'EA' },
+    { no: '', name: '싱크드레인펌프', spec: 'PD53', unit: 'EA' },
+    { no: '', name: '일반배관용 스테인리스 강관', spec: 'K-TYPE, D15', unit: 'M' },
+    { no: '', name: '일반배관용 스테인리스 강관', spec: 'K-TYPE, D25', unit: 'M' },
+    { no: '', name: '관부속(SR)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD15', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD25', unit: 'M' },
+    { no: '', name: '볼 밸브(STS)', spec: '10kg, D15', unit: 'EA' },
+    { no: '', name: '볼 밸브(STS)', spec: '10kg, D25', unit: 'EA' },
+    { no: '', name: '각압 밸브', spec: '냉온수 난사, 10kg, D15', unit: 'EA' },
+    { no: '', name: '원격검침기', spec: 'D25', unit: 'EA' },
+    { no: '', name: '배관배선', spec: '', unit: '식' },
+    { no: '', name: '프로그램 업그레이드', spec: '', unit: '식' },
+    { no: '', name: '일반용 경질염화비닐관', spec: 'PVC관(VG1,DRF) D50', unit: 'M' },
+    { no: '', name: '일반용 경질염화비닐관', spec: 'PVC관(VG1,DRF) D100', unit: 'M' },
+    { no: '', name: '관부속(DRF)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '13TxD100', unit: 'M' },
+    { no: '', name: '급수차단밸브', spec: '', unit: 'EA' },
+    { no: '', name: '누수탐지설비', spec: '', unit: 'EA' },
+    { no: '', name: 'STS판', spec: '', unit: 'EA' },
+    { no: '', name: '실링팬', spec: '', unit: 'EA' },
+    { no: '', name: '스파이럴덕트', spec: 'D150', unit: 'EA' },
+    { no: '', name: '스파이럴덕트 부속류', spec: '', unit: '식' },
+    { no: '', name: '벽체 코어링', spec: 'D150', unit: '개소' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '배관공', unit: '인' },
+    { no: '', name: '노무비', spec: '보통인부', unit: '인' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  sanitaryItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 위생설비 공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '위생설비 공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // E-3 기계 소화설비 공사
+  rows.push({
+    no: 'E-3',
+    name: '기계 소화설비 공사',
+    type: 'section-header',
+  });
+
+  const fireExtinguishingItems = [
+    { no: '', name: '배관용 탄소강관', spec: 'D25', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D32', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D40', unit: 'M' },
+    { no: '', name: '배관용 탄소강관', spec: 'D50', unit: 'M' },
+    { no: '', name: '관부속(강관)', spec: '', unit: '식' },
+    { no: '', name: '지지철물', spec: '', unit: '식' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD25', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD32', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD40', unit: 'M' },
+    { no: '', name: '관보온(EPDM+메직)', spec: '25TxD50', unit: 'M' },
+    { no: '', name: '소방용헤드(FLUSH-TV), 이설', spec: '하향식 72℃', unit: 'EA' },
+    { no: '', name: '소방용헤드(FLUSH-TV), 신설', spec: '하향식 72℃', unit: 'EA' },
+    { no: '', name: '후렉시블조인트(펌조)', spec: '2.3M', unit: 'SET' },
+    { no: '', name: '스프링클러 퇴수 및 중수비용', spec: '', unit: '식' },
+    { no: '', name: '잡자재비', spec: '', unit: '식' },
+    { no: '', name: '노무비', spec: '배관공', unit: '인' },
+    { no: '', name: '노무비', spec: '보통인부', unit: '인' },
+    { no: '', name: '철거노무비', spec: '', unit: '식' },
+    { no: '', name: '공구손료', spec: '', unit: '식' },
+  ];
+
+  fireExtinguishingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 기계 소화설비 공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '기계 소화설비 공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // E-4 기타
+  rows.push({
+    no: 'E-4',
+    name: '기타',
+    type: 'section-header',
+  });
+
+  const etcItems = [
+    { no: '', name: 'T.A.B', spec: '', unit: '식' },
+    { no: '', name: '[냉난방]', spec: '', unit: '' },
+    { no: '', name: '[냉난방]', spec: '', unit: '' },
+    { no: '', name: '1-WAY 카세트 실내기', spec: 'AM023BN1PBH1', unit: 'EA' },
+    { no: '', name: '1-WAY 카세트 실내기', spec: 'AM032BN1PBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM060BN4DBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM083BN4DBH1', unit: 'EA' },
+    { no: '', name: '4-WAY 카세트 실내기', spec: 'AM130BN4DBH1', unit: 'EA' },
+    { no: '', name: '1-WAY 판넬', spec: 'PC1NWSK3NW', unit: 'EA' },
+    { no: '', name: '4-WAY 판넬', spec: 'PC4NUFK1NW', unit: 'EA' },
+    { no: '', name: '표준형 냉난방 실외기', spec: 'AM180AXVGHH1', unit: 'EA' },
+    { no: '', name: '유선리모컨', spec: 'AWR-WE13N', unit: 'EA' },
+    { no: '', name: 'Y-분기관', spec: 'AXJ-YA2815M 外', unit: 'EA' },
+    { no: '', name: '16살 제어기', spec: 'ACM-A202DN', unit: 'EA' },
+    { no: '', name: '실외기 발칠대', spec: '멀티용', unit: 'EA' },
+  ];
+
+  etcItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalEtcItems = [
+    { no: '', name: '냉난방 설치공사비', spec: '신규라인', unit: '' },
+    { no: '', name: '냉매배관 공사비', spec: '동관,EPDM보온재作', unit: 'SET' },
+    { no: '', name: '드레인배관 공사비', spec: 'PVC,보온재作', unit: 'SET' },
+    { no: '', name: '실내기 통신공사', spec: 'CVVSB2.0SQx3C', unit: 'SET' },
+    { no: '', name: '냉매', spec: 'R-410', unit: 'LOT' },
+    { no: '', name: '기밀시험', spec: '질소차징', unit: 'SET' },
+    { no: '', name: '기타 공과잡비', spec: '행거,전산볼트外', unit: 'LOT' },
+    { no: '', name: '인건비', spec: '기계설치공', unit: '명' },
+    { no: '', name: '인건비', spec: '배관공', unit: '명' },
+    { no: '', name: '인건비', spec: '용접공', unit: '명' },
+    { no: '', name: '인건비', spec: '보온공', unit: '명' },
+    { no: '', name: '인건비', spec: '내전선공', unit: '명' },
+    { no: '', name: '인건비', spec: '보통인부', unit: '명' },
+    { no: '', name: '기타 공과잡비', spec: '공구손료 外', unit: 'LOT' },
+    { no: '', name: '이전설치', spec: '동관,EPDM보온재外 (장비벽경포함)', unit: 'SET' },
+    { no: '', name: '기타공사비', spec: '', unit: '' },
+    { no: '', name: '실외기 배관 COVER 및 TRAY', spec: '제작설치', unit: 'LOT' },
+    { no: '', name: '16살 제어공사', spec: '', unit: 'LOT' },
+    { no: '', name: '타공 공사비', spec: '', unit: 'LOT' },
+    { no: '', name: '실외기양중', spec: '크레인 및 도비비', unit: 'LOT' },
+    { no: '', name: '기타 공과잡비', spec: '', unit: 'LOT' },
+  ];
+
+  additionalEtcItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 기타 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '기타 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F. 전기공사
+  rows.push({
+    no: 'F.',
+    name: '전기공사',
+    type: 'section-header',
+  });
+
+  // F-1 동력전원설비공사
+  rows.push({
+    no: 'F-1',
+    name: '동력전원설비공사',
+    type: 'section-header',
+  });
+
+  const powerSupplyItems = [
+    { no: '', name: '450/750V 저독성난연가교폴리올레핀절연선', spec: 'HFIX, 4 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 10SQ * 4C', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 4SQ * 4C', unit: 'M' },
+    { no: '', name: '접지용전선', spec: 'F-GV 10SQ', unit: 'M' },
+    { no: '', name: '접지용전선', spec: 'F-GV 4SQ', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 22mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 28mm, 방수', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 36mm, 방수', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '풀박스', spec: '풀박스, 400*400*400mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 동근형-매입형, 접지', unit: '개' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관지지행거(단독)', spec: '28 C', unit: '개소' },
+    { no: '', name: '전선관지지행거(단독)', spec: '36 C', unit: '개소' },
+    { no: '', name: '실내기전원 이설', spec: '', unit: '식' },
+    { no: '', name: '분전함 신설', spec: 'LN-9-에어컨', unit: '식' },
+    { no: '', name: '분전함 이설', spec: 'LN-9-1F, 1E, 2G, 2F', unit: '식' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+  ];
+
+  powerSupplyItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalPowerSupplyItems = [
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalPowerSupplyItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 동력전원설비공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '동력전원설비공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F-2 전열설비공사
+  rows.push({
+    no: 'F-2',
+    name: '전열설비공사',
+    type: 'section-header',
+  });
+
+  const electricalHeatingItems = [
+    { no: '', name: '450/750V 저독성난연가교폴리올레핀절연선', spec: 'HFIX, 4 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 4SQ * 3C', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 22mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '풀박스', spec: '300*300*200', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 동근형-매입형, 접지', unit: '개' },
+    { no: '', name: '콘센트', spec: '방수콘센트, 2구, 15A, 250V', unit: '개' },
+    { no: '', name: '콘센트', spec: '콘센트, 2구, 15A, 250V, 노출', unit: '개' },
+    { no: '', name: '플러그', spec: '노출, 15A, 250V', unit: '개' },
+    { no: '', name: '석고구멍따기', spec: '', unit: '개소' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+  ];
+
+  electricalHeatingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalElectricalHeatingItems = [
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalElectricalHeatingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 전열설비공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '전열설비공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F-3 전등설비공사
+  rows.push({
+    no: 'F-3',
+    name: '전등설비공사',
+    type: 'section-header',
+  });
+
+  const lightingEquipmentItems = [
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '난연전력케이블', spec: 'F-CV 2.5SQ * 3C', unit: 'M' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 중형4각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 4각, 평', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '스위치', spec: '1구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: '2구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: '3구 , 매입형', unit: '개' },
+    { no: '', name: '스위치', spec: 'PROGRAM S/W , 4구 , 매입형', unit: '개' },
+    { no: '', name: '석고구멍따기', spec: '', unit: '개소' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '노무비', spec: '내선전공', unit: '인' },
+  ];
+
+  lightingEquipmentItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalLightingEquipmentItems = [
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalLightingEquipmentItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 전등설비공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '전등설비공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F-4 철거맞이설공사
+  rows.push({
+    no: 'F-4',
+    name: '철거맞이설공사',
+    type: 'section-header',
+  });
+
+  const dismantlingItems = [
+    { no: '', name: '철거 및 이설', spec: '', unit: '식' },
+  ];
+
+  dismantlingItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 철거맞이설공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '철거맞이설공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F-5 자탐 및 유도등공사
+  rows.push({
+    no: 'F-5',
+    name: '자탐 및 유도등공사',
+    type: 'section-header',
+  });
+
+  const smokeDetectorGuideItems = [
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '케이블', spec: 'TSP AWG16', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '연기감지기', spec: '', unit: '개' },
+    { no: '', name: '유도등', spec: '유도등, 천정형(단면), 60분용, 피난구유도등, 고휘도, LED', unit: '개' },
+    { no: '', name: '유도등', spec: '유도등, 중형(단면), 60분용, 피난구유도등, 고휘도, LED', unit: '개' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수, 콘넥터', unit: '개' },
+    { no: '', name: '전선관지지행거(단독)', spec: '16 C', unit: '개소' },
+  ];
+
+  smokeDetectorGuideItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalSmokeDetectorGuideItems = [
+    { no: '', name: '내선전공', spec: '알박공사 직종', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  additionalSmokeDetectorGuideItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 자탐 및 유도등공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '자탐 및 유도등공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // F-6 전관방송설비공사
+  rows.push({
+    no: 'F-6',
+    name: '전관방송설비공사',
+    type: 'section-header',
+  });
+
+  const broadcastEquipmentItems = [
+    { no: '', name: '스피커', spec: '천정형', unit: '개' },
+    { no: '', name: '저독성난연케이블', spec: 'HFIX, 2.5 ㎟', unit: 'M' },
+    { no: '', name: '케이블', spec: 'TSP AWG16', unit: 'M' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 8각, 54mm', unit: '개' },
+    { no: '', name: '아웃렛박스', spec: '아웃렛박스, 커버, 8각, 평형', unit: '개' },
+    { no: '', name: '강제전선관', spec: '강제전선관, 후강전선관, 아연도, 16mm', unit: 'M' },
+    { no: '', name: '1종금속제가요전선관', spec: '1종금속제가요전선관, 16mm, 비방수', unit: 'M' },
+    { no: '', name: '전선관부속품비', spec: '전선관의 %', unit: '식' },
+    { no: '', name: '잡재료비', spec: '배관배선의 %', unit: '식' },
+    { no: '', name: '내선전공', spec: '알박공사 직종', unit: '인' },
+    { no: '', name: '노무비', spec: '저압케이블전공', unit: '인' },
+    { no: '', name: '공구손료', spec: '인력품의 %', unit: '식' },
+  ];
+
+  broadcastEquipmentItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // 전관방송설비공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: '전관방송설비공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // G. 재작가구공사
+  rows.push({
+    no: 'G.',
+    name: '재작가구공사',
+    type: 'section-header',
+  });
+
+  const customFurnitureItems = [
+    { no: '', name: 'Table 1~13', spec: 'D:500*H:750', unit: 'M' },
+  ];
+
+  customFurnitureItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const additionalCustomFurnitureItems = [
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: 'OA상부장-1', spec: 'W:4300', unit: 'SET' },
+    { no: '', name: 'OA하부장-1', spec: 'W:2560', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: 'OA상부장-2', spec: '1820*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-2', spec: '1820*600*2650', unit: 'SET' },
+    { no: '', name: 'Booth Sofa', spec: '1610*700*850', unit: 'SET' },
+    { no: '', name: 'Booth Table', spec: '1610*600*750', unit: 'SET' },
+    { no: '', name: 'OA상부장-3', spec: '1600*350*750', unit: 'SET' },
+    { no: '', name: '붙박이장', spec: '2100*750*2600', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '세면대 하부장', spec: 'W:2400', unit: 'SET' },
+    { no: '', name: '안내데스크', spec: '2600*800*1100', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:3150', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: 'OA상부장-4', spec: '1250*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-4', spec: '1250*600*2650', unit: 'SET' },
+    { no: '', name: 'OA상부장-5', spec: '3560*350*750', unit: 'SET' },
+    { no: '', name: 'OA하부장-5', spec: '1820*600*850', unit: 'SET' },
+  ];
+
+  additionalCustomFurnitureItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  const moreCustomFurnitureItems = [
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: '캔틴장 - 하부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 상부장', spec: 'W:2350', unit: 'SET' },
+    { no: '', name: '캔틴장 - 붙박이장', spec: 'W:1150', unit: 'SET' },
+    { no: '', name: '락카장', spec: '400*550*800', unit: 'SET' },
+    { no: '', name: 'OA상부장-6', spec: '1760*350*750', unit: 'SET' },
+    { no: '', name: '캐비닛', spec: 'W:3600', unit: 'SET' },
+    { no: '', name: '운반비 및 셋팅비', spec: '', unit: '식' },
+  ];
+
+  moreCustomFurnitureItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // G. 재작가구공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: 'G. 재작가구공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // H. 이동식가구공사
+  rows.push({
+    no: 'H.',
+    name: '이동식가구공사',
+    type: 'section-header',
+  });
+
+  // H. 이동식가구공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: 'H. 이동식가구공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
+  });
+
+  // I. 기타공사
+  rows.push({
+    no: 'I.',
+    name: '기타공사',
+    type: 'section-header',
+  });
+
+  const otherConstructionItems = [
+    { no: '', name: '기존사방실 철거(FMS 판넬 철거)', spec: '', unit: '식' },
+  ];
+
+  otherConstructionItems.forEach((item) => {
+    rows.push({
+      no: item.no,
+      name: item.name,
+      spec: item.spec,
+      unit: item.unit,
+      quantity: '',
+      materialUnitPrice: '',
+      materialAmount: '',
+      laborUnitPrice: '',
+      laborAmount: '',
+      expenseUnitPrice: '',
+      expenseAmount: '',
+      totalUnitPrice: '',
+      totalAmount: '',
+      remark: '',
+      orderMaterialUnitPrice: '',
+      orderMaterialAmount: '',
+      orderLaborUnitPrice: '',
+      orderLaborAmount: '',
+      orderExpenseUnitPrice: '',
+      orderExpenseAmount: '',
+      orderTotalUnitPrice: '',
+      orderTotalAmount: '',
+      remark2: '',
+      type: 'item',
+    });
+  });
+
+  // I. 기타공사 SUB TOTAL
+  rows.push({
+    no: '',
+    name: 'I. 기타공사 SUB TOTAL',
+    spec: '',
+    unit: '',
+    quantity: '',
+    materialUnitPrice: '',
+    materialAmount: '',
+    laborUnitPrice: '',
+    laborAmount: '',
+    expenseUnitPrice: '',
+    expenseAmount: '',
+    totalUnitPrice: '',
+    totalAmount: '',
+    remark: '',
+    orderMaterialUnitPrice: '',
+    orderMaterialAmount: '',
+    orderLaborUnitPrice: '',
+    orderLaborAmount: '',
+    orderExpenseUnitPrice: '',
+    orderExpenseAmount: '',
+    orderTotalUnitPrice: '',
+    orderTotalAmount: '',
+    remark2: '',
+    type: 'subtotal',
   });
 
   return rows;
