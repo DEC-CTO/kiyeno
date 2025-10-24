@@ -724,6 +724,8 @@ function createLayerSection(title, layerKeys, layerPricing, area) {
 // 차트 인스턴스 전역 변수
 let workTypeChart = null;
 let wallTypeChart = null;
+let roomChart = null;
+let levelChart = null;
 
 /**
  * 집계 현황 렌더링
@@ -762,6 +764,8 @@ function renderSummaryResults() {
   // 차트 렌더링
   renderWorkTypeChart();
   renderWallTypeChart();
+  renderRoomChart();
+  renderLevelChart();
 }
 
 /**
@@ -938,6 +942,222 @@ function renderWallTypeChart() {
                 `${
                   context.dataset.label
                 }: ₩${context.parsed.y.toLocaleString()}`,
+                `면적: ${data.area.toFixed(2)}m²`,
+                `단가: ₩${unitPrice.toLocaleString()}/m²`,
+                `개수: ${data.count}개`,
+              ];
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+/**
+ * 실별 비용 분포 차트 렌더링
+ */
+function renderRoomChart() {
+  const ctx = document.getElementById('roomChart');
+  if (!ctx || calculationResults.length === 0) return;
+
+  // 기존 차트 파괴
+  if (roomChart) {
+    roomChart.destroy();
+  }
+
+  // 실별 데이터 집계
+  const roomData = {};
+
+  calculationResults.forEach((result) => {
+    const roomName = result.roomName || '미지정';
+
+    if (roomData[roomName]) {
+      roomData[roomName].materialCost += result.materialCost;
+      roomData[roomName].laborCost += result.laborCost;
+      roomData[roomName].area += result.area;
+      roomData[roomName].count += 1;
+    } else {
+      roomData[roomName] = {
+        materialCost: result.materialCost,
+        laborCost: result.laborCost,
+        area: result.area,
+        count: 1,
+      };
+    }
+  });
+
+  const labels = Object.keys(roomData);
+  const materialData = labels.map((label) => roomData[label].materialCost);
+  const laborData = labels.map((label) => roomData[label].laborCost);
+
+  roomChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '재료비',
+          data: materialData,
+          backgroundColor: '#2196F3',
+          borderColor: '#1976D2',
+          borderWidth: 1,
+        },
+        {
+          label: '노무비',
+          data: laborData,
+          backgroundColor: '#FFC107',
+          borderColor: '#FFA000',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      indexAxis: 'y', // 가로 막대
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          stacked: true,
+          title: {
+            display: true,
+            text: '비용 (₩)',
+          },
+          ticks: {
+            callback: function (value) {
+              return '₩' + value.toLocaleString();
+            },
+          },
+        },
+        y: {
+          stacked: true,
+          title: {
+            display: true,
+            text: '실(공간)명',
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const roomName = context.label;
+              const data = roomData[roomName];
+              const unitPrice = data.area > 0 ? (data.materialCost + data.laborCost) / data.area : 0;
+
+              return [
+                `${context.dataset.label}: ₩${context.parsed.x.toLocaleString()}`,
+                `면적: ${data.area.toFixed(2)}m²`,
+                `단가: ₩${unitPrice.toLocaleString()}/m²`,
+                `개수: ${data.count}개`,
+              ];
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+/**
+ * 레벨별 비용 분포 차트 렌더링
+ */
+function renderLevelChart() {
+  const ctx = document.getElementById('levelChart');
+  if (!ctx || calculationResults.length === 0) return;
+
+  // 기존 차트 파괴
+  if (levelChart) {
+    levelChart.destroy();
+  }
+
+  // 레벨별 데이터 집계
+  const levelData = {};
+
+  calculationResults.forEach((result) => {
+    const level = result.level || '미지정';
+
+    if (levelData[level]) {
+      levelData[level].materialCost += result.materialCost;
+      levelData[level].laborCost += result.laborCost;
+      levelData[level].area += result.area;
+      levelData[level].count += 1;
+    } else {
+      levelData[level] = {
+        materialCost: result.materialCost,
+        laborCost: result.laborCost,
+        area: result.area,
+        count: 1,
+      };
+    }
+  });
+
+  // 레벨 정렬 (예: Level 1, Level 2, ...)
+  const labels = Object.keys(levelData).sort();
+  const materialData = labels.map((label) => levelData[label].materialCost);
+  const laborData = labels.map((label) => levelData[label].laborCost);
+
+  levelChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: '재료비',
+          data: materialData,
+          backgroundColor: '#9C27B0',
+          borderColor: '#7B1FA2',
+          borderWidth: 1,
+        },
+        {
+          label: '노무비',
+          data: laborData,
+          backgroundColor: '#FF5722',
+          borderColor: '#E64A19',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          stacked: true,
+          title: {
+            display: true,
+            text: '레벨',
+          },
+        },
+        y: {
+          stacked: true,
+          title: {
+            display: true,
+            text: '비용 (₩)',
+          },
+          ticks: {
+            callback: function (value) {
+              return '₩' + value.toLocaleString();
+            },
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const level = context.label;
+              const data = levelData[level];
+              const unitPrice = data.area > 0 ? (data.materialCost + data.laborCost) / data.area : 0;
+
+              return [
+                `${context.dataset.label}: ₩${context.parsed.y.toLocaleString()}`,
                 `면적: ${data.area.toFixed(2)}m²`,
                 `단가: ₩${unitPrice.toLocaleString()}/m²`,
                 `개수: ${data.count}개`,

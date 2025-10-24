@@ -1620,9 +1620,7 @@ window.toggleRevitActionsDropdown = toggleRevitActionsDropdown;
 window.addRevitWallType = addRevitWallType;
 window.createNewWallType = createNewWallType;
 window.handleWallTypeCreationKeydown = handleWallTypeCreationKeydown;
-window.duplicateRevitWall = duplicateRevitWall;
 window.deleteSelectedRevitWalls = deleteSelectedRevitWalls;
-window.clearRevitWallData = clearRevitWallData;
 
 // 선택 관리 함수들
 window.toggleRevitWallSelection = toggleRevitWallSelection;
@@ -1635,7 +1633,6 @@ window.selectUnitPriceRow = selectUnitPriceRow;
 window.applySelectedUnitPrice = applySelectedUnitPrice;
 window.clearUnitPriceFromModal = clearUnitPriceFromModal;
 window.filterUnitPriceSelectionTable = filterUnitPriceSelectionTable;
-window.editUnitPriceFromSelection = editUnitPriceFromSelection;
 window.refreshUnitPriceSelectionTable = refreshUnitPriceSelectionTable;
 
 // 자재 선택 함수들 (호환성 유지)

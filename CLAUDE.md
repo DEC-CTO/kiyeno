@@ -15,6 +15,7 @@
 - **자재 데이터베이스**: 55개 경량자재 + 49개 석고보드 기본 데이터 + 사용자 커스터마이징
 - **일위대가 관리**: 세부 아이템별 구성품 관리 및 소요량 계산
 - **실시간 계산**: 6가지 자재 동시 소요량 계산 (스터드, 런너, 피스, 타정총알, 용접봉, 석고피스)
+- **견적서 생성**: 갑지(표지) + 을지(내역서) Excel 내보내기, 수식 지원, 1000단위 절사
 - **데이터 백업/복원**: Excel/JSON 파일 내보내기/가져오기
 - **디스플레이 시스템**: 4가지 보기 모드 (기본값보기, 타입별보기, 재료별보기, 공종별보기)
 
@@ -42,7 +43,7 @@
 - **UI**: Font Awesome 6.4.0
 - **데이터**: IndexedDB (Dexie.js latest)
 - **통신**: Socket.IO Client 4.7.4
-- **파일처리**: SheetJS 0.18.5
+- **파일처리**: SheetJS 0.18.5, ExcelJS 4.4.0
 - **스타일**: CSS3 (Grid, Flexbox)
 
 ### Revit 연동
@@ -90,7 +91,8 @@ services/
 - **프레임워크**: Vanilla JavaScript (ES6 모듈)
 - **외부 라이브러리**:
   - Font Awesome 6.4.0 (아이콘)
-  - SheetJS 0.18.5 (Excel 처리)
+  - SheetJS 0.18.5 (Excel 파일 읽기/쓰기)
+  - ExcelJS 4.4.0 (Excel 파일 생성 및 수식 지원)
   - Dexie.js (IndexedDB)
   - Socket.IO 4.7.4 (WebSocket)
 
@@ -107,19 +109,21 @@ services/
 ├── bridge.js              # 기존 시스템과 새 시스템 연결
 ├── debug.js               # 디버깅 및 로그 관리
 ├── display-system.js      # 4가지 보기 모드 시스템
-└── revit-wall-handler.js  # Revit 벽체 데이터 처리 및 객체 선택
+├── revit-wall-handler.js  # Revit 벽체 데이터 처리 및 객체 선택
+└── wall-cost-calculator.js # 견적서 생성 및 Excel 내보내기 (15000+ 라인)
 ```
 
 **📦 모듈 (`modules/`)**
 
 ```
 modules/
-├── priceDatabase.js       # IndexedDB 기반 가격 데이터베이스
-├── materialManager.js     # 자재 관리 모듈
-├── unitPriceManager.js    # 일위대가 관리 (핵심 모듈, 3400+ 라인)
-├── revitManager.js        # Revit 연동 관리
-├── revitTypeMatching.js   # Revit 타입 매칭
-└── revitUtilities.js     # Revit 유틸리티 함수
+├── priceDatabase.js          # IndexedDB 기반 가격 데이터베이스
+├── materialManager.js        # 자재 관리 모듈
+├── unitPriceManager.js       # 일위대가 관리 (핵심 모듈, 3400+ 라인)
+├── priceComparisonManager.js # 가격 비교 관리
+├── revitManager.js           # Revit 연동 관리
+├── revitTypeMatching.js      # Revit 타입 매칭
+└── revitUtilities.js         # Revit 유틸리티 함수
 ```
 
 **🔧 서비스 (`services/`)**
@@ -272,6 +276,32 @@ gypsumPiece = calculateGypsumPiece(width, height);
 - **가격 관리**: 재료비단가, 노무비단가 별도 관리
 - **카테고리 관리**: 경량자재 7종, 석고보드 7종
 
+### 📄 견적서 생성 시스템 (`wall-cost-calculator.js`)
+
+**위치**: `public/js/wall-cost-calculator.js` (15000+ 라인)
+
+**주요 기능**:
+
+- **갑지(표지) 생성**: `createEstimateCoverSheet()` 함수
+  - 프로젝트 정보, 발주처, 시공사 정보
+  - 총 견적 금액 (1000단위 절사)
+  - 한글 금액 표기 (일금 ~ 원정)
+- **을지(내역서) 생성**: `createEstimateDetailSheet()` 함수
+  - 3단 헤더 (도급내역서 + 발주단가내역서)
+  - 직접공사비 (A~I 항목 + 하위 세부 항목)
+  - 간접공사비 (산재보험료, 안전관리비 등)
+  - 단수정리 및 총합계
+- **Excel 수식 지원**:
+  - 일반 항목: `금액 = 수량 × 단가`
+  - SUB TOTAL: 섹션별 SUM 수식
+  - A~I 항목: 각 SUB TOTAL 참조
+  - IFERROR로 오류 처리
+- **금액 계산**:
+  - `calculateDirectCosts()`: 직접공사비 합산
+  - `calculateEstimateGrandTotal()`: 간접공사비 포함 총액
+  - `updateEstimateTotalAmount()`: 1000단위 절사 적용
+- **내보내기**: ExcelJS 라이브러리로 .xlsx 파일 생성
+
 ## 개발 명령어
 
 ### 서버 시작
@@ -381,6 +411,40 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **구현**: `fillComponentRowWithMaterial` 함수 내 노무비 처리 로직 완전 재작성
 - **테스트**: 세부아이템 수정에서 노무비 포함 구성품 추가 시 정상 작동
 
+### 9. Excel 견적서 수식 지원 기능 ✅ (2025-01-24 추가)
+
+- **위치**: `wall-cost-calculator.js` 14885-15220라인 (`createEstimateDetailSheet` 함수)
+- **기능**: Excel 견적서 내보내기 시 모든 계산을 수식으로 적용
+- **구현 내용**:
+  - **일반 항목**: 금액 = 수량 × 단가 수식
+    - 자재비 금액(G열): `=IFERROR(E×F,0)`
+    - 노무비 금액(I열): `=IFERROR(E×H,0)`
+    - 경비 금액(K열): `=IFERROR(E×J,0)`
+    - 합계 단가(L열): `=IFERROR(F+H+J,0)`
+    - 합계 금액(M열): `=IFERROR(G+I+K,0)`
+  - **SUB TOTAL 행**: 섹션별 SUM 수식
+    - 단가와 금액 모두 합산: `=IFERROR(SUM(범위),0)`
+  - **A~I 항목** (직접공사비 아래 9개 대분류):
+    - 단가 열: 빈칸
+    - 금액 열: 각 항목의 SUB TOTAL 참조 (예: `=IFERROR(G50,0)`)
+  - **발주단가내역서**: 도급내역서와 동일한 로직 적용
+  - **오류 처리**: IFERROR로 #VALUE! 오류 방지, 0으로 표시
+  - **천단위 구분**: 모든 숫자 컬럼에 `#,##0` 포맷 적용
+  - **정렬**: D열(단위) 중앙정렬
+- **효과**: Excel에서 단가/수량 수정 시 금액 자동 재계산, 하위 섹션 변경 시 상위 항목 자동 업데이트
+
+### 10. 1000단위 절사 기능 ✅ (2025-01-24 추가)
+
+- **위치**: `wall-cost-calculator.js` 5951-5963라인 (`updateEstimateTotalAmount` 함수)
+- **기능**: 견적서 갑지에 표시되는 총 금액을 1000단위로 절사 (버림)
+- **구현**:
+  ```javascript
+  const roundedTotal = Math.floor(grandTotal / 1000) * 1000;
+  ```
+- **예시**: 2,112,567원 → 2,112,000원
+- **적용 범위**: 갑지(표지) 금액 표시 및 한글 금액 표기
+- **계산 출처**: `calculateEstimateGrandTotal()` 함수에서 직접공사비 + 간접공사비 합산
+
 ## 📡 API 엔드포인트
 
 ### 벽체 관리 API (`/api/walls`)
@@ -449,6 +513,12 @@ npm run dev        # 개발 모드 (nodemon 사용)
    - **석고보드 필터링**: 품목/품명/규격 필드별 검색 및 초기화 테스트
    - **Excel/JSON 관리**: 드롭다운에서 내보내기/가져오기 테스트
    - **Revit 객체 선택**: 체크박스 선택 후 "Revit 객체 선택" 버튼 테스트
+   - **견적서 내보내기**:
+     - "Excel 내보내기" 버튼 클릭 시 .xlsx 파일 다운로드
+     - Excel에서 갑지(표지) 금액 1000단위 절사 확인
+     - Excel에서 을지(내역서) 수식 작동 확인 (셀 클릭 시 수식 표시)
+     - 단가/수량 수정 시 금액 자동 재계산 확인
+     - 모든 숫자에 천단위 구분(,) 적용 확인
 4. Revit 연동 확인 (Revit 환경 필요)
 5. 자재 계산 및 내보내기 검증
 
@@ -487,7 +557,12 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - **보안**: 10MB 제한의 요청 파싱, 오류 정보 노출 방지
 - **ES6 모듈 시스템**: 클라이언트 사이드에서 모듈 시스템 사용
 - **전역 함수 노출**: `window.priceDB`, `window.openRevitTypeMatching`, `window.selectInRevit` 등
-- **외부 라이브러리**: SheetJS (Excel 처리), Socket.IO (WebSocket), Dexie.js (IndexedDB)
+- **외부 라이브러리**:
+  - SheetJS 0.18.5 (Excel 파일 읽기/쓰기)
+  - ExcelJS 4.4.0 (Excel 파일 생성 및 수식 지원)
+  - Socket.IO 4.7.4 (WebSocket 통신)
+  - Dexie.js (IndexedDB 래퍼)
+  - Font Awesome 6.4.0 (아이콘)
 
 ## 브라우저 호환성
 
@@ -548,6 +623,8 @@ npm run dev        # 개발 모드 (nodemon 사용)
 - ✅ 석고보드 테이블 19개 컬럼 구조로 개선
 - ✅ 석고보드 필터 기능 개선 (품목/품명/규격만 필터링)
 - ✅ 초기화 버튼 위치 조정 (관리 컬럼 아래)
+- ✅ Excel 견적서 수식 지원 추가 (2025-01-24)
+- ✅ 1000단위 절사 기능 추가 (2025-01-24)
 
 ### 불필요한 파일
 
