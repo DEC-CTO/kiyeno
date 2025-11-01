@@ -32,6 +32,7 @@ window.calculateWallCosts = async function () {
     // 3. 벽체별 계산 수행
     calculationResults = [];
     window.calculationResults = calculationResults; // 전역 동기화
+    let failedCount = 0; // 실패한 벽체 카운트
 
     // 렌더링 플래그 리셋 (새 계산 시 재렌더링되도록)
     isOrderFormRendered = false;
@@ -42,6 +43,8 @@ window.calculateWallCosts = async function () {
       const result = await calculateSingleWallCost(wall, i + 1);
       if (result) {
         calculationResults.push(result);
+      } else {
+        failedCount++; // 실패 카운트 증가
       }
       updateCalculationProgress(i + 1, selectedWalls.length);
     }
@@ -55,6 +58,14 @@ window.calculateWallCosts = async function () {
     if (calculationResults.length === 0) {
       alert('계산할 수 있는 벽체가 없습니다. 벽체 타입 매칭을 확인해주세요.');
       return;
+    }
+
+    // 계산 요약 메시지 표시
+    if (failedCount > 0) {
+      showToast(
+        `계산 완료: 성공 ${calculationResults.length}개, 실패 ${failedCount}개`,
+        'warning'
+      );
     }
 
     // 5. 결과 패널 표시
@@ -164,6 +175,7 @@ async function calculateSingleWallCost(wall, sequence) {
     };
   } catch (error) {
     console.error(`❌ 벽체 계산 실패: ${wall.Name}`, error);
+    showToast(`벽체 계산 실패: ${wall.Name || wall.id}`, 'error');
     return null;
   }
 }
@@ -21507,8 +21519,25 @@ function generateEstimateDetailRowsData() {
 window.toggleExportDropdown = function (event) {
   if (event) event.stopPropagation();
   const dropdown = document.getElementById('exportDropdown');
+  if (!dropdown) return;
+
   const isVisible = dropdown.style.display === 'block';
   dropdown.style.display = isVisible ? 'none' : 'block';
+
+  // 드롭다운을 열 때만 외부 클릭 리스너 등록 (성능 최적화 및 메모리 관리)
+  if (!isVisible) {
+    // 다음 틱에 리스너 등록 (현재 클릭 이벤트와 분리)
+    setTimeout(() => {
+      function closeOnOutsideClick(e) {
+        const button = e.target.closest('[onclick*="toggleExportDropdown"]');
+        if (!button && !dropdown.contains(e.target)) {
+          dropdown.style.display = 'none';
+          document.removeEventListener('click', closeOnOutsideClick);
+        }
+      }
+      document.addEventListener('click', closeOnOutsideClick);
+    }, 0);
+  }
 };
 
 /**
@@ -23826,14 +23855,7 @@ window.exportEstimate = function () {
   exportEstimateToExcel();
 };
 
-// 외부 클릭 시 드롭다운 닫기
-document.addEventListener('click', function (event) {
-  const dropdown = document.getElementById('exportDropdown');
-  const button = event.target.closest('[onclick*="toggleExportDropdown"]');
-
-  if (!button && dropdown && dropdown.style.display === 'block') {
-    dropdown.style.display = 'none';
-  }
-});
+// ✅ 전역 document click 리스너 제거됨 (toggleExportDropdown 함수에서 동적 관리)
+// 이전에는 모든 클릭에 대해 리스너가 실행되었으나, 이제는 드롭다운을 열 때만 등록됨
 
 console.log('✅ wall-cost-calculator.js 로드 완료');

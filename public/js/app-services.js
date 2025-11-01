@@ -1663,17 +1663,23 @@ function showRevitIntegrationModal() {
 // 데이터 관리 드롭다운 토글
 function toggleDataManagementDropdown() {
     const dropdown = document.getElementById('dataManagementDropdown');
-    if (dropdown) {
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    if (!dropdown) return;
+
+    const isOpening = dropdown.style.display === 'none';
+    dropdown.style.display = isOpening ? 'block' : 'none';
+
+    // 드롭다운을 열 때만 외부 클릭 리스너 등록 (메모리 누수 방지)
+    if (isOpening) {
+        // 다음 틱에 리스너 등록 (현재 클릭 이벤트와 분리)
+        setTimeout(() => {
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!e.target.closest('.dropdown')) {
+                    if (dropdown) dropdown.style.display = 'none';
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }, 0);
     }
-    
-    // 외부 클릭 시 드롭다운 닫기
-    document.addEventListener('click', function closeDropdown(e) {
-        if (!e.target.closest('.dropdown')) {
-            if (dropdown) dropdown.style.display = 'none';
-            document.removeEventListener('click', closeDropdown);
-        }
-    });
 }
 
 // 현재 상태 저장

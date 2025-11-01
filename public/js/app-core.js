@@ -39,6 +39,9 @@ class KiyenoDB extends Dexie {
 // 전역 데이터베이스 인스턴스
 let kiyenoDB;
 
+// 자동 저장 타이머 ID (메모리 누수 방지용)
+let autoSaveIntervalId = null;
+
 // KiyenoDB 자동 생성 주석 처리 (KiyenoMaterialsDB 통합 사용)
 /*
 try {
@@ -608,11 +611,27 @@ console.log('[INFO] Kiyeno 핵심 모듈 로드 완료');
 // DOM 로드 완료 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Kiyeno 핵심 시스템 초기화 완료');
-    
+
     // 자동 저장 (30초마다)
-    setInterval(() => {
+    autoSaveIntervalId = setInterval(() => {
         if (Kiyeno.Data.isDataModified) {
             Kiyeno.Storage.saveToLocalStorage();
         }
     }, 30000);
+});
+
+// =============================================================================
+// 정리 작업 (메모리 누수 방지)
+// =============================================================================
+
+/**
+ * 페이지 언로드 시 타이머 정리
+ * - 자동 저장 타이머 중지
+ */
+window.addEventListener('beforeunload', () => {
+    if (autoSaveIntervalId) {
+        clearInterval(autoSaveIntervalId);
+        autoSaveIntervalId = null;
+        console.log('✅ 자동 저장 타이머 정리 완료');
+    }
 });

@@ -385,6 +385,13 @@ function getMaterialCategoryInfo(categoryKey) {
 
 // 자재 선택 이벤트 설정
 function setupMaterialSelectorEvents(selectElement, hiddenInput, customInput, wallId, field, originalValue) {
+    // 중복 리스너 등록 방지 (안전장치)
+    if (selectElement._eventsAttached) {
+        console.warn('⚠️ 이미 이벤트가 등록된 요소입니다');
+        return;
+    }
+    selectElement._eventsAttached = true;
+
     // 선택 변경 이벤트
     selectElement.addEventListener('change', (event) => {
         const selectedOption = event.target.selectedOptions[0];
@@ -1203,14 +1210,15 @@ function createSubModal(title, content, buttons = [], options = {}) {
         const handleEscape = (e) => {
             if (e.key === 'Escape') {
                 closeSubModal(subModalOverlay);
-                document.removeEventListener('keydown', handleEscape);
             }
         };
         document.addEventListener('keydown', handleEscape);
+        // 리스너 참조를 모달에 저장하여 나중에 제거 가능하도록 함
+        subModalOverlay._handleEscape = handleEscape;
     }
-    
+
     document.body.appendChild(subModalOverlay);
-    
+
     return subModalOverlay;
 }
 
@@ -1219,6 +1227,12 @@ window.createSubModal = createSubModal;
 
 // 서브 모달 닫기 (배경 모달 복원)
 function closeSubModal(subModalOverlay) {
+    // ESC 키 이벤트 리스너 제거 (메모리 누수 방지)
+    if (subModalOverlay && subModalOverlay._handleEscape) {
+        document.removeEventListener('keydown', subModalOverlay._handleEscape);
+        subModalOverlay._handleEscape = null;
+    }
+
     // 배경 자재 관리 모달 복원
     const materialModal = document.querySelector('.modal-overlay .modal');
     if (materialModal) {
@@ -1230,7 +1244,7 @@ function closeSubModal(subModalOverlay) {
             modalOverlay.style.zIndex = '9999999';
         }
     }
-    
+
     // 서브 모달 제거
     if (subModalOverlay && subModalOverlay.parentNode) {
         subModalOverlay.remove();

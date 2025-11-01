@@ -532,19 +532,20 @@ function createRevitWallTableRow(wall) {
 function toggleRevitActionsDropdown() {
     const dropdown = document.getElementById('revitActionsDropdown');
     if (!dropdown) return;
-    
+
     const isVisible = dropdown.style.display === 'block';
-    
+
     // 모든 드롭다운 닫기
     document.querySelectorAll('.dropdown-menu').forEach(menu => {
         menu.style.display = 'none';
     });
-    
+
     // 현재 드롭다운 토글
     dropdown.style.display = isVisible ? 'none' : 'block';
-    
-    // 클릭 외부 영역에서 닫기
+
+    // 드롭다운을 열 때만 외부 클릭 리스너 등록 (메모리 누수 방지)
     if (!isVisible) {
+        // 다음 틱에 리스너 등록 (현재 클릭 이벤트와 분리)
         setTimeout(() => {
             document.addEventListener('click', function closeDropdown(e) {
                 if (!dropdown.contains(e.target)) {
@@ -552,7 +553,7 @@ function toggleRevitActionsDropdown() {
                     document.removeEventListener('click', closeDropdown);
                 }
             });
-        }, 100);
+        }, 0);
     }
 }
 

@@ -446,76 +446,90 @@ const unitPriceDB = new UnitPriceDB();
 
 // 일위대가 관리 모달 열기
 async function openUnitPriceManagement() {
-    console.log('💰 일위대가 관리 모달 열기 시작');
-    console.log('📊 현재 DOM 상태 - 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
-    
-    // 모달 열기 시 최신 자재 데이터 캐시 강제 로드
-    if (window.priceDatabase) {
-        // 캐시 무효화
-        window.priceDatabase.lightweightItemsCache = null;
-        window.priceDatabase.gypsumItemsCache = null;
-        
-        // 최신 데이터 로드
-        await window.priceDatabase.getLightweightComponents();
-        await window.priceDatabase.getGypsumBoards();
-        
-        console.log('✅ 자재 데이터 캐시 갱신 완료');
-    }
-    
-    // createSubModal 함수 존재 여부 확인
-    if (typeof createSubModal !== 'function') {
-        console.error('❌ createSubModal 함수를 찾을 수 없습니다.');
-        alert('모달 시스템을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
-        return;
-    }
-    
-    // 모달 HTML 생성
-    console.log('🏗️ 모달 HTML 생성 중...');
-    const modalHTML = createUnitPriceManagementModal();
-    console.log('✅ 모달 HTML 생성 완료');
-    
-    // 모달 표시 (닫기 버튼 추가)
-    console.log('🖼️ createSubModal 호출 시작...');
-    const modal = createSubModal('💰 일위대가 관리', modalHTML, [
-        { text: '닫기', class: 'btn-secondary', onClick: (modal) => {
-            // 모달 닫기 전 세션 저장
-            saveUnitPriceSession();
-            closeSubModal(modal);
-        }}
-    ], {
-        disableBackgroundClick: true,
-        disableEscapeKey: true,
-        width: '70vw'
-    });
-    
-    console.log('🔍 createSubModal 완료 - modal 객체:', modal);
-    console.log('📊 createSubModal 완료 후 DOM 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
-    
-    if (modal) {
-        console.log('✅ 모달 객체가 생성됨');
-        // 모달이 DOM에 추가된 후 초기화
-        setTimeout(async () => {
-            await loadUnitPriceItems();
-            await renderUnitPriceItemsList();
-            
-            // 세션 복원 시도 (모달이 닫힌 후 재열기 시)
-            const sessionRestored = restoreUnitPriceSession();
-            
-            // 일위대가 목록 렌더링 완료 후 메인 모달 데이터 동기화
+    try {
+        console.log('💰 일위대가 관리 모달 열기 시작');
+        console.log('📊 현재 DOM 상태 - 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
+
+        // 모달 열기 시 최신 자재 데이터 캐시 강제 로드
+        if (window.priceDatabase) {
+            // 캐시 무효화
+            window.priceDatabase.lightweightItemsCache = null;
+            window.priceDatabase.gypsumItemsCache = null;
+
+            // 최신 데이터 로드
+            await window.priceDatabase.getLightweightComponents();
+            await window.priceDatabase.getGypsumBoards();
+
+            console.log('✅ 자재 데이터 캐시 갱신 완료');
+        }
+
+        // createSubModal 함수 존재 여부 확인
+        if (typeof createSubModal !== 'function') {
+            console.error('❌ createSubModal 함수를 찾을 수 없습니다.');
+            alert('모달 시스템을 찾을 수 없습니다. 페이지를 새로고침 해주세요.');
+            return;
+        }
+
+        // 모달 HTML 생성
+        console.log('🏗️ 모달 HTML 생성 중...');
+        const modalHTML = createUnitPriceManagementModal();
+        console.log('✅ 모달 HTML 생성 완료');
+
+        // 모달 표시 (닫기 버튼 추가)
+        console.log('🖼️ createSubModal 호출 시작...');
+        const modal = createSubModal('💰 일위대가 관리', modalHTML, [
+            { text: '닫기', class: 'btn-secondary', onClick: (modal) => {
+                // 모달 닫기 전 세션 저장
+                saveUnitPriceSession();
+                closeSubModal(modal);
+            }}
+        ], {
+            disableBackgroundClick: true,
+            disableEscapeKey: true,
+            width: '70vw'
+        });
+
+        console.log('🔍 createSubModal 완료 - modal 객체:', modal);
+        console.log('📊 createSubModal 완료 후 DOM 모달 개수:', document.querySelectorAll('[class*="modal"]').length);
+
+        if (modal) {
+            console.log('✅ 모달 객체가 생성됨');
+            // 모달이 DOM에 추가된 후 초기화
             setTimeout(async () => {
-                await syncMainModalData();
-                if (sessionRestored) {
-                    console.log('✅ 세션 복원 및 메인 모달 데이터 동기화 완료');
-                } else {
-                    console.log('✅ 메인 모달 데이터 동기화 완료');
+                try {
+                    await loadUnitPriceItems();
+                    await renderUnitPriceItemsList();
+
+                    // 세션 복원 시도 (모달이 닫힌 후 재열기 시)
+                    const sessionRestored = restoreUnitPriceSession();
+
+                    // 일위대가 목록 렌더링 완료 후 메인 모달 데이터 동기화
+                    setTimeout(async () => {
+                        try {
+                            await syncMainModalData();
+                            if (sessionRestored) {
+                                console.log('✅ 세션 복원 및 메인 모달 데이터 동기화 완료');
+                            } else {
+                                console.log('✅ 메인 모달 데이터 동기화 완료');
+                            }
+                        } catch (syncError) {
+                            console.error('❌ 메인 모달 데이터 동기화 실패:', syncError);
+                        }
+                    }, 200);
+                } catch (initError) {
+                    console.error('❌ 모달 초기화 실패:', initError);
+                    alert('일위대가 데이터 로드 중 오류가 발생했습니다: ' + initError.message);
                 }
-            }, 200);
-        }, 100);
-    } else {
-        console.error('❌ 모달 객체가 생성되지 않음');
+            }, 100);
+        } else {
+            console.error('❌ 모달 객체가 생성되지 않음');
+        }
+
+        console.log('🏁 openUnitPriceManagement 함수 완료');
+    } catch (error) {
+        console.error('❌ 일위대가 관리 모달 열기 실패:', error);
+        alert('일위대가 관리 모달을 열 수 없습니다: ' + error.message);
     }
-    
-    console.log('🏁 openUnitPriceManagement 함수 완료');
 }
 
 // 일위대가 관리 모달 HTML 생성
@@ -849,29 +863,12 @@ function showUnitPriceBasicModal(editData = null) {
 
     // 모달이 열린 후 이벤트 리스너 등록
     setTimeout(() => {
-        const itemNameSelect = document.getElementById('itemName');
         const spacingSelect = document.getElementById('spacing');
         const heightSelect = document.getElementById('height');
         const sizeSelect = document.getElementById('size');
 
-        // 아이템명 select가 있을 때만 이벤트 등록 (직접입력 모드가 아닐 때)
-        if (itemNameSelect && itemNameSelect.tagName === 'SELECT') {
-            itemNameSelect.addEventListener('change', function(e) {
-                if (e.target.value === 'CUSTOM_INPUT') {
-                    const itemNameGroup = document.getElementById('itemNameGroup');
-                    itemNameGroup.innerHTML = `
-                        <label>아이템 <span class="required">*</span></label>
-                        <div class="custom-input-wrapper">
-                            <input type="text" id="itemName" placeholder="직접 입력" value="" required>
-                            <button type="button" onclick="window.resetItemNameToSelect()">
-                                <i class="fas fa-undo"></i> 목록
-                            </button>
-                        </div>
-                    `;
-                    document.getElementById('itemName').focus();
-                }
-            });
-        }
+        // 아이템명 select 이벤트 리스너 등록 (공통 함수 사용)
+        attachItemNameSelectListener();
 
         // 간격 select 이벤트
         if (spacingSelect && spacingSelect.tagName === 'SELECT') {
@@ -932,6 +929,29 @@ function showUnitPriceBasicModal(editData = null) {
     }, 100);
 }
 
+// 아이템명 select 변경 이벤트 핸들러 (공통 함수)
+function attachItemNameSelectListener() {
+    const itemNameSelect = document.getElementById('itemName');
+    const itemNameGroup = document.getElementById('itemNameGroup');
+
+    if (!itemNameSelect || itemNameSelect.tagName !== 'SELECT') return;
+
+    itemNameSelect.addEventListener('change', function(e) {
+        if (e.target.value === 'CUSTOM_INPUT') {
+            itemNameGroup.innerHTML = `
+                <label>아이템 <span class="required">*</span></label>
+                <div class="custom-input-wrapper">
+                    <input type="text" id="itemName" placeholder="직접 입력" value="" required>
+                    <button type="button" onclick="window.resetItemNameToSelect()">
+                        <i class="fas fa-undo"></i> 목록
+                    </button>
+                </div>
+            `;
+            document.getElementById('itemName').focus();
+        }
+    });
+}
+
 // 아이템명을 select로 되돌리기 (전역 함수)
 window.resetItemNameToSelect = function() {
     const itemNameGroup = document.getElementById('itemNameGroup');
@@ -948,22 +968,8 @@ window.resetItemNameToSelect = function() {
         </select>
     `;
 
-    // 이벤트 리스너 재등록
-    const itemNameSelect = document.getElementById('itemName');
-    itemNameSelect.addEventListener('change', function(e) {
-        if (e.target.value === 'CUSTOM_INPUT') {
-            itemNameGroup.innerHTML = `
-                <label>아이템 <span class="required">*</span></label>
-                <div class="custom-input-wrapper">
-                    <input type="text" id="itemName" placeholder="직접 입력" value="" required>
-                    <button type="button" onclick="window.resetItemNameToSelect()">
-                        <i class="fas fa-undo"></i> 목록
-                    </button>
-                </div>
-            `;
-            document.getElementById('itemName').focus();
-        }
-    });
+    // 공통 함수 사용하여 이벤트 리스너 등록
+    attachItemNameSelectListener();
 };
 
 // 간격을 select로 되돌리기 (전역 함수)
@@ -3588,10 +3594,10 @@ function searchAndEditMaterial(material) {
 // 자재 데이터 업데이트 이벤트 리스너 (자재 관리에서 저장 시 캐시 무효화)
 // =============================================================================
 
-// 자재 데이터 업데이트 이벤트 리스너 설정
+// 자재 데이터 업데이트 이벤트 리스너 설정 (통합 버전)
 window.addEventListener('materialDataUpdated', function(event) {
     console.log('📡 자재 데이터 업데이트 이벤트 수신:', event.detail);
-    
+
     // 자재 선택용 캐시 무효화
     if (window.priceDatabase) {
         console.log('🔄 자재 선택용 캐시 무효화...');
@@ -3599,7 +3605,7 @@ window.addEventListener('materialDataUpdated', function(event) {
         window.priceDatabase.gypsumItemsCache = null;
         console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
     }
-    
+
     // 현재 자재선택 모달이 열려있다면 데이터 새로고침
     const materialSelectModal = document.querySelector('.material-select-modal');
     if (materialSelectModal && materialSelectModal.style.display !== 'none') {
@@ -3608,7 +3614,18 @@ window.addEventListener('materialDataUpdated', function(event) {
             loadMaterialsForSelection(); // 자재 데이터 다시 로드
         }, 300);
     }
-    
+
+    // 일위대가 관리 모달이 열려있으면 즉시 UI 갱신
+    const unitPriceModal = document.getElementById('unitPriceModal');
+    const isModalOpen = unitPriceModal && unitPriceModal.style.display !== 'none';
+
+    if (isModalOpen) {
+        console.log('🔄 일위대가 관리 모달이 열려있음 - 즉시 UI 갱신');
+        setTimeout(() => {
+            refreshActiveUnitPriceComponents();
+        }, 100);
+    }
+
     console.log('✅ 자재 데이터 업데이트 이벤트 처리 완료');
 });
 
@@ -4199,31 +4216,9 @@ function updateComponentSubtotal(row) {
     }
 }
 
-// 자재 데이터 업데이트 이벤트 리스너 등록 (단순화된 버전)
-window.addEventListener('materialDataUpdated', function(event) {
-    console.log('🔔 자재 데이터 업데이트 이벤트 수신:', event.detail);
-    
-    // priceDatabase 캐시 무효화
-    if (window.priceDatabase) {
-        console.log('🔄 자재 선택용 캐시 무효화...');
-        window.priceDatabase.lightweightItemsCache = null;
-        window.priceDatabase.gypsumItemsCache = null;
-        console.log('✅ 자재 선택에서 다음 선택 시 최신 데이터가 로드됩니다');
-    }
-    
-    // 일위대가 관리 모달이 열려있으면 즉시 UI 갱신
-    const unitPriceModal = document.getElementById('unitPriceModal');
-    const isModalOpen = unitPriceModal && unitPriceModal.style.display !== 'none';
-    
-    if (isModalOpen) {
-        console.log('🔄 일위대가 관리 모달이 열려있음 - 즉시 UI 갱신');
-        setTimeout(() => {
-            refreshActiveUnitPriceComponents();
-        }, 100);
-    } else {
-        console.log('📝 일위대가 관리 모달이 닫혀있음 - 다음 모달 열기 시 최신 데이터 자동 로드');
-    }
-});
+// ✅ 중복 이벤트 리스너 제거됨 (3592번 라인에 통합됨)
+// 이전에는 materialDataUpdated 이벤트가 두 번 등록되어 메모리 누수 발생
+// 현재는 3592번 라인의 통합 버전 하나만 사용
 
 // 전역 함수 등록
 window.closeMaterialSelectModal = closeMaterialSelectModal;
