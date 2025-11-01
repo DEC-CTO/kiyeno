@@ -486,7 +486,7 @@ async function openUnitPriceManagement() {
         ], {
             disableBackgroundClick: true,
             disableEscapeKey: true,
-            width: '70vw'
+            width: '1300px'
         });
 
         console.log('🔍 createSubModal 완료 - modal 객체:', modal);
@@ -858,7 +858,7 @@ function showUnitPriceBasicModal(editData = null) {
     ], {
         disableBackgroundClick: true,
         disableEscapeKey: true,
-        width: '70vw'
+        width: '1300px'
     });
 
     // 모달이 열린 후 이벤트 리스너 등록
@@ -1185,7 +1185,7 @@ function openUnitPriceDetailModal(isEdit = false) {
     ], {
         disableBackgroundClick: true,
         disableEscapeKey: true,
-        width: '70vw'
+        width: '1300px'
     });
     
     // 편집 모드일 때 고정 비율 복원
@@ -1228,10 +1228,11 @@ function openUnitPriceDetailModal(isEdit = false) {
 // 세부 모달 HTML 생성
 function createDetailModalHTML(itemSummary) {
     return `
-        <div class="unit-price-detail-form">
-            <div class="detail-header">
-                <h4><i class="fas fa-info-circle"></i> ${itemSummary}</h4>
-            </div>
+        <div style="min-width: 840px; max-width: 1300px;">
+            <div class="unit-price-detail-form">
+                <div class="detail-header">
+                    <h4><i class="fas fa-info-circle"></i> ${itemSummary}</h4>
+                </div>
             
             <div class="controls-section">
                 <button class="btn btn-success btn-sm" onclick="addComponentRow()">
@@ -1374,8 +1375,9 @@ function createDetailModalHTML(itemSummary) {
                     </tfoot>
                 </table>
             </div>
-            
+
             <!-- 버튼들은 createSubModal에서 처리 -->
+            </div>
         </div>
     `;
 }
@@ -2119,18 +2121,18 @@ async function renderUnitPriceItemsList() {
                 <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
                     <tr>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">간격</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">높이</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">SIZE</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">부위</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">공종1</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">공종2</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">재료비</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">노무비</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">경비</th>
                         <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">총계</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600;">작업</th>
+                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 140px; text-align: center; font-weight: 600;">작업</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2590,7 +2592,8 @@ unitPriceStyles.textContent = `
 /* 일위대가 상세 입력 폼 스타일 */
 .unit-price-detail-form {
     width: 100%;
-    max-width: 1200px;
+    min-width: 840px;
+    max-width: 1300px;
     margin: 0 auto;
 }
 

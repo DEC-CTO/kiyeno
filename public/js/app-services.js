@@ -2535,10 +2535,13 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
     };
 
     const content = `
-        <div style="min-width: 1000px;">
+        <div style="min-width: 700px; max-width: 1000px;">
             <h4><i class="fas fa-${isAddMode ? 'plus' : 'edit'}"></i> 경량부품 ${isAddMode ? '추가' : '편집'}${isAddMode ? '' : ': ' + material.name}</h4>
-            <div style="margin: 20px 0;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+
+            <!-- Section 1: 기본 정보 편집 -->
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #f9fafb;">
+                <h5 style="margin: 0 0 15px 0; color: #1f2937;"><i class="fas fa-info-circle"></i> 기본 정보</h5>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                     <!-- Row 1: 기본 정보 (파란색) -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">ID *</label>
@@ -2638,14 +2641,15 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                                style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
                     </div>
                 </div>
-                
+            </div>
+
             <!-- Section 2: 노무비 계산 섹션 -->
-            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #fef3c7;">
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #fef3c7;">
                 <h5 style="margin: 0 0 15px 0; color: #92400e;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+
                     <!-- 기준 노무비 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
                         <h6 style="margin: 0 0 10px 0; color: #92400e;">기준 노무비 설정</h6>
                         <div id="workersList" style="margin-bottom: 10px;">
                             ${laborSettings.workers.map((worker, index) => `
@@ -2678,7 +2682,7 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                     </div>
 
                     <!-- 생산성 & 보할 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
                         <h6 style="margin: 0 0 10px 0; color: #92400e;">생산성 및 보할 설정</h6>
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 생산성</label>
@@ -2717,7 +2721,7 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
 
     const modalTitle = isAddMode ? '경량부품 추가' : '경량부품 편집';
     const buttonText = isAddMode ? '추가' : '저장';
-    
+
     createSubModal(modalTitle, content, [
         { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
         { text: buttonText, class: 'btn-primary', onClick: (modal) => {
@@ -2727,7 +2731,7 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                 updateLightweightMaterial(materialId, modal);
             }
         }}
-    ]);
+    ], { width: '880px' });
     
     // 모달 로드 후 초기 계산 실행
     setTimeout(() => {
@@ -3106,13 +3110,13 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
     };
 
     const content = `
-        <div style="min-width: 1200px; max-height: 80vh; overflow-y: auto;">
+        <div style="min-width: 700px; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
             <h4><i class="fas fa-${isAddMode ? 'plus' : 'edit'}"></i> 석고보드 ${isAddMode ? '추가' : '편집'}${isAddMode ? '' : ': ' + material.name}</h4>
-            
+
             <!-- Section 1: 기본 정보 편집 -->
             <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #f9fafb;">
                 <h5 style="margin: 0 0 15px 0; color: #1f2937;"><i class="fas fa-info-circle"></i> 기본 정보</h5>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                     <!-- ID (수정 불가) -->
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #6b7280;">ID</label>
@@ -3236,12 +3240,12 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
             </div>
 
             <!-- Section 2: 노무비 계산 섹션 -->
-            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 15px 0; background: #fef3c7;">
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #fef3c7;">
                 <h5 style="margin: 0 0 15px 0; color: #92400e;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+
                     <!-- 기준 노무비 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
                         <h6 style="margin: 0 0 10px 0; color: #92400e;">기준 노무비 설정</h6>
                         <div id="workersList" style="margin-bottom: 10px;">
                             ${laborSettings.workers.map((worker, index) => `
@@ -3271,7 +3275,7 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                     </div>
 
                     <!-- 생산성 & 보할 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 15px; background: #fffbeb;">
+                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
                         <h6 style="margin: 0 0 10px 0; color: #92400e;">생산성 및 보할 설정</h6>
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 생산성</label>
@@ -3310,7 +3314,7 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
 
     const modalTitle = isAddMode ? '석고보드 추가' : '석고보드 편집';
     const buttonText = isAddMode ? '추가' : '저장';
-    
+
     createSubModal(modalTitle, content, [
         { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
         { text: buttonText, class: 'btn-primary', onClick: (modal) => {
@@ -3320,7 +3324,7 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                 updateGypsumBoard(materialId, modal);
             }
         }}
-    ]);
+    ], { width: '880px' });
     
     // 모달 로드 후 초기 계산 실행
     setTimeout(() => {

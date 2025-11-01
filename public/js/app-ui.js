@@ -1180,12 +1180,19 @@ function createSubModal(title, content, buttons = [], options = {}) {
             `;
 
             if (buttonConfig.onClick) {
-                button.addEventListener('click', (event) => {
+                const handleClick = (event) => {
                     console.log(`🖱️ 버튼 클릭 이벤트 발생 (버튼 ${index}):`, buttonConfig.text);
                     event.preventDefault();
                     event.stopPropagation();
                     buttonConfig.onClick(subModalOverlay);
-                });
+                };
+                button.addEventListener('click', handleClick);
+
+                // 리스너 참조 저장 (나중에 정리를 위해)
+                if (!subModalOverlay._buttonListeners) {
+                    subModalOverlay._buttonListeners = [];
+                }
+                subModalOverlay._buttonListeners.push({ button, handleClick });
             }
 
             buttonContainer.appendChild(button);
@@ -1198,11 +1205,14 @@ function createSubModal(title, content, buttons = [], options = {}) {
     
     // 옵션에 따라 외부 클릭으로 닫기 설정
     if (!options.disableBackgroundClick) {
-        subModalOverlay.addEventListener('click', (e) => {
+        const handleBackgroundClick = (e) => {
             if (e.target === subModalOverlay) {
                 closeSubModal(subModalOverlay);
             }
-        });
+        };
+        subModalOverlay.addEventListener('click', handleBackgroundClick);
+        // 리스너 참조 저장 (나중에 정리를 위해)
+        subModalOverlay._handleBackgroundClick = handleBackgroundClick;
     }
     
     // 옵션에 따라 ESC 키로 닫기 설정
@@ -1231,6 +1241,20 @@ function closeSubModal(subModalOverlay) {
     if (subModalOverlay && subModalOverlay._handleEscape) {
         document.removeEventListener('keydown', subModalOverlay._handleEscape);
         subModalOverlay._handleEscape = null;
+    }
+
+    // 버튼 클릭 이벤트 리스너 제거 (메모리 누수 방지)
+    if (subModalOverlay && subModalOverlay._buttonListeners) {
+        subModalOverlay._buttonListeners.forEach(({ button, handleClick }) => {
+            button.removeEventListener('click', handleClick);
+        });
+        subModalOverlay._buttonListeners = null;
+    }
+
+    // 배경 클릭 이벤트 리스너 제거 (메모리 누수 방지)
+    if (subModalOverlay && subModalOverlay._handleBackgroundClick) {
+        subModalOverlay.removeEventListener('click', subModalOverlay._handleBackgroundClick);
+        subModalOverlay._handleBackgroundClick = null;
     }
 
     // 배경 자재 관리 모달 복원
