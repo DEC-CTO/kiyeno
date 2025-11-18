@@ -142,22 +142,59 @@
 
             <!-- 필터 컨트롤 -->
             <div class="revit-filters">
+              <!-- Name 필터 (다중 선택 체크박스 드롭다운) -->
               <div class="filter-group">
-                <label for="nameFilter"
-                  ><i class="fas fa-filter"></i> Name 필터:</label
-                >
-                <select id="nameFilter" onchange="applyRevitFilters()">
-                  <option value="">전체</option>
-                </select>
+                <label><i class="fas fa-filter"></i> Name:</label>
+                <div class="multi-select-dropdown">
+                  <button
+                    class="multi-select-button"
+                    id="nameFilterButton"
+                    type="button"
+                    onclick="toggleNameDropdown()"
+                  >
+                    전체 (0개 선택)
+                  </button>
+                  <div class="multi-select-dropdown-menu" id="nameDropdown">
+                    <div class="multi-select-all">
+                      <input
+                        type="checkbox"
+                        id="nameSelectAll"
+                        onchange="selectAllNames(this.checked)"
+                      >
+                      <label for="nameSelectAll">전체 선택</label>
+                    </div>
+                    <div id="nameCheckboxList"></div>
+                  </div>
+                </div>
               </div>
+
+              <!-- Level 필터 (다중 선택 체크박스 드롭다운) -->
               <div class="filter-group">
-                <label for="levelFilter"
-                  ><i class="fas fa-filter"></i> Level 필터:</label
-                >
-                <select id="levelFilter" onchange="applyRevitFilters()">
-                  <option value="">전체</option>
-                </select>
+                <label><i class="fas fa-filter"></i> Level:</label>
+                <div class="multi-select-dropdown">
+                  <button
+                    class="multi-select-button"
+                    id="levelFilterButton"
+                    type="button"
+                    onclick="toggleLevelDropdown()"
+                  >
+                    전체 (0개 선택)
+                  </button>
+                  <div class="multi-select-dropdown-menu" id="levelDropdown">
+                    <div class="multi-select-all">
+                      <input
+                        type="checkbox"
+                        id="levelSelectAll"
+                        onchange="selectAllLevels(this.checked)"
+                      >
+                      <label for="levelSelectAll">전체 선택</label>
+                    </div>
+                    <div id="levelCheckboxList"></div>
+                  </div>
+                </div>
               </div>
+
+              <!-- 필터 초기화 버튼 -->
               <div class="filter-group">
                 <button
                   class="btn btn-sm btn-secondary"
@@ -1187,6 +1224,9 @@
           <button class="panel-tab active" onclick="switchResultTab('comparison')">
             <i class="fas fa-balance-scale"></i> 벽체별 합계
           </button>
+          <button class="panel-tab" onclick="switchResultTab('materialSummary')">
+            <i class="fas fa-boxes"></i> 재료별 합계
+          </button>
           <button class="panel-tab" onclick="switchResultTab('individual')">
             <i class="fas fa-list"></i> 벽체별 상세
           </button>
@@ -1226,6 +1266,30 @@
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- 재료별 합계 탭 -->
+        <div id="materialSummaryTab" class="tab-content">
+          <div class="material-summary-container">
+            <table class="material-summary-table">
+              <thead>
+                <tr>
+                  <th>품명 규격</th>
+                  <th>단위</th>
+                  <th>수량</th>
+                  <th>자재비</th>
+                  <th>노무비</th>
+                  <th>합계</th>
+                </tr>
+              </thead>
+              <tbody id="materialSummaryTableBody">
+                <!-- 동적으로 생성 -->
+              </tbody>
+              <tfoot id="materialSummaryTableFoot">
+                <!-- 합계 행 동적으로 생성 -->
+              </tfoot>
+            </table>
           </div>
         </div>
 

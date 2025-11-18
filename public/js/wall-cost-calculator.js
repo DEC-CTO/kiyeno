@@ -9,6 +9,7 @@ let isResultsPanelOpen = false;
 let currentActiveTab = 'comparison';
 let isOrderFormRendered = false;
 let isPriceComparisonRendered = false;
+let orderFormDirectCosts = []; // 발주서 직접비 데이터 저장
 
 /**
  * 벽체 비용 계산 시작
@@ -573,10 +574,11 @@ function updateCalculationSummary() {
 /**
  * 계산 결과 렌더링
  */
-function renderCalculationResults() {
+async function renderCalculationResults() {
   renderIndividualResults();
   renderSummaryResults();
   renderComparisonResults();
+  await renderMaterialSummaryTable();
 }
 
 /**
@@ -740,10 +742,104 @@ let roomChart = null;
 let levelChart = null;
 
 /**
+ * 발주서 직접비에서 재료별 합계 집계 함수
+ * 발주서에서 이미 계산된 금액을 그대로 사용
+ * @returns {Array} 재료별 집계 데이터 배열
+ */
+function aggregateMaterialsByType() {
+  console.log('📊 재료별 합계 집계 시작 (발주서 직접비 사용)');
+
+  if (calculationResults.length === 0) {
+    console.log('❌ 계산 결과 없음');
+    return [];
+  }
+
+  if (orderFormDirectCosts.length === 0) {
+    console.log('⚠️ 발주서 직접비 데이터가 없습니다. 발주서 탭을 먼저 렌더링하세요.');
+    return [];
+  }
+
+  console.log(`📋 발주서 직접비 항목 개수: ${orderFormDirectCosts.length}`);
+
+  // 재료별 집계 맵
+  const materialMap = {};
+
+  // 발주서 직접비 데이터를 품명별로 집계
+  for (let i = 0; i < orderFormDirectCosts.length; i++) {
+    const comp = orderFormDirectCosts[i];
+
+    if (i < 3) {
+      console.log(`  📦 직접비 항목 ${i + 1}:`, {
+        name: comp.name,
+        spec: comp.spec,
+        unit: comp.unit,
+        orderMatAmount: comp.orderMatAmount,
+        orderLabAmount: comp.orderLabAmount,
+        mValue: comp.mValue,
+        sheetQuantity: comp.sheetQuantity
+      });
+    }
+
+    const name = comp.name || '';
+    const spec = comp.spec || '';
+    const key = `${name}_${spec}`.trim();
+
+    // ✅ 발주서에서 이미 계산된 금액을 그대로 사용
+    const materialCost = comp.orderMatAmount || 0;
+    const laborCost = comp.orderLabAmount || 0;
+
+    // ✅ 수량: 석고보드는 sheetQuantity(14번 컬럼), 나머지는 mValue(11번 컬럼)
+    let quantity = 0;
+    let isSheet = false;
+    if (isGypsumBoard(name) && comp.sheetQuantity) {
+      quantity = comp.sheetQuantity;
+      isSheet = true;
+    } else if (comp.mValue !== null && comp.mValue !== undefined) {
+      quantity = comp.mValue;
+    } else {
+      quantity = (comp.quantity || 0) * (comp.area || 0);
+    }
+
+    const unit = comp.unit || '';
+
+    if (!materialMap[key]) {
+      materialMap[key] = {
+        nameSpec: `${name} ${spec}`.trim(),  // 품명+규격 통합
+        unit: unit,
+        quantity: 0,
+        isWelding: isWeldingRod(name),  // 용접봉 여부 저장
+        isSheet: isSheet,  // 석고보드 장수 여부 저장
+        materialCost: 0,
+        laborCost: 0,
+      };
+    }
+
+    // 발주서에서 이미 계산된 금액을 그대로 합산
+    materialMap[key].quantity += quantity;
+    materialMap[key].materialCost += materialCost;
+    materialMap[key].laborCost += laborCost;
+  }
+
+  // 맵을 배열로 변환하고 정렬
+  const materialsArray = Object.values(materialMap).sort((a, b) => {
+    if (a.nameSpec < b.nameSpec) return -1;
+    if (a.nameSpec > b.nameSpec) return 1;
+    return 0;
+  });
+
+  console.log(`\n✅ 재료별 집계 완료: ${materialsArray.length}개 자재`);
+  console.log(`📊 집계 결과 (처음 5개):`, materialsArray.slice(0, 5));
+
+  return materialsArray;
+}
+
+/**
  * 집계 현황 렌더링
  */
 function renderSummaryResults() {
   if (calculationResults.length === 0) return;
+
+  console.log('📊 집계 현황 렌더링 시작');
 
   const totalArea = calculationResults.reduce(
     (sum, result) => sum + result.area,
@@ -778,7 +874,98 @@ function renderSummaryResults() {
   renderWallTypeChart();
   renderRoomChart();
   renderLevelChart();
+
+  console.log('✅ 집계 현황 렌더링 완료');
 }
+
+/**
+ * 재료별 합계 테이블 렌더링
+ */
+async function renderMaterialSummaryTable() {
+  console.log('📊 재료별 합계 테이블 렌더링 시작');
+
+  const tableBody = document.getElementById('materialSummaryTableBody');
+  const tableFoot = document.getElementById('materialSummaryTableFoot');
+
+  if (!tableBody || !tableFoot) {
+    console.error('❌ 재료별 합계 테이블 요소를 찾을 수 없습니다.');
+    return;
+  }
+
+  // 발주서가 렌더링되지 않았으면 먼저 렌더링
+  if (orderFormDirectCosts.length === 0) {
+    console.log('⚠️ 발주서 데이터가 없습니다. 발주서 탭을 먼저 렌더링합니다...');
+    await renderOrderFormTab();
+  }
+
+  // 재료별 집계 데이터 가져오기
+  const materials = aggregateMaterialsByType();
+
+  console.log('📊 집계 완료, materials.length:', materials.length);
+
+  if (materials.length === 0) {
+    console.log('❌ 집계된 재료 없음 - 빈 메시지 표시');
+    tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">집계된 재료가 없습니다.</td></tr>';
+    tableFoot.innerHTML = '';
+    return;
+  }
+
+  // 테이블 본문 생성
+  let totalQuantity = 0;
+  let totalMaterialCostSum = 0;
+  let totalLaborCostSum = 0;
+  let totalSum = 0;
+
+  const rows = materials.map((material, index) => {
+    // materialCost와 laborCost는 이미 반올림된 값
+    const totalCost = material.materialCost + material.laborCost;
+    totalQuantity += material.quantity;
+    totalMaterialCostSum += material.materialCost;
+    totalLaborCostSum += material.laborCost;
+    totalSum += totalCost;
+
+    // ✅ 용접봉은 소수점 표시, 나머지는 정수 표시
+    let quantityDisplay;
+    if (material.isWelding) {
+      quantityDisplay = material.quantity.toLocaleString('ko-KR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 2
+      });
+    } else {
+      quantityDisplay = Math.round(material.quantity).toLocaleString();
+    }
+
+    return `
+      <tr>
+        <td>${material.nameSpec}</td>
+        <td style="text-align: center;">${material.unit}</td>
+        <td style="text-align: right;">${quantityDisplay}</td>
+        <td style="text-align: right;">₩${material.materialCost.toLocaleString()}</td>
+        <td style="text-align: right;">₩${material.laborCost.toLocaleString()}</td>
+        <td style="text-align: right; font-weight: bold;">₩${totalCost.toLocaleString()}</td>
+      </tr>
+    `;
+  }).join('');
+
+  tableBody.innerHTML = rows;
+
+  // 합계 행 생성 (이미 반올림된 값들의 합)
+  tableFoot.innerHTML = `
+    <tr style="background-color: #f8f9fa; font-weight: bold;">
+      <td colspan="2" style="text-align: center;">합계</td>
+      <td style="text-align: right;">-</td>
+      <td style="text-align: right;">₩${totalMaterialCostSum.toLocaleString()}</td>
+      <td style="text-align: right;">₩${totalLaborCostSum.toLocaleString()}</td>
+      <td style="text-align: right; color: #2563eb;">₩${totalSum.toLocaleString()}</td>
+    </tr>
+  `;
+
+  console.log(`✅ 재료별 합계 테이블 렌더링 완료: ${materials.length}개 자재`);
+  console.log(`   총 재료비: ₩${totalMaterialCostSum.toLocaleString()}`);
+  console.log(`   총 노무비: ₩${totalLaborCostSum.toLocaleString()}`);
+  console.log(`   총   합계: ₩${totalSum.toLocaleString()}`);
+}
+
 
 /**
  * 공종별 비용 분포 차트 렌더링
@@ -1301,6 +1488,8 @@ window.switchResultTab = function (tabName) {
     }
   } else if (tabName === 'estimate') {
     renderEstimateTab();
+  } else if (tabName === 'materialSummary') {
+    renderMaterialSummaryTable();
   }
 };
 
@@ -4172,12 +4361,66 @@ async function generateOrderFormDataRows() {
       }
     }
 
-    // ✅ 4-2. 석고보드 수량을 모든 구성품에 전달
+    // ✅ 4-2. 석고보드 수량을 모든 구성품에 전달하고 금액 계산
     for (const comp of sortedDirectCosts) {
       comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+
+      // 💾 발주단가 금액 계산 및 저장 (재료별 합계에서 사용)
+      const area = comp.area;
+      const componentName = comp.name;
+      const materialData = comp.materialData;
+
+      // 16번 컬럼 수량 계산
+      let displayQuantity = area;
+      if (isGypsumBoard(componentName)) {
+        displayQuantity = comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+      }
+
+      // 14번 컬럼 장수 계산 (석고보드만)
+      let sheetQuantity = null;
+      if (isGypsumBoard(componentName) && materialData) {
+        const w = parseFloat(materialData.w) || 0;
+        const h = parseFloat(materialData.h) || 0;
+        if (w > 0 && h > 0) {
+          const m2PerSheet = ((w / 1000) * (h / 1000));
+          const gypsumBoardQty = comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+          sheetQuantity = Math.round(gypsumBoardQty / m2PerSheet);
+        }
+      }
+
+      // 11번 컬럼 수량 계산
+      let mValue = null;
+      if (isWeldingRod(componentName)) {
+        mValue = parseFloat((comp.quantity * area).toFixed(2));
+      } else if (!isGypsumBoard(componentName)) {
+        mValue = Math.round(comp.quantity * area);
+      }
+
+      // 발주단가 1m² 단가
+      const orderMatPrice = comp.materialPricePerM2 || Math.round(comp.materialPrice * comp.quantity);
+      const orderLabPrice = comp.laborPricePerM2 || Math.round(comp.laborAmount);
+
+      // 발주단가 금액 = 1m² 단가 × 16번 컬럼 수량
+      const orderMatAmount = Math.round(orderMatPrice * displayQuantity);
+      const orderLabAmount = Math.round(orderLabPrice * displayQuantity);
+
+      // 저장
+      comp.displayQuantity = displayQuantity;
+      comp.sheetQuantity = sheetQuantity;
+      comp.mValue = mValue;
+      comp.orderMatPrice = orderMatPrice;
+      comp.orderLabPrice = orderLabPrice;
+      comp.orderMatAmount = orderMatAmount;
+      comp.orderLabAmount = orderLabAmount;
+
       html += generateGroupedComponentRow(comp, rowNumber);
       rowNumber++;
     }
+
+    // ✅ 전역 변수에 직접비 데이터 저장 (재료별 합계에서 사용)
+    // 모든 계산이 완료된 후에 저장하여 orderMatAmount, orderLabAmount 등이 포함되도록 함
+    orderFormDirectCosts = sortedDirectCosts;
+    console.log(`💾 발주서 직접비 데이터 저장됨: ${orderFormDirectCosts.length}개 항목`);
 
     // 5. ✅ 직접비 소계
     html += generateSubtotalRow(sortedDirectCosts, '소계 (직접자재)', rowNumber);

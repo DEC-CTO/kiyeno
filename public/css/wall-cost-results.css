@@ -349,6 +349,66 @@
     max-height: 300px;
 }
 
+/* 재료별 합계 테이블 */
+.material-summary-container {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.material-summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.material-summary-table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+}
+
+.material-summary-table th {
+    padding: 12px 15px;
+    font-weight: 600;
+    text-align: center;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.material-summary-table th:last-child {
+    border-right: none;
+}
+
+.material-summary-table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: background-color 0.2s ease;
+}
+
+.material-summary-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.material-summary-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.material-summary-table td {
+    padding: 12px 15px;
+    color: #495057;
+}
+
+.material-summary-table tfoot tr {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-top: 2px solid #dee2e6;
+}
+
+.material-summary-table tfoot td {
+    padding: 14px 15px;
+    font-size: 15px;
+}
+
 /* 비교 분석 */
 .comparison-container {
     background: #ffffff;

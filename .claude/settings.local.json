@@ -4,7 +4,13 @@
       "Bash(npm start)",
       "Bash(awk:*)",
       "Bash(find:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout /t 10)",
+      "Bash(timeout:*)",
+      "Bash(if exist .next rmdir /s /q .next)"
     ]
   }
 }

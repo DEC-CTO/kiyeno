@@ -8,6 +8,10 @@ let revitWallData = [];
 let filteredRevitWallData = []; // 필터링된 데이터
 let pendingWallData = null; // 실명 입력 대기 중인 벽체 데이터
 
+// 다중 선택 필터 상태
+let selectedNames = [];  // 선택된 Name 목록
+let selectedLevels = []; // 선택된 Level 목록
+
 // 전역 변수로 노출 (다른 모듈에서 접근 가능)
 window.filteredRevitWallData = filteredRevitWallData;
 console.log('🚀 revit-wall-handler.js 로드됨. 초기 filteredRevitWallData:', filteredRevitWallData.length);
@@ -19,6 +23,27 @@ function updateFilteredData(newData) {
     filteredRevitWallData = newData;
     window.filteredRevitWallData = filteredRevitWallData;
     console.log('📊 filteredRevitWallData 업데이트됨:', filteredRevitWallData.length, '개');
+}
+
+/**
+ * 벽체 데이터 정렬 함수 (Level → Name 순)
+ */
+function sortWallData(data) {
+    return data.sort((a, b) => {
+        // 1. 먼저 Level로 정렬
+        const levelA = a.Level || '';
+        const levelB = b.Level || '';
+        if (levelA < levelB) return -1;
+        if (levelA > levelB) return 1;
+
+        // 2. Level이 같으면 Name으로 정렬
+        const nameA = a.Name || '';
+        const nameB = b.Name || '';
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+
+        return 0;
+    });
 }
 
 /**
@@ -218,23 +243,31 @@ function addWallsToRevitTable(wallDataArray) {
                 
                 // 결과 메시지 표시
                 showProcessingResult(addedCount, updatedCount, skippedCount);
-                
+
+                // Revit 데이터 수신 후 전체 데이터 정렬 (Level → Name 순)
+                sortWallData(revitWallData);
+                console.log('🔤 Revit 데이터 정렬 완료: Level → Name 순');
+
                 // 필터링된 데이터 리셋
                 updateFilteredData([...revitWallData]);
-                
+
                 // 테이블 업데이트
                 updateRevitDataTable();
-                
+
                 // Revit 데이터 섹션 자동 열기
                 openRevitDataSection();
             });
         } else {
             // 중복이 없는 경우 바로 완료
             showProcessingResult(addedCount, 0, 0);
-            
+
+            // Revit 데이터 수신 후 전체 데이터 정렬 (Level → Name 순)
+            sortWallData(revitWallData);
+            console.log('🔤 Revit 데이터 정렬 완료: Level → Name 순');
+
             // 필터링된 데이터 리셋
             updateFilteredData([...revitWallData]);
-            
+
             updateRevitDataTable();
             openRevitDataSection();
         }
@@ -490,7 +523,7 @@ function updateRevitDataTable() {
     
     if (!revitWallData || revitWallData.length === 0) {
         selectionText.textContent = 'Revit 데이터가 없습니다.';
-        updateFilterOptions(); // 필터 옵션도 초기화
+        updateFilterCheckboxes(); // 필터 체크박스 목록 초기화
         return;
     }
     
@@ -508,11 +541,15 @@ function updateRevitDataTable() {
     } else {
         selectionText.textContent = `총 ${totalCount}개 중 ${filteredCount}개 표시됨 (필터 적용)`;
     }
-    
-    // 필터 옵션 업데이트
-    updateFilterOptions();
-    
-    // 테이블 행 생성 (필터링된 데이터 사용)
+
+    // 테이블 표시 전 항상 정렬 (Level → Name 순)
+    sortWallData(filteredRevitWallData);
+    console.log('🔤 테이블 정렬 완료: Level → Name 순');
+
+    // 필터 체크박스 목록 업데이트
+    updateFilterCheckboxes();
+
+    // 테이블 행 생성 (정렬된 데이터 사용)
     filteredRevitWallData.forEach((wall, index) => {
         const row = document.createElement('tr');
         row.setAttribute('data-wall-index', index);
@@ -952,81 +989,291 @@ document.head.appendChild(style);
  */
 
 /**
- * 필터 옵션 업데이트
+ * 체크박스 필터 옵션 업데이트 (다중 선택 지원, 체크 상태 보존)
  */
-function updateFilterOptions() {
-    const nameFilter = document.getElementById('nameFilter');
-    const levelFilter = document.getElementById('levelFilter');
-    
-    if (!nameFilter || !levelFilter) return;
-    
-    // 기존 옵션 제거 (첫 번째 "전체" 옵션 제외)
-    nameFilter.innerHTML = '<option value="">전체</option>';
-    levelFilter.innerHTML = '<option value="">전체</option>';
-    
-    if (revitWallData.length === 0) return;
-    
+function updateFilterCheckboxes() {
+    console.log('🔧 updateFilterCheckboxes 호출됨');
+    console.log('📊 revitWallData 개수:', revitWallData.length);
+
+    const nameList = document.getElementById('nameCheckboxList');
+    const levelList = document.getElementById('levelCheckboxList');
+
+    console.log('📦 nameList 요소:', nameList);
+    console.log('📦 levelList 요소:', levelList);
+
+    if (!nameList || !levelList) {
+        console.error('❌ 체크박스 컨테이너를 찾을 수 없습니다!');
+        return;
+    }
+
+    // 데이터가 없으면 빈 메시지 표시
+    if (revitWallData.length === 0) {
+        console.log('⚠️ revitWallData가 비어있습니다.');
+        nameList.innerHTML = '<div class="multi-select-empty">데이터 없음</div>';
+        levelList.innerHTML = '<div class="multi-select-empty">데이터 없음</div>';
+        return;
+    }
+
     // 고유한 Name 값들 수집
     const uniqueNames = [...new Set(revitWallData.map(wall => wall.Name).filter(name => name))];
-    uniqueNames.sort().forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        nameFilter.appendChild(option);
-    });
-    
+    console.log('📝 고유한 Name 목록:', uniqueNames);
+
+    // Name 체크박스 생성 (체크 상태 보존)
+    nameList.innerHTML = uniqueNames.sort().map((name, index) => {
+        const isChecked = selectedNames.includes(name) ? 'checked' : '';
+        return `
+            <div class="multi-select-item">
+                <input type="checkbox" id="name_${index}" value="${name}" ${isChecked} onchange="onNameCheckboxChange()">
+                <label for="name_${index}">${name}</label>
+            </div>
+        `;
+    }).join('');
+
     // 고유한 Level 값들 수집
     const uniqueLevels = [...new Set(revitWallData.map(wall => wall.Level).filter(level => level))];
-    uniqueLevels.sort().forEach(level => {
-        const option = document.createElement('option');
-        option.value = level;
-        option.textContent = level;
-        levelFilter.appendChild(option);
-    });
+    console.log('📝 고유한 Level 목록:', uniqueLevels);
+
+    // Level 체크박스 생성 (체크 상태 보존)
+    levelList.innerHTML = uniqueLevels.sort().map((level, index) => {
+        const isChecked = selectedLevels.includes(level) ? 'checked' : '';
+        return `
+            <div class="multi-select-item">
+                <input type="checkbox" id="level_${index}" value="${level}" ${isChecked} onchange="onLevelCheckboxChange()">
+                <label for="level_${index}">${level}</label>
+            </div>
+        `;
+    }).join('');
+
+    console.log(`✅ 필터 체크박스 생성 완료: Name ${uniqueNames.length}개, Level ${uniqueLevels.length}개`);
+    console.log('💾 보존된 체크 상태 - Name:', selectedNames, 'Level:', selectedLevels);
+
+    // "전체 선택" 체크박스 상태 동기화
+    const nameSelectAll = document.getElementById('nameSelectAll');
+    const levelSelectAll = document.getElementById('levelSelectAll');
+
+    if (nameSelectAll) {
+        nameSelectAll.checked = uniqueNames.length > 0 && selectedNames.length === uniqueNames.length;
+    }
+
+    if (levelSelectAll) {
+        levelSelectAll.checked = uniqueLevels.length > 0 && selectedLevels.length === uniqueLevels.length;
+    }
 }
 
 /**
- * 필터 적용
+ * 드롭다운 토글 함수들
  */
-window.applyRevitFilters = function() {
-    const nameFilter = document.getElementById('nameFilter');
-    const levelFilter = document.getElementById('levelFilter');
-    
-    if (!nameFilter || !levelFilter) return;
-    
-    const selectedName = nameFilter.value;
-    const selectedLevel = levelFilter.value;
-    
-    // 필터링 적용
-    const filteredData = revitWallData.filter(wall => {
-        const nameMatch = !selectedName || wall.Name === selectedName;
-        const levelMatch = !selectedLevel || wall.Level === selectedLevel;
-        return nameMatch && levelMatch;
-    });
-    updateFilteredData(filteredData);
-    
-    // 테이블 업데이트
-    updateRevitDataTable();
-    
-    console.log(`🔍 필터 적용됨: Name="${selectedName}", Level="${selectedLevel}", 결과: ${filteredRevitWallData.length}개`);
+window.toggleNameDropdown = function() {
+    console.log('🔽 toggleNameDropdown 호출됨');
+
+    const dropdown = document.getElementById('nameDropdown');
+    const button = document.getElementById('nameFilterButton');
+    const levelDropdown = document.getElementById('levelDropdown');
+    const levelButton = document.getElementById('levelFilterButton');
+
+    console.log('📦 dropdown 요소:', dropdown);
+    console.log('📦 button 요소:', button);
+
+    if (!dropdown || !button) {
+        console.error('❌ Name 드롭다운 요소를 찾을 수 없습니다!');
+        return;
+    }
+
+    // Level 드롭다운 닫기
+    if (levelDropdown) levelDropdown.classList.remove('show');
+    if (levelButton) levelButton.classList.remove('open');
+
+    // Name 드롭다운 토글
+    const isShowing = dropdown.classList.toggle('show');
+    button.classList.toggle('open');
+
+    console.log('📊 Name 드롭다운 상태:', isShowing ? '열림' : '닫힘');
+};
+
+window.toggleLevelDropdown = function() {
+    console.log('🔽 toggleLevelDropdown 호출됨');
+
+    const dropdown = document.getElementById('levelDropdown');
+    const button = document.getElementById('levelFilterButton');
+    const nameDropdown = document.getElementById('nameDropdown');
+    const nameButton = document.getElementById('nameFilterButton');
+
+    console.log('📦 dropdown 요소:', dropdown);
+    console.log('📦 button 요소:', button);
+
+    if (!dropdown || !button) {
+        console.error('❌ Level 드롭다운 요소를 찾을 수 없습니다!');
+        return;
+    }
+
+    // Name 드롭다운 닫기
+    if (nameDropdown) nameDropdown.classList.remove('show');
+    if (nameButton) nameButton.classList.remove('open');
+
+    // Level 드롭다운 토글
+    const isShowing = dropdown.classList.toggle('show');
+    button.classList.toggle('open');
+
+    console.log('📊 Level 드롭다운 상태:', isShowing ? '열림' : '닫힘');
 };
 
 /**
- * 필터 초기화
+ * 드롭다운 외부 클릭 시 닫기
  */
-window.clearRevitFilters = function() {
-    const nameFilter = document.getElementById('nameFilter');
-    const levelFilter = document.getElementById('levelFilter');
-    
-    if (nameFilter) nameFilter.value = '';
-    if (levelFilter) levelFilter.value = '';
-    
-    // 필터링된 데이터를 전체 데이터로 리셋
-    updateFilteredData([...revitWallData]);
-    
+document.addEventListener('click', function(event) {
+    const nameDropdown = document.getElementById('nameDropdown');
+    const levelDropdown = document.getElementById('levelDropdown');
+    const nameButton = document.getElementById('nameFilterButton');
+    const levelButton = document.getElementById('levelFilterButton');
+
+    if (!event.target.closest('.multi-select-dropdown')) {
+        if (nameDropdown) {
+            nameDropdown.classList.remove('show');
+            if (nameButton) nameButton.classList.remove('open');
+        }
+        if (levelDropdown) {
+            levelDropdown.classList.remove('show');
+            if (levelButton) levelButton.classList.remove('open');
+        }
+    }
+});
+
+/**
+ * 체크박스 변경 이벤트 핸들러
+ */
+window.onNameCheckboxChange = function() {
+    console.log('☑️ onNameCheckboxChange 호출됨');
+
+    const checkboxes = document.querySelectorAll('#nameCheckboxList input[type="checkbox"]');
+    console.log('📊 전체 Name 체크박스 개수:', checkboxes.length);
+
+    selectedNames = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+    console.log('✅ 선택된 Name:', selectedNames);
+
+    // "전체 선택" 체크박스 동기화
+    const selectAllCheckbox = document.getElementById('nameSelectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = checkboxes.length > 0 && selectedNames.length === checkboxes.length;
+    }
+
+    updateFilterButtonText();
+    applyRevitFilters();
+};
+
+window.onLevelCheckboxChange = function() {
+    console.log('☑️ onLevelCheckboxChange 호출됨');
+
+    const checkboxes = document.querySelectorAll('#levelCheckboxList input[type="checkbox"]');
+    console.log('📊 전체 Level 체크박스 개수:', checkboxes.length);
+
+    selectedLevels = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+    console.log('✅ 선택된 Level:', selectedLevels);
+
+    // "전체 선택" 체크박스 동기화
+    const selectAllCheckbox = document.getElementById('levelSelectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = checkboxes.length > 0 && selectedLevels.length === checkboxes.length;
+    }
+
+    updateFilterButtonText();
+    applyRevitFilters();
+};
+
+/**
+ * 필터 버튼 텍스트 업데이트
+ */
+function updateFilterButtonText() {
+    const nameButton = document.getElementById('nameFilterButton');
+    const levelButton = document.getElementById('levelFilterButton');
+
+    if (nameButton) {
+        nameButton.textContent = selectedNames.length === 0
+            ? '전체 (0개 선택)'
+            : `${selectedNames.length}개 선택`;
+    }
+
+    if (levelButton) {
+        levelButton.textContent = selectedLevels.length === 0
+            ? '전체 (0개 선택)'
+            : `${selectedLevels.length}개 선택`;
+    }
+}
+
+/**
+ * 전체 선택/해제 함수
+ */
+window.selectAllNames = function(checked) {
+    const checkboxes = document.querySelectorAll('#nameCheckboxList input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = checked);
+    onNameCheckboxChange();
+};
+
+window.selectAllLevels = function(checked) {
+    const checkboxes = document.querySelectorAll('#levelCheckboxList input[type="checkbox"]');
+    checkboxes.forEach(cb => cb.checked = checked);
+    onLevelCheckboxChange();
+};
+
+/**
+ * 필터 적용 (다중 선택 지원)
+ */
+window.applyRevitFilters = function() {
+    // 필터링 적용 (OR 조건으로 다중 선택 지원)
+    const filteredData = revitWallData.filter(wall => {
+        // Name 필터: 선택된 항목이 없으면 전체, 있으면 선택된 항목 중 하나라도 매칭
+        const nameMatch = selectedNames.length === 0 || selectedNames.includes(wall.Name);
+
+        // Level 필터: 동일
+        const levelMatch = selectedLevels.length === 0 || selectedLevels.includes(wall.Level);
+
+        // AND 조건: 두 필터 모두 만족해야 함
+        return nameMatch && levelMatch;
+    });
+
+    // 필터링 후 정렬 (Level → Name 순)
+    sortWallData(filteredData);
+
+    updateFilteredData(filteredData);
+
     // 테이블 업데이트
     updateRevitDataTable();
-    
+
+    console.log(`🔍 필터 적용됨: Name=${selectedNames.length}개, Level=${selectedLevels.length}개, 결과=${filteredRevitWallData.length}개`);
+};
+
+/**
+ * 필터 초기화 (다중 선택 체크박스 모두 해제)
+ */
+window.clearRevitFilters = function() {
+    // 모든 체크박스 해제
+    document.querySelectorAll('#nameCheckboxList input[type="checkbox"], #levelCheckboxList input[type="checkbox"]')
+        .forEach(cb => cb.checked = false);
+
+    // 전체 선택 체크박스도 해제
+    const nameSelectAll = document.getElementById('nameSelectAll');
+    const levelSelectAll = document.getElementById('levelSelectAll');
+    if (nameSelectAll) nameSelectAll.checked = false;
+    if (levelSelectAll) levelSelectAll.checked = false;
+
+    // 상태 초기화
+    selectedNames = [];
+    selectedLevels = [];
+
+    // 버튼 텍스트 초기화
+    updateFilterButtonText();
+
+    // 필터링된 데이터를 전체 데이터로 리셋
+    updateFilteredData([...revitWallData]);
+
+    // 테이블 업데이트
+    updateRevitDataTable();
+
     console.log('🔄 필터가 초기화되었습니다.');
 };
 

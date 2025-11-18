@@ -2040,3 +2040,159 @@ body {
 .child-row.hidden {
     display: none;
 }
+
+/* =============================================================================
+   다중 선택 체크박스 드롭다운 스타일 (Revit 필터용)
+   ============================================================================= */
+
+.multi-select-dropdown {
+    position: relative;
+    min-width: 180px;
+}
+
+.multi-select-button {
+    width: 100%;
+    padding: 6px 30px 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    background: white;
+    text-align: left;
+    font-size: 12px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.multi-select-button:hover {
+    border-color: #007bff;
+    background: #f8f9fa;
+}
+
+.multi-select-button:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* 드롭다운 화살표 아이콘 */
+.multi-select-button::after {
+    content: '\f107'; /* Font Awesome chevron-down */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: #6c757d;
+    transition: transform 0.2s ease;
+}
+
+.multi-select-button.open::after {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* 드롭다운 메뉴 */
+.multi-select-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    min-width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+.multi-select-dropdown-menu.show {
+    display: block;
+}
+
+/* 전체 선택 체크박스 영역 */
+.multi-select-all {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.multi-select-all input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.multi-select-all label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 체크박스 항목 */
+.multi-select-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+}
+
+.multi-select-item:hover {
+    background: #f8f9fa;
+}
+
+.multi-select-item input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+.multi-select-item label {
+    cursor: pointer;
+    user-select: none;
+    flex: 1;
+}
+
+/* 드롭다운 스크롤바 */
+.multi-select-dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.multi-select-dropdown-menu::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.multi-select-dropdown-menu::-webkit-scrollbar-thumb {
+    background: #999;
+    border-radius: 4px;
+}
+
+.multi-select-dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}
+
+/* 빈 상태 메시지 */
+.multi-select-empty {
+    padding: 12px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* 반응형: 모바일에서는 드롭다운 너비 100% */
+@media (max-width: 768px) {
+    .multi-select-dropdown {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .multi-select-dropdown-menu {
+        min-width: 100%;
+    }
+}
