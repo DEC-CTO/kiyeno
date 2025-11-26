@@ -379,3 +379,49 @@
         background: #5568d3;
     }
 }
+
+/* =============================================================================
+   발주서 테이블 Sticky 헤더 (스크롤 시 헤더 고정)
+   ============================================================================= */
+
+/* 테이블 래퍼에 스크롤 영역 설정 */
+.order-form-table-wrapper {
+    max-height: 70vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* 헤더 행별 고정 높이 설정 */
+.order-form-table thead tr:nth-child(1) th {
+    height: 35px;
+    position: sticky;
+    top: 0;
+    z-index: 12;
+}
+
+.order-form-table thead tr:nth-child(2) th {
+    height: 30px;
+    position: sticky;
+    top: 35px;
+    z-index: 11;
+}
+
+.order-form-table thead tr:nth-child(3) th {
+    height: 28px;
+    position: sticky;
+    top: 65px;
+    z-index: 10;
+}
+
+/* rowspan으로 병합된 셀의 경우 첫 번째 행 top 값 사용 + 전체 높이 설정 */
+.order-form-table thead tr:nth-child(1) th[rowspan="3"] {
+    height: 93px; /* 35 + 30 + 28 = 전체 3행 높이 */
+    top: 0;
+    z-index: 13;
+}
+
+.order-form-table thead tr:nth-child(2) th[rowspan="2"] {
+    height: 58px; /* 30 + 28 = 2행+3행 높이 */
+    top: 35px;
+    z-index: 12;
+}
