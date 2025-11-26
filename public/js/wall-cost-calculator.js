@@ -143,8 +143,9 @@ async function calculateSingleWallCost(wall, sequence) {
     // 2. 레이어별 자재 정보 추출
     const layerPricing = await extractLayerPricing(wallTypeMatch);
 
-    // 3. 면적 기반 총 금액 계산
-    const area = parseFloat(wall.Area) || 0;
+    // 3. 면적 기반 총 금액 계산 (소수점 반올림 적용)
+    // 면적: 3째자리 반올림 → 2자리, 길이/높이/두께: 4째자리 반올림 → 3자리
+    const area = Math.round((parseFloat(wall.Area) || 0) * 100) / 100;
     const totalCost = calculateTotalCost(layerPricing, area);
 
     return {
@@ -153,9 +154,9 @@ async function calculateSingleWallCost(wall, sequence) {
       wallName: wall.Name,
       roomName: wall.RoomName || '미지정',
       area: area,
-      height: parseFloat(wall.Height) || 0,
-      length: parseFloat(wall.Length) || 0,
-      thickness: parseFloat(wall.Thickness) || 0,
+      height: Math.round((parseFloat(wall.Height) || 0) * 1000) / 1000,
+      length: Math.round((parseFloat(wall.Length) || 0) * 1000) / 1000,
+      thickness: Math.round((parseFloat(wall.Thickness) || 0) * 1000) / 1000,
       level: wall.Level || '',
 
       // 매칭 정보

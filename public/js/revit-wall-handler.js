@@ -12,6 +12,13 @@ let pendingWallData = null; // 실명 입력 대기 중인 벽체 데이터
 let selectedNames = [];  // 선택된 Name 목록
 let selectedLevels = []; // 선택된 Level 목록
 
+// 소수점 반올림 함수
+// 면적: 2자리 (3째자리 반올림), 길이/높이/두께: 3자리 (4째자리 반올림)
+function roundToDecimals(value, decimals) {
+    const factor = Math.pow(10, decimals);
+    return Math.round(parseFloat(value) * factor) / factor || 0;
+}
+
 // 전역 변수로 노출 (다른 모듈에서 접근 가능)
 window.filteredRevitWallData = filteredRevitWallData;
 console.log('🚀 revit-wall-handler.js 로드됨. 초기 filteredRevitWallData:', filteredRevitWallData.length);
@@ -686,81 +693,106 @@ window.clearRevitData = function() {
 /**
  * Excel(.xlsx) 파일로 내보내기
  */
-window.exportToExcel = function() {
+window.exportToExcel = async function() {
     if (!revitWallData || revitWallData.length === 0) {
         showToast('내보낼 Revit 데이터가 없습니다.', 'warning');
         return;
     }
-    
+
     try {
-        // 워크북 생성
-        const wb = XLSX.utils.book_new();
-        
-        // 데이터 준비 (헤더 + 데이터)
-        const worksheetData = [
-            // 헤더 행
-            ['Revit ID', 'Name', 'Length (m)', 'Area (m²)', 'Height (m)', 'Thickness (m)', 'Level', 'Category', '실명(Room)']
-        ];
-        
-        // 데이터 행들 추가
-        revitWallData.forEach(wall => {
-            worksheetData.push([
+        // 필터 적용 여부 확인 - 필터된 데이터가 있으면 필터된 데이터만 내보내기
+        const dataToExport = (filteredRevitWallData && filteredRevitWallData.length > 0 &&
+                              filteredRevitWallData.length !== revitWallData.length)
+            ? filteredRevitWallData
+            : revitWallData;
+
+        // ExcelJS 워크북 생성
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Revit 벽체 데이터');
+
+        // 헤더 정의
+        const headers = ['Revit ID', 'Name', 'Length (m)', 'Area (m²)', 'Height (m)', 'Thickness (m)', 'Level', 'Category', '실명(Room)'];
+
+        // 헤더 행 추가
+        const headerRow = worksheet.addRow(headers);
+
+        // 헤더 스타일 적용 (회색 배경, 굵게, 중앙정렬, 테두리)
+        headerRow.eachCell((cell, colNumber) => {
+            cell.font = { bold: true };
+            cell.fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FFCCCCCC' }  // 회색 배경
+            };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = {
+                top: { style: 'thin', color: { argb: 'FF000000' } },
+                left: { style: 'thin', color: { argb: 'FF000000' } },
+                bottom: { style: 'thin', color: { argb: 'FF000000' } },
+                right: { style: 'thin', color: { argb: 'FF000000' } }
+            };
+        });
+
+        // 데이터 행들 추가 (반올림 + toFixed 적용)
+        dataToExport.forEach(wall => {
+            const row = worksheet.addRow([
                 wall.ID || '',
                 wall.Name || '',
-                wall.Length || 0,
-                wall.Area || 0,
-                wall.Height || 0,
-                wall.Thickness || 0,
+                roundToDecimals(wall.Length, 3).toFixed(3),      // "3.300" 형식
+                roundToDecimals(wall.Area, 2).toFixed(2),        // "25.50" 형식
+                roundToDecimals(wall.Height, 3).toFixed(3),      // "3.000" 형식
+                roundToDecimals(wall.Thickness, 3).toFixed(3),   // "0.100" 형식
                 wall.Level || '',
                 wall.Category || '',
                 wall.RoomName || ''
             ]);
+
+            // 데이터 셀 스타일 적용 (중앙정렬, 테두리)
+            row.eachCell((cell, colNumber) => {
+                cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                cell.border = {
+                    top: { style: 'thin', color: { argb: 'FF000000' } },
+                    left: { style: 'thin', color: { argb: 'FF000000' } },
+                    bottom: { style: 'thin', color: { argb: 'FF000000' } },
+                    right: { style: 'thin', color: { argb: 'FF000000' } }
+                };
+            });
         });
-        
-        // 워크시트 생성
-        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-        
+
         // 컬럼 너비 설정
-        ws['!cols'] = [
-            { wch: 12 }, // Revit ID
-            { wch: 20 }, // Name
-            { wch: 12 }, // Length
-            { wch: 12 }, // Area
-            { wch: 12 }, // Height
-            { wch: 12 }, // Thickness
-            { wch: 15 }, // Level
-            { wch: 15 }, // Category
-            { wch: 15 }  // Room Name
+        worksheet.columns = [
+            { width: 15 },  // Revit ID
+            { width: 25 },  // Name
+            { width: 12 },  // Length
+            { width: 12 },  // Area
+            { width: 12 },  // Height
+            { width: 12 },  // Thickness
+            { width: 15 },  // Level
+            { width: 15 },  // Category
+            { width: 18 }   // Room Name
         ];
-        
-        // 헤더 스타일 설정
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let col = range.s.c; col <= range.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-            if (!ws[cellAddress]) continue;
-            
-            ws[cellAddress].s = {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { bgColor: { indexed: 64 }, fgColor: { rgb: "4472C4" } },
-                alignment: { horizontal: "center" }
-            };
-        }
-        
-        // 워크시트를 워크북에 추가
-        XLSX.utils.book_append_sheet(wb, ws, "Revit 벽체 데이터");
-        
+
         // 파일명 생성 (날짜 포함)
         const today = new Date();
-        const dateStr = today.getFullYear() + 
-                       String(today.getMonth() + 1).padStart(2, '0') + 
+        const dateStr = today.getFullYear() +
+                       String(today.getMonth() + 1).padStart(2, '0') +
                        String(today.getDate()).padStart(2, '0');
         const filename = `revit-wall-data_${dateStr}.xlsx`;
-        
+
         // Excel 파일 다운로드
-        XLSX.writeFile(wb, filename);
-        
-        showToast(`${revitWallData.length}개의 벽체 데이터를 Excel 파일로 내보냈습니다.`, 'success');
-        
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        // 필터 적용 여부에 따른 메시지
+        const filterMsg = (dataToExport === filteredRevitWallData) ? ' (필터 적용됨)' : '';
+        showToast(`${dataToExport.length}개의 벽체 데이터를 Excel 파일로 내보냈습니다.${filterMsg}`, 'success');
+
     } catch (error) {
         console.error('Excel 내보내기 오류:', error);
         showToast('Excel 파일 생성 중 오류가 발생했습니다.', 'error');
@@ -775,13 +807,22 @@ window.exportToJSON = function() {
         showToast('내보낼 Revit 데이터가 없습니다.', 'warning');
         return;
     }
-    
+
+    // 반올림 처리된 데이터 생성 (toFixed로 자릿수 고정 - 문자열)
+    const roundedData = revitWallData.map(wall => ({
+        ...wall,
+        Length: roundToDecimals(wall.Length, 3).toFixed(3),      // "3.300" 형식
+        Area: roundToDecimals(wall.Area, 2).toFixed(2),          // "25.50" 형식
+        Height: roundToDecimals(wall.Height, 3).toFixed(3),      // "3.000" 형식
+        Thickness: roundToDecimals(wall.Thickness, 3).toFixed(3) // "0.100" 형식
+    }));
+
     const exportData = {
         exportDate: new Date().toISOString(),
-        totalCount: revitWallData.length,
-        data: revitWallData
+        totalCount: roundedData.length,
+        data: roundedData
     };
-    
+
     const jsonContent = JSON.stringify(exportData, null, 2);
     downloadFile(jsonContent, 'revit-wall-data.json', 'application/json');
     showToast(`${revitWallData.length}개의 벽체 데이터를 JSON 파일로 내보냈습니다.`, 'success');
@@ -813,7 +854,17 @@ window.handleFileImport = function(event) {
             reader.onload = function(e) {
                 try {
                     const jsonData = JSON.parse(e.target.result);
-                    importedData = jsonData.data || jsonData;
+                    const rawData = jsonData.data || jsonData;
+
+                    // 반올림 처리
+                    importedData = rawData.map(wall => ({
+                        ...wall,
+                        Length: roundToDecimals(wall.Length, 3),      // 4째자리 반올림 → 3자리
+                        Area: roundToDecimals(wall.Area, 2),          // 3째자리 반올림 → 2자리
+                        Height: roundToDecimals(wall.Height, 3),      // 4째자리 반올림 → 3자리
+                        Thickness: roundToDecimals(wall.Thickness, 3) // 4째자리 반올림 → 3자리
+                    }));
+
                     processImportedData(importedData);
                 } catch (error) {
                     console.error('JSON 파일 읽기 오류:', error);
@@ -845,10 +896,10 @@ window.handleFileImport = function(event) {
                         importedData = dataRows.map(row => ({
                             ID: row[0] || '',
                             Name: row[1] || '',
-                            Length: parseFloat(row[2]) || 0,
-                            Area: parseFloat(row[3]) || 0,
-                            Height: parseFloat(row[4]) || 0,
-                            Thickness: parseFloat(row[5]) || 0,
+                            Length: roundToDecimals(row[2], 3),      // 4째자리 반올림 → 3자리
+                            Area: roundToDecimals(row[3], 2),        // 3째자리 반올림 → 2자리
+                            Height: roundToDecimals(row[4], 3),      // 4째자리 반올림 → 3자리
+                            Thickness: roundToDecimals(row[5], 3),   // 4째자리 반올림 → 3자리
                             Level: row[6] || '',
                             Category: row[7] || '',
                             RoomName: row[8] || ''
