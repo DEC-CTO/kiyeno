@@ -178,8 +178,11 @@
 /* 테이블 컨테이너 */
 .price-comparison-table-wrapper {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 60vh;
     border: 1px solid #e0e0e0;
     border-radius: 8px;
+    position: relative;
 }
 
 /* 테이블 스타일 */
@@ -206,6 +209,11 @@
     font-weight: 600;
     font-size: 12px;
     padding: 12px 8px;
+    /* Sticky 헤더 */
+    height: 40px;
+    position: sticky;
+    top: 0;
+    z-index: 12;
 }
 
 .price-comparison-table thead tr:nth-child(2) th {
@@ -214,6 +222,18 @@
     font-weight: 600;
     font-size: 11px;
     padding: 10px 8px;
+    /* Sticky 헤더 */
+    height: 35px;
+    position: sticky;
+    top: 40px;
+    z-index: 11;
+}
+
+/* rowspan="2" 병합 셀 - 전체 높이 설정 */
+.price-comparison-table thead tr:first-child th[rowspan="2"] {
+    height: 75px; /* 40 + 35 = 전체 2행 높이 */
+    top: 0;
+    z-index: 13;
 }
 
 /* 본문 스타일 - 모든 행 흰색 배경 */
