@@ -1868,9 +1868,9 @@ function getLayerDisplayName(layerKey) {
 }
 
 /**
- * 단일 벽체 Excel 내보내기
+ * 단일 벽체 Excel 내보내기 (ExcelJS 사용)
  */
-window.exportSingleWall = function (elementId) {
+window.exportSingleWall = async function (elementId) {
   const result = calculationResults.find((r) => r.elementId === elementId);
   if (!result) {
     alert('해당 벽체 데이터를 찾을 수 없습니다.');
@@ -1880,14 +1880,16 @@ window.exportSingleWall = function (elementId) {
   try {
     console.log('📊 단일 벽체 Excel 내보내기:', result.wallName);
 
-    // 워크북 생성
-    const wb = XLSX.utils.book_new();
+    // ExcelJS 워크북 생성
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Kiyeno 벽체 관리 시스템';
+    workbook.created = new Date();
 
     // 1. 벽체 기본 정보 시트
-    createSingleWallInfoSheet(wb, result);
+    createSingleWallInfoSheet(workbook, result);
 
     // 2. 레이어별 자재 상세 시트
-    createSingleWallMaterialSheet(wb, result);
+    createSingleWallMaterialSheet(workbook, result);
 
     // 파일 이름 생성
     const now = new Date();
@@ -1902,7 +1904,16 @@ window.exportSingleWall = function (elementId) {
     const filename = `${safeName}_${dateStr}_${timeStr}.xlsx`;
 
     // Excel 파일 다운로드
-    XLSX.writeFile(wb, filename);
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
     console.log('✅ 단일 벽체 Excel 파일 생성 완료:', filename);
   } catch (error) {
@@ -1912,59 +1923,123 @@ window.exportSingleWall = function (elementId) {
 };
 
 /**
- * 단일 벽체 기본 정보 시트 생성
+ * 단일 벽체 기본 정보 시트 생성 (ExcelJS)
  */
-function createSingleWallInfoSheet(wb, result) {
-  const data = [];
-
-  // 기본 정보
-  data.push(['=== 벽체 기본 정보 ===']);
-  data.push(['ElementID', result.elementId]);
-  data.push(['벽체명', result.wallName]);
-  data.push(['공간명', result.roomName]);
-  data.push(['레벨', result.level]);
-  data.push(['면적', result.area, 'm²']);
-  data.push(['높이', result.height, 'm']);
-  data.push(['길이', result.length, 'm']);
-  data.push(['두께', result.thickness, 'mm']);
-  data.push([]);
-
-  // 계산 결과
-  data.push(['=== 계산 결과 ===']);
-  data.push(['재료비', result.materialCost, '₩']);
-  data.push(['노무비', result.laborCost, '₩']);
-  data.push(['총계', result.totalCost, '₩']);
-  data.push(['단가', result.unitPrice, '₩/m²']);
-  data.push([
-    '계산일시',
-    new Date(result.calculatedAt).toLocaleString('ko-KR'),
-  ]);
-  data.push([]);
-
-  // 매칭된 벽체 타입 정보
-  if (result.wallType) {
-    data.push(['=== 매칭된 벽체 타입 정보 ===']);
-    data.push(['벽체 타입', result.wallType.wallType || '']);
-    data.push(['설명', result.wallType.description || '']);
-    data.push(['두께', result.wallType.thickness || '', 'mm']);
-  }
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
+function createSingleWallInfoSheet(workbook, result) {
+  const worksheet = workbook.addWorksheet('벽체정보');
 
   // 컬럼 너비 설정
-  ws['!cols'] = [{ wch: 20 }, { wch: 20 }, { wch: 10 }];
+  worksheet.columns = [
+    { width: 20 },
+    { width: 25 },
+    { width: 12 }
+  ];
 
-  XLSX.utils.book_append_sheet(wb, ws, '벽체정보');
+  // 공통 테두리 스타일
+  const thinBorder = {
+    top: { style: 'thin', color: { argb: 'FF000000' } },
+    left: { style: 'thin', color: { argb: 'FF000000' } },
+    bottom: { style: 'thin', color: { argb: 'FF000000' } },
+    right: { style: 'thin', color: { argb: 'FF000000' } }
+  };
+
+  // 섹션 헤더 스타일 함수
+  const addSectionHeader = (text, rowNum) => {
+    const row = worksheet.getRow(rowNum);
+    worksheet.mergeCells(rowNum, 1, rowNum, 3);
+    row.getCell(1).value = text;
+    row.getCell(1).font = { bold: true, size: 11 };
+    row.getCell(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFCCCCCC' }
+    };
+    row.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    row.getCell(1).border = thinBorder;
+    row.height = 22;
+  };
+
+  // 데이터 행 추가 함수
+  const addDataRow = (label, value, unit, rowNum, numFmt = null) => {
+    const row = worksheet.getRow(rowNum);
+    row.getCell(1).value = label;
+    row.getCell(2).value = value;
+    row.getCell(3).value = unit || '';
+
+    for (let col = 1; col <= 3; col++) {
+      const cell = row.getCell(col);
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = thinBorder;
+      if (col === 2 && numFmt) {
+        cell.numFmt = numFmt;
+      }
+    }
+    row.height = 20;
+  };
+
+  let currentRow = 1;
+
+  // 기본 정보 섹션
+  addSectionHeader('=== 벽체 기본 정보 ===', currentRow++);
+  addDataRow('ElementID', result.elementId, '', currentRow++);
+  addDataRow('벽체명', result.wallName, '', currentRow++);
+  addDataRow('공간명', result.roomName, '', currentRow++);
+  addDataRow('레벨', result.level, '', currentRow++);
+  addDataRow('면적', result.area, 'm²', currentRow++, '0.00');
+  addDataRow('높이', result.height, 'm', currentRow++, '0.000');
+  addDataRow('길이', result.length, 'm', currentRow++, '0.000');
+  addDataRow('두께', result.thickness, 'm', currentRow++, '0.000');
+  currentRow++; // 빈 행
+
+  // 계산 결과 섹션
+  addSectionHeader('=== 계산 결과 ===', currentRow++);
+  addDataRow('재료비', result.materialCost, '₩', currentRow++, '#,##0');
+  addDataRow('노무비', result.laborCost, '₩', currentRow++, '#,##0');
+  addDataRow('총계', result.totalCost, '₩', currentRow++, '#,##0');
+  addDataRow('단가', result.unitPrice, '₩/m²', currentRow++, '#,##0');
+  addDataRow('계산일시', new Date(result.calculatedAt).toLocaleString('ko-KR'), '', currentRow++);
+  currentRow++; // 빈 행
+
+  // 매칭된 벽체 타입 정보 섹션
+  if (result.wallType) {
+    addSectionHeader('=== 매칭된 벽체 타입 정보 ===', currentRow++);
+    addDataRow('벽체 타입', result.wallType.wallType || '', '', currentRow++);
+    addDataRow('설명', result.wallType.description || '', '', currentRow++);
+    addDataRow('두께', result.wallType.thickness ? result.wallType.thickness / 1000 : '', 'm', currentRow++, '0.000');
+  }
 }
 
 /**
- * 단일 벽체 레이어별 자재 상세 시트 생성
+ * 단일 벽체 레이어별 자재 상세 시트 생성 (ExcelJS)
  */
-function createSingleWallMaterialSheet(wb, result) {
-  const data = [];
+function createSingleWallMaterialSheet(workbook, result) {
+  const worksheet = workbook.addWorksheet('레이어별자재');
+
+  // 컬럼 너비 설정
+  worksheet.columns = [
+    { width: 15 },  // 레이어
+    { width: 30 },  // 자재명
+    { width: 12 },  // 공종1
+    { width: 12 },  // 공종2
+    { width: 8 },   // 단위
+    { width: 15 },  // 재료비단가
+    { width: 15 },  // 노무비단가
+    { width: 12 },  // 면적
+    { width: 15 },  // 재료비계
+    { width: 15 },  // 노무비계
+    { width: 15 }   // 소계
+  ];
+
+  // 공통 테두리 스타일
+  const thinBorder = {
+    top: { style: 'thin', color: { argb: 'FF000000' } },
+    left: { style: 'thin', color: { argb: 'FF000000' } },
+    bottom: { style: 'thin', color: { argb: 'FF000000' } },
+    right: { style: 'thin', color: { argb: 'FF000000' } }
+  };
 
   // 헤더 추가
-  data.push([
+  const headers = [
     '레이어',
     '자재명',
     '공종1',
@@ -1975,8 +2050,21 @@ function createSingleWallMaterialSheet(wb, result) {
     '면적(m²)',
     '재료비계(₩)',
     '노무비계(₩)',
-    '소계(₩)',
-  ]);
+    '소계(₩)'
+  ];
+
+  const headerRow = worksheet.addRow(headers);
+  headerRow.height = 25;
+  headerRow.eachCell((cell) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFCCCCCC' }
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.border = thinBorder;
+  });
 
   let totalMaterialCost = 0;
   let totalLaborCost = 0;
@@ -1992,7 +2080,7 @@ function createSingleWallMaterialSheet(wb, result) {
     totalMaterialCost += materialTotal;
     totalLaborCost += laborTotal;
 
-    data.push([
+    const dataRow = worksheet.addRow([
       getLayerDisplayName(layerKey),
       layer.materialName,
       layer.workType1 || '',
@@ -2003,46 +2091,62 @@ function createSingleWallMaterialSheet(wb, result) {
       result.area,
       materialTotal,
       laborTotal,
-      subtotal,
+      subtotal
     ]);
+
+    dataRow.height = 22;
+    dataRow.eachCell((cell, colNumber) => {
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+      cell.border = thinBorder;
+
+      // 숫자 포맷 적용
+      if (colNumber === 6 || colNumber === 7) {
+        // 재료비단가, 노무비단가
+        cell.numFmt = '#,##0';
+      } else if (colNumber === 8) {
+        // 면적 (소수점 2자리)
+        cell.numFmt = '0.00';
+      } else if (colNumber >= 9 && colNumber <= 11) {
+        // 재료비계, 노무비계, 소계 (천단위 콤마)
+        cell.numFmt = '#,##0';
+      }
+    });
   });
 
+  // 빈 행 추가
+  worksheet.addRow([]);
+
   // 합계 행 추가
-  if (data.length > 1) {
-    data.push([]);
-    data.push([
-      '합계',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      totalMaterialCost,
-      totalLaborCost,
-      totalMaterialCost + totalLaborCost,
-    ]);
-  }
+  const totalRow = worksheet.addRow([
+    '합계',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    totalMaterialCost,
+    totalLaborCost,
+    totalMaterialCost + totalLaborCost
+  ]);
 
-  const ws = XLSX.utils.aoa_to_sheet(data);
+  totalRow.height = 25;
+  totalRow.eachCell((cell, colNumber) => {
+    cell.font = { bold: true };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFFFF2CC' }  // 연한 노란색 배경
+    };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.border = thinBorder;
 
-  // 컬럼 너비 설정
-  ws['!cols'] = [
-    { wch: 15 },
-    { wch: 25 },
-    { wch: 12 },
-    { wch: 12 },
-    { wch: 8 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 10 },
-    { wch: 15 },
-    { wch: 15 },
-    { wch: 15 },
-  ];
-
-  XLSX.utils.book_append_sheet(wb, ws, '레이어별자재');
+    // 숫자 포맷 적용
+    if (colNumber >= 9 && colNumber <= 11) {
+      cell.numFmt = '#,##0';
+    }
+  });
 }
 
 /**
