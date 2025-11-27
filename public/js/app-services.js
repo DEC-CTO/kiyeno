@@ -2731,8 +2731,12 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                 updateLightweightMaterial(materialId, modal);
             }
         }}
-    ], { width: '880px' });
-    
+    ], {
+        width: '880px',
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+
     // 모달 로드 후 초기 계산 실행
     setTimeout(() => {
         if (typeof window.calculateLightweightLaborCost === 'function') {
@@ -3324,8 +3328,12 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                 updateGypsumBoard(materialId, modal);
             }
         }}
-    ], { width: '880px' });
-    
+    ], {
+        width: '880px',
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+
     // 모달 로드 후 초기 계산 실행
     setTimeout(() => {
         if (typeof window.calculateGypsumLaborCost === 'function') {

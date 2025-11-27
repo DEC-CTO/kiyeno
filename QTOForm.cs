@@ -157,14 +157,29 @@ namespace QTO
             try
             {
                 var buffer = new byte[4096];
+                var messageBuilder = new StringBuilder();
+
                 while (webSocket.State == WebSocketState.Open && !cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationTokenSource.Token);
 
                     if (result.MessageType == WebSocketMessageType.Text)
                     {
-                        var message = Encoding.UTF8.GetString(buffer, 0, result.Count);
-                        ProcessWebSocketMessage(message);
+                        // 메시지 조각 누적
+                        messageBuilder.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+
+                        // 메시지가 완전히 수신되었을 때만 처리
+                        if (result.EndOfMessage)
+                        {
+                            var completeMessage = messageBuilder.ToString();
+                            messageBuilder.Clear();
+                            ProcessWebSocketMessage(completeMessage);
+                        }
+                    }
+                    else if (result.MessageType == WebSocketMessageType.Close)
+                    {
+                        await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", cancellationTokenSource.Token);
+                        isConnected = false;
                     }
                 }
             }
@@ -1351,33 +1366,39 @@ namespace QTO
                     return;
                 }
 
-                // 트랜잭션 시작
-                using (Transaction trans = new Transaction(doc, "벽체 타입 생성"))
+                // 각 벽체 타입별 개별 트랜잭션으로 생성
+                foreach (var wallData in wallTypesToCreate)
                 {
-                    trans.Start();
-
-                    foreach (var wallData in wallTypesToCreate)
+                    using (Transaction trans = new Transaction(doc, $"벽체 타입 생성: {wallData.WallTypeName}"))
                     {
                         try
                         {
+                            trans.Start();
+
                             // WallTypeCreate 클래스를 통해 벽체 타입 생성
                             var creator = new WallTypeCreate(doc);
                             var result = creator.CreateWallType(wallData);
 
                             results.Add(result);
 
-                            // 성공 로그
+                            // 성공 시 커밋, 실패 시 롤백
                             if (result.Success)
                             {
+                                trans.Commit();
                                 form?.UpdateStatus($"✅ {result.WallTypeName} 생성 완료");
                             }
                             else
                             {
+                                trans.RollBack();
                                 form?.UpdateStatus($"❌ {result.WallTypeName} 생성 실패: {result.Message}");
                             }
                         }
                         catch (Exception ex)
                         {
+                            // 트랜잭션이 시작된 상태라면 롤백
+                            if (trans.HasStarted())
+                                trans.RollBack();
+
                             // 개별 벽체 타입 생성 실패 시
                             results.Add(new WallTypeCreationResult
                             {
@@ -1389,16 +1410,28 @@ namespace QTO
                             form?.UpdateStatus($"❌ {wallData.WallTypeName} 오류: {ex.Message}");
                         }
                     }
-
-                    trans.Commit();
                 }
 
                 // 결과 요약
                 int successCount = results.Count(r => r.Success);
                 int failCount = results.Count - successCount;
 
-                string summary = $"벽체 타입 생성 완료\n\n성공: {successCount}개\n실패: {failCount}개";
-                TaskDialog.Show("생성 결과", summary);
+                var summaryBuilder = new StringBuilder();
+                summaryBuilder.AppendLine($"벽체 타입 생성 완료\n");
+                summaryBuilder.AppendLine($"성공: {successCount}개");
+                summaryBuilder.AppendLine($"실패: {failCount}개");
+
+                // 실패한 벽체 타입 상세 정보
+                if (failCount > 0)
+                {
+                    summaryBuilder.AppendLine("\n[실패 상세]");
+                    foreach (var failed in results.Where(r => !r.Success))
+                    {
+                        summaryBuilder.AppendLine($"• {failed.WallTypeName}: {failed.Message}");
+                    }
+                }
+
+                TaskDialog.Show("생성 결과", summaryBuilder.ToString());
 
                 // 웹으로 결과 전송
                 form?.SendWallTypeCreationResult(results);
