@@ -1056,7 +1056,8 @@ function attachGlobalContractRatioListener() {
 
     if (input) {
         input.addEventListener('input', function() {
-            const ratio = parseFloat(this.value) || 1.2;
+            const value = parseFloat(this.value);
+            const ratio = isNaN(value) ? 1.2 : value;
 
             // 모든 자재비 항목 업데이트
             priceComparisonData.detailSections.materials.forEach((item, index) => {

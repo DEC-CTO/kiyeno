@@ -2242,8 +2242,8 @@ async function renderOrderFormTab() {
   if (contractRatioInput) {
     contractRatioInput.addEventListener('input', function () {
       console.log('🔄 조정비율 변경됨:', this.value);
-      // 실시간 업데이트 (재렌더링 없이 DOM만 수정)
-      updateContractPricesRealtime();
+      // 실시간 업데이트 (재렌더링 없이 DOM만 수정, Debounce 적용으로 렉 방지)
+      debounceUpdateContractPrices();
     });
   }
 }
@@ -2410,8 +2410,8 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
   }
 
   // ✅ 조정비율 가져오기 (기본값 1.2)
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   // ✅ 발주단가 (기준값)
   const orderMaterialUnitPrice = totalMaterialUnitPrice;
@@ -2830,8 +2830,8 @@ async function generateComponentRow(
   const displayQuantity = area;
 
   // ✅ 조정비율 가져오기 (기본값 1.2)
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   // ✅ 발주단가 (기준값)
   const orderMaterialUnitPrice = parseFloat(component.materialPrice) || 0;
@@ -3415,8 +3415,8 @@ function generateSubtotalRow(components, label, rowNumber) {
   let sheetQuantitySum = 0; // 14번 칸럼 (매/장) 합계
   let displayQuantitySum = 0; // 16번 칸럼 (displayQuantity) 합계
 
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   console.log(`🔍 ========== [${label}] 화면 표시용 소계 디버깅 시작 ==========`);
   console.log(`📦 components 배열 개수: ${components.length}`);
@@ -3819,8 +3819,8 @@ function generateMaterialRoundingRow(
  * @returns {string} - HTML 문자열
  */
 function generateIndirectCostRow(item, rowNumber, totalArea) {
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   // ✅ item.area가 있으면 사용, 없으면 totalArea 사용
   const area = item.area || totalArea;
@@ -3889,7 +3889,8 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
  * @returns {string} - HTML 문자열
  */
 function generateRoundingAdjustmentRow(categoryName, indirectCostItems, rowNumber) {
-    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+    const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+    const contractRatio = isNaN(value) ? 1.2 : value;
 
     // 해당 카테고리 간접비 합계 계산
     let categoryExpenseSum = 0;
@@ -3951,8 +3952,8 @@ function generateRoundingAdjustmentRow(categoryName, indirectCostItems, rowNumbe
  * @returns {string} - HTML 문자열
  */
 function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber) {
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   console.log(`📊 간접비 소계 계산 시작 (총 ${indirectCostItems.length}개 항목)`);
 
@@ -4134,8 +4135,8 @@ function generateGrandTotalRow(directSubtotal, indirectSubtotal, roundingAmount,
 function generateTotalRow(directCosts, indirectCosts) {
   const allCosts = [...directCosts, ...indirectCosts];
 
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
 
   let contractTotal = 0;
   let orderTotal = 0;
@@ -4205,8 +4206,8 @@ function generateTotalRow(directCosts, indirectCosts) {
  * @returns {string} - HTML 문자열
  */
 function generateGroupedComponentRow(component, rowNumber) {
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
   const area = component.area;
   const componentName = component.name;
   const materialData = component.materialData;
@@ -4754,7 +4755,8 @@ async function generateOrderFormDataRows() {
 
     // 🆕 스터드 단수정리 행 추가
     if (studIndirectCosts.length > 0) {
-      const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+      const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+      const contractRatio = isNaN(value) ? 1.2 : value;
 
       // 스터드 간접비 합계 계산 (발주단가 & 계약도급)
       let studIndirectMaterial = 0;
@@ -4863,7 +4865,8 @@ async function generateOrderFormDataRows() {
 
       // 🆕 이 그룹의 단수정리 행 추가
       if (gypsumGroupIndirectCosts.length > 0) {
-        const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+        const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+        const contractRatio = isNaN(value) ? 1.2 : value;
 
         // 간접비 합계 계산 (발주단가 & 계약도급)
         let gypsumIndirectMaterial = 0;
@@ -4973,7 +4976,8 @@ async function generateOrderFormDataRows() {
 
       // 🆕 이 그룹의 단수정리 행 추가
       if (glassWoolGroupIndirectCosts.length > 0) {
-        const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+        const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+        const contractRatio = isNaN(value) ? 1.2 : value;
 
         // 간접비 합계 계산
         let glassWoolIndirectMaterial = 0;
@@ -5074,7 +5078,8 @@ async function generateOrderFormDataRows() {
     const allIndirectCosts = [...studIndirectCosts, ...allGypsumIndirectCosts, ...allGlassWoolIndirectCosts];
 
     // 7. 간접비 소계 데이터 계산 (✅ amount 직접 합산 방식으로 변경)
-    const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+    const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+    const contractRatio = isNaN(value) ? 1.2 : value;
     let orderMaterialAmount = 0;
     let orderLaborAmount = 0;
 
@@ -5978,12 +5983,30 @@ function formatNumberInput(input) {
 }
 
 /**
+ * 조정비율 업데이트 debounce 타이머
+ */
+let updateContractPricesTimeout = null;
+
+/**
+ * 조정비율 변경 시 계약도급 단가 실시간 업데이트 (Debounced)
+ * 입력 후 300ms 대기 후 실행하여 렉 방지
+ */
+function debounceUpdateContractPrices() {
+  if (updateContractPricesTimeout) {
+    clearTimeout(updateContractPricesTimeout);
+  }
+  updateContractPricesTimeout = setTimeout(() => {
+    updateContractPricesRealtime();
+  }, 300);
+}
+
+/**
  * 조정비율 변경 시 계약도급 단가 실시간 업데이트
  * 전체 재렌더링 없이 DOM의 숫자만 변경하여 포커스 유지
  */
 function updateContractPricesRealtime() {
-  const contractRatio =
-    parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+  const value = parseFloat(document.getElementById('contractRatioInput')?.value);
+  const contractRatio = isNaN(value) ? 1.2 : value;
   console.log('💰 조정비율 실시간 업데이트:', contractRatio);
 
   // 모든 데이터 행 순회
@@ -6068,6 +6091,55 @@ function updateContractPricesRealtime() {
     const noCell = row.cells[0];
     const noText = noCell?.textContent.trim();
 
+    // ✅ 총계 행 특별 처리 (CSS 클래스 없이 cell index로 직접 접근)
+    const labelCell = row.cells[1];
+    const labelText = labelCell?.textContent.trim();
+
+    if (labelText === '총 계') {
+      console.log('🔄 총계 행 단가 업데이트');
+
+      // 발주단가 단가 읽기 (cell index 사용)
+      const orderMatPrice =
+        parseFloat(row.cells[25]?.textContent.replace(/,/g, '')) || 0;
+      const orderLabPrice =
+        parseFloat(row.cells[27]?.textContent.replace(/,/g, '')) || 0;
+      const orderExpPrice =
+        parseFloat(row.cells[29]?.textContent.replace(/,/g, '')) || 0;
+
+      // 계약도급 단가 계산 (발주단가 × 조정비율)
+      const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+      const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+      const contractExpPrice = Math.round(orderExpPrice * contractRatio);
+      const contractTotalPrice = Math.round(
+        contractMatPrice + contractLabPrice + contractExpPrice
+      );
+
+      // 단가 업데이트 (cell index 사용)
+      if (row.cells[16])
+        row.cells[16].textContent = contractMatPrice.toLocaleString();
+      if (row.cells[18])
+        row.cells[18].textContent = contractLabPrice.toLocaleString();
+      if (row.cells[20])
+        row.cells[20].textContent = contractExpPrice.toLocaleString();
+      if (row.cells[22])
+        row.cells[22].textContent = contractTotalPrice.toLocaleString();
+
+      console.log(
+        `  ✅ 자재비 단가: ${orderMatPrice.toLocaleString()} → ${contractMatPrice.toLocaleString()}`
+      );
+      console.log(
+        `  ✅ 노무비 단가: ${orderLabPrice.toLocaleString()} → ${contractLabPrice.toLocaleString()}`
+      );
+      console.log(
+        `  ✅ 경비 단가: ${orderExpPrice.toLocaleString()} → ${contractExpPrice.toLocaleString()}`
+      );
+      console.log(
+        `  ✅ 합계 단가: ${contractTotalPrice.toLocaleString()}`
+      );
+
+      return; // 다른 처리 건너뛰기
+    }
+
     // 타입 요약 행은 "1-1", "1-2" 같은 형식
     if (noText && /^\d+-\d+$/.test(noText)) {
       console.log(`⏭️ 타입 요약 행 자재비/노무비 건너뛰기: ${noText}`);
@@ -6141,9 +6213,22 @@ function updateContractPricesRealtime() {
     if (contractLabAmountCell)
       contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
 
-    // 합계 업데이트
+    // 경비 처리 (조정비율 적용)
+    const orderExpenseAmountCell = row.querySelector('.order-expense-amount');
+    const orderExpenseAmount =
+      parseFloat(orderExpenseAmountCell?.textContent.replace(/,/g, '')) || 0;
+
+    const contractExpenseAmount = Math.round(orderExpenseAmount * contractRatio);
+
+    const contractExpenseAmountCell = row.querySelector('.contract-expense-amount');
+    if (contractExpenseAmountCell)
+      contractExpenseAmountCell.textContent = contractExpenseAmount.toLocaleString();
+
+    // 합계 업데이트 (경비 포함)
     const totalPrice = Math.round(contractMatPrice + contractLabPrice);
-    const totalAmount = Math.round(contractMatAmount + contractLabAmount);
+    const totalAmount = Math.round(
+      contractMatAmount + contractLabAmount + contractExpenseAmount
+    );
 
     const totalPriceCell = row.querySelector('.contract-total-price');
     const totalAmountCell = row.querySelector('.contract-total-amount');

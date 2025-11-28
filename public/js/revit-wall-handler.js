@@ -591,6 +591,69 @@ function updateRevitDataTable() {
     if (container) {
         console.log(`📏 스크롤 정보 - 컨테이너 높이: ${container.clientHeight}px, 콘텐츠 높이: ${container.scrollHeight}px, 스크롤 가능: ${container.scrollHeight > container.clientHeight}`);
     }
+
+    // 테이블 컬럼 리사이즈 초기화
+    initTableResize();
+}
+
+/**
+ * 테이블 컬럼 리사이즈 초기화
+ */
+function initTableResize() {
+    const table = document.querySelector('.revit-table');
+    if (!table || table.dataset.resizeInit) return; // 중복 초기화 방지
+
+    table.dataset.resizeInit = 'true';
+    const headers = table.querySelectorAll('thead th');
+
+    headers.forEach((th, index) => {
+        // 첫 번째(체크박스)와 마지막 컬럼 제외
+        if (index === 0 || index === headers.length - 1) return;
+
+        // 기존 resizer 제거 (있다면)
+        const existingResizer = th.querySelector('.resizer');
+        if (existingResizer) existingResizer.remove();
+
+        const resizer = document.createElement('div');
+        resizer.className = 'resizer';
+        th.appendChild(resizer);
+
+        let startX, startWidth;
+
+        resizer.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // 이벤트 버블링 방지
+
+            // 모든 컬럼 너비를 현재 값으로 고정 (다른 컬럼 움직임 방지)
+            headers.forEach(header => {
+                header.style.width = header.offsetWidth + 'px';
+                header.style.minWidth = header.offsetWidth + 'px';
+            });
+
+            startX = e.pageX;
+            startWidth = th.offsetWidth;
+            resizer.classList.add('resizing');
+            document.body.style.cursor = 'col-resize';
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            const width = startWidth + (e.pageX - startX);
+            if (width > 50) {
+                th.style.width = width + 'px';
+                th.style.minWidth = width + 'px';
+            }
+        }
+
+        function onMouseUp() {
+            resizer.classList.remove('resizing');
+            document.body.style.cursor = '';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+    });
 }
 
 /**

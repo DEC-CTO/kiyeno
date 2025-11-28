@@ -1454,6 +1454,24 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
+    user-select: none; /* 리사이즈 시 텍스트 선택 방지 */
+}
+
+/* 컬럼 리사이즈 핸들 */
+.revit-table th .resizer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 5px;
+    height: 100%;
+    cursor: col-resize;
+    background: transparent;
+    z-index: 11;
+}
+
+.revit-table th .resizer:hover,
+.revit-table th .resizer.resizing {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .revit-table td {
