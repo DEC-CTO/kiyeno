@@ -3748,28 +3748,59 @@ function generateMaterialRoundingRow(
   contractRatio,
   rowNumber
 ) {
-  // ✅ unitPrice에 저장된 단수정리 1m² 단가 사용
-  const roundingPerM2 = unitPrice.totalCosts?.roundingPerM2 || 0;
+  // ✅ unitPrice에 저장된 단수정리 1m² 단가 사용 (신규 rounding 객체 우선, 없으면 roundingPerM2 사용)
+  const roundingData = unitPrice.totalCosts?.rounding || {
+    material: 0,
+    labor: 0,
+    expense: 0,
+    total: unitPrice.totalCosts?.roundingPerM2 || 0
+  };
 
-  // 발주단가 단수정리 = 1m² 단가 × 면적 (반올림하여 정수로)
-  const orderRounding = Math.round(roundingPerM2 * area);
+  // 발주단가 단수정리 (1m² 단가)
+  const orderMatPrice = roundingData.material;
+  const orderLabPrice = roundingData.labor;
+  const orderExpPrice = roundingData.expense;
+  const orderTotalPrice = roundingData.total;
 
-  // 계약도급 단수정리 = 발주단가 단수정리 × 비율 (반올림하여 정수로)
-  const contractRounding = Math.round(orderRounding * contractRatio);
+  // 발주단가 단수정리 (금액 = 1m² 단가 × 면적)
+  const orderMatAmount = Math.round(orderMatPrice * area);
+  const orderLabAmount = Math.round(orderLabPrice * area);
+  const orderExpAmount = Math.round(orderExpPrice * area);
+  const orderTotalAmount = Math.round(orderTotalPrice * area);
+
+  // 계약도급 단수정리 (1m² 단가 = 발주단가 × 비율)
+  const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+  const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+  const contractExpPrice = Math.round(orderExpPrice * contractRatio);
+  const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
+
+  // 계약도급 단수정리 (금액 = 1m² 단가 × 면적)
+  const contractMatAmount = Math.round(contractMatPrice * area);
+  const contractLabAmount = Math.round(contractLabPrice * area);
+  const contractExpAmount = Math.round(contractExpPrice * area);
+  const contractTotalAmount = Math.round(contractTotalPrice * area);
 
   console.log(`📐 [${materialName}] 단수정리:`);
   console.log(
-    `  1m² 단가: ${roundingPerM2.toLocaleString()}원, 면적: ${area.toFixed(2)}m²`
+    `  발주단가 - 자재비: ${orderMatPrice}원 × ${area.toFixed(2)}m² = ${orderMatAmount.toLocaleString()}원`
   );
   console.log(
-    `  발주단가 단수정리: ${orderRounding.toLocaleString()}`
+    `  발주단가 - 노무비: ${orderLabPrice}원 × ${area.toFixed(2)}m² = ${orderLabAmount.toLocaleString()}원`
   );
   console.log(
-    `  계약도급 단수정리: ${contractRounding.toLocaleString()} (발주단가 ${orderRounding.toLocaleString()} × ${contractRatio})`
+    `  발주단가 - 합계: ${orderTotalPrice}원 × ${area.toFixed(2)}m² = ${orderTotalAmount.toLocaleString()}원`
+  );
+  console.log(
+    `  계약도급 - 합계: ${contractTotalPrice}원 × ${area.toFixed(2)}m² = ${contractTotalAmount.toLocaleString()}원 (비율 ${contractRatio})`
   );
 
   const html = `
-        <tr style="background: linear-gradient(135deg, #e0e0e0 0%, #eeeeee 100%);" data-rounding-per-m2="${roundingPerM2}" data-area="${area}">
+        <tr style="background: linear-gradient(135deg, #e0e0e0 0%, #eeeeee 100%);"
+            data-material-rounding="${orderMatPrice}"
+            data-labor-rounding="${orderLabPrice}"
+            data-expense-rounding="${orderExpPrice}"
+            data-total-rounding="${orderTotalPrice}"
+            data-area="${area}">
             <td class="number-cell">${rowNumber}</td>
             <td></td>
             <td>단수정리 (${materialName})</td>
@@ -3787,29 +3818,29 @@ function generateMaterialRoundingRow(
             <td></td>
             <td></td>
             <!-- 계약도급 -->
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="number-cell">${contractRounding.toLocaleString()}</td>
+            <td class="number-cell contract-material-price">${contractMatPrice.toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${contractMatAmount.toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${contractLabPrice.toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${contractLabAmount.toLocaleString()}</td>
+            <td class="number-cell contract-expense-price">${contractExpPrice.toLocaleString()}</td>
+            <td class="number-cell contract-expense-amount">${contractExpAmount.toLocaleString()}</td>
+            <td class="number-cell contract-total-price">${contractTotalPrice.toLocaleString()}</td>
+            <td class="number-cell contract-total-amount">${contractTotalAmount.toLocaleString()}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="number-cell">${orderRounding.toLocaleString()}</td>
+            <td class="number-cell order-material-price">${orderMatPrice.toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${orderMatAmount.toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${orderLabPrice.toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${orderLabAmount.toLocaleString()}</td>
+            <td class="number-cell order-expense-price">${orderExpPrice.toLocaleString()}</td>
+            <td class="number-cell order-expense-amount">${orderExpAmount.toLocaleString()}</td>
+            <td class="number-cell order-total-price">${orderTotalPrice.toLocaleString()}</td>
+            <td class="number-cell order-total-amount">${orderTotalAmount.toLocaleString()}</td>
             <td></td>
         </tr>
     `;
 
-  return { html, orderRounding, contractRounding };
+  return { html, orderRounding: orderTotalAmount, contractRounding: contractTotalAmount };
 }
 
 /**
@@ -6299,22 +6330,50 @@ function updateContractPricesRealtime() {
     // 자재명 추출 (로그용)
     const materialName = label.match(/\(([^)]+)\)/)?.[1] || '';
 
-    // ✅ 발주단가 단수정리를 HTML에서 읽기 (32번 셀)
-    const orderRounding = parseFloat(row.cells[32]?.textContent.replace(/,/g, '')) || 0;
+    // ✅ data 속성에서 발주단가 단수정리 1m² 단가 읽기
+    const orderMatPrice = parseFloat(row.dataset.materialRounding) || 0;
+    const orderLabPrice = parseFloat(row.dataset.laborRounding) || 0;
+    const orderExpPrice = parseFloat(row.dataset.expenseRounding) || 0;
+    const orderTotalPrice = parseFloat(row.dataset.totalRounding) || 0;
+    const area = parseFloat(row.dataset.area) || 0;
 
-    // ✅ 계약도급 단수정리 = 발주단가 단수정리 × 비율 (반올림하여 정수로)
-    const contractRounding = Math.round(orderRounding * contractRatio);
+    // ✅ 계약도급 1m² 단가 = 발주단가 × 비율
+    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
+    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+    const contractExpPrice = Math.round(orderExpPrice * contractRatio);
+    const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
+
+    // ✅ 계약도급 금액 = 1m² 단가 × 면적
+    const contractMatAmount = Math.round(contractMatPrice * area);
+    const contractLabAmount = Math.round(contractLabPrice * area);
+    const contractExpAmount = Math.round(contractExpPrice * area);
+    const contractTotalAmount = Math.round(contractTotalPrice * area);
 
     console.log(`  📐 ${materialName} 단수정리:`);
-    console.log(`    발주단가: ${orderRounding.toLocaleString()}`);
-    console.log(`    계약도급: ${orderRounding.toLocaleString()} × ${contractRatio} = ${contractRounding.toLocaleString()}`);
+    console.log(`    자재비: ${orderMatPrice}원 × ${contractRatio} = ${contractMatPrice}원`);
+    console.log(`    노무비: ${orderLabPrice}원 × ${contractRatio} = ${contractLabPrice}원`);
+    console.log(`    합계: ${orderTotalPrice}원 × ${contractRatio} = ${contractTotalPrice}원`);
 
-    // ✅ 계약도급 단수정리만 업데이트 (23번 셀)
-    if (row.cells[23]) {
-      row.cells[23].textContent = contractRounding.toLocaleString();
-    }
+    // ✅ CSS 클래스로 계약도급 셀 업데이트
+    const contractMatPriceCell = row.querySelector('.contract-material-price');
+    const contractMatAmountCell = row.querySelector('.contract-material-amount');
+    const contractLabPriceCell = row.querySelector('.contract-labor-price');
+    const contractLabAmountCell = row.querySelector('.contract-labor-amount');
+    const contractExpPriceCell = row.querySelector('.contract-expense-price');
+    const contractExpAmountCell = row.querySelector('.contract-expense-amount');
+    const contractTotalPriceCell = row.querySelector('.contract-total-price');
+    const contractTotalAmountCell = row.querySelector('.contract-total-amount');
 
-    console.log(`  ✅ ${label} 재계산 완료 (발주단가는 초기값 유지)`);
+    if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
+    if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+    if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
+    if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+    if (contractExpPriceCell) contractExpPriceCell.textContent = contractExpPrice.toLocaleString();
+    if (contractExpAmountCell) contractExpAmountCell.textContent = contractExpAmount.toLocaleString();
+    if (contractTotalPriceCell) contractTotalPriceCell.textContent = contractTotalPrice.toLocaleString();
+    if (contractTotalAmountCell) contractTotalAmountCell.textContent = contractTotalAmount.toLocaleString();
+
+    console.log(`  ✅ ${label} 재계산 완료`);
   });
 
   console.log(`✅ 단수정리 행 ${roundingRows.length}개 업데이트 완료`);

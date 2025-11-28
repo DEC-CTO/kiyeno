@@ -1887,7 +1887,14 @@ async function saveUnitPriceItem() {
             materialProfit: materialProfitUnitPrice,
             toolExpense: toolExpenseUnitPrice
         },
-        // ✨ 단수정리 1m² 단가 추가
+        // ✨ 단수정리 1m² 단가 (개별 항목별 분리)
+        rounding: {
+            material: materialRounding,
+            labor: laborRounding,
+            expense: expenseRounding,
+            total: roundingPerM2
+        },
+        // ✨ 단수정리 1m² 단가 (하위 호환성 유지)
         roundingPerM2: roundingPerM2
     };
     
