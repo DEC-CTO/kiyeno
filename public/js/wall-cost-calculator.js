@@ -22383,9 +22383,15 @@ async function addOrderFormDataToExcel(worksheet) {
         } else if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
           // 계약도급 단가 (Q, S, U, W): 소수점 2자리
           cell.numFmt = '#,##0.00';
-        } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-          // 계약도급 금액 (R, T, V, X) + 발주단가 모든 컬럼: 소수점 2자리
+        } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+          // 계약도급 금액 (R, T, V, X): 정수
+          cell.numFmt = '#,##0';
+        } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+          // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
           cell.numFmt = '#,##0.00';
+        } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+          // 발주단가 금액 (AA, AC, AE, AG): 정수
+          cell.numFmt = '#,##0';
         }
       }
     });
@@ -22534,19 +22540,11 @@ async function addOrderFormDataToExcel(worksheet) {
           } else if (colNumber === 16) {
             // 수량: 소수점 2자리 표시
             cell.numFmt = '#,##0.00';
-          } else if (colNumber === 17 || colNumber === 19 || colNumber === 23) {
-            // 계약도급 단가 (Q, S, W): 소수점 2자리
-            cell.numFmt = '#,##0.00';
-          } else if (colNumber === 21) {
-            // U열 (계약도급 경비 단가): 소수점 2자리
-            cell.numFmt = '#,##0.00';
-          } else if (
-            (colNumber >= 8 && colNumber <= 9) ||
-            colNumber === 14 ||
-            colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24 ||
-            (colNumber >= 26 && colNumber <= 33)
-          ) {
-            // 나머지: 소수점 2자리 (수식 셀 포함)
+          } else if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
+            // 모든 단가와 금액: 정수
+            cell.numFmt = '#,##0';
+          } else if ((colNumber >= 8 && colNumber <= 9) || colNumber === 14) {
+            // 두께, 넓이, 제공자: 소수점 2자리
             cell.numFmt = '#,##0.00';
           }
         }
@@ -22595,15 +22593,18 @@ async function addOrderFormDataToExcel(worksheet) {
 
       // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
       if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-        if (colNumber === 17 || colNumber === 19 || colNumber === 23) {
-          // 계약도급 단가 (Q, S, W): 소수점 2자리
+        if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+          // 계약도급 단가 (Q, S, U, W): 소수점 2자리
           cell.numFmt = '#,##0.00';
-        } else if (colNumber === 21) {
-          // U열 (계약도급 경비 단가): 소수점 2자리
+        } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+          // 계약도급 금액 (R, T, V, X): 정수
+          cell.numFmt = '#,##0';
+        } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+          // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
           cell.numFmt = '#,##0.00';
-        } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-          // 계약도급 금액 (R, T, V, X) + 발주단가 전체: 소수점 2자리
-          cell.numFmt = '#,##0.00';
+        } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+          // 발주단가 금액 (AA, AC, AE, AG): 정수
+          cell.numFmt = '#,##0';
         }
       }
     });
@@ -22777,9 +22778,15 @@ async function addOrderFormDataToExcel(worksheet) {
             if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
               // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-              // 계약도급 금액 (R, T, V, X) + 발주단가 전체: 소수점 2자리
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -22792,13 +22799,18 @@ async function addOrderFormDataToExcel(worksheet) {
       if (studIndirectCosts.length > 0) {
         const studIndirectEndRow = currentRow - 1;
         // ✅ HTML과 동일한 계산을 위한 파라미터 준비
-        const studRoundingPerM2 = studUnitPriceItem?.totalCosts?.roundingPerM2 || 0;
+        const roundingData = studUnitPriceItem?.totalCosts?.rounding || {
+          material: 0,
+          labor: 0,
+          expense: 0,
+          total: studUnitPriceItem?.totalCosts?.roundingPerM2 || 0
+        };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
         const roundingRowData = generateMaterialRoundingRowData(
           '스터드',
           layerNumber,
           currentRow,
-          studRoundingPerM2,       // 1m² 단수정리 단가
+          roundingData,            // 단수정리 데이터 객체
           totalArea,               // 면적
           contractRatio            // 조정비율
         );
@@ -22833,9 +22845,17 @@ async function addOrderFormDataToExcel(worksheet) {
           // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
             if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -22943,13 +22963,18 @@ async function addOrderFormDataToExcel(worksheet) {
         const gypsumIndirectEndRow = currentRow - 1;
         const gypsumDirectEndRow = gypsumDirectEndRows.get(unitPriceId) || gypsumDirectStartRow; // 추적된 직접비 끝 행 사용
         // ✅ HTML과 동일한 계산을 위한 파라미터 준비
-        const gypsumRoundingPerM2 = gypsumUnitPriceItem?.totalCosts?.roundingPerM2 || 0;
+        const roundingData = gypsumUnitPriceItem?.totalCosts?.rounding || {
+          material: 0,
+          labor: 0,
+          expense: 0,
+          total: gypsumUnitPriceItem?.totalCosts?.roundingPerM2 || 0
+        };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
         const roundingRowData = generateMaterialRoundingRowData(
           categoryName,
           layerNumber,
           currentRow,
-          gypsumRoundingPerM2,     // 1m² 단수정리 단가
+          roundingData,            // 단수정리 데이터 객체
           gypsumArea,              // 면적 (타입별 면적 합산)
           contractRatio            // 조정비율
         );
@@ -22984,9 +23009,17 @@ async function addOrderFormDataToExcel(worksheet) {
           // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
             if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -23094,13 +23127,18 @@ async function addOrderFormDataToExcel(worksheet) {
         const glassWoolIndirectEndRow = currentRow - 1;
         const glassWoolDirectEndRow = glassWoolDirectEndRows.get(unitPriceId) || glassWoolDirectStartRow; // 추적된 직접비 끝 행 사용
         // ✅ HTML과 동일한 계산을 위한 파라미터 준비
-        const glassWoolRoundingPerM2 = glassWoolUnitPriceItem?.totalCosts?.roundingPerM2 || 0;
+        const roundingData = glassWoolUnitPriceItem?.totalCosts?.rounding || {
+          material: 0,
+          labor: 0,
+          expense: 0,
+          total: glassWoolUnitPriceItem?.totalCosts?.roundingPerM2 || 0
+        };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
         const roundingRowData = generateMaterialRoundingRowData(
           categoryName,
           layerNumber,
           currentRow,
-          glassWoolRoundingPerM2,  // 1m² 단수정리 단가
+          roundingData,            // 단수정리 데이터 객체
           glassWoolArea,           // 면적 (타입별 면적 합산)
           contractRatio            // 조정비율
         );
@@ -23135,9 +23173,17 @@ async function addOrderFormDataToExcel(worksheet) {
           // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
             if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -23156,7 +23202,8 @@ async function addOrderFormDataToExcel(worksheet) {
         layerNumber,
         currentRow,
         indirectCostStartRow,
-        indirectCostEndRow
+        indirectCostEndRow,
+        roundingRowNumbers  // 단수정리 행 번호 배열 전달
       );
       const indirectSubtotalRow = worksheet.getRow(currentRow);
       indirectSubtotalRow.values = indirectSubtotalRowData;
@@ -23186,16 +23233,11 @@ async function addOrderFormDataToExcel(worksheet) {
           right: { style: 'thin' },
         };
 
-        // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+        // ✅ 숫자 포맷: 모든 단가와 금액은 정수
         if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-          if (colNumber === 17 || colNumber === 19 || colNumber === 23) {
-            // 계약도급 단가 (Q, S, W): 소수점 2자리
-            cell.numFmt = '#,##0.00';
-          } else if (colNumber === 21) {
-            // U열 (계약도급 경비 단가): 소수점 2자리
-            cell.numFmt = '#,##0.00';
-          } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-            cell.numFmt = '#,##0.00';
+          if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
+            // 모든 단가와 금액: 정수
+            cell.numFmt = '#,##0';
           }
         }
       });
@@ -23243,9 +23285,17 @@ async function addOrderFormDataToExcel(worksheet) {
           // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
             if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -23291,17 +23341,20 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷: 계약도급 단가와 금액 소수점 2자리
+          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, W): 소수점 2자리
+            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
+              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if (colNumber === 21) {
-              // U열 (계약도급 경비 단가): 소수점 2자리
+            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
+              // 계약도급 금액 (R, T, V, X): 정수
+              cell.numFmt = '#,##0';
+            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
+              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
               cell.numFmt = '#,##0.00';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-              // 계약도급 금액 (R, T, V, X) + 발주단가 모든 컬럼: 소수점 2자리
-              cell.numFmt = '#,##0.00';
+            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
+              // 발주단가 금액 (AA, AC, AE, AG): 정수
+              cell.numFmt = '#,##0';
             }
           }
         });
@@ -23661,26 +23714,26 @@ async function generateComponentRowData(
     unit, // O: 단위
     finalQuantity, // P: 수량
 
-    // ✅ 계약도급 (Q~X) - 금액 우선 계산 방식
-    { formula: `=ROUND(Z${excelRow}*${contractRatio},0)` }, // Q: 계약도급 자재비 단가 = 발주 단가×비율 (반올림)
+    // ✅ 계약도급 (Q~X) - 금액 우선 계산 방식 (Round 제거)
+    { formula: `=Z${excelRow}*${contractRatio}` }, // Q: 계약도급 자재비 단가 = 발주 단가×비율
     { formula: `=Q${excelRow}*P${excelRow}` }, // R: 계약도급 자재비 금액 = 단가×수량
-    { formula: `=ROUND(AB${excelRow}*${contractRatio},0)` }, // S: 계약도급 노무비 단가 = 발주 단가×비율 (반올림)
+    { formula: `=AB${excelRow}*${contractRatio}` }, // S: 계약도급 노무비 단가 = 발주 단가×비율
     { formula: `=S${excelRow}*P${excelRow}` }, // T: 계약도급 노무비 금액 = 단가×수량
-    { formula: `=ROUND(AD${excelRow}*${contractRatio},0)` }, // U: 계약도급 경비 단가 = 발주 단가×비율 (반올림)
+    { formula: `=AD${excelRow}*${contractRatio}` }, // U: 계약도급 경비 단가 = 발주 단가×비율
     { formula: `=U${excelRow}*P${excelRow}` }, // V: 계약도급 경비 금액 = 단가×수량
     { formula: `=Q${excelRow}+S${excelRow}+U${excelRow}` }, // W: 계약도급 합계 단가 = 자재+노무+경비
     { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액 = 자재+노무+경비
     '', // Y: 비고
 
-    // ✅ 발주단가 (Z~AG) - HTML과 동일: 소수점 유지, 반올림 최소화
-    materialPrice, // Z: 발주단가 자재비 단가 (소수점 유지)
-    { formula: `=Z${excelRow}*P${excelRow}` }, // AA: 발주단가 자재비 금액 = 단가×수량 (반올림 없음)
-    laborPrice, // AB: 발주단가 노무비 단가 (소수점 유지)
-    { formula: `=AB${excelRow}*P${excelRow}` }, // AC: 발주단가 노무비 금액 = 단가×수량 (반올림 없음)
-    orderExpensePrice, // AD: 발주단가 경비 단가 (소수점 유지)
-    { formula: `=ROUND(AD${excelRow}*P${excelRow},0)` }, // AE: 발주단가 경비 금액 = 단가×수량 (반올림)
-    orderTotalPrice, // AF: 발주단가 합계 단가 (소수점 유지)
-    { formula: `=AF${excelRow}*P${excelRow}` }, // AG: 발주단가 합계 금액 = 단가×수량 (반올림 없음)
+    // ✅ 발주단가 (Z~AG) - Round 함수 제거
+    materialPrice, // Z: 발주단가 자재비 단가
+    { formula: `=Z${excelRow}*P${excelRow}` }, // AA: 발주단가 자재비 금액 = 단가×수량
+    laborPrice, // AB: 발주단가 노무비 단가
+    { formula: `=AB${excelRow}*P${excelRow}` }, // AC: 발주단가 노무비 금액 = 단가×수량
+    orderExpensePrice, // AD: 발주단가 경비 단가
+    { formula: `=AD${excelRow}*P${excelRow}` }, // AE: 발주단가 경비 금액 = 단가×수량
+    orderTotalPrice, // AF: 발주단가 합계 단가
+    { formula: `=AF${excelRow}*P${excelRow}` }, // AG: 발주단가 합계 금액 = 단가×수량
     '', // AH: 비고
   ];
 }
@@ -23813,24 +23866,24 @@ async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) 
     'M2', // O: 단위
     displayQuantity, // P: 수량
 
-    // ✅ 계약도급 (Q~X) - 금액 우선 계산 (HTML과 동일)
-    { formula: `=ROUND(Z${excelRow}*${contractRatio},0)` }, // Q: 계약도급 자재비 단가 = 발주 단가×비율 (반올림)
+    // ✅ 계약도급 (Q~X) - Round 함수 제거
+    { formula: `=Z${excelRow}*${contractRatio}` }, // Q: 계약도급 자재비 단가 = 발주 단가×비율
     { formula: `=Q${excelRow}*P${excelRow}` }, // R: 계약도급 자재비 금액 = 단가×수량
-    { formula: `=ROUND(AB${excelRow}*${contractRatio},0)` }, // S: 계약도급 노무비 단가 = 발주 단가×비율 (반올림)
+    { formula: `=AB${excelRow}*${contractRatio}` }, // S: 계약도급 노무비 단가 = 발주 단가×비율
     { formula: `=S${excelRow}*P${excelRow}` }, // T: 계약도급 노무비 금액 = 단가×수량
-    { formula: `=ROUND(AD${excelRow}*${contractRatio},0)` }, // U: 계약도급 경비 단가 = 발주 단가×비율 (반올림)
+    { formula: `=AD${excelRow}*${contractRatio}` }, // U: 계약도급 경비 단가 = 발주 단가×비율
     { formula: `=U${excelRow}*P${excelRow}` }, // V: 계약도급 경비 금액 = 단가×수량
     { formula: `=Q${excelRow}+S${excelRow}+U${excelRow}` }, // W: 계약도급 합계 단가
     { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액
     '', // Y: 비고
 
-    // ✅ 발주단가 (Z~AG) - 소수점 유지, 반올림 최소화
-    orderMatPrice, // Z: 발주단가 자재비 단가 (소수점 유지)
-    { formula: `=Z${excelRow}*P${excelRow}` }, // AA: 발주단가 자재비 금액 (반올림 없음)
-    orderLabPrice, // AB: 발주단가 노무비 단가 (소수점 유지)
-    { formula: `=AB${excelRow}*P${excelRow}` }, // AC: 발주단가 노무비 금액 (반올림 없음)
-    orderExpensePrice, // AD: 발주단가 경비 단가 (입력값)
-    { formula: `=ROUND(AD${excelRow}*P${excelRow},0)` }, // AE: 발주단가 경비 금액 = 단가×수량 (반올림)
+    // ✅ 발주단가 (Z~AG) - Round 함수 제거
+    orderMatPrice, // Z: 발주단가 자재비 단가
+    { formula: `=Z${excelRow}*P${excelRow}` }, // AA: 발주단가 자재비 금액 = 단가×수량
+    orderLabPrice, // AB: 발주단가 노무비 단가
+    { formula: `=AB${excelRow}*P${excelRow}` }, // AC: 발주단가 노무비 금액 = 단가×수량
+    orderExpensePrice, // AD: 발주단가 경비 단가
+    { formula: `=AD${excelRow}*P${excelRow}` }, // AE: 발주단가 경비 금액 = 단가×수량
     { formula: `=Z${excelRow}+AB${excelRow}+AD${excelRow}` }, // AF: 발주단가 합계 단가
     { formula: `=AA${excelRow}+AC${excelRow}+AE${excelRow}` }, // AG: 발주단가 합계 금액
     '', // AH: 비고
@@ -23883,36 +23936,36 @@ function generateIndirectCostRowData(item, layerNumber, totalArea, excelRow) {
 
     // ✅ 계약도급 (Q~X) - 단가 우선 계산 방식
     isMaterialCost
-      ? { formula: `=ROUND(Z${excelRow}*${contractRatio},0)` }
-      : 0, // Q: 계약도급 자재비 단가 = 발주 단가×비율 (반올림)
+      ? { formula: `=Z${excelRow}*${contractRatio}` }
+      : 0, // Q: 계약도급 자재비 단가 = 발주 단가×비율
     isMaterialCost
       ? { formula: `=Q${excelRow}*P${excelRow}` }
       : 0, // R: 계약도급 자재비 금액 = 단가×수량
     isLaborCost
-      ? { formula: `=ROUND(AB${excelRow}*${contractRatio},0)` }
-      : 0, // S: 계약도급 노무비 단가 = 발주 단가×비율 (반올림)
+      ? { formula: `=AB${excelRow}*${contractRatio}` }
+      : 0, // S: 계약도급 노무비 단가 = 발주 단가×비율
     isLaborCost
       ? { formula: `=S${excelRow}*P${excelRow}` }
       : 0, // T: 계약도급 노무비 금액 = 단가×수량
     0, // U: 계약도급 경비 단가
     0, // V: 계약도급 경비 금액
-    { formula: `=ROUND(AF${excelRow}*${contractRatio},0)` }, // W: 계약도급 합계 단가 = 발주 단가×비율 (반올림)
+    { formula: `=AF${excelRow}*${contractRatio}` }, // W: 계약도급 합계 단가 = 발주 단가×비율
     { formula: `=W${excelRow}*P${excelRow}` }, // X: 계약도급 합계 금액 = 단가×수량
     '', // Y: 비고
 
     // 발주단가 (Z~AG)
     isMaterialCost ? orderUnitPrice : 0, // Z: 발주단가 자재비 단가
     isMaterialCost
-      ? { formula: `=ROUND(Z${excelRow}*P${excelRow},0)` }
+      ? { formula: `=Z${excelRow}*P${excelRow}` }
       : 0, // AA: 발주단가 자재비 금액
     isLaborCost ? orderUnitPrice : 0, // AB: 발주단가 노무비 단가
     isLaborCost
-      ? { formula: `=ROUND(AB${excelRow}*P${excelRow},0)` }
+      ? { formula: `=AB${excelRow}*P${excelRow}` }
       : 0, // AC: 발주단가 노무비 금액
     0, // AD: 발주단가 경비 단가
     0, // AE: 발주단가 경비 금액
     orderUnitPrice, // AF: 발주단가 합계 단가
-    { formula: `=ROUND(AF${excelRow}*P${excelRow},0)` }, // AG: 발주단가 합계 금액
+    { formula: `=AF${excelRow}*P${excelRow}` }, // AG: 발주단가 합계 금액
     '', // AH: 비고
   ];
 }
@@ -23990,8 +24043,54 @@ function generateIndirectCostSubtotalRowData(
   layerNumber,
   excelRow,
   startRow,
-  endRow
+  endRow,
+  roundingRowNumbers = []  // 단수정리 행 번호 배열
 ) {
+  // ✅ 단수정리 행 제외를 위한 수식 생성
+  // SUM(전체) - SUM(단수정리 행들)
+  const roundingRowsFormula = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `Q${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaR = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `R${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaS = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `S${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaT = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `T${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaU = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `U${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaV = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `V${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaW = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `W${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaZ = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `Z${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAA = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AA${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAB = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AB${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAC = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AC${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAD = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AD${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAE = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AE${row}`).join(',')})`
+    : '';
+  const roundingRowsFormulaAF = roundingRowNumbers.length > 0
+    ? `-SUM(${roundingRowNumbers.map(row => `AF${row}`).join(',')})`
+    : '';
+
   // 34개 컬럼 데이터 배열 반환 (Excel 산식 포함)
   // 간접비 소계는 K, N, P를 빈칸으로 처리
   return [
@@ -24012,25 +24111,25 @@ function generateIndirectCostSubtotalRowData(
     '', // O: 단위
     '', // P: 수량 (빈칸)
 
-    // 계약도급 (Q~X) - 직접비와 동일
-    { formula: `=SUM(Q${startRow}:Q${endRow})` }, // Q: 계약도급 자재비 단가 (합계)
-    { formula: `=SUM(R${startRow}:R${endRow})` }, // R: 계약도급 자재비 금액
-    { formula: `=SUM(S${startRow}:S${endRow})` }, // S: 계약도급 노무비 단가 (합계)
-    { formula: `=SUM(T${startRow}:T${endRow})` }, // T: 계약도급 노무비 금액
-    { formula: `=SUM(U${startRow}:U${endRow})` }, // U: 계약도급 경비 단가 (합계)
-    { formula: `=SUM(V${startRow}:V${endRow})` }, // V: 계약도급 경비 금액
-    { formula: `=SUM(W${startRow}:W${endRow})` }, // W: 계약도급 합계 단가 (합계)
+    // 계약도급 (Q~X) - 단수정리 제외
+    { formula: `=SUM(Q${startRow}:Q${endRow})${roundingRowsFormula}` }, // Q: 계약도급 자재비 단가 (합계)
+    { formula: `=SUM(R${startRow}:R${endRow})${roundingRowsFormulaR}` }, // R: 계약도급 자재비 금액
+    { formula: `=SUM(S${startRow}:S${endRow})${roundingRowsFormulaS}` }, // S: 계약도급 노무비 단가 (합계)
+    { formula: `=SUM(T${startRow}:T${endRow})${roundingRowsFormulaT}` }, // T: 계약도급 노무비 금액
+    { formula: `=SUM(U${startRow}:U${endRow})${roundingRowsFormulaU}` }, // U: 계약도급 경비 단가 (합계)
+    { formula: `=SUM(V${startRow}:V${endRow})${roundingRowsFormulaV}` }, // V: 계약도급 경비 금액
+    { formula: `=SUM(W${startRow}:W${endRow})${roundingRowsFormulaW}` }, // W: 계약도급 합계 단가 (합계)
     { formula: `=R${excelRow}+T${excelRow}+V${excelRow}` }, // X: 계약도급 합계 금액
     '', // Y: 비고
 
-    // 발주단가 (Z~AG) - 직접비와 동일
-    { formula: `=SUM(Z${startRow}:Z${endRow})` }, // Z: 발주단가 자재비 단가 (합계)
-    { formula: `=SUM(AA${startRow}:AA${endRow})` }, // AA: 발주단가 자재비 금액
-    { formula: `=SUM(AB${startRow}:AB${endRow})` }, // AB: 발주단가 노무비 단가 (합계)
-    { formula: `=SUM(AC${startRow}:AC${endRow})` }, // AC: 발주단가 노무비 금액
-    { formula: `=SUM(AD${startRow}:AD${endRow})` }, // AD: 발주단가 경비 단가 (합계)
-    { formula: `=SUM(AE${startRow}:AE${endRow})` }, // AE: 발주단가 경비 금액
-    { formula: `=SUM(AF${startRow}:AF${endRow})` }, // AF: 발주단가 합계 단가 (합계)
+    // 발주단가 (Z~AG) - 단수정리 제외
+    { formula: `=SUM(Z${startRow}:Z${endRow})${roundingRowsFormulaZ}` }, // Z: 발주단가 자재비 단가 (합계)
+    { formula: `=SUM(AA${startRow}:AA${endRow})${roundingRowsFormulaAA}` }, // AA: 발주단가 자재비 금액
+    { formula: `=SUM(AB${startRow}:AB${endRow})${roundingRowsFormulaAB}` }, // AB: 발주단가 노무비 단가 (합계)
+    { formula: `=SUM(AC${startRow}:AC${endRow})${roundingRowsFormulaAC}` }, // AC: 발주단가 노무비 금액
+    { formula: `=SUM(AD${startRow}:AD${endRow})${roundingRowsFormulaAD}` }, // AD: 발주단가 경비 단가 (합계)
+    { formula: `=SUM(AE${startRow}:AE${endRow})${roundingRowsFormulaAE}` }, // AE: 발주단가 경비 금액
+    { formula: `=SUM(AF${startRow}:AF${endRow})${roundingRowsFormulaAF}` }, // AF: 발주단가 합계 단가 (합계)
     { formula: `=AA${excelRow}+AC${excelRow}+AE${excelRow}` }, // AG: 발주단가 합계 금액
     '', // AH: 비고
   ];
@@ -24163,7 +24262,7 @@ function generateGrandTotalRowData(
  * @param {string} materialName - 자재 이름 (예: "스터드", "석고보드 9.5T")
  * @param {number} layerNumber - 레이어 번호
  * @param {number} excelRow - 실제 Excel 행 번호
- * @param {number} roundingPerM2 - 1m² 단수정리 단가
+ * @param {object} roundingData - 단수정리 데이터 { material, labor, expense, total }
  * @param {number} area - 면적
  * @param {number} contractRatio - 조정비율
  * @returns {Array} - 34개 컬럼 데이터 배열
@@ -24172,21 +24271,40 @@ function generateMaterialRoundingRowData(
   materialName,
   layerNumber,
   excelRow,
-  roundingPerM2,
+  roundingData,
   area,
   contractRatio
 ) {
   // ✅ HTML과 동일한 계산 방식
-  // 발주단가 단수정리 = 1m² 단가 × 면적 (반올림하여 정수로)
-  const orderRounding = Math.round(roundingPerM2 * area);
+  // 발주단가 단수정리 (1m² 단가)
+  const orderMatPrice = roundingData.material || 0;
+  const orderLabPrice = roundingData.labor || 0;
+  const orderExpPrice = roundingData.expense || 0;
+  const orderTotalPrice = roundingData.total || 0;
 
-  // 계약도급 단수정리 = 발주단가 단수정리 × 비율 (반올림하여 정수로)
-  const contractRounding = Math.round(orderRounding * contractRatio);
+  // ✅ 발주단가 단수정리 (금액 = 1m² 단가 × 면적, 소수점 유지)
+  const orderMatAmount = orderMatPrice * area;  // 소수점 유지
+  const orderLabAmount = orderLabPrice * area;   // 소수점 유지
+  const orderExpAmount = orderExpPrice * area;   // 소수점 유지
+  const orderTotalAmount = orderTotalPrice * area;  // 소수점 유지
+
+  // ✅ 계약도급 단수정리 (1m² 단가 = 발주단가 × 비율, 소수점 2자리)
+  const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+  const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
+  const contractExpPrice = Math.round((orderExpPrice * contractRatio) * 100) / 100;
+  const contractTotalPrice = Math.round((orderTotalPrice * contractRatio) * 100) / 100;
+
+  // ✅ 계약도급 단수정리 (금액 = 1m² 단가 × 면적, 소수점 2자리)
+  const contractMatAmount = Math.round((contractMatPrice * area) * 100) / 100;
+  const contractLabAmount = Math.round((contractLabPrice * area) * 100) / 100;
+  const contractExpAmount = Math.round((contractExpPrice * area) * 100) / 100;
+  const contractTotalAmount = Math.round((contractTotalPrice * area) * 100) / 100;
 
   console.log(`📐 Excel: [${materialName}] 단수정리:`);
-  console.log(`  1m² 단가: ${roundingPerM2.toLocaleString()}원, 면적: ${area.toFixed(2)}m²`);
-  console.log(`  발주단가 단수정리: ${orderRounding.toLocaleString()}`);
-  console.log(`  계약도급 단수정리: ${orderRounding.toLocaleString()} × ${contractRatio} = ${contractRounding.toLocaleString()}`);
+  console.log(`  발주단가 - 자재비: ${orderMatPrice}원 × ${area.toFixed(2)}m² = ${orderMatAmount.toLocaleString()}원`);
+  console.log(`  발주단가 - 노무비: ${orderLabPrice}원 × ${area.toFixed(2)}m² = ${orderLabAmount.toLocaleString()}원`);
+  console.log(`  발주단가 - 합계: ${orderTotalPrice}원 × ${area.toFixed(2)}m² = ${orderTotalAmount.toLocaleString()}원`);
+  console.log(`  계약도급 - 합계: ${contractTotalPrice}원 × ${area.toFixed(2)}m² = ${contractTotalAmount.toLocaleString()}원 (비율 ${contractRatio})`);
 
   // 34개 컬럼 데이터 배열 반환 (실제 값 입력)
   return [
@@ -24207,26 +24325,26 @@ function generateMaterialRoundingRowData(
     '', // O: 단위
     '', // P: 수량
 
-    // ✅ 계약도급 (Q~X) - 실제 값 입력
-    '', // Q: 계약도급 자재비 단가
-    '', // R: 계약도급 자재비 금액
-    '', // S: 계약도급 노무비 단가
-    '', // T: 계약도급 노무비 금액
-    '', // U: 계약도급 경비 단가
-    '', // V: 계약도급 경비 금액
-    '', // W: 계약도급 합계 단가
-    contractRounding, // X: 계약도급 합계 금액 = 발주단가 단수정리×비율 (실제 값)
+    // ✅ 계약도급 (Q~X) - 자재비/노무비/경비 각각 표시
+    contractMatPrice, // Q: 계약도급 자재비 단가
+    contractMatAmount, // R: 계약도급 자재비 금액
+    contractLabPrice, // S: 계약도급 노무비 단가
+    contractLabAmount, // T: 계약도급 노무비 금액
+    contractExpPrice, // U: 계약도급 경비 단가
+    contractExpAmount, // V: 계약도급 경비 금액
+    contractTotalPrice, // W: 계약도급 합계 단가
+    contractTotalAmount, // X: 계약도급 합계 금액
     '', // Y: 비고
 
-    // 발주단가 (Z~AG)
-    '', // Z: 발주단가 자재비 단가
-    '', // AA: 발주단가 자재비 금액
-    '', // AB: 발주단가 노무비 단가
-    '', // AC: 발주단가 노무비 금액
-    '', // AD: 발주단가 경비 단가
-    '', // AE: 발주단가 경비 금액
-    '', // AF: 발주단가 합계 단가
-    orderRounding, // AG: 발주단가 합계 금액 = 1m² 단가×면적 (실제 값)
+    // 발주단가 (Z~AG) - 자재비/노무비/경비 각각 표시
+    orderMatPrice, // Z: 발주단가 자재비 단가
+    orderMatAmount, // AA: 발주단가 자재비 금액
+    orderLabPrice, // AB: 발주단가 노무비 단가
+    orderLabAmount, // AC: 발주단가 노무비 금액
+    orderExpPrice, // AD: 발주단가 경비 단가
+    orderExpAmount, // AE: 발주단가 경비 금액
+    orderTotalPrice, // AF: 발주단가 합계 단가
+    orderTotalAmount, // AG: 발주단가 합계 금액
     '', // AH: 비고
   ];
 }
@@ -24262,17 +24380,15 @@ function applyOrderFormExcelStyles(worksheet) {
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
         }
 
-        // 숫자 포맷: 계약도급 단가는 소수점 1자리, 금액은 정수
-        // Q, S, U, W (17, 19, 21, 23): 계약도급 단가
-        // R, T, V, X (18, 20, 22, 24): 계약도급 금액
-        // Z~AG (26~33): 발주단가
+        // ✅ 숫자 포맷: 모든 단가와 금액은 정수
+        // 계약도급: Q(17), S(19), U(21), W(23) = 단가
+        //          R(18), T(20), V(22), X(24) = 금액
+        // 발주단가: Z(26), AB(28), AD(30), AF(32) = 단가
+        //          AA(27), AC(29), AE(31), AG(33) = 금액
         if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-          if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-            // 계약도급 단가: 소수점 2자리
-            cell.numFmt = '#,##0.00';
-          } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-            // 계약도급 금액 + 발주단가 모든 컬럼: 소수점 2자리
-            cell.numFmt = '#,##0.00';
+          if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
+            // 모든 단가와 금액: 정수
+            cell.numFmt = '#,##0';
           }
         }
       });
