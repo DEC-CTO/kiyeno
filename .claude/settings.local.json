@@ -10,7 +10,11 @@
       "Bash(npm run dev:*)",
       "Bash(timeout /t 10)",
       "Bash(timeout:*)",
-      "Bash(if exist .next rmdir /s /q .next)"
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(tasklist:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd //c \"taskkill /F /PID 45184 & taskkill /F /PID 41228\")"
     ]
   }
 }

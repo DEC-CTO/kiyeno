@@ -2841,20 +2841,19 @@ async function generateComponentRow(
   const orderMaterialAmount = orderMaterialUnitPrice * area;
   const orderLaborAmount = orderLaborUnitPrice * area;
 
-  // ✅ 계약도급 단가 = 발주단가 단가 × 조정비율 (반올림하여 정수로)
-  const contractMaterialUnitPrice = Math.round(orderMaterialUnitPrice * contractRatio);
-  const contractLaborUnitPrice = Math.round(orderLaborUnitPrice * contractRatio);
+  // ✅ 계약도급 단가 = 발주단가 단가 × 조정비율 (소수점 2자리로 계산)
+  const contractMaterialUnitPrice = Math.round((orderMaterialUnitPrice * contractRatio) * 100) / 100;
+  const contractLaborUnitPrice = Math.round((orderLaborUnitPrice * contractRatio) * 100) / 100;
 
-  // ✅ 계약도급 금액 = 단가 × 면적
-  const contractMaterialAmount = contractMaterialUnitPrice * area;
-  const contractLaborAmount = contractLaborUnitPrice * area;
+  // ✅ 계약도급 금액 = 단가 × 면적 (소수점 단가로 계산)
+  const contractMaterialAmount = Math.round((contractMaterialUnitPrice * area) * 100) / 100;
+  const contractLaborAmount = Math.round((contractLaborUnitPrice * area) * 100) / 100;
 
-  // ✅ 합계
-  const contractTotalUnitPrice =
-    contractMaterialUnitPrice + contractLaborUnitPrice;
-  const contractTotalAmount = contractMaterialAmount + contractLaborAmount;
-  const orderTotalUnitPrice = orderMaterialUnitPrice + orderLaborUnitPrice;
-  const orderTotalAmount = orderMaterialAmount + orderLaborAmount;
+  // ✅ 합계 (소수점 2자리로 계산)
+  const contractTotalUnitPrice = Math.round((contractMaterialUnitPrice + contractLaborUnitPrice) * 100) / 100;
+  const contractTotalAmount = Math.round((contractMaterialAmount + contractLaborAmount) * 100) / 100;
+  const orderTotalUnitPrice = Math.round((orderMaterialUnitPrice + orderLaborUnitPrice) * 100) / 100;
+  const orderTotalAmount = Math.round((orderMaterialAmount + orderLaborAmount) * 100) / 100;
 
   // 석고보드 장 수량 재계산: 실제수량 ÷ 1장당m2 (0단위 반올림)
   if (isGypsumBoard(componentName) && conversionM2) {
@@ -2904,28 +2903,22 @@ async function generateComponentRow(
             }</td>
             <td>M2</td>
             <td class="quantity-cell">${displayQuantity.toFixed(2)}</td>
-            <td class="number-cell contract-material-price">${Math.round(contractMaterialUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-material-price">${contractMaterialUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-material-amount">${contractMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell contract-labor-price">${Math.round(contractLaborUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${contractLaborUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-labor-amount">${contractLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input contract-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
             <td class="number-cell expense-amount contract-expense-amount" data-row="${rowNumber}">0</td>
-            <td class="number-cell contract-total-price" data-row="${rowNumber}">${Math.round(contractTotalUnitPrice).toLocaleString()}</td>
+            <td class="number-cell contract-total-price" data-row="${rowNumber}">${contractTotalUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-total-amount" data-row="${rowNumber}">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
-            <td class="number-cell order-material-price">${Math.round(
-              orderMaterialUnitPrice
-            ).toLocaleString()}</td>
+            <td class="number-cell order-material-price">${orderMaterialUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-material-amount">${orderMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell order-labor-price">${Math.round(
-              orderLaborUnitPrice
-            ).toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${orderLaborUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-labor-amount">${orderLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input order-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
             <td class="number-cell expense-amount order-expense-amount" data-row="${rowNumber}">0</td>
-            <td class="number-cell order-total-price" data-row="${rowNumber}">${Math.round(
-    orderTotalUnitPrice
-  ).toLocaleString()}</td>
+            <td class="number-cell order-total-price" data-row="${rowNumber}">${orderTotalUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-total-amount" data-row="${rowNumber}">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
@@ -3453,22 +3446,25 @@ function generateSubtotalRow(components, label, rowNumber) {
     console.log(`  총 면적: ${totalArea.toFixed(2)}m²`);
 
     // ✅ 발주단가 - 금액 합계 (DB 저장값 × 면적, 소수점 유지)
-    const matAmount = materialUnitPrice * totalArea;  // Math.round() 제거
-    const labAmount = laborUnitPrice * totalArea;     // Math.round() 제거
+    // ✅ 발주단가 금액도 소수점 2자리로 계산
+    const matAmount = Math.round((materialUnitPrice * totalArea) * 100) / 100;
+    const labAmount = Math.round((laborUnitPrice * totalArea) * 100) / 100;
     orderMaterialAmountSum += matAmount;
     orderLaborAmountSum += labAmount;
 
     console.log(`  발주단가 금액(소수점): 자재=${matAmount.toFixed(2)}, 노무=${labAmount.toFixed(2)}`);
 
-    // ✅ 계약도급 - 단가 우선 계산 (발주 단가 × 비율, 반올림)
-    const contractMatUnitPrice = Math.round(materialUnitPrice * contractRatio);
-    const contractLabUnitPrice = Math.round(laborUnitPrice * contractRatio);
-    const contractMatAmount = contractMatUnitPrice * totalArea;
-    const contractLabAmount = contractLabUnitPrice * totalArea;
+    // ✅ 계약도급 - 금액 계산 시 전체 정밀도 유지, 최종 결과만 고정소수점 반올림
+    const contractMatAmount = Math.round((materialUnitPrice * contractRatio * totalArea) * 100) / 100;
+    const contractLabAmount = Math.round((laborUnitPrice * contractRatio * totalArea) * 100) / 100;
     contractMaterialAmountSum += contractMatAmount;
     contractLaborAmountSum += contractLabAmount;
 
-    console.log(`  계약도급 금액: 자재=${contractMatAmount.toLocaleString()}, 노무=${contractLabAmount.toLocaleString()}`);
+    // ✅ 표시용 단가도 소수점 2자리로 계산
+    const contractMatUnitPrice = Math.round((materialUnitPrice * contractRatio) * 100) / 100;
+    const contractLabUnitPrice = Math.round((laborUnitPrice * contractRatio) * 100) / 100;
+
+    console.log(`  계약도급 금액(소수점): 자재=${contractMatAmount.toFixed(2)}, 노무=${contractLabAmount.toFixed(2)}`);
   }
 
   // ✅ 단가 합계는 구성품별로 계산 (표시용)
@@ -3480,9 +3476,9 @@ function generateSubtotalRow(components, label, rowNumber) {
     orderMaterialPriceSum += matPrice1m2;
     orderLaborPriceSum += labPrice1m2;
 
-    // 계약도급 - 단가 합계 (표시용)
-    const contractMatPrice = Math.round(matPrice1m2 * contractRatio);
-    const contractLabPrice = Math.round(labPrice1m2 * contractRatio);
+    // ✅ 계약도급 - 단가 합계 (표시용, 소수점 2자리)
+    const contractMatPrice = Math.round((matPrice1m2 * contractRatio) * 100) / 100;
+    const contractLabPrice = Math.round((labPrice1m2 * contractRatio) * 100) / 100;
     contractMaterialPriceSum += contractMatPrice;
     contractLaborPriceSum += contractLabPrice;
 
@@ -3523,17 +3519,11 @@ function generateSubtotalRow(components, label, rowNumber) {
     }
   }
 
-  // 합계 계산
-  const contractTotalPriceSum =
-    contractMaterialPriceSum + contractLaborPriceSum + contractExpensePriceSum;
-  const contractTotalAmountSum =
-    contractMaterialAmountSum +
-    contractLaborAmountSum +
-    contractExpenseAmountSum;
-  const orderTotalPriceSum =
-    orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum;
-  const orderTotalAmountSum =
-    orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum;
+  // ✅ 합계 계산 (소수점 2자리)
+  const contractTotalPriceSum = Math.round((contractMaterialPriceSum + contractLaborPriceSum + contractExpensePriceSum) * 100) / 100;
+  const contractTotalAmountSum = Math.round((contractMaterialAmountSum + contractLaborAmountSum + contractExpenseAmountSum) * 100) / 100;
+  const orderTotalPriceSum = Math.round((orderMaterialPriceSum + orderLaborPriceSum + orderExpensePriceSum) * 100) / 100;
+  const orderTotalAmountSum = Math.round((orderMaterialAmountSum + orderLaborAmountSum + orderExpenseAmountSum) * 100) / 100;
 
   const htmlMaterialAmount = Math.round(orderMaterialAmountSum);
   const htmlLaborAmount = Math.round(orderLaborAmountSum);
@@ -3625,26 +3615,27 @@ function calculateIndirectCosts(
     materialProfitUnitPrice = indirectCosts.materialProfit;
     toolExpenseUnitPrice = indirectCosts.toolExpense;
 
-    materialLoss = Math.round(materialLossUnitPrice * totalArea);
-    transportCost = Math.round(transportCostUnitPrice * totalArea);
-    materialProfit = Math.round(materialProfitUnitPrice * totalArea);
-    toolExpense = Math.round(toolExpenseUnitPrice * totalArea);
+    // ✅ 금액을 소수점 2자리로 계산
+    materialLoss = Math.round((materialLossUnitPrice * totalArea) * 100) / 100;
+    transportCost = Math.round((transportCostUnitPrice * totalArea) * 100) / 100;
+    materialProfit = Math.round((materialProfitUnitPrice * totalArea) * 100) / 100;
+    toolExpense = Math.round((toolExpenseUnitPrice * totalArea) * 100) / 100;
 
     console.log(`  📊 DB 저장된 1m² 단가 사용 (면적: ${totalArea}m²)`);
   } else {
-    // Fallback: 비율로 계산
-    materialLoss = Math.round((materialTotal * fixedRates.materialLoss) / 100);
-    transportCost = Math.round((materialTotal * fixedRates.transportCost) / 100);
+    // Fallback: 비율로 계산 (소수점 2자리)
+    materialLoss = Math.round(((materialTotal * fixedRates.materialLoss) / 100) * 100) / 100;
+    transportCost = Math.round(((materialTotal * fixedRates.transportCost) / 100) * 100) / 100;
     const materialProfitBase = materialTotal + materialLoss + transportCost;
-    materialProfit = Math.round((materialProfitBase * fixedRates.materialProfit) / 100);
-    toolExpense = Math.round((laborTotal * fixedRates.toolExpense) / 100);
+    materialProfit = Math.round(((materialProfitBase * fixedRates.materialProfit) / 100) * 100) / 100;
+    toolExpense = Math.round(((laborTotal * fixedRates.toolExpense) / 100) * 100) / 100;
 
-    // 1m² 단가 역산 (면적이 있을 때만)
+    // ✅ 1m² 단가 역산 (면적이 있을 때만, 소수점 2자리)
     if (totalArea > 0) {
-      materialLossUnitPrice = Math.round(materialLoss / totalArea);
-      transportCostUnitPrice = Math.round(transportCost / totalArea);
-      materialProfitUnitPrice = Math.round(materialProfit / totalArea);
-      toolExpenseUnitPrice = Math.round(toolExpense / totalArea);
+      materialLossUnitPrice = Math.round((materialLoss / totalArea) * 100) / 100;
+      transportCostUnitPrice = Math.round((transportCost / totalArea) * 100) / 100;
+      materialProfitUnitPrice = Math.round((materialProfit / totalArea) * 100) / 100;
+      toolExpenseUnitPrice = Math.round((toolExpense / totalArea) * 100) / 100;
     }
 
     console.log(`  ⚠️ 비율로 계산 (fallback)`);
@@ -3738,17 +3729,17 @@ function generateMaterialRoundingRow(
   const orderExpAmount = orderExpPrice * area;   // Math.round() 제거
   const orderTotalAmount = orderTotalPrice * area;  // Math.round() 제거
 
-  // 계약도급 단수정리 (1m² 단가 = 발주단가 × 비율)
-  const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-  const contractLabPrice = Math.round(orderLabPrice * contractRatio);
-  const contractExpPrice = Math.round(orderExpPrice * contractRatio);
-  const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
+  // ✅ 계약도급 단수정리 (1m² 단가 = 발주단가 × 비율, 소수점 2자리)
+  const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+  const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
+  const contractExpPrice = Math.round((orderExpPrice * contractRatio) * 100) / 100;
+  const contractTotalPrice = Math.round((orderTotalPrice * contractRatio) * 100) / 100;
 
-  // 계약도급 단수정리 (금액 = 1m² 단가 × 면적)
-  const contractMatAmount = Math.round(contractMatPrice * area);
-  const contractLabAmount = Math.round(contractLabPrice * area);
-  const contractExpAmount = Math.round(contractExpPrice * area);
-  const contractTotalAmount = Math.round(contractTotalPrice * area);
+  // ✅ 계약도급 단수정리 (금액 = 1m² 단가 × 면적, 소수점 2자리)
+  const contractMatAmount = Math.round((contractMatPrice * area) * 100) / 100;
+  const contractLabAmount = Math.round((contractLabPrice * area) * 100) / 100;
+  const contractExpAmount = Math.round((contractExpPrice * area) * 100) / 100;
+  const contractTotalAmount = Math.round((contractTotalPrice * area) * 100) / 100;
 
   console.log(`📐 [${materialName}] 단수정리:`);
   console.log(
@@ -3788,24 +3779,24 @@ function generateMaterialRoundingRow(
             <td></td>
             <td></td>
             <!-- 계약도급 -->
-            <td class="number-cell contract-material-price">${contractMatPrice.toLocaleString()}</td>
+            <td class="number-cell contract-material-price">${contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-material-amount">${contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell contract-labor-price">${contractLabPrice.toLocaleString()}</td>
+            <td class="number-cell contract-labor-price">${contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-labor-amount">${contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell contract-expense-price">${contractExpPrice.toLocaleString()}</td>
+            <td class="number-cell contract-expense-price">${contractExpPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-expense-amount">${contractExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell contract-total-price">${contractTotalPrice.toLocaleString()}</td>
-            <td class="number-cell contract-total-amount">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell contract-total-price">${contractTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell contract-total-amount" data-contract-rounding="${contractTotalAmount.toFixed(2)}">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell order-material-price">${orderMatPrice.toLocaleString()}</td>
+            <td class="number-cell order-material-price">${orderMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-material-amount">${orderMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell order-labor-price">${orderLabPrice.toLocaleString()}</td>
+            <td class="number-cell order-labor-price">${orderLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-labor-amount">${orderLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell order-expense-price">${orderExpPrice.toLocaleString()}</td>
+            <td class="number-cell order-expense-price">${orderExpPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-expense-amount">${orderExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell order-total-price">${orderTotalPrice.toLocaleString()}</td>
-            <td class="number-cell order-total-amount">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell order-total-price">${orderTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell order-total-amount" data-order-rounding="${orderTotalAmount.toFixed(2)}">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -3829,10 +3820,14 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
   // 1m² 단가
   const orderUnitPrice = item.unitPrice || 0;
 
-  // ✅ 단가 우선 계산 (발주 단가 × 비율, 소수점 유지)
-  const orderAmount = orderUnitPrice * area;  // Math.round() 제거
-  const contractUnitPrice = Math.round(orderUnitPrice * contractRatio);
-  const contractAmount = contractUnitPrice * area;
+  // ✅ 발주단가 금액 계산 (소수점 2자리)
+  const orderAmount = Math.round((orderUnitPrice * area) * 100) / 100;
+
+  // ✅ 계약도급 단가도 소수점 2자리로 계산
+  const contractUnitPrice = Math.round((orderUnitPrice * contractRatio) * 100) / 100;
+
+  // ✅ 계약도급 금액 계산 (소수점 단가로 계산)
+  const contractAmount = Math.round((contractUnitPrice * area) * 100) / 100;
 
   // 자재비 항목인지 노무비 항목인지 구분
   const isMaterialCost = item.name.includes('자재로스') ||
@@ -3859,23 +3854,23 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
             <td>M2</td>
             <td class="quantity-cell">${area.toFixed(2)}</td>
             <!-- 계약도급 -->
-            <td class="number-cell">${isMaterialCost ? Math.round(contractUnitPrice).toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isMaterialCost ? contractUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">${isMaterialCost ? contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
-            <td class="number-cell">${isLaborCost ? Math.round(contractUnitPrice).toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? contractUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">${isLaborCost ? contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">0.00</td>
-            <td class="number-cell">${Math.round(contractUnitPrice).toLocaleString()}</td>
+            <td class="number-cell">${contractUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
-            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">0.00</td>
-            <td class="number-cell">${orderUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${orderUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
@@ -3899,9 +3894,9 @@ function generateRoundingAdjustmentRow(categoryName, indirectCostItems, rowNumbe
         categoryExpenseSum += item.amount;
     }
 
-    // 단수정리: 10원 단위 절사
+    // ✅ 단수정리: 10원 단위 절사 (소수점 2자리)
     const orderRoundingAmount = -(categoryExpenseSum % 10);
-    const contractRoundingAmount = Math.round(orderRoundingAmount * contractRatio);
+    const contractRoundingAmount = Math.round((orderRoundingAmount * contractRatio) * 100) / 100;
 
     return `
         <tr style="background: #fff9c4;">
@@ -3926,10 +3921,10 @@ function generateRoundingAdjustmentRow(categoryName, indirectCostItems, rowNumbe
             <td></td>
             <td></td>
             <td></td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">${contractRoundingAmount.toLocaleString()}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">${contractRoundingAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
-            <td class="number-cell">${contractRoundingAmount.toLocaleString()}</td>
+            <td class="number-cell" data-contract-rounding="${contractRoundingAmount.toFixed(2)}">${contractRoundingAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
             <td></td>
@@ -3939,7 +3934,7 @@ function generateRoundingAdjustmentRow(categoryName, indirectCostItems, rowNumbe
             <td class="number-cell">0</td>
             <td class="number-cell">${orderRoundingAmount.toLocaleString()}</td>
             <td></td>
-            <td class="number-cell">${orderRoundingAmount.toLocaleString()}</td>
+            <td class="number-cell" data-order-rounding="${orderRoundingAmount.toFixed(2)}">${orderRoundingAmount.toLocaleString()}</td>
             <td></td>
         </tr>
     `;
@@ -3982,21 +3977,23 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
   console.log(`  ✅ 소수점 유지 합계 - 자재: ${orderMaterialAmount.toFixed(2)}, 노무: ${orderLaborAmount.toFixed(2)}`);
   console.log(`  ✅ 화면 표시(반올림) - 자재: ${Math.round(orderMaterialAmount).toLocaleString()}, 노무: ${Math.round(orderLaborAmount).toLocaleString()}`);
 
-  // 단가 역산 (금액 ÷ 면적)
-  const orderMaterialUnitPrice = totalArea > 0 ? Math.round(orderMaterialAmount / totalArea) : 0;
-  const orderLaborUnitPrice = totalArea > 0 ? Math.round(orderLaborAmount / totalArea) : 0;
-  const orderTotalUnitPrice = orderMaterialUnitPrice + orderLaborUnitPrice;
-  const orderTotalAmount = orderMaterialAmount + orderLaborAmount;
+  // ✅ 단가 역산 (금액 ÷ 면적, 소수점 2자리)
+  const orderMaterialUnitPrice = totalArea > 0 ? Math.round((orderMaterialAmount / totalArea) * 100) / 100 : 0;
+  const orderLaborUnitPrice = totalArea > 0 ? Math.round((orderLaborAmount / totalArea) * 100) / 100 : 0;
+  const orderTotalUnitPrice = Math.round((orderMaterialUnitPrice + orderLaborUnitPrice) * 100) / 100;
+  const orderTotalAmount = Math.round((orderMaterialAmount + orderLaborAmount) * 100) / 100;
 
-  // 계약도급 = 발주단가 × contractRatio
-  const contractMaterialUnitPrice = Math.round(orderMaterialUnitPrice * contractRatio);
-  const contractLaborUnitPrice = Math.round(orderLaborUnitPrice * contractRatio);
-  const contractMaterialAmount = Math.round(orderMaterialAmount * contractRatio);
-  const contractLaborAmount = Math.round(orderLaborAmount * contractRatio);
-  const contractTotalUnitPrice = Math.round(orderTotalUnitPrice * contractRatio);
-  const contractTotalAmount = contractMaterialAmount + contractLaborAmount;
+  // ✅ 계약도급 - 금액은 고정소수점 계산, 단가만 정수로
+  const contractMaterialAmount = Math.round(orderMaterialAmount * contractRatio * 100) / 100;
+  const contractLaborAmount = Math.round(orderLaborAmount * contractRatio * 100) / 100;
+  const contractTotalAmount = Math.round((contractMaterialAmount + contractLaborAmount) * 100) / 100;
 
-  console.log(`  ✅ 계약도급 합계 (${contractRatio}배) - 자재비: ${contractMaterialAmount.toLocaleString()}, 노무비: ${contractLaborAmount.toLocaleString()}`);
+  // ✅ 표시용 단가도 소수점 2자리로 계산
+  const contractMaterialUnitPrice = Math.round((orderMaterialUnitPrice * contractRatio) * 100) / 100;
+  const contractLaborUnitPrice = Math.round((orderLaborUnitPrice * contractRatio) * 100) / 100;
+  const contractTotalUnitPrice = Math.round((orderTotalUnitPrice * contractRatio) * 100) / 100;
+
+  console.log(`  ✅ 계약도급 합계(소수점) (${contractRatio}배) - 자재비: ${contractMaterialAmount.toFixed(2)}, 노무비: ${contractLaborAmount.toFixed(2)}`);
 
   return `
         <tr style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); font-weight: 600;">
@@ -4017,23 +4014,23 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
             <td>M2</td>
             <td class="quantity-cell"></td>
             <!-- 계약도급 -->
-            <td class="number-cell">${contractMaterialUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${contractMaterialUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${contractMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell">${contractLaborUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${contractLaborUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${contractLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">0.00</td>
-            <td class="number-cell">${contractTotalUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${contractTotalUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell">${orderMaterialUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${orderMaterialUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${orderMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="number-cell">${orderLaborUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${orderLaborUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${orderLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">0.00</td>
-            <td class="number-cell">${orderTotalUnitPrice.toLocaleString()}</td>
+            <td class="number-cell">${orderTotalUnitPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
@@ -4105,9 +4102,9 @@ function generateGrandTotalRow(directSubtotal, indirectSubtotal, roundingAmount,
             <td></td>
             <!-- 계약도급 -->
             <td class="number-cell">${Math.round(contractMatPrice).toLocaleString()}</td>
-            <td class="number-cell">${contractMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell" data-material-amount="${contractMaterialTotal.toFixed(2)}">${contractMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(contractLabPrice).toLocaleString()}</td>
-            <td class="number-cell">${contractLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell" data-labor-amount="${contractLaborTotal.toFixed(2)}">${contractLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(contractExpPrice).toLocaleString()}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">${Math.round(contractTotalPrice).toLocaleString()}</td>
@@ -4115,9 +4112,9 @@ function generateGrandTotalRow(directSubtotal, indirectSubtotal, roundingAmount,
             <td></td>
             <!-- 발주단가 -->
             <td class="number-cell">${Math.round(orderMatPrice).toLocaleString()}</td>
-            <td class="number-cell">${orderMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell" data-material-amount="${orderMaterialTotal.toFixed(2)}">${orderMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(orderLabPrice).toLocaleString()}</td>
-            <td class="number-cell">${orderLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell" data-labor-amount="${orderLaborTotal.toFixed(2)}">${orderLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(orderExpPrice).toLocaleString()}</td>
             <td class="number-cell">0.00</td>
             <td class="number-cell">${Math.round(orderTotalPrice).toLocaleString()}</td>
@@ -5089,9 +5086,9 @@ async function generateOrderFormDataRows() {
 
     console.log(`  ✅ 발주단가 합계 - 자재비: ${orderMaterialAmount.toLocaleString()}, 노무비: ${orderLaborAmount.toLocaleString()}`);
 
-    // ✅ 계약도급 금액: 화면 표시 소계와 동일한 방식 (발주단가 합계 × 비율, 한 번만 반올림)
-    const contractMaterialAmount = Math.round(orderMaterialAmount * contractRatio);
-    const contractLaborAmount = Math.round(orderLaborAmount * contractRatio);
+    // ✅ 계약도급 금액: 소수점 2자리 유지 (발주단가 합계 × 비율)
+    const contractMaterialAmount = Math.round((orderMaterialAmount * contractRatio) * 100) / 100;
+    const contractLaborAmount = Math.round((orderLaborAmount * contractRatio) * 100) / 100;
 
     // ✅ 단가 합계 계산 (총계 행 표시용) - 역산 방식
     const orderMaterialUnitPrice = totalArea > 0 ? Math.round(orderMaterialAmount / totalArea) : 0;
@@ -5100,8 +5097,8 @@ async function generateOrderFormDataRows() {
     const contractLaborUnitPrice = Math.round(orderLaborUnitPrice * contractRatio);
 
     const indirectSubtotal = {
-      orderMaterialAmount: Math.round(orderMaterialAmount),
-      orderLaborAmount: Math.round(orderLaborAmount),
+      orderMaterialAmount: Math.round(orderMaterialAmount * 100) / 100,
+      orderLaborAmount: Math.round(orderLaborAmount * 100) / 100,
       orderMaterialPrice: orderMaterialUnitPrice,
       orderLaborPrice: orderLaborUnitPrice,
       orderExpensePrice: 0,
@@ -5164,17 +5161,17 @@ async function generateOrderFormDataRows() {
       console.log(`  DB 노무 단가: ${laborUnitPrice.toLocaleString()}원/m²`);
       console.log(`  총 면적: ${totalArea.toFixed(2)}m²`);
 
-      // 발주단가 - 금액 합계 (DB 저장값 × 면적, 반올림)
-      const matAmount = Math.round(materialUnitPrice * totalArea);
-      const labAmount = Math.round(laborUnitPrice * totalArea);
+      // 발주단가 - 금액 합계 (DB 저장값 × 면적, 소수점 2자리 유지)
+      const matAmount = Math.round((materialUnitPrice * totalArea) * 100) / 100;
+      const labAmount = Math.round((laborUnitPrice * totalArea) * 100) / 100;
       directMaterialTotal += matAmount;
       directLaborTotal += labAmount;
 
       console.log(`  발주단가 금액: 자재=${matAmount.toLocaleString()}, 노무=${labAmount.toLocaleString()}`);
 
-      // ✅ 계약도급 - 금액 우선 계산 (발주단가 금액 × 비율, 반올림)
-      const contractMatAmount = Math.round(matAmount * contractRatio);
-      const contractLabAmount = Math.round(labAmount * contractRatio);
+      // ✅ 계약도급 - 금액 우선 계산 (발주단가 금액 × 비율, 소수점 2자리 유지)
+      const contractMatAmount = Math.round((matAmount * contractRatio) * 100) / 100;
+      const contractLabAmount = Math.round((labAmount * contractRatio) * 100) / 100;
       contractDirectMaterialTotal += contractMatAmount;
       contractDirectLaborTotal += contractLabAmount;
 
@@ -5744,15 +5741,23 @@ function updateSubtotalRows() {
       `  💰 총 경비: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
     );
 
-    // 총계 행의 기존 자재비, 노무비 금액 읽기
-    const contractMaterialAmount =
-      parseFloat(grandTotalRow.cells[17]?.textContent.replace(/,/g, '')) || 0;
-    const contractLaborAmount =
-      parseFloat(grandTotalRow.cells[19]?.textContent.replace(/,/g, '')) || 0;
-    const orderMaterialAmount =
-      parseFloat(grandTotalRow.cells[26]?.textContent.replace(/,/g, '')) || 0;
-    const orderLaborAmount =
-      parseFloat(grandTotalRow.cells[28]?.textContent.replace(/,/g, '')) || 0;
+    // 총계 행의 기존 자재비, 노무비 금액 읽기 (data 속성 우선, 없으면 textContent 파싱)
+    const contractMaterialAmount = parseFloat(
+      grandTotalRow.cells[17]?.dataset?.materialAmount ||
+      grandTotalRow.cells[17]?.textContent.replace(/,/g, '')
+    ) || 0;
+    const contractLaborAmount = parseFloat(
+      grandTotalRow.cells[19]?.dataset?.laborAmount ||
+      grandTotalRow.cells[19]?.textContent.replace(/,/g, '')
+    ) || 0;
+    const orderMaterialAmount = parseFloat(
+      grandTotalRow.cells[26]?.dataset?.materialAmount ||
+      grandTotalRow.cells[26]?.textContent.replace(/,/g, '')
+    ) || 0;
+    const orderLaborAmount = parseFloat(
+      grandTotalRow.cells[28]?.dataset?.laborAmount ||
+      grandTotalRow.cells[28]?.textContent.replace(/,/g, '')
+    ) || 0;
 
     // 단수정리 금액 읽기 (발주단가와 계약도급 모두)
     const roundingRowIndex = Array.from(
@@ -5763,17 +5768,26 @@ function updateSubtotalRows() {
     let contractRoundingAmount = 0;
     if (roundingRowIndex !== -1) {
       const roundingRow = document.querySelectorAll('.order-form-table tbody tr')[roundingRowIndex];
-      roundingAmount = parseFloat(roundingRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
-      contractRoundingAmount = parseFloat(roundingRow.cells[23]?.textContent.replace(/,/g, '')) || 0;
+      // data 속성에서 원본 값 읽기 (없으면 textContent 파싱)
+      roundingAmount = parseFloat(
+        roundingRow.cells[32]?.dataset?.orderRounding ||
+        roundingRow.cells[32]?.textContent.replace(/,/g, '')
+      ) || 0;
+      contractRoundingAmount = parseFloat(
+        roundingRow.cells[23]?.dataset?.contractRounding ||
+        roundingRow.cells[23]?.textContent.replace(/,/g, '')
+      ) || 0;
     }
 
     console.log(`  📐 단수정리 - 발주단가: ${roundingAmount.toLocaleString()}, 계약도급: ${contractRoundingAmount.toLocaleString()}`);
 
-    // 총계 금액 재계산 (자재비 + 노무비 + 경비 + 단수정리) - 소수점 유지
-    const orderGrandTotal =
-      orderMaterialAmount + orderLaborAmount + totalOrderExpenseAmount + roundingAmount;
-    const contractGrandTotal =
-      contractMaterialAmount + contractLaborAmount + totalContractExpenseAmount + contractRoundingAmount;
+    // 총계 금액 재계산 (자재비 + 노무비 + 단수정리) - 경비 중복 제거, 고정소수점 계산
+    const orderGrandTotal = Math.round(
+      (orderMaterialAmount + orderLaborAmount + roundingAmount) * 100
+    ) / 100;
+    const contractGrandTotal = Math.round(
+      (contractMaterialAmount + contractLaborAmount + contractRoundingAmount) * 100
+    ) / 100;
 
     console.log(
       `  💵 총계 금액: 계약도급=${contractGrandTotal.toFixed(2)}, 발주단가=${orderGrandTotal.toFixed(2)}`
@@ -5835,14 +5849,14 @@ function attachExpenseInputListeners() {
       const row = document.querySelector(`tr[data-row="${rowNumber}"]`);
       if (!row) return;
 
-      // 경비 금액 계산 (경비는 단가 그대로 사용, 수량 곱하지 않음)
-      const expenseAmount = Math.round(expensePrice);
+      // 경비 금액 계산 (경비는 단가 그대로 사용, 수량 곱하지 않음, 소수점 2자리)
+      const expenseAmount = Math.round(expensePrice * 100) / 100;
 
       if (isContract) {
-        // 계약도급 경비 금액 업데이트
+        // 계약도급 경비 금액 업데이트 (소수점 2자리)
         const expenseAmountCell = row.querySelector('.contract-expense-amount');
         if (expenseAmountCell) {
-          expenseAmountCell.textContent = expenseAmount.toLocaleString();
+          expenseAmountCell.textContent = expenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
         // 계약도급 자재비, 노무비 가져오기 (클래스 선택자 사용)
@@ -5855,35 +5869,31 @@ function attachExpenseInputListeners() {
         const laborAmount =
           parseFloat(laborAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-        // 계약도급 합계 단가 계산
+        // 계약도급 합계 단가 계산 (소수점 2자리)
         const materialPriceCell = row.querySelector('.contract-material-price');
         const laborPriceCell = row.querySelector('.contract-labor-price');
         const materialPrice =
           parseFloat(materialPriceCell?.textContent.replace(/,/g, '')) || 0;
         const laborPrice =
           parseFloat(laborPriceCell?.textContent.replace(/,/g, '')) || 0;
-        const totalPrice = Math.round(
-          materialPrice + laborPrice + expensePrice
-        );
+        const totalPrice = Math.round((materialPrice + laborPrice + expensePrice) * 100) / 100;
 
-        // 계약도급 합계 금액 계산
-        const totalAmount = Math.round(
-          materialAmount + laborAmount + expenseAmount
-        );
+        // 계약도급 합계 금액 계산 (소수점 2자리)
+        const totalAmount = Math.round((materialAmount + laborAmount + expenseAmount) * 100) / 100;
 
-        // 합계 셀 업데이트
+        // 합계 셀 업데이트 (소수점 2자리 표시)
         const totalPriceCell = row.querySelector('.contract-total-price');
         const totalAmountCell = row.querySelector('.contract-total-amount');
 
         if (totalPriceCell)
-          totalPriceCell.textContent = totalPrice.toLocaleString();
+          totalPriceCell.textContent = totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         if (totalAmountCell)
-          totalAmountCell.textContent = totalAmount.toLocaleString();
+          totalAmountCell.textContent = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       } else {
-        // 발주단가 경비 금액 업데이트
+        // 발주단가 경비 금액 업데이트 (소수점 2자리)
         const expenseAmountCell = row.querySelector('.order-expense-amount');
         if (expenseAmountCell) {
-          expenseAmountCell.textContent = expenseAmount.toLocaleString();
+          expenseAmountCell.textContent = expenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         }
 
         // 발주단가 자재비, 노무비 가져오기 (클래스 선택자 사용)
@@ -5894,30 +5904,26 @@ function attachExpenseInputListeners() {
         const laborAmount =
           parseFloat(laborAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-        // 발주단가 합계 단가 계산
+        // 발주단가 합계 단가 계산 (소수점 2자리)
         const materialPriceCell = row.querySelector('.order-material-price');
         const laborPriceCell = row.querySelector('.order-labor-price');
         const materialPrice =
           parseFloat(materialPriceCell?.textContent.replace(/,/g, '')) || 0;
         const laborPrice =
           parseFloat(laborPriceCell?.textContent.replace(/,/g, '')) || 0;
-        const totalPrice = Math.round(
-          materialPrice + laborPrice + expensePrice
-        );
+        const totalPrice = Math.round((materialPrice + laborPrice + expensePrice) * 100) / 100;
 
-        // 발주단가 합계 금액 계산
-        const totalAmount = Math.round(
-          materialAmount + laborAmount + expenseAmount
-        );
+        // 발주단가 합계 금액 계산 (소수점 2자리)
+        const totalAmount = Math.round((materialAmount + laborAmount + expenseAmount) * 100) / 100;
 
-        // 합계 셀 업데이트
+        // 합계 셀 업데이트 (소수점 2자리 표시)
         const totalPriceCell = row.querySelector('.order-total-price');
         const totalAmountCell = row.querySelector('.order-total-amount');
 
         if (totalPriceCell)
-          totalPriceCell.textContent = totalPrice.toLocaleString();
+          totalPriceCell.textContent = totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         if (totalAmountCell)
-          totalAmountCell.textContent = totalAmount.toLocaleString();
+          totalAmountCell.textContent = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       }
 
       // ✅ 소계 행 업데이트 (타입 요약 행은 빈칸으로 유지)
@@ -6000,21 +6006,21 @@ function updateContractPricesRealtime() {
     const quantity =
       parseFloat(quantityCell?.textContent.replace(/,/g, '')) || 0;
 
-    // 계약도급 단가 계산 (발주 단가 × 조정비율, 반올림)
-    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+    // ✅ 계약도급 단가 계산 (발주 단가 × 조정비율, 소수점 2자리)
+    const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+    const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
 
-    // 계약도급 금액 계산 (단가 × 수량)
-    const contractMatAmount = contractMatPrice * quantity;
-    const contractLabAmount = contractLabPrice * quantity;
+    // ✅ 계약도급 금액 계산 (단가 × 수량, 소수점 2자리)
+    const contractMatAmount = Math.round((contractMatPrice * quantity) * 100) / 100;
+    const contractLabAmount = Math.round((contractLabPrice * quantity) * 100) / 100;
 
-    // 계약도급 단가 업데이트 (소수점 1자리)
+    // ✅ 계약도급 단가 업데이트 (소수점 2자리 표시)
     const contractMatPriceCell = row.querySelector('.contract-material-price');
     const contractLabPriceCell = row.querySelector('.contract-labor-price');
     if (contractMatPriceCell)
-      contractMatPriceCell.textContent = Math.round(contractMatPrice).toLocaleString();
+      contractMatPriceCell.textContent = contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabPriceCell)
-      contractLabPriceCell.textContent = Math.round(contractLabPrice).toLocaleString();
+      contractLabPriceCell.textContent = contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     // 계약도급 금액 업데이트
     const contractMatAmountCell = row.querySelector(
@@ -6031,15 +6037,15 @@ function updateContractPricesRealtime() {
     const expensePrice =
       parseFloat(expenseAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-    // 합계 계산 (소수점 유지)
-    const totalPrice = Math.round(contractMatPrice + contractLabPrice);
-    const totalAmount = contractMatAmount + contractLabAmount + expensePrice;
+    // ✅ 합계 계산 (소수점 2자리)
+    const totalPrice = Math.round((contractMatPrice + contractLabPrice) * 100) / 100;
+    const totalAmount = Math.round((contractMatAmount + contractLabAmount + expensePrice) * 100) / 100;
 
-    // 합계 업데이트
+    // ✅ 합계 업데이트 (소수점 2자리 표시)
     const totalPriceCell = row.querySelector('.contract-total-price');
     const totalAmountCell = row.querySelector('.contract-total-amount');
     if (totalPriceCell)
-      totalPriceCell.textContent = totalPrice.toLocaleString();
+      totalPriceCell.textContent = totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (totalAmountCell)
       totalAmountCell.textContent = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   });
@@ -6069,23 +6075,23 @@ function updateContractPricesRealtime() {
       const orderExpPrice =
         parseFloat(row.cells[29]?.textContent.replace(/,/g, '')) || 0;
 
-      // 계약도급 단가 계산 (발주단가 × 조정비율)
-      const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-      const contractLabPrice = Math.round(orderLabPrice * contractRatio);
-      const contractExpPrice = Math.round(orderExpPrice * contractRatio);
+      // ✅ 계약도급 단가 계산 (발주단가 × 조정비율, 소수점 2자리)
+      const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+      const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
+      const contractExpPrice = Math.round((orderExpPrice * contractRatio) * 100) / 100;
       const contractTotalPrice = Math.round(
-        contractMatPrice + contractLabPrice + contractExpPrice
-      );
+        (contractMatPrice + contractLabPrice + contractExpPrice) * 100
+      ) / 100;
 
-      // 단가 업데이트 (cell index 사용)
+      // ✅ 단가 업데이트 (cell index 사용, 소수점 2자리 표시)
       if (row.cells[16])
-        row.cells[16].textContent = contractMatPrice.toLocaleString();
+        row.cells[16].textContent = contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (row.cells[18])
-        row.cells[18].textContent = contractLabPrice.toLocaleString();
+        row.cells[18].textContent = contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (row.cells[20])
-        row.cells[20].textContent = contractExpPrice.toLocaleString();
+        row.cells[20].textContent = contractExpPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (row.cells[22])
-        row.cells[22].textContent = contractTotalPrice.toLocaleString();
+        row.cells[22].textContent = contractTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
       console.log(
         `  ✅ 자재비 단가: ${orderMatPrice.toLocaleString()} → ${contractMatPrice.toLocaleString()}`
@@ -6116,8 +6122,8 @@ function updateContractPricesRealtime() {
       const orderTotalAmount =
         parseFloat(orderTotalAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-      const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
-      const contractTotalAmount = Math.round(orderTotalAmount * contractRatio);
+      const contractTotalPrice = Math.round((orderTotalPrice * contractRatio) * 100) / 100;
+      const contractTotalAmount = Math.round((orderTotalAmount * contractRatio) * 100) / 100;
 
       const contractTotalPriceCell = row.querySelector('.contract-total-price');
       const contractTotalAmountCell = row.querySelector(
@@ -6126,10 +6132,10 @@ function updateContractPricesRealtime() {
 
       if (contractTotalPriceCell)
         contractTotalPriceCell.textContent =
-          contractTotalPrice.toLocaleString();
+          contractTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
       if (contractTotalAmountCell)
         contractTotalAmountCell.textContent =
-          contractTotalAmount.toLocaleString();
+          contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
       return; // 자재비/노무비 업데이트는 건너뛰기
     }
@@ -6150,55 +6156,55 @@ function updateContractPricesRealtime() {
     const orderLabAmount =
       parseFloat(orderLabAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-    // 계약도급 단가 계산 (발주단가 × 조정비율)
-    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+    // ✅ 계약도급 단가 계산 (발주단가 × 조정비율, 소수점 2자리)
+    const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+    const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
 
-    // 계약도급 금액 계산 (발주금액 × 조정비율)
-    const contractMatAmount = Math.round(orderMatAmount * contractRatio);
-    const contractLabAmount = Math.round(orderLabAmount * contractRatio);
+    // ✅ 계약도급 금액 계산 (발주금액 × 조정비율, 소수점 2자리)
+    const contractMatAmount = Math.round((orderMatAmount * contractRatio) * 100) / 100;
+    const contractLabAmount = Math.round((orderLabAmount * contractRatio) * 100) / 100;
 
-    // 계약도급 단가 업데이트
+    // ✅ 계약도급 단가 업데이트 (소수점 2자리)
     const contractMatPriceCell = row.querySelector('.contract-material-price');
     const contractLabPriceCell = row.querySelector('.contract-labor-price');
     if (contractMatPriceCell)
-      contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
+      contractMatPriceCell.textContent = contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabPriceCell)
-      contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
+      contractLabPriceCell.textContent = contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    // 계약도급 금액 업데이트
+    // ✅ 계약도급 금액 업데이트 (소수점 2자리)
     const contractMatAmountCell = row.querySelector(
       '.contract-material-amount'
     );
     const contractLabAmountCell = row.querySelector('.contract-labor-amount');
     if (contractMatAmountCell)
-      contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+      contractMatAmountCell.textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabAmountCell)
-      contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+      contractLabAmountCell.textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    // 경비 처리 (조정비율 적용)
+    // ✅ 경비 처리 (조정비율 적용, 소수점 2자리)
     const orderExpenseAmountCell = row.querySelector('.order-expense-amount');
     const orderExpenseAmount =
       parseFloat(orderExpenseAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-    const contractExpenseAmount = Math.round(orderExpenseAmount * contractRatio);
+    const contractExpenseAmount = Math.round((orderExpenseAmount * contractRatio) * 100) / 100;
 
     const contractExpenseAmountCell = row.querySelector('.contract-expense-amount');
     if (contractExpenseAmountCell)
-      contractExpenseAmountCell.textContent = contractExpenseAmount.toLocaleString();
+      contractExpenseAmountCell.textContent = contractExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    // 합계 업데이트 (경비 포함)
-    const totalPrice = Math.round(contractMatPrice + contractLabPrice);
+    // ✅ 합계 업데이트 (경비 포함, 소수점 2자리)
+    const totalPrice = Math.round((contractMatPrice + contractLabPrice) * 100) / 100;
     const totalAmount = Math.round(
-      contractMatAmount + contractLabAmount + contractExpenseAmount
-    );
+      (contractMatAmount + contractLabAmount + contractExpenseAmount) * 100
+    ) / 100;
 
     const totalPriceCell = row.querySelector('.contract-total-price');
     const totalAmountCell = row.querySelector('.contract-total-amount');
     if (totalPriceCell)
-      totalPriceCell.textContent = totalPrice.toLocaleString();
+      totalPriceCell.textContent = totalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (totalAmountCell)
-      totalAmountCell.textContent = totalAmount.toLocaleString();
+      totalAmountCell.textContent = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   });
 
   console.log(
@@ -6216,24 +6222,24 @@ function updateContractPricesRealtime() {
     const orderMatPrice = parseFloat(row.cells[25]?.textContent.replace(/,/g, '')) || 0;
     const orderLabPrice = parseFloat(row.cells[27]?.textContent.replace(/,/g, '')) || 0;
 
-    // ✅ 단가 우선 계산 (발주 단가 × 비율, 반올림)
-    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
+    // ✅ 단가 우선 계산 (발주 단가 × 비율, 소수점 2자리)
+    const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+    const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
 
-    // 금액 계산 (단가 × 면적)
-    const contractMatAmount = contractMatPrice * area;
-    const contractLabAmount = contractLabPrice * area;
+    // 금액 계산 (단가 × 면적, 소수점 2자리)
+    const contractMatAmount = Math.round((contractMatPrice * area) * 100) / 100;
+    const contractLabAmount = Math.round((contractLabPrice * area) * 100) / 100;
 
-    // 계약도급 업데이트 (16-23번 셀)
-    if (row.cells[16]) row.cells[16].textContent = Math.round(contractMatPrice).toLocaleString();
-    if (row.cells[17]) row.cells[17].textContent = Math.round(contractMatAmount).toLocaleString();
-    if (row.cells[18]) row.cells[18].textContent = Math.round(contractLabPrice).toLocaleString();
-    if (row.cells[19]) row.cells[19].textContent = Math.round(contractLabAmount).toLocaleString();
+    // 계약도급 업데이트 (16-23번 셀, 소수점 2자리 표시)
+    if (row.cells[16]) row.cells[16].textContent = contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (row.cells[17]) row.cells[17].textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (row.cells[18]) row.cells[18].textContent = contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (row.cells[19]) row.cells[19].textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-    const contractTotal = contractMatPrice + contractLabPrice;
-    const contractTotalAmount = contractMatAmount + contractLabAmount;
-    if (row.cells[22]) row.cells[22].textContent = Math.round(contractTotal).toLocaleString();
-    if (row.cells[23]) row.cells[23].textContent = Math.round(contractTotalAmount).toLocaleString();
+    const contractTotal = Math.round((contractMatPrice + contractLabPrice) * 100) / 100;
+    const contractTotalAmount = Math.round((contractMatAmount + contractLabAmount) * 100) / 100;
+    if (row.cells[22]) row.cells[22].textContent = contractTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (row.cells[23]) row.cells[23].textContent = contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   });
 
   console.log(`✅ 간접비 행 ${indirectRows.length}개 업데이트 완료`);
@@ -6269,17 +6275,17 @@ function updateContractPricesRealtime() {
     const orderTotalPrice = parseFloat(row.dataset.totalRounding) || 0;
     const area = parseFloat(row.dataset.area) || 0;
 
-    // ✅ 계약도급 1m² 단가 = 발주단가 × 비율
-    const contractMatPrice = Math.round(orderMatPrice * contractRatio);
-    const contractLabPrice = Math.round(orderLabPrice * contractRatio);
-    const contractExpPrice = Math.round(orderExpPrice * contractRatio);
-    const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
+    // ✅ 계약도급 1m² 단가 = 발주단가 × 비율 (소수점 2자리)
+    const contractMatPrice = Math.round((orderMatPrice * contractRatio) * 100) / 100;
+    const contractLabPrice = Math.round((orderLabPrice * contractRatio) * 100) / 100;
+    const contractExpPrice = Math.round((orderExpPrice * contractRatio) * 100) / 100;
+    const contractTotalPrice = Math.round((orderTotalPrice * contractRatio) * 100) / 100;
 
-    // ✅ 계약도급 금액 = 1m² 단가 × 면적 (소수점 유지)
-    const contractMatAmount = contractMatPrice * area;
-    const contractLabAmount = contractLabPrice * area;
-    const contractExpAmount = contractExpPrice * area;
-    const contractTotalAmount = contractTotalPrice * area;
+    // ✅ 계약도급 금액 = 1m² 단가 × 면적 (소수점 2자리)
+    const contractMatAmount = Math.round((contractMatPrice * area) * 100) / 100;
+    const contractLabAmount = Math.round((contractLabPrice * area) * 100) / 100;
+    const contractExpAmount = Math.round((contractExpPrice * area) * 100) / 100;
+    const contractTotalAmount = Math.round((contractTotalPrice * area) * 100) / 100;
 
     console.log(`  📐 ${materialName} 단수정리:`);
     console.log(`    자재비: ${orderMatPrice}원 × ${contractRatio} = ${contractMatPrice}원`);
@@ -6296,13 +6302,13 @@ function updateContractPricesRealtime() {
     const contractTotalPriceCell = row.querySelector('.contract-total-price');
     const contractTotalAmountCell = row.querySelector('.contract-total-amount');
 
-    if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
+    if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
+    if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (contractExpPriceCell) contractExpPriceCell.textContent = contractExpPrice.toLocaleString();
+    if (contractExpPriceCell) contractExpPriceCell.textContent = contractExpPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractExpAmountCell) contractExpAmountCell.textContent = contractExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (contractTotalPriceCell) contractTotalPriceCell.textContent = contractTotalPrice.toLocaleString();
+    if (contractTotalPriceCell) contractTotalPriceCell.textContent = contractTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractTotalAmountCell) contractTotalAmountCell.textContent = contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     console.log(`  ✅ ${label} 재계산 완료`);
@@ -6341,14 +6347,14 @@ function updateContractPricesRealtime() {
     console.log(`  발주단가 단수정리 합산: ${orderRoundingSum.toLocaleString()}`);
     console.log(`  계약도급 단수정리 합산: ${contractRoundingSum.toLocaleString()}`);
 
-    // 발주단가 단수정리 합산 업데이트 (32번 셀)
+    // 발주단가 단수정리 합산 업데이트 (32번 셀, 소수점 2자리)
     if (typeTotalRoundingRow.cells[32]) {
-      typeTotalRoundingRow.cells[32].textContent = orderRoundingSum.toLocaleString();
+      typeTotalRoundingRow.cells[32].textContent = orderRoundingSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
-    // 계약도급 단수정리 합산 업데이트 (23번 셀)
+    // 계약도급 단수정리 합산 업데이트 (23번 셀, 소수점 2자리)
     if (typeTotalRoundingRow.cells[23]) {
-      typeTotalRoundingRow.cells[23].textContent = contractRoundingSum.toLocaleString();
+      typeTotalRoundingRow.cells[23].textContent = contractRoundingSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     console.log('✅ 타입별 단수정리 합산 행 업데이트 완료');
