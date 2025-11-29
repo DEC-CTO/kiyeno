@@ -2905,34 +2905,28 @@ async function generateComponentRow(
             <td>M2</td>
             <td class="quantity-cell">${displayQuantity.toFixed(2)}</td>
             <td class="number-cell contract-material-price">${Math.round(contractMaterialUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-material-amount">${Math.round(contractMaterialAmount).toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${contractMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-labor-price">${Math.round(contractLaborUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-labor-amount">${Math.round(contractLaborAmount).toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${contractLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input contract-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
             <td class="number-cell expense-amount contract-expense-amount" data-row="${rowNumber}">0</td>
             <td class="number-cell contract-total-price" data-row="${rowNumber}">${Math.round(contractTotalUnitPrice).toLocaleString()}</td>
-            <td class="number-cell contract-total-amount" data-row="${rowNumber}">${Math.round(contractTotalAmount).toLocaleString()}</td>
+            <td class="number-cell contract-total-amount" data-row="${rowNumber}">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <td class="number-cell order-material-price">${Math.round(
               orderMaterialUnitPrice
             ).toLocaleString()}</td>
-            <td class="number-cell order-material-amount">${Math.round(
-              orderMaterialAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${orderMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-labor-price">${Math.round(
               orderLaborUnitPrice
             ).toLocaleString()}</td>
-            <td class="number-cell order-labor-amount">${Math.round(
-              orderLaborAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${orderLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input order-expense-price" data-row="${rowNumber}" value="0" style="width: 100%; text-align: right; border: 1px solid #ddd; padding: 4px; font-size: 11px;"></td>
             <td class="number-cell expense-amount order-expense-amount" data-row="${rowNumber}">0</td>
             <td class="number-cell order-total-price" data-row="${rowNumber}">${Math.round(
     orderTotalUnitPrice
   ).toLocaleString()}</td>
-            <td class="number-cell order-total-amount" data-row="${rowNumber}">${Math.round(
-    orderTotalAmount
-  ).toLocaleString()}</td>
+            <td class="number-cell order-total-amount" data-row="${rowNumber}">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -3458,13 +3452,13 @@ function generateSubtotalRow(components, label, rowNumber) {
     console.log(`  DB 노무 단가: ${laborUnitPrice.toLocaleString()}원/m²`);
     console.log(`  총 면적: ${totalArea.toFixed(2)}m²`);
 
-    // 발주단가 - 금액 합계 (DB 저장값 × 면적, 반올림)
-    const matAmount = Math.round(materialUnitPrice * totalArea);
-    const labAmount = Math.round(laborUnitPrice * totalArea);
+    // ✅ 발주단가 - 금액 합계 (DB 저장값 × 면적, 소수점 유지)
+    const matAmount = materialUnitPrice * totalArea;  // Math.round() 제거
+    const labAmount = laborUnitPrice * totalArea;     // Math.round() 제거
     orderMaterialAmountSum += matAmount;
     orderLaborAmountSum += labAmount;
 
-    console.log(`  발주단가 금액: 자재=${matAmount.toLocaleString()}, 노무=${labAmount.toLocaleString()}`);
+    console.log(`  발주단가 금액(소수점): 자재=${matAmount.toFixed(2)}, 노무=${labAmount.toFixed(2)}`);
 
     // ✅ 계약도급 - 단가 우선 계산 (발주 단가 × 비율, 반올림)
     const contractMatUnitPrice = Math.round(materialUnitPrice * contractRatio);
@@ -3545,8 +3539,8 @@ function generateSubtotalRow(components, label, rowNumber) {
   const htmlLaborAmount = Math.round(orderLaborAmountSum);
 
   console.log(`\n✅ [${label}] 화면 표시용 최종 합계:`);
-  console.log(`  반올림 전 - 자재: ${orderMaterialAmountSum.toFixed(2)}, 노무: ${orderLaborAmountSum.toFixed(2)}`);
-  console.log(`  ✅ HTML 출력값 - 자재: ${htmlMaterialAmount.toLocaleString()}, 노무: ${htmlLaborAmount.toLocaleString()}`);
+  console.log(`  ✅ 소수점 유지 합계 - 자재: ${orderMaterialAmountSum.toFixed(2)}, 노무: ${orderLaborAmountSum.toFixed(2)}`);
+  console.log(`  ✅ 화면 표시(반올림) - 자재: ${htmlMaterialAmount.toLocaleString()}, 노무: ${htmlLaborAmount.toLocaleString()}`);
   console.log(`  소계 수량 합계 - 11번: ${mValueSum}, 14번(장): ${sheetQuantitySum}, 16번: ${displayQuantitySum}`);
   console.log(`🔍 ========== [${label}] 화면 표시용 소계 디버깅 종료 ==========\n`);
 
@@ -3573,48 +3567,24 @@ function generateSubtotalRow(components, label, rowNumber) {
             <td></td>
             <td class="number-cell">${displayQuantitySum.toFixed(2)}</td>
             <!-- 계약도급 -->
-            <td class="number-cell">${Math.round(
-              contractMaterialPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              contractMaterialAmountSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              contractLaborPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              contractLaborAmountSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">${Math.round(
-              contractTotalPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              contractTotalAmountSum
-            ).toLocaleString()}</td>
+            <td class="number-cell">${contractMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${contractMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${contractLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${contractLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">${contractTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${contractTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell">${Math.round(
-              orderMaterialPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              orderMaterialAmountSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              orderLaborPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              orderLaborAmountSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">${Math.round(
-              orderTotalPriceSum
-            ).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(
-              orderTotalAmountSum
-            ).toLocaleString()}</td>
+            <td class="number-cell">${orderMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${orderMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${orderLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${orderLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">${orderTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">${orderTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -3762,11 +3732,11 @@ function generateMaterialRoundingRow(
   const orderExpPrice = roundingData.expense;
   const orderTotalPrice = roundingData.total;
 
-  // 발주단가 단수정리 (금액 = 1m² 단가 × 면적)
-  const orderMatAmount = Math.round(orderMatPrice * area);
-  const orderLabAmount = Math.round(orderLabPrice * area);
-  const orderExpAmount = Math.round(orderExpPrice * area);
-  const orderTotalAmount = Math.round(orderTotalPrice * area);
+  // ✅ 발주단가 단수정리 (금액 = 1m² 단가 × 면적, 소수점 유지)
+  const orderMatAmount = orderMatPrice * area;  // Math.round() 제거
+  const orderLabAmount = orderLabPrice * area;   // Math.round() 제거
+  const orderExpAmount = orderExpPrice * area;   // Math.round() 제거
+  const orderTotalAmount = orderTotalPrice * area;  // Math.round() 제거
 
   // 계약도급 단수정리 (1m² 단가 = 발주단가 × 비율)
   const contractMatPrice = Math.round(orderMatPrice * contractRatio);
@@ -3819,23 +3789,23 @@ function generateMaterialRoundingRow(
             <td></td>
             <!-- 계약도급 -->
             <td class="number-cell contract-material-price">${contractMatPrice.toLocaleString()}</td>
-            <td class="number-cell contract-material-amount">${contractMatAmount.toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-labor-price">${contractLabPrice.toLocaleString()}</td>
-            <td class="number-cell contract-labor-amount">${contractLabAmount.toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-expense-price">${contractExpPrice.toLocaleString()}</td>
-            <td class="number-cell contract-expense-amount">${contractExpAmount.toLocaleString()}</td>
+            <td class="number-cell contract-expense-amount">${contractExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-total-price">${contractTotalPrice.toLocaleString()}</td>
-            <td class="number-cell contract-total-amount">${contractTotalAmount.toLocaleString()}</td>
+            <td class="number-cell contract-total-amount">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
             <td class="number-cell order-material-price">${orderMatPrice.toLocaleString()}</td>
-            <td class="number-cell order-material-amount">${orderMatAmount.toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${orderMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-labor-price">${orderLabPrice.toLocaleString()}</td>
-            <td class="number-cell order-labor-amount">${orderLabAmount.toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${orderLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-expense-price">${orderExpPrice.toLocaleString()}</td>
-            <td class="number-cell order-expense-amount">${orderExpAmount.toLocaleString()}</td>
+            <td class="number-cell order-expense-amount">${orderExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-total-price">${orderTotalPrice.toLocaleString()}</td>
-            <td class="number-cell order-total-amount">${orderTotalAmount.toLocaleString()}</td>
+            <td class="number-cell order-total-amount">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -3859,8 +3829,8 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
   // 1m² 단가
   const orderUnitPrice = item.unitPrice || 0;
 
-  // ✅ 단가 우선 계산 (발주 단가 × 비율)
-  const orderAmount = Math.round(orderUnitPrice * area);
+  // ✅ 단가 우선 계산 (발주 단가 × 비율, 소수점 유지)
+  const orderAmount = orderUnitPrice * area;  // Math.round() 제거
   const contractUnitPrice = Math.round(orderUnitPrice * contractRatio);
   const contractAmount = contractUnitPrice * area;
 
@@ -3889,24 +3859,24 @@ function generateIndirectCostRow(item, rowNumber, totalArea) {
             <td>M2</td>
             <td class="quantity-cell">${area.toFixed(2)}</td>
             <!-- 계약도급 -->
-            <td class="number-cell">${isMaterialCost ? Math.round(contractUnitPrice).toLocaleString() : '0'}</td>
-            <td class="number-cell">${isMaterialCost ? Math.round(contractAmount).toLocaleString() : '0'}</td>
-            <td class="number-cell">${isLaborCost ? Math.round(contractUnitPrice).toLocaleString() : '0'}</td>
-            <td class="number-cell">${isLaborCost ? Math.round(contractAmount).toLocaleString() : '0'}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">${isMaterialCost ? Math.round(contractUnitPrice).toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isMaterialCost ? contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? Math.round(contractUnitPrice).toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${Math.round(contractUnitPrice).toLocaleString()}</td>
-            <td class="number-cell">${Math.round(contractAmount).toLocaleString()}</td>
+            <td class="number-cell">${contractAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
-            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : '0'}</td>
-            <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString() : '0'}</td>
-            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : '0'}</td>
-            <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString() : '0'}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">${isMaterialCost ? orderUnitPrice.toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isMaterialCost ? orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? orderUnitPrice.toLocaleString() : '0.00'}</td>
+            <td class="number-cell">${isLaborCost ? orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${orderUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${orderAmount.toLocaleString()}</td>
+            <td class="number-cell">${orderAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -4009,8 +3979,8 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
   }
 
   console.log(`📊 [소계 (간접비)] 화면 표시용 소계:`);
-  console.log(`  반올림 전 - 자재: ${orderMaterialAmount.toFixed(2)}, 노무: ${orderLaborAmount.toFixed(2)}`);
-  console.log(`  ✅ HTML 출력값 - 자재: ${orderMaterialAmount.toLocaleString()}, 노무: ${orderLaborAmount.toLocaleString()}`);
+  console.log(`  ✅ 소수점 유지 합계 - 자재: ${orderMaterialAmount.toFixed(2)}, 노무: ${orderLaborAmount.toFixed(2)}`);
+  console.log(`  ✅ 화면 표시(반올림) - 자재: ${Math.round(orderMaterialAmount).toLocaleString()}, 노무: ${Math.round(orderLaborAmount).toLocaleString()}`);
 
   // 단가 역산 (금액 ÷ 면적)
   const orderMaterialUnitPrice = totalArea > 0 ? Math.round(orderMaterialAmount / totalArea) : 0;
@@ -4048,23 +4018,23 @@ function generateIndirectCostSubtotalRow(indirectCostItems, totalArea, rowNumber
             <td class="quantity-cell"></td>
             <!-- 계약도급 -->
             <td class="number-cell">${contractMaterialUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${contractMaterialAmount.toLocaleString()}</td>
+            <td class="number-cell">${contractMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${contractLaborUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${contractLaborAmount.toLocaleString()}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">${contractLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${contractTotalUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${contractTotalAmount.toLocaleString()}</td>
+            <td class="number-cell">${contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
             <td class="number-cell">${orderMaterialUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${orderMaterialAmount.toLocaleString()}</td>
+            <td class="number-cell">${orderMaterialAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${orderLaborUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${orderLaborAmount.toLocaleString()}</td>
-            <td class="number-cell">0</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">${orderLaborAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="number-cell">0.00</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${orderTotalUnitPrice.toLocaleString()}</td>
-            <td class="number-cell">${orderTotalAmount.toLocaleString()}</td>
+            <td class="number-cell">${orderTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -4135,23 +4105,23 @@ function generateGrandTotalRow(directSubtotal, indirectSubtotal, roundingAmount,
             <td></td>
             <!-- 계약도급 -->
             <td class="number-cell">${Math.round(contractMatPrice).toLocaleString()}</td>
-            <td class="number-cell">${contractMaterialTotal.toLocaleString()}</td>
+            <td class="number-cell">${contractMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(contractLabPrice).toLocaleString()}</td>
-            <td class="number-cell">${contractLaborTotal.toLocaleString()}</td>
+            <td class="number-cell">${contractLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(contractExpPrice).toLocaleString()}</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${Math.round(contractTotalPrice).toLocaleString()}</td>
-            <td class="number-cell">${contractGrandTotal.toLocaleString()}</td>
+            <td class="number-cell">${contractGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
             <!-- 발주단가 -->
             <td class="number-cell">${Math.round(orderMatPrice).toLocaleString()}</td>
-            <td class="number-cell">${orderMaterialTotal.toLocaleString()}</td>
+            <td class="number-cell">${orderMaterialTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(orderLabPrice).toLocaleString()}</td>
-            <td class="number-cell">${orderLaborTotal.toLocaleString()}</td>
+            <td class="number-cell">${orderLaborTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell">${Math.round(orderExpPrice).toLocaleString()}</td>
-            <td class="number-cell">0</td>
+            <td class="number-cell">0.00</td>
             <td class="number-cell">${Math.round(orderTotalPrice).toLocaleString()}</td>
-            <td class="number-cell">${orderGrandTotal.toLocaleString()}</td>
+            <td class="number-cell">${orderGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -4382,46 +4352,34 @@ function generateGroupedComponentRow(component, rowNumber) {
             <td class="number-cell contract-material-price">${Math.round(
               contractMatPrice
             ).toLocaleString()}</td>
-            <td class="number-cell contract-material-amount">${Math.round(
-              contractMatAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell contract-material-amount">${contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell contract-labor-price">${Math.round(
               contractLabPrice
             ).toLocaleString()}</td>
-            <td class="number-cell contract-labor-amount">${Math.round(
-              contractLabAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell contract-labor-amount">${contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input contract-expense-price" data-row="${rowNumber}" placeholder="0" style="text-align: right;"></td>
             <td class="number-cell contract-expense-amount">0</td>
             <td class="number-cell contract-total-price">${Math.round(
               contractMatPrice + contractLabPrice
             ).toLocaleString()}</td>
-            <td class="number-cell contract-total-amount">${Math.round(
-              contractMatAmount + contractLabAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell contract-total-amount">${(contractMatAmount + contractLabAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
 
             <!-- 발주단가 -->
             <td class="number-cell order-material-price">${Math.round(
               orderMatPrice
             ).toLocaleString()}</td>
-            <td class="number-cell order-material-amount">${Math.round(
-              orderMatAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell order-material-amount">${orderMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="number-cell order-labor-price">${Math.round(
               orderLabPrice
             ).toLocaleString()}</td>
-            <td class="number-cell order-labor-amount">${Math.round(
-              orderLabAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell order-labor-amount">${orderLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td><input type="text" class="expense-input order-expense-price" data-row="${rowNumber}" placeholder="0" style="text-align: right;"></td>
             <td class="number-cell order-expense-amount">0</td>
             <td class="number-cell order-total-price">${Math.round(
               orderMatPrice + orderLabPrice
             ).toLocaleString()}</td>
-            <td class="number-cell order-total-amount">${Math.round(
-              orderMatAmount + orderLabAmount
-            ).toLocaleString()}</td>
+            <td class="number-cell order-total-amount">${(orderMatAmount + orderLabAmount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td></td>
         </tr>
     `;
@@ -5713,61 +5671,39 @@ function updateSubtotalRows() {
 
     // 계약도급 (17번 셀부터 - 인덱스 16)
     if (cells[16])
-      cells[16].textContent = Math.round(
-        contractMaterialPriceSum
-      ).toLocaleString();
+      cells[16].textContent = contractMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[17])
-      cells[17].textContent = Math.round(
-        contractMaterialAmountSum
-      ).toLocaleString();
+      cells[17].textContent = contractMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[18])
-      cells[18].textContent = Math.round(
-        contractLaborPriceSum
-      ).toLocaleString();
+      cells[18].textContent = contractLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[19])
-      cells[19].textContent = Math.round(
-        contractLaborAmountSum
-      ).toLocaleString();
+      cells[19].textContent = contractLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[20])
-      cells[20].textContent = Math.round(
-        contractExpensePriceSum
-      ).toLocaleString();
+      cells[20].textContent = contractExpensePriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[21])
-      cells[21].textContent = Math.round(
-        contractExpenseAmountSum
-      ).toLocaleString();
+      cells[21].textContent = contractExpenseAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[22])
-      cells[22].textContent = Math.round(
-        contractTotalPriceSum
-      ).toLocaleString();
+      cells[22].textContent = contractTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[23])
-      cells[23].textContent = Math.round(
-        contractTotalAmountSum
-      ).toLocaleString();
+      cells[23].textContent = contractTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     // 발주단가 (25번 셀부터 - 인덱스 24, 24번은 비고)
     if (cells[25])
-      cells[25].textContent = Math.round(
-        orderMaterialPriceSum
-      ).toLocaleString();
+      cells[25].textContent = orderMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[26])
-      cells[26].textContent = Math.round(
-        orderMaterialAmountSum
-      ).toLocaleString();
+      cells[26].textContent = orderMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[27])
-      cells[27].textContent = Math.round(orderLaborPriceSum).toLocaleString();
+      cells[27].textContent = orderLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[28])
-      cells[28].textContent = Math.round(orderLaborAmountSum).toLocaleString();
+      cells[28].textContent = orderLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[29])
-      cells[29].textContent = Math.round(orderExpensePriceSum).toLocaleString();
+      cells[29].textContent = orderExpensePriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[30])
-      cells[30].textContent = Math.round(
-        orderExpenseAmountSum
-      ).toLocaleString();
+      cells[30].textContent = orderExpenseAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[31])
-      cells[31].textContent = Math.round(orderTotalPriceSum).toLocaleString();
+      cells[31].textContent = orderTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[32])
-      cells[32].textContent = Math.round(orderTotalAmountSum).toLocaleString();
+      cells[32].textContent = orderTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   });
 
   // ✅ 총계 행 업데이트 (경비 포함)
@@ -5833,35 +5769,33 @@ function updateSubtotalRows() {
 
     console.log(`  📐 단수정리 - 발주단가: ${roundingAmount.toLocaleString()}, 계약도급: ${contractRoundingAmount.toLocaleString()}`);
 
-    // 총계 금액 재계산 (자재비 + 노무비 + 경비 + 단수정리) - 발주단가와 계약도급 동일한 로직
-    const orderGrandTotal = Math.round(
-      orderMaterialAmount + orderLaborAmount + totalOrderExpenseAmount + roundingAmount
-    );
-    const contractGrandTotal = Math.round(
-      contractMaterialAmount + contractLaborAmount + totalContractExpenseAmount + contractRoundingAmount
-    );
+    // 총계 금액 재계산 (자재비 + 노무비 + 경비 + 단수정리) - 소수점 유지
+    const orderGrandTotal =
+      orderMaterialAmount + orderLaborAmount + totalOrderExpenseAmount + roundingAmount;
+    const contractGrandTotal =
+      contractMaterialAmount + contractLaborAmount + totalContractExpenseAmount + contractRoundingAmount;
 
     console.log(
-      `  💵 총계 금액: 계약도급=${contractGrandTotal.toLocaleString()}, 발주단가=${orderGrandTotal.toLocaleString()}`
+      `  💵 총계 금액: 계약도급=${contractGrandTotal.toFixed(2)}, 발주단가=${orderGrandTotal.toFixed(2)}`
     );
 
     // 총계 행 업데이트
     // 계약도급 경비
     if (grandTotalRow.cells[21]) {
-      grandTotalRow.cells[21].textContent = Math.round(totalContractExpenseAmount).toLocaleString();
+      grandTotalRow.cells[21].textContent = totalContractExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
     // 계약도급 합계 금액
     if (grandTotalRow.cells[23]) {
-      grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString();
+      grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     // 발주단가 경비
     if (grandTotalRow.cells[30]) {
-      grandTotalRow.cells[30].textContent = Math.round(totalOrderExpenseAmount).toLocaleString();
+      grandTotalRow.cells[30].textContent = totalOrderExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
     // 발주단가 합계 금액
     if (grandTotalRow.cells[32]) {
-      grandTotalRow.cells[32].textContent = orderGrandTotal.toLocaleString();
+      grandTotalRow.cells[32].textContent = orderGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     console.log('✅ 총계 행 업데이트 완료');
@@ -6088,20 +6022,18 @@ function updateContractPricesRealtime() {
     );
     const contractLabAmountCell = row.querySelector('.contract-labor-amount');
     if (contractMatAmountCell)
-      contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+      contractMatAmountCell.textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabAmountCell)
-      contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+      contractLabAmountCell.textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     // 경비 가져오기 (경비는 단가 그대로)
     const expenseAmountCell = row.querySelector('.contract-expense-amount');
     const expensePrice =
       parseFloat(expenseAmountCell?.textContent.replace(/,/g, '')) || 0;
 
-    // 합계 계산
+    // 합계 계산 (소수점 유지)
     const totalPrice = Math.round(contractMatPrice + contractLabPrice);
-    const totalAmount = Math.round(
-      contractMatAmount + contractLabAmount + expensePrice
-    );
+    const totalAmount = contractMatAmount + contractLabAmount + expensePrice;
 
     // 합계 업데이트
     const totalPriceCell = row.querySelector('.contract-total-price');
@@ -6109,7 +6041,7 @@ function updateContractPricesRealtime() {
     if (totalPriceCell)
       totalPriceCell.textContent = totalPrice.toLocaleString();
     if (totalAmountCell)
-      totalAmountCell.textContent = totalAmount.toLocaleString();
+      totalAmountCell.textContent = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   });
 
   // 타입 요약 행 및 소계/총계 행도 업데이트 (보라색/회색/노란색/초록색 배경 행)
@@ -6343,11 +6275,11 @@ function updateContractPricesRealtime() {
     const contractExpPrice = Math.round(orderExpPrice * contractRatio);
     const contractTotalPrice = Math.round(orderTotalPrice * contractRatio);
 
-    // ✅ 계약도급 금액 = 1m² 단가 × 면적
-    const contractMatAmount = Math.round(contractMatPrice * area);
-    const contractLabAmount = Math.round(contractLabPrice * area);
-    const contractExpAmount = Math.round(contractExpPrice * area);
-    const contractTotalAmount = Math.round(contractTotalPrice * area);
+    // ✅ 계약도급 금액 = 1m² 단가 × 면적 (소수점 유지)
+    const contractMatAmount = contractMatPrice * area;
+    const contractLabAmount = contractLabPrice * area;
+    const contractExpAmount = contractExpPrice * area;
+    const contractTotalAmount = contractTotalPrice * area;
 
     console.log(`  📐 ${materialName} 단수정리:`);
     console.log(`    자재비: ${orderMatPrice}원 × ${contractRatio} = ${contractMatPrice}원`);
@@ -6365,13 +6297,13 @@ function updateContractPricesRealtime() {
     const contractTotalAmountCell = row.querySelector('.contract-total-amount');
 
     if (contractMatPriceCell) contractMatPriceCell.textContent = contractMatPrice.toLocaleString();
-    if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString();
+    if (contractMatAmountCell) contractMatAmountCell.textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractLabPriceCell) contractLabPriceCell.textContent = contractLabPrice.toLocaleString();
-    if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString();
+    if (contractLabAmountCell) contractLabAmountCell.textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractExpPriceCell) contractExpPriceCell.textContent = contractExpPrice.toLocaleString();
-    if (contractExpAmountCell) contractExpAmountCell.textContent = contractExpAmount.toLocaleString();
+    if (contractExpAmountCell) contractExpAmountCell.textContent = contractExpAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (contractTotalPriceCell) contractTotalPriceCell.textContent = contractTotalPrice.toLocaleString();
-    if (contractTotalAmountCell) contractTotalAmountCell.textContent = contractTotalAmount.toLocaleString();
+    if (contractTotalAmountCell) contractTotalAmountCell.textContent = contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     console.log(`  ✅ ${label} 재계산 완료`);
   });
