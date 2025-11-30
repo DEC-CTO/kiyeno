@@ -22376,21 +22376,11 @@ async function addOrderFormDataToExcel(worksheet) {
         right: { style: 'thin' },
       };
 
-      // ✅ 타입 요약 행도 숫자 포맷 적용: 모든 단가와 금액 소수점 2자리 표시
+      // ✅ 숫자 포맷: 수량(P)은 소수점 2자리, 단가/금액(Q~X, Z~AG)은 정수
       if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
         if (colNumber === 16) {
           cell.numFmt = '#,##0';
-        } else if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-          // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-          cell.numFmt = '#,##0';
-        } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-          // 계약도급 금액 (R, T, V, X): 정수
-          cell.numFmt = '#,##0';
-        } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-          // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-          cell.numFmt = '#,##0';
-        } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-          // 발주단가 금액 (AA, AC, AE, AG): 정수
+        } else if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
           cell.numFmt = '#,##0';
         }
       }
@@ -22763,19 +22753,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -22832,19 +22812,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -22932,13 +22902,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷: 계약도급 단가와 금액 소수점 2자리
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-              // 계약도급 금액 (R, T, V, X) + 발주단가 모든 컬럼: 소수점 2자리
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -22996,19 +22962,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -23096,13 +23052,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷: 계약도급 단가와 금액 소수점 2자리
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if ((colNumber >= 18 && colNumber <= 22 && colNumber % 2 === 0) || colNumber === 24 || (colNumber >= 26 && colNumber <= 33)) {
-              // 계약도급 금액 (R, T, V, X) + 발주단가 모든 컬럼: 소수점 2자리
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -23160,19 +23112,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -23272,19 +23214,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }
@@ -23331,19 +23263,9 @@ async function addOrderFormDataToExcel(worksheet) {
             right: { style: 'thin' },
           };
 
-          // ✅ 숫자 포맷 (천단위 콤마) - 수식 셀 포함
+          // ✅ 숫자 포맷: 단가/금액(Q~X, Z~AG)은 정수
           if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
-            if (colNumber === 17 || colNumber === 19 || colNumber === 21 || colNumber === 23) {
-              // 계약도급 단가 (Q, S, U, W): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 18 || colNumber === 20 || colNumber === 22 || colNumber === 24) {
-              // 계약도급 금액 (R, T, V, X): 정수
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 26 || colNumber === 28 || colNumber === 30 || colNumber === 32) {
-              // 발주단가 단가 (Z, AB, AD, AF): 소수점 2자리
-              cell.numFmt = '#,##0';
-            } else if (colNumber === 27 || colNumber === 29 || colNumber === 31 || colNumber === 33) {
-              // 발주단가 금액 (AA, AC, AE, AG): 정수
+            if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
               cell.numFmt = '#,##0';
             }
           }

@@ -513,12 +513,12 @@ function renderDetailItems(items, type) {
                 <td><input type="text" class="order-quantity-input" data-type="${type}" data-index="${index}" value="${item.orderQuantity ? formatNumber(item.orderQuantity) : ''}" style="width: 80px; text-align: right !important;" /></td>
                 <td class="number-cell progress-unit-price" data-type="${type}" data-index="${index}">${formatNumber(item.progressUnitPrice || 0)}</td>
                 <td class="number-cell progress-amount" data-type="${type}" data-index="${index}">${formatNumber(item.progressAmount || 0)}</td>
-                <td class="number-cell order-price-quantity" data-type="${type}" data-index="${index}">${formatNumber(item.orderPriceQuantity || 0)}</td>
+                <td class="number-cell order-price-quantity" data-type="${type}" data-index="${index}">${formatQuantity(item.orderPriceQuantity || 0)}</td>
                 <td class="number-cell">${formatNumber(item.unitPrice)}</td>
                 <td class="number-cell order-price-amount" data-type="${type}" data-index="${index}">${formatNumber(item.orderPriceAmount || 0)}</td>
                 ${Array.from({ length: vendorCount }, (_, i) => {
                     const vendor = item.vendors && item.vendors[i] ? item.vendors[i] : { unitPrice: 0, amount: 0, quantity: 0 };
-                    return `<td class="number-cell vendor-quantity-${i}" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatNumber(item.orderPriceQuantity || 0)}</td><td><input type="text" class="vendor-unit-price-input" data-type="${type}" data-index="${index}" data-vendor="${i}" value="${vendor.unitPrice ? formatNumber(vendor.unitPrice) : ''}" style="width: 80px; text-align: right !important;" /></td><td class="number-cell vendor-amount" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatNumber(vendor.amount || 0)}</td>`;
+                    return `<td class="number-cell vendor-quantity-${i}" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatQuantity(item.orderPriceQuantity || 0)}</td><td><input type="text" class="vendor-unit-price-input" data-type="${type}" data-index="${index}" data-vendor="${i}" value="${vendor.unitPrice ? formatNumber(vendor.unitPrice) : ''}" style="width: 80px; text-align: right !important;" /></td><td class="number-cell vendor-amount" data-type="${type}" data-index="${index}" data-vendor="${i}">${formatNumber(vendor.amount || 0)}</td>`;
                 }).join('')}
                 <td></td>
             </tr>
@@ -959,7 +959,7 @@ function attachOrderQuantityListeners() {
                 // UI 업데이트 (12번, 14번 칸)
                 const orderQuantityCell = document.querySelector(`.order-price-quantity[data-type="${type}"][data-index="${index}"]`);
                 if (orderQuantityCell) {
-                    orderQuantityCell.textContent = formatNumber(quantity);
+                    orderQuantityCell.textContent = formatQuantity(quantity);
                 }
 
                 const orderAmountCell = document.querySelector(`.order-price-amount[data-type="${type}"][data-index="${index}"]`);
@@ -975,7 +975,7 @@ function attachOrderQuantityListeners() {
                         // 15열, 18열, 21열 (업체1, 2, 3 수량) - data-vendor="0", "1", "2"
                         const vendorQuantityCell = document.querySelector(`.vendor-quantity-${vIdx}[data-type="${type}"][data-index="${index}"]`);
                         if (vendorQuantityCell) {
-                            vendorQuantityCell.textContent = formatNumber(quantity);
+                            vendorQuantityCell.textContent = formatQuantity(quantity);
                         }
 
                         // 업체별 금액 재계산: 수량 × 업체 단가
@@ -1311,9 +1311,9 @@ function attachMiscQuantityListener() {
         // 발주단가 칸에 계산값 표시
         priceComparisonData.miscRow.orderPrice.amount = miscOrderAmount;
 
-        // 단수정리 계산: (경량공사 + 공과잡비) 발주단가 금액의 십만단위 절사
+        // 단수정리 계산: (경량공사 + 공과잡비) 발주단가 금액의 천단위 절사
         const totalBeforeRounding = summaryOrderAmount + miscOrderAmount;
-        const roundingAmount = totalBeforeRounding % 100000;  // 십만단위 미만 금액
+        const roundingAmount = totalBeforeRounding % 1000;  // 천단위 미만 금액
         // 발주단가 칸에 절사값 표시
         priceComparisonData.roundingRow.orderPrice.amount = -roundingAmount;
 
@@ -1490,7 +1490,7 @@ function calculateVendorRounding() {
         const summaryAmount = priceComparisonData.summaryRow.vendors[vIdx].amount || 0;
         const miscAmount = priceComparisonData.miscRow.vendors[vIdx].amount || 0;
         const totalBeforeRounding = summaryAmount + miscAmount;
-        const roundingAmount = totalBeforeRounding % 100000;  // 십만단위 미만 금액
+        const roundingAmount = totalBeforeRounding % 1000;  // 천단위 미만 금액
         vendor.amount = -roundingAmount;
     });
 }
@@ -1910,7 +1910,9 @@ async function exportPriceComparisonToExcel() {
                 if (cellColIdx >= 5 && cellColIdx !== 4 && cellColIdx !== 8) {
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                     if (typeof cell.value === 'number') {
-                        cell.numFmt = '#,##0';
+                        // 수량 컬럼(5,9,12,15,18,21)은 소수점 2자리, 나머지는 정수
+                        const isQuantityCol = [5, 9, 12, 15, 18, 21].includes(cellColIdx);
+                        cell.numFmt = isQuantityCol ? '#,##0.00' : '#,##0';
                     }
                 } else {
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -1942,6 +1944,10 @@ async function exportPriceComparisonToExcel() {
         // 공과잡비 수식 적용
         const miscRowNum = miscRow.number;
         const summaryRowNum = summaryRow.number;
+
+        // L열(12): 공과잡비 % 값 - 소수점 2자리 포맷
+        miscRow.getCell(12).numFmt = '#,##0.00';
+
         miscRow.getCell(14).value = { formula: `=N${summaryRowNum}*(L${miscRowNum}/100)` };  // 14. 공과잡비 금액 = 경량공사 금액 × (% ÷ 100)
         miscRow.getCell(14).alignment = { vertical: 'middle', horizontal: 'right' };
         miscRow.getCell(14).numFmt = '#,##0';
@@ -1949,7 +1955,7 @@ async function exportPriceComparisonToExcel() {
         // 업체1 공과잡비: 15열(% 입력), 16열(빈칸), 17열(금액)
         miscRow.getCell(15).value = priceComparisonData.miscRow.vendors[0]?.percent || 0;  // 15. 업체1 공과잡비 % (수량 열)
         miscRow.getCell(15).alignment = { vertical: 'middle', horizontal: 'right' };
-        miscRow.getCell(15).numFmt = '#,##0';
+        miscRow.getCell(15).numFmt = '#,##0.00';
         miscRow.getCell(17).value = { formula: `=Q${summaryRowNum}*(O${miscRowNum}/100)` };  // 17. 업체1 공과잡비 금액 = 경량공사 × (% ÷ 100)
         miscRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
         miscRow.getCell(17).numFmt = '#,##0';
@@ -1957,7 +1963,7 @@ async function exportPriceComparisonToExcel() {
         // 업체2 공과잡비: 18열(% 입력), 19열(빈칸), 20열(금액)
         miscRow.getCell(18).value = priceComparisonData.miscRow.vendors[1]?.percent || 0;  // 18. 업체2 공과잡비 % (수량 열)
         miscRow.getCell(18).alignment = { vertical: 'middle', horizontal: 'right' };
-        miscRow.getCell(18).numFmt = '#,##0';
+        miscRow.getCell(18).numFmt = '#,##0.00';
         miscRow.getCell(20).value = { formula: `=T${summaryRowNum}*(R${miscRowNum}/100)` };  // 20. 업체2 공과잡비 금액 = 경량공사 × (% ÷ 100)
         miscRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
         miscRow.getCell(20).numFmt = '#,##0';
@@ -1965,7 +1971,7 @@ async function exportPriceComparisonToExcel() {
         // 업체3 공과잡비: 21열(% 입력), 22열(빈칸), 23열(금액)
         miscRow.getCell(21).value = priceComparisonData.miscRow.vendors[2]?.percent || 0;  // 21. 업체3 공과잡비 % (수량 열)
         miscRow.getCell(21).alignment = { vertical: 'middle', horizontal: 'right' };
-        miscRow.getCell(21).numFmt = '#,##0';
+        miscRow.getCell(21).numFmt = '#,##0.00';
         miscRow.getCell(23).value = { formula: `=W${summaryRowNum}*(U${miscRowNum}/100)` };  // 23. 업체3 공과잡비 금액 = 경량공사 × (% ÷ 100)
         miscRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
         miscRow.getCell(23).numFmt = '#,##0';
@@ -2033,18 +2039,18 @@ async function exportPriceComparisonToExcel() {
         // 단수정리 행에 업체별 수식 적용
         const roundingRowNum = roundingRow.number;
 
-        // 업체1 단수정리: (경량공사 + 공과잡비)의 십만단위 미만 × -1
-        roundingRow.getCell(17).value = { formula: `=MOD(Q${summaryRowNum}+Q${miscRowNum}, 100000)*-1` };
+        // 업체1 단수정리: (경량공사 + 공과잡비)의 천단위 미만 × -1
+        roundingRow.getCell(17).value = { formula: `=MOD(Q${summaryRowNum}+Q${miscRowNum}, 1000)*-1` };
         roundingRow.getCell(17).alignment = { vertical: 'middle', horizontal: 'right' };
         roundingRow.getCell(17).numFmt = '#,##0';
 
         // 업체2 단수정리
-        roundingRow.getCell(20).value = { formula: `=MOD(T${summaryRowNum}+T${miscRowNum}, 100000)*-1` };
+        roundingRow.getCell(20).value = { formula: `=MOD(T${summaryRowNum}+T${miscRowNum}, 1000)*-1` };
         roundingRow.getCell(20).alignment = { vertical: 'middle', horizontal: 'right' };
         roundingRow.getCell(20).numFmt = '#,##0';
 
         // 업체3 단수정리
-        roundingRow.getCell(23).value = { formula: `=MOD(W${summaryRowNum}+W${miscRowNum}, 100000)*-1` };
+        roundingRow.getCell(23).value = { formula: `=MOD(W${summaryRowNum}+W${miscRowNum}, 1000)*-1` };
         roundingRow.getCell(23).alignment = { vertical: 'middle', horizontal: 'right' };
         roundingRow.getCell(23).numFmt = '#,##0';
 
@@ -2181,6 +2187,7 @@ async function exportPriceComparisonToExcel() {
             itemRow.getCell(6).value = { formula: `=M${rowNum}*1.2` };  // 6. 계약도급 단가 = 발주단가 × 1.2
             itemRow.getCell(7).value = { formula: `=E${rowNum}*F${rowNum}` };  // 7. 계약도급 금액 = 수량 × 계약도급 단가
             itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
+            itemRow.getCell(11).value = { formula: `=I${rowNum}*J${rowNum}` };  // 11. 진행도급 금액 = 발주수량 × 진행도급 단가
             itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
             itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
             // 업체별 금액 수식 (발주수량 × 업체 단가)
@@ -2199,7 +2206,9 @@ async function exportPriceComparisonToExcel() {
                 if ((colIdx >= 5 && colIdx <= 7) || (colIdx >= 9 && colIdx <= 23)) {
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                     if (typeof cell.value === 'number' || cell.value?.formula) {
-                        cell.numFmt = '#,##0';
+                        // 수량 컬럼(5,9,12,15,18,21)은 소수점 2자리, 나머지는 정수
+                        const isQuantityCol = [5, 9, 12, 15, 18, 21].includes(colIdx);
+                        cell.numFmt = isQuantityCol ? '#,##0.00' : '#,##0';
                     }
                 } else {
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
@@ -2280,6 +2289,7 @@ async function exportPriceComparisonToExcel() {
             itemRow.getCell(6).value = { formula: `=M${rowNum}*1.2` };  // 6. 계약도급 단가 = 발주단가 × 1.2
             itemRow.getCell(7).value = { formula: `=E${rowNum}*F${rowNum}` };  // 7. 계약도급 금액 = 수량 × 계약도급 단가
             itemRow.getCell(10).value = { formula: `=F${rowNum}` };  // 10. 진행도급 단가 = 계약도급 단가
+            itemRow.getCell(11).value = { formula: `=I${rowNum}*J${rowNum}` };  // 11. 진행도급 금액 = 발주수량 × 진행도급 단가
             itemRow.getCell(12).value = { formula: `=I${rowNum}` };  // 12. 발주단가 수량 = 발주수량
             itemRow.getCell(14).value = { formula: `=L${rowNum}*M${rowNum}` };  // 14. 발주단가 금액 = 발주단가 수량 × 발주단가 단가
             // 업체별 금액 수식 (발주수량 × 업체 단가)
@@ -2298,7 +2308,9 @@ async function exportPriceComparisonToExcel() {
                 if ((colIdx >= 5 && colIdx <= 7) || (colIdx >= 9 && colIdx <= 23)) {
                     cell.alignment = { vertical: 'middle', horizontal: 'right' };
                     if (typeof cell.value === 'number' || cell.value?.formula) {
-                        cell.numFmt = '#,##0';
+                        // 수량 컬럼(5,9,12,15,18,21)은 소수점 2자리, 나머지는 정수
+                        const isQuantityCol = [5, 9, 12, 15, 18, 21].includes(colIdx);
+                        cell.numFmt = isQuantityCol ? '#,##0.00' : '#,##0';
                     }
                 } else {
                     cell.alignment = { vertical: 'middle', horizontal: 'center' };
