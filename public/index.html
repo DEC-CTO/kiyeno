@@ -1224,7 +1224,8 @@
           <button class="panel-tab active" onclick="switchResultTab('comparison')">
             <i class="fas fa-balance-scale"></i> 벽체별 합계
           </button>
-          <button class="panel-tab" onclick="switchResultTab('materialSummary')">
+          <!-- 재료별 합계 탭 버튼 (임시 숨김) -->
+          <button class="panel-tab" onclick="switchResultTab('materialSummary')" style="display: none;">
             <i class="fas fa-boxes"></i> 재료별 합계
           </button>
           <button class="panel-tab" onclick="switchResultTab('individual')">
@@ -1269,8 +1270,8 @@
           </div>
         </div>
 
-        <!-- 재료별 합계 탭 -->
-        <div id="materialSummaryTab" class="tab-content">
+        <!-- 재료별 합계 탭 (임시 숨김) -->
+        <div id="materialSummaryTab" class="tab-content" style="display: none !important;">
           <div class="material-summary-container">
             <table class="material-summary-table">
               <thead>

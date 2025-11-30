@@ -32,6 +32,7 @@ window.calculateWallCosts = async function () {
 
     // 3. 벽체별 계산 수행
     calculationResults = [];
+    orderFormDirectCosts = [];  // 이전 발주서 데이터 초기화 (재료별 합계 업데이트용)
     window.calculationResults = calculationResults; // 전역 동기화
     let failedCount = 0; // 실패한 벽체 카운트
 
@@ -4574,10 +4575,10 @@ async function generateOrderFormDataRows() {
       rowNumber++;
     }
 
-    // ✅ 전역 변수에 직접비 데이터 저장 (재료별 합계에서 사용)
-    // 모든 계산이 완료된 후에 저장하여 orderMatAmount, orderLabAmount 등이 포함되도록 함
-    orderFormDirectCosts = sortedDirectCosts;
-    console.log(`💾 발주서 직접비 데이터 저장됨: ${orderFormDirectCosts.length}개 항목`);
+    // ✅ 전역 변수에 직접비 데이터 누적 (재료별 합계에서 사용)
+    // 모든 타입의 데이터를 누적하여 재료별 합계가 전체 수량을 표시하도록 함
+    orderFormDirectCosts.push(...sortedDirectCosts);
+    console.log(`💾 발주서 직접비 데이터 누적됨: ${orderFormDirectCosts.length}개 항목 (현재 타입: ${typeName})`);
 
     // 5. ✅ 직접비 소계 (HTML과 데이터 함께 받기)
     const directSubtotalResult = generateSubtotalRow(sortedDirectCosts, '소계 (직접자재)', rowNumber);
