@@ -1432,8 +1432,19 @@ function renderComparisonResults() {
   // 2단계: 그룹화된 데이터로 테이블 행 생성 (✅ 정렬 적용)
   const sortedWallNames = sortWallTypeNames(Object.keys(groupedData));
 
+  // 전체 합계 계산용 변수
+  let grandTotalCount = 0;
+  let grandTotalArea = 0;
+  let grandTotalCost = 0;
+
   sortedWallNames.forEach((wallName) => {
     const data = groupedData[wallName];
+
+    // 합계 누적
+    grandTotalCount += data.count;
+    grandTotalArea += data.totalArea;
+    grandTotalCost += data.totalCost;
+
     const row = document.createElement('tr');
     row.innerHTML = `
             <td>${wallName}</td>
@@ -1455,6 +1466,24 @@ function renderComparisonResults() {
         `;
     tbody.appendChild(row);
   });
+
+  // 합계 행 추가
+  const totalRow = document.createElement('tr');
+  totalRow.style.backgroundColor = '#e3f2fd';
+  totalRow.style.fontWeight = 'bold';
+  totalRow.innerHTML = `
+            <td style="text-align: center;">합계</td>
+            <td>${grandTotalCount}개</td>
+            <td>M2</td>
+            <td class="text-right">${grandTotalArea.toFixed(2)}</td>
+            <td class="text-right cost-cell">-</td>
+            <td class="text-right cost-cell">-</td>
+            <td class="text-right">-</td>
+            <td class="text-right cost-cell" style="color: #1565c0;">₩${Math.round(
+              grandTotalCost
+            ).toLocaleString()}</td>
+        `;
+  tbody.appendChild(totalRow);
 }
 
 /**
@@ -1747,12 +1776,16 @@ async function createComparisonSheet(workbook) {
           // 비율 제외
           cell.numFmt = '#,##0';
         }
+      } else if (colNumber === 2) {
+        // 개수: 정수, 중앙 정렬
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.numFmt = '#,##0';
+      } else if (colNumber === 3) {
+        // 면적: 소수점, 오른쪽 정렬
+        cell.alignment = { vertical: 'middle', horizontal: 'right' };
+        cell.numFmt = '#,##0.##';
       } else {
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        if (colNumber === 2 || colNumber === 3) {
-          // 개수, 면적
-          cell.numFmt = '#,##0.##';
-        }
       }
     });
   });
@@ -2891,7 +2924,7 @@ async function generateComponentRow(
             <td></td>
             <td>${displayName}</td>
             <td>${wallThk}</td>
-            <td>${wallTypeCode}</td>
+            <td></td>
             <td>${atValue}</td>
             <td>${thicknessValue}</td>
             <td>${widthValue}</td>
@@ -3022,7 +3055,7 @@ async function generateLayerDetailRows(result, allResults) {
                     <td></td>
                     <td>${displayName}</td>
                     <td></td>
-                    <td>${wallTypeCode}</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -4396,7 +4429,7 @@ function generateGroupedComponentRow(component, rowNumber) {
             <td></td>
             <td>${displayName}</td>
             <td>${wallThk}</td>
-            <td>${wallTypeCode}</td>
+            <td></td>
             <td>${atValue}</td>
             <td>${thicknessValue}</td>
             <td>${widthValue}</td>
@@ -22380,7 +22413,7 @@ async function addOrderFormDataToExcel(worksheet) {
       // ✅ 숫자 포맷: 수량(P)은 소수점 2자리, 단가/금액(Q~X, Z~AG)은 정수
       if (cell.value !== null && cell.value !== '' && cell.value !== undefined) {
         if (colNumber === 16) {
-          cell.numFmt = '#,##0';
+          cell.numFmt = '#,##0.00';  // P열 수량: 소수점 2자리
         } else if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
           cell.numFmt = '#,##0';
         }
@@ -22530,7 +22563,7 @@ async function addOrderFormDataToExcel(worksheet) {
             }
           } else if (colNumber === 16) {
             // 수량: 소수점 2자리 표시
-            cell.numFmt = '#,##0';
+            cell.numFmt = '#,##0.00';
           } else if ((colNumber >= 17 && colNumber <= 24) || (colNumber >= 26 && colNumber <= 33)) {
             // 모든 단가와 금액: 정수
             cell.numFmt = '#,##0';
@@ -23668,7 +23701,7 @@ async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) 
   const unitPriceItem = comp.unitPriceItem;
 
   // WALL 및 개수 컬럼 채우기
-  const wallTypeCode = comp.wallType?.wallType || '';
+  // wallTypeCode는 보라색 헤더 행에만 표시 (데이터 행에서는 사용 안 함)
   const sizeData = parseSizeField(comp.size);
   const spacingValue = extractSpacingValue(unitPriceItem?.basic?.spacing);
 
@@ -23766,7 +23799,7 @@ async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) 
     '', // B: 구분
     displayName, // C: 품명 및 규격
     wallThk, // D: THK
-    wallTypeCode, // E: Type
+    '', // E: Type (빈 값 - 보라색 헤더 행에만 표시)
     atValue, // F: @
     thicknessValue, // G: 두께
     widthValue, // H: 넓이
