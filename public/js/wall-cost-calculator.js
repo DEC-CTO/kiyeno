@@ -4913,10 +4913,13 @@ async function generateOrderFormDataRows() {
       // ✅ 스터드 unitPriceItem에서 단수정리 1m² 단가 가져오기
       const studUnitPriceItem = categorizedCosts['STUD'][0]?.unitPriceItem;
 
+      // ✅ 스터드 면적: 첫 번째 구성품의 면적 (간접비와 동일)
+      const studArea = categorizedCosts['STUD'][0]?.area || totalArea;
+
       const studRoundingResult = generateMaterialRoundingRow(
         '스터드',
         studUnitPriceItem,
-        totalArea,
+        studArea,  // ✅ totalArea → studArea로 변경
         contractRatio,
         rowNumber
       );
@@ -22814,12 +22817,14 @@ async function addOrderFormDataToExcel(worksheet) {
           total: studUnitPriceItem?.totalCosts?.roundingPerM2 || 0
         };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
+        // ✅ 스터드 면적: 첫 번째 구성품의 면적 (웹페이지와 동일)
+        const studArea = categorizedCosts['STUD'][0]?.area || totalArea;
         const roundingRowData = generateMaterialRoundingRowData(
           '스터드',
           layerNumber,
           currentRow,
           roundingData,            // 단수정리 데이터 객체
-          totalArea,               // 면적
+          studArea,                // ✅ totalArea → studArea로 변경
           contractRatio            // 조정비율
         );
         const roundingRow = worksheet.getRow(currentRow);
