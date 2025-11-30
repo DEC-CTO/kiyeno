@@ -22726,6 +22726,15 @@ async function addOrderFormDataToExcel(worksheet) {
       }
     }
 
+    // ✅ 스터드 면적: sortedDirectCosts에서 첫 번째 스터드 구성품의 누적 면적 가져오기
+    let studAreaFromGrouped = totalArea;
+    for (const comp of sortedDirectCosts) {
+      if (comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') {
+        studAreaFromGrouped = comp.area;
+        break;
+      }
+    }
+
     // 3. 스터드 간접비 계산 및 추가
     // studDirectStartRow는 위에서 추적됨
     let studMaterialTotal = 0;
@@ -22748,13 +22757,14 @@ async function addOrderFormDataToExcel(worksheet) {
         toolExpense: 2,
       };
 
+      // ✅ 스터드 면적: sortedDirectCosts에서 가져온 누적 면적 사용
       studIndirectCosts = calculateIndirectCosts(
         '스터드',
         studMaterialTotal,
         studLaborTotal,
         studFixedRates,
         studUnitPriceItem,
-        totalArea
+        studAreaFromGrouped  // ✅ sortedDirectCosts의 누적 면적 사용
       );
 
       // 스터드 간접비 행 추가
@@ -22763,7 +22773,7 @@ async function addOrderFormDataToExcel(worksheet) {
         const indirectRowData = generateIndirectCostRowData(
           item,
           layerNumber,
-          totalArea,
+          studAreaFromGrouped,  // ✅ sortedDirectCosts의 누적 면적 사용
           currentRow
         );
         const indirectRow = worksheet.getRow(currentRow);
@@ -22817,14 +22827,13 @@ async function addOrderFormDataToExcel(worksheet) {
           total: studUnitPriceItem?.totalCosts?.roundingPerM2 || 0
         };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
-        // ✅ 스터드 면적: 첫 번째 구성품의 면적 (웹페이지와 동일)
-        const studArea = categorizedCosts['STUD'][0]?.area || totalArea;
+        // ✅ 스터드 면적: sortedDirectCosts에서 가져온 누적 면적 사용 (간접비와 동일)
         const roundingRowData = generateMaterialRoundingRowData(
           '스터드',
           layerNumber,
           currentRow,
           roundingData,            // 단수정리 데이터 객체
-          studArea,                // ✅ totalArea → studArea로 변경
+          studAreaFromGrouped,     // ✅ sortedDirectCosts의 누적 면적 사용
           contractRatio            // 조정비율
         );
         const roundingRow = worksheet.getRow(currentRow);
