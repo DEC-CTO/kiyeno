@@ -4702,13 +4702,17 @@ async function generateOrderFormDataRows() {
         `📊 스터드/런너 직접비 합계 - 자재: ${studMaterialTotal.toLocaleString()}, 노무: ${studLaborTotal.toLocaleString()}`
       );
 
+      // ✅ 스터드 면적: 첫 번째 구성품의 면적 사용 (석고보드와 동일한 방식)
+      const studArea = categorizedCosts['STUD'][0]?.area || totalArea;
+      console.log(`📊 스터드 간접비 면적: ${studArea}m²`);
+
       studIndirectCosts = calculateIndirectCosts(
         '스터드',
         studMaterialTotal,
         studLaborTotal,
         studFixedRates,
         studUnitPriceItem,
-        totalArea
+        studArea  // ✅ totalArea → studArea로 변경
       );
     }
 
