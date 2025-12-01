@@ -22639,8 +22639,9 @@ async function addOrderFormDataToExcel(worksheet) {
     const roundingRowNumbers = []; // 자재별 단수정리 행 번호 추적
 
     // 구성품을 카테고리별로 분류 (스터드, 석고보드, 그라스울)
+    // ✅ 스터드도 unitPriceId별로 그룹화 (석고보드와 동일한 구조)
     const categorizedCosts = {
-      STUD: [],
+      STUD: {},  // 스터드도 객체로 변경하여 unitPriceId별 그룹화
       '석고보드': {},
       '그라스울': {},
     };
@@ -22708,9 +22709,12 @@ async function addOrderFormDataToExcel(worksheet) {
             materialData: materialData,
           };
 
-          // 카테고리에 추가
+          // 카테고리에 추가 (모든 카테고리가 unitPriceId별로 그룹화됨)
           if (categoryType === 'STUD') {
-            categorizedCosts['STUD'].push(comp);
+            if (!categorizedCosts['STUD'][unitPriceId]) {
+              categorizedCosts['STUD'][unitPriceId] = [];
+            }
+            categorizedCosts['STUD'][unitPriceId].push(comp);
           } else if (categoryType === '석고보드') {
             if (!categorizedCosts['석고보드'][unitPriceId]) {
               categorizedCosts['석고보드'][unitPriceId] = [];
@@ -22726,30 +22730,23 @@ async function addOrderFormDataToExcel(worksheet) {
       }
     }
 
-    // ✅ 스터드 면적: sortedDirectCosts에서 첫 번째 스터드 구성품의 누적 면적 가져오기
-    let studAreaFromGrouped = totalArea;
-    for (const comp of sortedDirectCosts) {
-      if (comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') {
-        studAreaFromGrouped = comp.area;
-        break;
+    // 3. 스터드 타입별 간접비 및 단수정리 추가 (석고보드와 동일한 구조)
+    for (const [unitPriceId, studGroup] of Object.entries(categorizedCosts['STUD'])) {
+      const studUnitPriceItem = studGroup[0]?.unitPriceItem;
+      const categoryName = studUnitPriceItem?.basic
+        ? `${studUnitPriceItem.basic.itemName} ${studUnitPriceItem.basic.size || ''}`.trim()
+        : studGroup[0]?.name || '스터드';
+
+      let studMaterialTotal = 0;
+      let studLaborTotal = 0;
+
+      for (const comp of studGroup) {
+        const materialPricePerM2 = comp.materialPrice * comp.quantity;
+        const laborPricePerM2 = comp.laborAmount;
+        studMaterialTotal += materialPricePerM2 * comp.area;
+        studLaborTotal += laborPricePerM2 * comp.area;
       }
-    }
 
-    // 3. 스터드 간접비 계산 및 추가
-    // studDirectStartRow는 위에서 추적됨
-    let studMaterialTotal = 0;
-    let studLaborTotal = 0;
-
-    for (const comp of categorizedCosts['STUD']) {
-      const materialPricePerM2 = comp.materialPrice * comp.quantity;
-      const laborPricePerM2 = comp.laborAmount;
-      studMaterialTotal += materialPricePerM2 * comp.area;
-      studLaborTotal += laborPricePerM2 * comp.area;
-    }
-
-    let studIndirectCosts = [];
-    if (categorizedCosts['STUD'].length > 0) {
-      const studUnitPriceItem = categorizedCosts['STUD'][0]?.unitPriceItem;
       const studFixedRates = studUnitPriceItem?.fixedRates || {
         materialLoss: 3,
         transportCost: 1.5,
@@ -22757,14 +22754,55 @@ async function addOrderFormDataToExcel(worksheet) {
         toolExpense: 2,
       };
 
-      // ✅ 스터드 면적: sortedDirectCosts에서 가져온 누적 면적 사용
-      studIndirectCosts = calculateIndirectCosts(
-        '스터드',
+      // ✅ sortedDirectCosts에서 해당 스터드 타입의 누적 면적 가져오기
+      let studAreaFromGrouped = totalArea;  // 기본값은 totalArea
+
+      // 디버깅: studGroup과 sortedDirectCosts의 내용 확인
+      console.log(`📊 Excel 스터드 면적 매칭 시도: ${categoryName}`);
+      console.log(`   studGroup 구성품:`, studGroup.map(c => ({ name: c.name, area: c.area })));
+      console.log(`   sortedDirectCosts STUD/RUNNER:`, sortedDirectCosts
+        .filter(c => c.parentCategory === 'STUD' || c.parentCategory === 'RUNNER')
+        .map(c => ({ name: c.name, area: c.area })));
+
+      // 방법 1: 구성품 이름으로 정확히 매칭
+      for (const studComp of studGroup) {
+        for (const comp of sortedDirectCosts) {
+          if ((comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') &&
+              comp.name === studComp.name) {
+            studAreaFromGrouped = comp.area;
+            console.log(`   ✅ 정확 매칭 성공: ${studComp.name} → ${studAreaFromGrouped}m²`);
+            break;
+          }
+        }
+        if (studAreaFromGrouped !== totalArea) break;
+      }
+
+      // 방법 2: 정확 매칭 실패 시 부분 문자열 매칭
+      if (studAreaFromGrouped === totalArea) {
+        for (const studComp of studGroup) {
+          for (const comp of sortedDirectCosts) {
+            if ((comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') &&
+                (comp.name.includes(studComp.name) || studComp.name.includes(comp.name))) {
+              studAreaFromGrouped = comp.area;
+              console.log(`   ✅ 부분 매칭 성공: ${studComp.name} ↔ ${comp.name} → ${studAreaFromGrouped}m²`);
+              break;
+            }
+          }
+          if (studAreaFromGrouped !== totalArea) break;
+        }
+      }
+
+      if (studAreaFromGrouped === totalArea) {
+        console.log(`   ⚠️ 매칭 실패, fallback: ${totalArea}m²`);
+      }
+
+      const studIndirectCosts = calculateIndirectCosts(
+        categoryName,
         studMaterialTotal,
         studLaborTotal,
         studFixedRates,
         studUnitPriceItem,
-        studAreaFromGrouped  // ✅ sortedDirectCosts의 누적 면적 사용
+        studAreaFromGrouped
       );
 
       // 스터드 간접비 행 추가
@@ -22773,7 +22811,7 @@ async function addOrderFormDataToExcel(worksheet) {
         const indirectRowData = generateIndirectCostRowData(
           item,
           layerNumber,
-          studAreaFromGrouped,  // ✅ sortedDirectCosts의 누적 면적 사용
+          studAreaFromGrouped,
           currentRow
         );
         const indirectRow = worksheet.getRow(currentRow);
@@ -22827,14 +22865,13 @@ async function addOrderFormDataToExcel(worksheet) {
           total: studUnitPriceItem?.totalCosts?.roundingPerM2 || 0
         };
         const contractRatio = parseFloat(document.getElementById('contractRatioInput')?.value) || 1.2;
-        // ✅ 스터드 면적: sortedDirectCosts에서 가져온 누적 면적 사용 (간접비와 동일)
         const roundingRowData = generateMaterialRoundingRowData(
-          '스터드',
+          categoryName,
           layerNumber,
           currentRow,
-          roundingData,            // 단수정리 데이터 객체
-          studAreaFromGrouped,     // ✅ sortedDirectCosts의 누적 면적 사용
-          contractRatio            // 조정비율
+          roundingData,
+          studAreaFromGrouped,
+          contractRatio
         );
         const roundingRow = worksheet.getRow(currentRow);
         roundingRow.values = roundingRowData;
