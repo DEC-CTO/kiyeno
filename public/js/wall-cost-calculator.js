@@ -22639,94 +22639,34 @@ async function addOrderFormDataToExcel(worksheet) {
     const roundingRowNumbers = []; // 자재별 단수정리 행 번호 추적
 
     // 구성품을 카테고리별로 분류 (스터드, 석고보드, 그라스울)
-    // ✅ 스터드도 unitPriceId별로 그룹화 (석고보드와 동일한 구조)
+    // ✅ 웹페이지와 동일하게 sortedDirectCosts에서 직접 수집 (이미 그룹화/누적된 면적 사용)
     const categorizedCosts = {
-      STUD: {},  // 스터드도 객체로 변경하여 unitPriceId별 그룹화
+      STUD: {},  // unitPriceId별로 그룹화
       '석고보드': {},
       '그라스울': {},
     };
 
-    // results[0]의 layerPricing을 순회하여 구성품 수집
-    const result = results[0];
-    const layerOrder = [
-      'layer3_1',
-      'layer2_1',
-      'layer1_1',
-      'column1',
-      'infill',
-      'layer1_2',
-      'layer2_2',
-      'layer3_2',
-      'column2',
-      'channel',
-      'runner',
-    ];
+    // ✅ sortedDirectCosts에서 직접 분류 (웹페이지와 동일한 방식)
+    for (const comp of sortedDirectCosts) {
+      const category = comp.parentCategory;
+      const unitPriceId = comp.unitPriceItem?.id || 'unknown';
 
-    for (const layerKey of layerOrder) {
-      const layer = result.layerPricing[layerKey];
-      if (!layer || !layer.materialName) continue;
-
-      const unitPriceItem = await findUnitPriceItemByIdOrName(
-        layer.materialName
-      );
-
-      if (
-        unitPriceItem &&
-        unitPriceItem.components &&
-        unitPriceItem.components.length > 0
-      ) {
-        // ✅ unitPriceItem의 첫 번째 구성품으로 카테고리 판단
-        const firstComponent = unitPriceItem.components.find(c => shouldDisplayComponent(c.name));
-        const firstComponentName = firstComponent?.name || '';
-
-        // 카테고리 타입 결정
-        let categoryType = null;
-        let unitPriceId = unitPriceItem.id;
-
-        if (isStud(firstComponentName) || isRunner(firstComponentName)) {
-          categoryType = 'STUD';
-        } else if (isGypsumBoard(firstComponentName)) {
-          categoryType = '석고보드';
-        } else if (isGlassWool(firstComponentName)) {
-          categoryType = '그라스울';
+      if (category === 'STUD' || category === 'RUNNER') {
+        // 스터드와 런너는 unitPriceId별로 그룹화
+        if (!categorizedCosts['STUD'][unitPriceId]) {
+          categorizedCosts['STUD'][unitPriceId] = [];
         }
-
-        // ✅ 같은 unitPriceItem의 모든 구성품을 같은 카테고리로 분류
-        for (const component of unitPriceItem.components) {
-          if (!shouldDisplayComponent(component.name)) continue;
-
-          const materialData = await findMaterialByIdInDB(
-            component.materialId
-          );
-
-          const comp = {
-            name: component.name,
-            materialPrice: component.materialPrice || 0,
-            laborAmount: component.laborPrice || 0,
-            quantity: component.quantity || 0,
-            area: totalArea,
-            unitPriceItem: unitPriceItem,
-            materialData: materialData,
-          };
-
-          // 카테고리에 추가 (모든 카테고리가 unitPriceId별로 그룹화됨)
-          if (categoryType === 'STUD') {
-            if (!categorizedCosts['STUD'][unitPriceId]) {
-              categorizedCosts['STUD'][unitPriceId] = [];
-            }
-            categorizedCosts['STUD'][unitPriceId].push(comp);
-          } else if (categoryType === '석고보드') {
-            if (!categorizedCosts['석고보드'][unitPriceId]) {
-              categorizedCosts['석고보드'][unitPriceId] = [];
-            }
-            categorizedCosts['석고보드'][unitPriceId].push(comp);
-          } else if (categoryType === '그라스울') {
-            if (!categorizedCosts['그라스울'][unitPriceId]) {
-              categorizedCosts['그라스울'][unitPriceId] = [];
-            }
-            categorizedCosts['그라스울'][unitPriceId].push(comp);
-          }
+        categorizedCosts['STUD'][unitPriceId].push(comp);
+      } else if (category === '석고보드') {
+        if (!categorizedCosts['석고보드'][unitPriceId]) {
+          categorizedCosts['석고보드'][unitPriceId] = [];
         }
+        categorizedCosts['석고보드'][unitPriceId].push(comp);
+      } else if (category === '그라스울') {
+        if (!categorizedCosts['그라스울'][unitPriceId]) {
+          categorizedCosts['그라스울'][unitPriceId] = [];
+        }
+        categorizedCosts['그라스울'][unitPriceId].push(comp);
       }
     }
 
@@ -22754,47 +22694,11 @@ async function addOrderFormDataToExcel(worksheet) {
         toolExpense: 2,
       };
 
-      // ✅ sortedDirectCosts에서 해당 스터드 타입의 누적 면적 가져오기
-      let studAreaFromGrouped = totalArea;  // 기본값은 totalArea
-
-      // 디버깅: studGroup과 sortedDirectCosts의 내용 확인
-      console.log(`📊 Excel 스터드 면적 매칭 시도: ${categoryName}`);
-      console.log(`   studGroup 구성품:`, studGroup.map(c => ({ name: c.name, area: c.area })));
-      console.log(`   sortedDirectCosts STUD/RUNNER:`, sortedDirectCosts
-        .filter(c => c.parentCategory === 'STUD' || c.parentCategory === 'RUNNER')
-        .map(c => ({ name: c.name, area: c.area })));
-
-      // 방법 1: 구성품 이름으로 정확히 매칭
-      for (const studComp of studGroup) {
-        for (const comp of sortedDirectCosts) {
-          if ((comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') &&
-              comp.name === studComp.name) {
-            studAreaFromGrouped = comp.area;
-            console.log(`   ✅ 정확 매칭 성공: ${studComp.name} → ${studAreaFromGrouped}m²`);
-            break;
-          }
-        }
-        if (studAreaFromGrouped !== totalArea) break;
-      }
-
-      // 방법 2: 정확 매칭 실패 시 부분 문자열 매칭
-      if (studAreaFromGrouped === totalArea) {
-        for (const studComp of studGroup) {
-          for (const comp of sortedDirectCosts) {
-            if ((comp.parentCategory === 'STUD' || comp.parentCategory === 'RUNNER') &&
-                (comp.name.includes(studComp.name) || studComp.name.includes(comp.name))) {
-              studAreaFromGrouped = comp.area;
-              console.log(`   ✅ 부분 매칭 성공: ${studComp.name} ↔ ${comp.name} → ${studAreaFromGrouped}m²`);
-              break;
-            }
-          }
-          if (studAreaFromGrouped !== totalArea) break;
-        }
-      }
-
-      if (studAreaFromGrouped === totalArea) {
-        console.log(`   ⚠️ 매칭 실패, fallback: ${totalArea}m²`);
-      }
+      // ✅ 스터드 면적: 직접비 테이블의 스터드 구성품 면적과 동일하게 사용
+      // 런너가 아닌 실제 스터드 구성품의 면적을 찾아서 사용 (웹페이지와 동일)
+      const firstStudComp = studGroup.find(comp => isStud(comp.name)) || studGroup[0];
+      const studArea = firstStudComp?.area || totalArea;
+      console.log(`📐 Excel 스터드 간접비 면적 - unitPriceId: ${unitPriceId}, studArea: ${studArea}, totalArea: ${totalArea}`);
 
       const studIndirectCosts = calculateIndirectCosts(
         categoryName,
@@ -22802,7 +22706,7 @@ async function addOrderFormDataToExcel(worksheet) {
         studLaborTotal,
         studFixedRates,
         studUnitPriceItem,
-        studAreaFromGrouped
+        studArea
       );
 
       // 스터드 간접비 행 추가
@@ -22811,7 +22715,7 @@ async function addOrderFormDataToExcel(worksheet) {
         const indirectRowData = generateIndirectCostRowData(
           item,
           layerNumber,
-          studAreaFromGrouped,
+          studArea,
           currentRow
         );
         const indirectRow = worksheet.getRow(currentRow);
@@ -22870,7 +22774,7 @@ async function addOrderFormDataToExcel(worksheet) {
           layerNumber,
           currentRow,
           roundingData,
-          studAreaFromGrouped,
+          studArea,
           contractRatio
         );
         const roundingRow = worksheet.getRow(currentRow);
@@ -22927,8 +22831,11 @@ async function addOrderFormDataToExcel(worksheet) {
 
       let gypsumMaterialTotal = 0;
       let gypsumLaborTotal = 0;
-      // ✅ 면적은 그룹 내 모든 구성품의 합산 (그룹핑된 수량 반영)
-      const gypsumArea = gypsumGroup.reduce((sum, comp) => sum + comp.area, 0);
+      // ✅ 면적은 첫 번째 구성품 것만 사용 (웹페이지 직접비 테이블 표시와 일치)
+      // 석고보드 구성품 우선 찾기 (석고피스 등이 아닌 실제 석고보드)
+      const firstGypsumComp = gypsumGroup.find(comp => isGypsumBoard(comp.name)) || gypsumGroup[0];
+      const gypsumArea = firstGypsumComp?.area || 0;
+      console.log(`📐 Excel 석고보드 간접비 면적 - unitPriceId: ${unitPriceId}, gypsumArea: ${gypsumArea}`);
 
       for (const comp of gypsumGroup) {
         const materialPricePerM2 = comp.materialPrice * comp.quantity;
@@ -23077,8 +22984,11 @@ async function addOrderFormDataToExcel(worksheet) {
 
       let glassWoolMaterialTotal = 0;
       let glassWoolLaborTotal = 0;
-      // ✅ 면적은 그룹 내 모든 구성품의 합산 (그룹핑된 수량 반영)
-      const glassWoolArea = glassWoolGroup.reduce((sum, comp) => sum + comp.area, 0);
+      // ✅ 면적은 첫 번째 구성품 것만 사용 (웹페이지 직접비 테이블 표시와 일치)
+      // 그라스울 구성품 우선 찾기
+      const firstGlassWoolComp = glassWoolGroup.find(comp => isGlassWool(comp.name)) || glassWoolGroup[0];
+      const glassWoolArea = firstGlassWoolComp?.area || 0;
+      console.log(`📐 Excel 그라스울 간접비 면적 - unitPriceId: ${unitPriceId}, glassWoolArea: ${glassWoolArea}`);
 
       for (const comp of glassWoolGroup) {
         const materialPricePerM2 = comp.materialPrice * comp.quantity;
