@@ -3264,6 +3264,15 @@ function groupComponentsByName(components) {
 
   console.log('🔍 그룹핑 시작 - 총 구성품 수:', components.length);
 
+  // 🔧 W70 디버깅: 모든 구성품의 키 정보 출력
+  console.log('📋 [W70 디버깅] 수집된 모든 구성품:');
+  components.forEach((comp, idx) => {
+    const debugKey = `${comp.name}|${comp.spec}|${comp.unit}|${comp.parentCategory}`;
+    console.log(`  [${idx}] 키: "${debugKey}"`);
+    console.log(`       name: "${comp.name}", spec: "${comp.spec}", unit: "${comp.unit}", category: "${comp.parentCategory}"`);
+    console.log(`       면적: ${comp.area}, unitPriceId: ${comp.unitPriceItem?.id || 'N/A'}`);
+  });
+
   for (const comp of components) {
     // 그룹핑 키: 품명 + 규격 + 단위 + 카테고리
     const key = `${comp.name}|${comp.spec}|${comp.unit}|${comp.parentCategory}`;
@@ -3272,6 +3281,7 @@ function groupComponentsByName(components) {
       console.log(
         `  ✨ 새 그룹 생성: ${comp.name} (${comp.spec}) - 카테고리: ${comp.parentCategory}`
       );
+      console.log(`     🔑 키: "${key}"`);
       grouped[key] = {
         name: comp.name,
         spec: comp.spec,
@@ -4364,12 +4374,8 @@ function generateGroupedComponentRow(component, rowNumber) {
         conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
         const m2PerSheet = parseFloat(conversionM2);
         if (m2PerSheet > 0) {
-          // ✅ 석고보드 수량: area × totalQuantity (렌더링 루프에서 전달됨)
-          if (component.gypsumBoardDisplayQuantity) {
-            gypsumBoardDisplayQuantity = component.gypsumBoardDisplayQuantity;
-          } else {
-            gypsumBoardDisplayQuantity = area * component.quantity; // ✅ quantity 사용
-          }
+          // ✅ 각 석고보드는 자신의 area × quantity 사용 (W70 등 다중 석고보드 지원)
+          gypsumBoardDisplayQuantity = area * component.quantity;
           // 14번 컬럼 장: displayQuantity ÷ m2PerSheet
           sheetQuantity = Math.round(gypsumBoardDisplayQuantity / m2PerSheet);
         }
@@ -4390,10 +4396,9 @@ function generateGroupedComponentRow(component, rowNumber) {
 
   // 수량 계산
   let displayQuantity = area;
-  // ✅ 석고보드: 16번 컬럼에 area × component.quantity
+  // ✅ 석고보드: 16번 컬럼에 area × component.quantity (각 석고보드는 자신의 면적 사용)
   if (isGypsumBoard(componentName)) {
-    displayQuantity =
-      component.gypsumBoardDisplayQuantity || area * component.quantity; // ✅ quantity 사용
+    displayQuantity = area * component.quantity; // ✅ 항상 자신의 area 사용 (W70 등 다중 석고보드 지원)
   } else if (component.parentCategory === '석고보드') {
     // ✅ 메거진피스 등 석고보드 카테고리의 다른 자재: area 사용 (그룹핑된 면적 합계)
     displayQuantity = area; // 120 + 120 = 240
@@ -4529,6 +4534,12 @@ async function generateOrderFormDataRows() {
     // 4. ✅ 직접비 정렬 및 행 생성
     const sortedDirectCosts = sortComponents(directCosts);
 
+    // 🔧 W70 디버깅: sortedDirectCosts의 모든 석고보드 면적 확인
+    console.log('🔧 [W70 디버깅] sortedDirectCosts 석고보드 면적:');
+    sortedDirectCosts.filter(c => isGypsumBoard(c.name)).forEach((comp, idx) => {
+      console.log(`  [${idx}] ${comp.name}: area=${comp.area}, quantity=${comp.quantity}`);
+    });
+
     // ✅ 4-1. 먼저 석고보드 찾아서 displayQuantity 계산
     let gypsumBoardQty = null;
     for (const comp of sortedDirectCosts) {
@@ -4554,7 +4565,11 @@ async function generateOrderFormDataRows() {
 
     // ✅ 4-2. 석고보드 수량을 모든 구성품에 전달하고 금액 계산
     for (const comp of sortedDirectCosts) {
-      comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+      // ✅ 석고보드가 아닌 구성품에만 gypsumBoardDisplayQuantity 전달 (피스 계산용)
+      // 석고보드는 자신의 area × quantity 사용
+      if (!isGypsumBoard(comp.name)) {
+        comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+      }
 
       // 💾 발주단가 금액 계산 및 저장 (재료별 합계에서 사용)
       const area = comp.area;
@@ -4564,7 +4579,8 @@ async function generateOrderFormDataRows() {
       // 16번 컬럼 수량 계산
       let displayQuantity = area;
       if (isGypsumBoard(componentName)) {
-        displayQuantity = comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+        // ✅ 각 석고보드는 자신의 area × quantity 사용 (W70 등 다중 석고보드 지원)
+        displayQuantity = area * comp.quantity;
       }
 
       // 14번 컬럼 장수 계산 (석고보드만)
@@ -22462,7 +22478,11 @@ async function addOrderFormDataToExcel(worksheet) {
     const glassWoolDirectEndRows = new Map(); // 그라스울 타입별 직접비 끝 행 (unitPriceId -> row)
 
     for (const comp of sortedDirectCosts) {
-      comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+      // ✅ 석고보드가 아닌 구성품에만 gypsumBoardDisplayQuantity 전달 (피스 계산용)
+      // 석고보드는 자신의 area × quantity 사용 (W70 등 다중 석고보드 지원)
+      if (!isGypsumBoard(comp.name)) {
+        comp.gypsumBoardDisplayQuantity = gypsumBoardQty;
+      }
 
       // ✅ unitPriceItem의 첫 번째 구성품으로 카테고리 판단
       let categoryType = null;
@@ -23704,8 +23724,8 @@ async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) 
         conversionM2 = ((w / 1000) * (h / 1000)).toFixed(3);
         const m2PerSheet = parseFloat(conversionM2);
         if (m2PerSheet > 0) {
-          const gypsumBoardDisplayQuantity =
-            comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+          // ✅ 각 석고보드는 자신의 area × quantity 사용 (W70 등 다중 석고보드 지원)
+          const gypsumBoardDisplayQuantity = area * comp.quantity;
           sheetQuantity = Math.round(gypsumBoardDisplayQuantity / m2PerSheet);
         }
       }
@@ -23720,7 +23740,8 @@ async function generateComponentRowDataFromGrouped(comp, layerNumber, excelRow) 
   // 수량 계산
   let displayQuantity = area;
   if (isGypsumBoard(componentName)) {
-    displayQuantity = comp.gypsumBoardDisplayQuantity || area * comp.quantity;
+    // ✅ 각 석고보드는 자신의 area × quantity 사용 (W70 등 다중 석고보드 지원)
+    displayQuantity = area * comp.quantity;
   } else if (comp.parentCategory === '석고보드') {
     displayQuantity = area;
   }
