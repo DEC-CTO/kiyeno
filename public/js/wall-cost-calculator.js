@@ -2496,23 +2496,23 @@ async function generateTypeSummaryRow(typeName, results, typeIndex) {
             <td></td>
             <td>M2</td>
             <td></td>
-            <td class="number-cell contract-material-price"></td>
-            <td class="number-cell contract-material-amount"></td>
-            <td class="number-cell contract-labor-price"></td>
-            <td class="number-cell contract-labor-amount"></td>
             <td class="number-cell"></td>
             <td class="number-cell"></td>
-            <td class="number-cell contract-total-price"></td>
-            <td class="number-cell contract-total-amount"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
             <td></td>
-            <td class="number-cell order-material-price"></td>
-            <td class="number-cell order-material-amount"></td>
-            <td class="number-cell order-labor-price"></td>
-            <td class="number-cell order-labor-amount"></td>
             <td class="number-cell"></td>
             <td class="number-cell"></td>
-            <td class="number-cell order-total-price"></td>
-            <td class="number-cell order-total-amount"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
+            <td class="number-cell"></td>
             <td></td>
         </tr>
     `;
@@ -5533,9 +5533,10 @@ function updateTypeSummaryRowExpense(currentRow, isContract) {
 
 /**
  * 소계 행들 업데이트 (경비 포함)
+ * @param {boolean} skipOrderUpdate - true이면 발주단가 업데이트 건너뜀 (조정비율 변경 시 사용)
  */
-function updateSubtotalRows() {
-  console.log('🔄 소계 행 업데이트 시작');
+function updateSubtotalRows(skipOrderUpdate = false) {
+  console.log(`🔄 소계 행 업데이트 시작 (skipOrderUpdate: ${skipOrderUpdate})`);
 
   // 모든 소계 행 찾기 (회색 배경)
   const subtotalRows = document.querySelectorAll(
@@ -5728,155 +5729,188 @@ function updateSubtotalRows() {
       cells[13].textContent = Math.round(sheetQuantitySum).toLocaleString();
     if (cells[15]) cells[15].textContent = displayQuantitySum.toFixed(2);
 
+    // ✅ 조정비율 가져오기
+    const ratioValue = parseFloat(document.getElementById('contractRatioInput')?.value);
+    const subtotalContractRatio = isNaN(ratioValue) ? 1 : ratioValue;
+
+    // ✅ 발주단가 소계에서 값을 읽어서 계약도급 계산 (개별 행 합산 대신)
+    // 발주단가 소계는 초기 렌더링에서 정확하게 계산됨
+    const orderMatPrice = parseFloat(cells[25]?.textContent.replace(/,/g, '')) || 0;
+    const orderMatAmount = parseFloat(cells[26]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabPrice = parseFloat(cells[27]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabAmount = parseFloat(cells[28]?.textContent.replace(/,/g, '')) || 0;
+    const orderExpPrice = parseFloat(cells[29]?.textContent.replace(/,/g, '')) || 0;
+    const orderExpAmount = parseFloat(cells[30]?.textContent.replace(/,/g, '')) || 0;
+    const orderTotalPrice = parseFloat(cells[31]?.textContent.replace(/,/g, '')) || 0;
+    const orderTotalAmount = parseFloat(cells[32]?.textContent.replace(/,/g, '')) || 0;
+
+    // 계약도급 = 발주단가 × 조정비율
+    const contractMatPriceCalc = Math.round(orderMatPrice * subtotalContractRatio * 100) / 100;
+    const contractMatAmountCalc = Math.round(orderMatAmount * subtotalContractRatio * 100) / 100;
+    const contractLabPriceCalc = Math.round(orderLabPrice * subtotalContractRatio * 100) / 100;
+    const contractLabAmountCalc = Math.round(orderLabAmount * subtotalContractRatio * 100) / 100;
+    const contractExpPriceCalc = Math.round(orderExpPrice * subtotalContractRatio * 100) / 100;
+    const contractExpAmountCalc = Math.round(orderExpAmount * subtotalContractRatio * 100) / 100;
+    const contractTotalPriceCalc = Math.round(orderTotalPrice * subtotalContractRatio * 100) / 100;
+    const contractTotalAmountCalc = Math.round(orderTotalAmount * subtotalContractRatio * 100) / 100;
+
     // 계약도급 (17번 셀부터 - 인덱스 16)
     if (cells[16])
-      cells[16].textContent = contractMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[16].textContent = contractMatPriceCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[17])
-      cells[17].textContent = contractMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[17].textContent = contractMatAmountCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[18])
-      cells[18].textContent = contractLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[18].textContent = contractLabPriceCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[19])
-      cells[19].textContent = contractLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[19].textContent = contractLabAmountCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[20])
-      cells[20].textContent = contractExpensePriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[20].textContent = contractExpPriceCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[21])
-      cells[21].textContent = contractExpenseAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[21].textContent = contractExpAmountCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[22])
-      cells[22].textContent = contractTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[22].textContent = contractTotalPriceCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     if (cells[23])
-      cells[23].textContent = contractTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      cells[23].textContent = contractTotalAmountCalc.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
     // 발주단가 (25번 셀부터 - 인덱스 24, 24번은 비고)
-    if (cells[25])
-      cells[25].textContent = orderMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[26])
-      cells[26].textContent = orderMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[27])
-      cells[27].textContent = orderLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[28])
-      cells[28].textContent = orderLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[29])
-      cells[29].textContent = orderExpensePriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[30])
-      cells[30].textContent = orderExpenseAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[31])
-      cells[31].textContent = orderTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    if (cells[32])
-      cells[32].textContent = orderTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    // skipOrderUpdate가 true이면 발주단가 업데이트 건너뜀 (조정비율 변경 시)
+    if (!skipOrderUpdate) {
+      if (cells[25])
+        cells[25].textContent = orderMaterialPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[26])
+        cells[26].textContent = orderMaterialAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[27])
+        cells[27].textContent = orderLaborPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[28])
+        cells[28].textContent = orderLaborAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[29])
+        cells[29].textContent = orderExpensePriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[30])
+        cells[30].textContent = orderExpenseAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[31])
+        cells[31].textContent = orderTotalPriceSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      if (cells[32])
+        cells[32].textContent = orderTotalAmountSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
   });
 
   // ✅ 총계 행 업데이트 (경비 포함)
-  console.log('🔄 총계 행 업데이트 시작');
+  // skipOrderUpdate가 true이면 총계 행 업데이트를 건너뜀
+  // (updateContractPricesRealtime()에서 발주단가 × 조정비율 방식으로 처리함)
+  if (skipOrderUpdate) {
+    console.log('⏭️ 총계 행 업데이트 건너뜀 (skipOrderUpdate=true, updateContractPricesRealtime에서 처리)');
+  } else {
+    console.log('🔄 총계 행 업데이트 시작');
 
-  // 총계 행 찾기 (초록색 배경, "총 계" 라벨)
-  const grandTotalRow = document.querySelector(
-    '.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]'
-  );
+    // 총계 행 찾기 (초록색 배경, "총 계" 라벨)
+    const grandTotalRow = document.querySelector(
+      '.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]'
+    );
 
-  if (grandTotalRow) {
-    console.log('📊 총계 행 찾음');
+    if (grandTotalRow) {
+      console.log('📊 총계 행 찾음');
 
-    // 모든 소계 행에서 경비 합산
-    let totalContractExpenseAmount = 0;
-    let totalOrderExpenseAmount = 0;
+      // 모든 소계 행에서 경비 합산
+      let totalContractExpenseAmount = 0;
+      let totalOrderExpenseAmount = 0;
 
-    subtotalRows.forEach((subtotalRow) => {
-      const label = subtotalRow.cells[2]?.textContent.trim();
-      console.log(`  📝 소계 라벨: "${label}"`);
+      subtotalRows.forEach((subtotalRow) => {
+        const label = subtotalRow.cells[2]?.textContent.trim();
+        console.log(`  📝 소계 라벨: "${label}"`);
 
-      // 계약도급 경비 금액
-      const contractExpense =
-        parseFloat(subtotalRow.cells[21]?.textContent.replace(/,/g, '')) || 0;
-      // 발주단가 경비 금액
-      const orderExpense =
-        parseFloat(subtotalRow.cells[30]?.textContent.replace(/,/g, '')) || 0;
+        // 계약도급 경비 금액
+        const contractExpense =
+          parseFloat(subtotalRow.cells[21]?.textContent.replace(/,/g, '')) || 0;
+        // 발주단가 경비 금액
+        const orderExpense =
+          parseFloat(subtotalRow.cells[30]?.textContent.replace(/,/g, '')) || 0;
 
-      totalContractExpenseAmount += contractExpense;
-      totalOrderExpenseAmount += orderExpense;
+        totalContractExpenseAmount += contractExpense;
+        totalOrderExpenseAmount += orderExpense;
+
+        console.log(
+          `  💰 경비 누적: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
+        );
+      });
 
       console.log(
-        `  💰 경비 누적: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
+        `  💰 총 경비: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
       );
-    });
 
-    console.log(
-      `  💰 총 경비: 계약도급=${totalContractExpenseAmount.toLocaleString()}, 발주단가=${totalOrderExpenseAmount.toLocaleString()}`
-    );
-
-    // 총계 행의 기존 자재비, 노무비 금액 읽기 (data 속성 우선, 없으면 textContent 파싱)
-    const contractMaterialAmount = parseFloat(
-      grandTotalRow.cells[17]?.dataset?.materialAmount ||
-      grandTotalRow.cells[17]?.textContent.replace(/,/g, '')
-    ) || 0;
-    const contractLaborAmount = parseFloat(
-      grandTotalRow.cells[19]?.dataset?.laborAmount ||
-      grandTotalRow.cells[19]?.textContent.replace(/,/g, '')
-    ) || 0;
-    const orderMaterialAmount = parseFloat(
-      grandTotalRow.cells[26]?.dataset?.materialAmount ||
-      grandTotalRow.cells[26]?.textContent.replace(/,/g, '')
-    ) || 0;
-    const orderLaborAmount = parseFloat(
-      grandTotalRow.cells[28]?.dataset?.laborAmount ||
-      grandTotalRow.cells[28]?.textContent.replace(/,/g, '')
-    ) || 0;
-
-    // 단수정리 금액 읽기 (발주단가와 계약도급 모두)
-    const roundingRowIndex = Array.from(
-      document.querySelectorAll('.order-form-table tbody tr')
-    ).findIndex((row) => row.cells[2]?.textContent.trim() === '단수정리');
-
-    let roundingAmount = 0;
-    let contractRoundingAmount = 0;
-    if (roundingRowIndex !== -1) {
-      const roundingRow = document.querySelectorAll('.order-form-table tbody tr')[roundingRowIndex];
-      // data 속성에서 원본 값 읽기 (없으면 textContent 파싱)
-      roundingAmount = parseFloat(
-        roundingRow.cells[32]?.dataset?.orderRounding ||
-        roundingRow.cells[32]?.textContent.replace(/,/g, '')
+      // 총계 행의 기존 자재비, 노무비 금액 읽기 (data 속성 우선, 없으면 textContent 파싱)
+      const contractMaterialAmount = parseFloat(
+        grandTotalRow.cells[17]?.dataset?.materialAmount ||
+        grandTotalRow.cells[17]?.textContent.replace(/,/g, '')
       ) || 0;
-      contractRoundingAmount = parseFloat(
-        roundingRow.cells[23]?.dataset?.contractRounding ||
-        roundingRow.cells[23]?.textContent.replace(/,/g, '')
+      const contractLaborAmount = parseFloat(
+        grandTotalRow.cells[19]?.dataset?.laborAmount ||
+        grandTotalRow.cells[19]?.textContent.replace(/,/g, '')
       ) || 0;
+      const orderMaterialAmount = parseFloat(
+        grandTotalRow.cells[26]?.dataset?.materialAmount ||
+        grandTotalRow.cells[26]?.textContent.replace(/,/g, '')
+      ) || 0;
+      const orderLaborAmount = parseFloat(
+        grandTotalRow.cells[28]?.dataset?.laborAmount ||
+        grandTotalRow.cells[28]?.textContent.replace(/,/g, '')
+      ) || 0;
+
+      // 단수정리 금액 읽기 (발주단가와 계약도급 모두)
+      const roundingRowIndex = Array.from(
+        document.querySelectorAll('.order-form-table tbody tr')
+      ).findIndex((row) => row.cells[2]?.textContent.trim() === '단수정리');
+
+      let roundingAmount = 0;
+      let contractRoundingAmount = 0;
+      if (roundingRowIndex !== -1) {
+        const roundingRow = document.querySelectorAll('.order-form-table tbody tr')[roundingRowIndex];
+        // data 속성에서 원본 값 읽기 (없으면 textContent 파싱)
+        roundingAmount = parseFloat(
+          roundingRow.cells[32]?.dataset?.orderRounding ||
+          roundingRow.cells[32]?.textContent.replace(/,/g, '')
+        ) || 0;
+        contractRoundingAmount = parseFloat(
+          roundingRow.cells[23]?.dataset?.contractRounding ||
+          roundingRow.cells[23]?.textContent.replace(/,/g, '')
+        ) || 0;
+      }
+
+      console.log(`  📐 단수정리 - 발주단가: ${roundingAmount.toLocaleString()}, 계약도급: ${contractRoundingAmount.toLocaleString()}`);
+
+      // 총계 금액 재계산 (자재비 + 노무비 + 단수정리) - 경비 중복 제거, 고정소수점 계산
+      const orderGrandTotal = Math.round(
+        (orderMaterialAmount + orderLaborAmount + roundingAmount) * 100
+      ) / 100;
+      const contractGrandTotal = Math.round(
+        (contractMaterialAmount + contractLaborAmount + contractRoundingAmount) * 100
+      ) / 100;
+
+      console.log(
+        `  💵 총계 금액: 계약도급=${contractGrandTotal.toFixed(2)}, 발주단가=${orderGrandTotal.toFixed(2)}`
+      );
+
+      // 총계 행 업데이트
+      // 계약도급 경비
+      if (grandTotalRow.cells[21]) {
+        grandTotalRow.cells[21].textContent = totalContractExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      // 계약도급 합계 금액
+      if (grandTotalRow.cells[23]) {
+        grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      // 발주단가 경비 금액
+      if (grandTotalRow.cells[30]) {
+        grandTotalRow.cells[30].textContent = totalOrderExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+      // 발주단가 합계 금액
+      if (grandTotalRow.cells[32]) {
+        grandTotalRow.cells[32].textContent = orderGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      console.log('✅ 총계 행 업데이트 완료');
+    } else {
+      console.log('❌ 총계 행을 찾을 수 없음');
     }
-
-    console.log(`  📐 단수정리 - 발주단가: ${roundingAmount.toLocaleString()}, 계약도급: ${contractRoundingAmount.toLocaleString()}`);
-
-    // 총계 금액 재계산 (자재비 + 노무비 + 단수정리) - 경비 중복 제거, 고정소수점 계산
-    const orderGrandTotal = Math.round(
-      (orderMaterialAmount + orderLaborAmount + roundingAmount) * 100
-    ) / 100;
-    const contractGrandTotal = Math.round(
-      (contractMaterialAmount + contractLaborAmount + contractRoundingAmount) * 100
-    ) / 100;
-
-    console.log(
-      `  💵 총계 금액: 계약도급=${contractGrandTotal.toFixed(2)}, 발주단가=${orderGrandTotal.toFixed(2)}`
-    );
-
-    // 총계 행 업데이트
-    // 계약도급 경비
-    if (grandTotalRow.cells[21]) {
-      grandTotalRow.cells[21].textContent = totalContractExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-    // 계약도급 합계 금액
-    if (grandTotalRow.cells[23]) {
-      grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-
-    // 발주단가 경비
-    if (grandTotalRow.cells[30]) {
-      grandTotalRow.cells[30].textContent = totalOrderExpenseAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-    // 발주단가 합계 금액
-    if (grandTotalRow.cells[32]) {
-      grandTotalRow.cells[32].textContent = orderGrandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-    }
-
-    console.log('✅ 총계 행 업데이트 완료');
-  } else {
-    console.log('❌ 총계 행을 찾을 수 없음');
   }
 
   // ❌ 단수정리 행 재계산 로직 제거됨
@@ -6171,35 +6205,10 @@ function updateContractPricesRealtime() {
       return; // 다른 처리 건너뛰기
     }
 
-    // 타입 요약 행은 "1-1", "1-2" 같은 형식
+    // 타입 요약 행은 "1-1", "1-2" 같은 형식 - 빈 셀이므로 건너뜀
     if (noText && /^\d+-\d+$/.test(noText)) {
-      console.log(`⏭️ 타입 요약 행 자재비/노무비 건너뛰기: ${noText}`);
-
-      // ✅ 타입 요약 행은 합계만 업데이트 (자재비/노무비는 빈칸 유지)
-      const orderTotalPriceCell = row.querySelector('.order-total-price');
-      const orderTotalAmountCell = row.querySelector('.order-total-amount');
-
-      const orderTotalPrice =
-        parseFloat(orderTotalPriceCell?.textContent.replace(/,/g, '')) || 0;
-      const orderTotalAmount =
-        parseFloat(orderTotalAmountCell?.textContent.replace(/,/g, '')) || 0;
-
-      const contractTotalPrice = Math.round((orderTotalPrice * contractRatio) * 100) / 100;
-      const contractTotalAmount = Math.round((orderTotalAmount * contractRatio) * 100) / 100;
-
-      const contractTotalPriceCell = row.querySelector('.contract-total-price');
-      const contractTotalAmountCell = row.querySelector(
-        '.contract-total-amount'
-      );
-
-      if (contractTotalPriceCell)
-        contractTotalPriceCell.textContent =
-          contractTotalPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      if (contractTotalAmountCell)
-        contractTotalAmountCell.textContent =
-          contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-      return; // 자재비/노무비 업데이트는 건너뛰기
+      console.log(`⏭️ 타입 요약 행 건너뜀 (빈 셀): ${noText}`);
+      return; // 타입 요약 행은 빈 셀 유지
     }
 
     // ✅ 소계/총계 행만 자재비/노무비 업데이트
@@ -6306,8 +6315,8 @@ function updateContractPricesRealtime() {
 
   console.log(`✅ 간접비 행 ${indirectRows.length}개 업데이트 완료`);
 
-  // ✅ 소계 행 업데이트 (경비 포함)
-  updateSubtotalRows();
+  // ✅ 소계 행 업데이트 (경비 포함, 발주단가는 업데이트하지 않음)
+  updateSubtotalRows(true);  // skipOrderUpdate = true: 조정비율 변경 시 발주단가 총계 유지
 
   // ✅ 단수정리 행 업데이트 (회색 배경 #e0e0e0)
   const roundingRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #e0e0e0"]');
@@ -6378,115 +6387,61 @@ function updateContractPricesRealtime() {
 
   console.log(`✅ 단수정리 행 ${roundingRows.length}개 업데이트 완료`);
 
-  // ✅ 타입별 단수정리 합산 행 업데이트 (밝은 노란색 배경 #fff9c4, "단수정리" 라벨)
-  const typeTotalRoundingRow = document.querySelector('.order-form-table tbody tr[style*="#fff9c4"]');
+  // ✅ 타입별 단수정리 합산 행 업데이트 (밝은 노란색 배경 #fff9c4) - 모든 벽체 처리
+  const typeTotalRoundingRows = document.querySelectorAll('.order-form-table tbody tr[style*="#fff9c4"]');
+  console.log(`🔄 타입별 단수정리 합산 행 ${typeTotalRoundingRows.length}개 재계산 시작`);
 
-  if (typeTotalRoundingRow) {
-    console.log('🔄 타입별 단수정리 합산 행 재계산 시작');
-
-    // ✅ 개별 타입별 단수정리 행들의 값을 합산 (예: "단수정리 (스터드)", "단수정리 (석고보드 9.5T)")
-    const typeRoundingRows = Array.from(roundingRows).filter(row => {
-      const label = row.cells[2]?.textContent.trim();
-      return label && label.includes('단수정리') && label !== '단수정리';
-    });
-
-    let orderRoundingSum = 0;
-    let contractRoundingSum = 0;
-
-    console.log(`  타입별 단수정리 행 개수: ${typeRoundingRows.length}`);
-
-    typeRoundingRows.forEach(row => {
-      const label = row.cells[2]?.textContent.trim();
-      const orderRounding = parseFloat(row.cells[32]?.textContent.replace(/,/g, '')) || 0;
-      const contractRounding = parseFloat(row.cells[23]?.textContent.replace(/,/g, '')) || 0;
-
-      console.log(`  - ${label}: 발주단가=${orderRounding.toLocaleString()}, 계약도급=${contractRounding.toLocaleString()}`);
-
-      orderRoundingSum += orderRounding;
-      contractRoundingSum += contractRounding;
-    });
-
-    console.log(`  발주단가 단수정리 합산: ${orderRoundingSum.toLocaleString()}`);
-    console.log(`  계약도급 단수정리 합산: ${contractRoundingSum.toLocaleString()}`);
-
-    // 발주단가 단수정리 합산 업데이트 (32번 셀, 소수점 2자리)
-    if (typeTotalRoundingRow.cells[32]) {
-      typeTotalRoundingRow.cells[32].textContent = orderRoundingSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  typeTotalRoundingRows.forEach((typeTotalRoundingRow, idx) => {
+    const label = typeTotalRoundingRow.cells[2]?.textContent.trim();
+    if (!label || label !== '단수정리') {
+      return; // "단수정리" 라벨이 아니면 건너뜀
     }
+
+    console.log(`  📝 단수정리 합산 행 ${idx + 1} 처리 중...`);
+
+    // 발주단가에서 값을 읽어서 조정비율 적용
+    const orderRoundingAmount = parseFloat(typeTotalRoundingRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
+    const contractRoundingAmount = Math.round(orderRoundingAmount * contractRatio * 100) / 100;
+
+    console.log(`    발주단가: ${orderRoundingAmount.toLocaleString()}, 계약도급: ${contractRoundingAmount.toLocaleString()}`);
 
     // 계약도급 단수정리 합산 업데이트 (23번 셀, 소수점 2자리)
     if (typeTotalRoundingRow.cells[23]) {
-      typeTotalRoundingRow.cells[23].textContent = contractRoundingSum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      typeTotalRoundingRow.cells[23].textContent = contractRoundingAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
+  });
 
-    console.log('✅ 타입별 단수정리 합산 행 업데이트 완료');
-  }
+  console.log('✅ 타입별 단수정리 합산 행 업데이트 완료');
 
-  // ✅ 총계 행 업데이트 (초록색 배경 #56ab2f) - 발주단가와 동일한 구조
-  const grandTotalRow = document.querySelector('.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]');
-  if (grandTotalRow) {
-    console.log('🔄 총계 행 재계산 시작 (소계 행들 합산 - 발주단가와 동일)');
+  // ✅ 총계 행 업데이트 (초록색 배경 #56ab2f) - 모든 벽체 처리
+  const grandTotalRows = document.querySelectorAll('.order-form-table tbody tr[style*="linear-gradient(135deg, #56ab2f"]');
+  console.log(`🔄 총계 행 ${grandTotalRows.length}개 재계산 시작 (발주단가 × 조정비율 방식)`);
 
-    const allRows = Array.from(document.querySelectorAll('.order-form-table tbody tr'));
+  grandTotalRows.forEach((grandTotalRow, idx) => {
+    console.log(`  📝 총계 행 ${idx + 1} 처리 중...`);
 
-    // 1. "소계 (직접자재)" 행 찾기
-    let directSubtotalRow = null;
-    let indirectSubtotalRow = null;
+    // ✅ 발주단가 총계에서 값을 읽어서 조정비율 적용
+    const orderMatAmount = parseFloat(grandTotalRow.cells[26]?.textContent.replace(/,/g, '')) || 0;
+    const orderLabAmount = parseFloat(grandTotalRow.cells[28]?.textContent.replace(/,/g, '')) || 0;
+    const orderTotalAmount = parseFloat(grandTotalRow.cells[32]?.textContent.replace(/,/g, '')) || 0;
 
-    for (const row of allRows) {
-      const label = row.cells[2]?.textContent.trim();
-      if (label === '소계 (직접자재)') {
-        directSubtotalRow = row;
-      } else if (label === '소계 (간접비)') {
-        indirectSubtotalRow = row;
-      }
-    }
+    console.log(`    📊 발주단가 - 자재: ${orderMatAmount.toLocaleString()}, 노무: ${orderLabAmount.toLocaleString()}, 합계: ${orderTotalAmount.toLocaleString()}`);
 
-    if (!directSubtotalRow || !indirectSubtotalRow) {
-      console.log('  ⚠️ 소계 행을 찾을 수 없음');
-      return;
-    }
+    // 계약도급 금액 = 발주단가 금액 × 조정비율
+    const contractMatAmount = Math.round(orderMatAmount * contractRatio * 100) / 100;
+    const contractLabAmount = Math.round(orderLabAmount * contractRatio * 100) / 100;
+    const contractTotalAmount = Math.round(orderTotalAmount * contractRatio * 100) / 100;
 
-    // 2. ✅ 계약도급 총계만 재계산 (소계 행들 합산)
-    // 계약도급: 17번 셀(자재비), 19번 셀(노무비)
-    const contractDirectMat = parseFloat(directSubtotalRow.cells[17]?.textContent.replace(/,/g, '')) || 0;
-    const contractDirectLab = parseFloat(directSubtotalRow.cells[19]?.textContent.replace(/,/g, '')) || 0;
-    const contractIndirectMat = parseFloat(indirectSubtotalRow.cells[17]?.textContent.replace(/,/g, '')) || 0;
-    const contractIndirectLab = parseFloat(indirectSubtotalRow.cells[19]?.textContent.replace(/,/g, '')) || 0;
+    console.log(`    💰 계약도급 (×${contractRatio}) - 자재: ${contractMatAmount.toLocaleString()}, 노무: ${contractLabAmount.toLocaleString()}, 합계: ${contractTotalAmount.toLocaleString()}`);
 
-    const contractMaterialTotal = contractDirectMat + contractIndirectMat;
-    const contractLaborTotal = contractDirectLab + contractIndirectLab;
+    // 총계 행 업데이트 (계약도급만)
+    if (grandTotalRow.cells[17]) grandTotalRow.cells[17].textContent = contractMatAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (grandTotalRow.cells[19]) grandTotalRow.cells[19].textContent = contractLabAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    if (grandTotalRow.cells[21]) grandTotalRow.cells[21].textContent = '0.00';
+    if (grandTotalRow.cells[23]) grandTotalRow.cells[23].textContent = contractTotalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  });
 
-    // 3. ✅ 계약도급 단수정리만 합산
-    let contractRoundingSum = 0;
-
-    for (const row of allRows) {
-      const label = row.cells[2]?.textContent.trim() || '';
-
-      // 단수정리 행만 합산
-      if (label.includes('단수정리') && (row.getAttribute('style') || '').includes('#e0e0e0')) {
-        const contractRounding = parseFloat(row.cells[23]?.textContent.replace(/,/g, '')) || 0;
-        contractRoundingSum += contractRounding;
-
-        console.log(`  단수정리 발견: ${label} - 계약: ${contractRounding.toLocaleString()}`);
-      }
-    }
-
-    // 4. ✅ 계약도급 총계 = 소계합 + 단수정리합
-    const contractGrandTotal = contractMaterialTotal + contractLaborTotal + contractRoundingSum;
-
-    console.log(`  💰 계약도급 - 자재: ${contractMaterialTotal.toLocaleString()}, 노무: ${contractLaborTotal.toLocaleString()}, 단수정리: ${contractRoundingSum.toLocaleString()}`);
-    console.log(`  💰 계약도급 총계: ${contractGrandTotal.toLocaleString()}`);
-
-    // 6. ✅ 총계 행 업데이트 (계약도급만, 발주단가는 초기값 유지)
-    // 계약도급 (17, 19, 21, 23번 셀)
-    if (grandTotalRow.cells[17]) grandTotalRow.cells[17].textContent = contractMaterialTotal.toLocaleString();
-    if (grandTotalRow.cells[19]) grandTotalRow.cells[19].textContent = contractLaborTotal.toLocaleString();
-    if (grandTotalRow.cells[21]) grandTotalRow.cells[21].textContent = '0'; // 경비는 0
-    if (grandTotalRow.cells[23]) grandTotalRow.cells[23].textContent = contractGrandTotal.toLocaleString();
-
-    console.log('✅ 총계 행 업데이트 완료 (발주단가는 초기값 유지)');
-  }
+  console.log('✅ 총계 행 업데이트 완료');
 }
 
 /**
