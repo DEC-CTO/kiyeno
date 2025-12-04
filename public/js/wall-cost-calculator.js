@@ -11,6 +11,45 @@ let isOrderFormRendered = false;
 let isPriceComparisonRendered = false;
 let orderFormDirectCosts = []; // 발주서 직접비 데이터 저장
 
+// 소수점 표시 설정 (기본: 숨김 - 정수로 표시)
+let showDecimalPlaces = false;
+
+/**
+ * 금액 포맷팅 헬퍼 함수 (표시용만, 계산에 영향 없음)
+ * @param {number} value - 포맷팅할 숫자 값
+ * @returns {string} - 포맷팅된 문자열
+ */
+function formatCurrency(value) {
+  if (showDecimalPlaces) {
+    return value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }
+  return Math.round(value).toLocaleString('en-US');
+}
+
+/**
+ * 모든 금액 셀의 소수점 표시를 업데이트하는 함수 (계산 로직 변경 없음)
+ */
+function updateAllCurrencyDisplay() {
+  const currencyCells = document.querySelectorAll('.order-form-table .number-cell');
+
+  currencyCells.forEach(cell => {
+    // 입력 필드가 있는 셀은 제외
+    if (cell.querySelector('input')) return;
+
+    const text = cell.textContent.trim();
+    if (!text) return;
+
+    // 쉼표 제거 후 숫자로 변환
+    const value = parseFloat(text.replace(/,/g, ''));
+    if (isNaN(value)) return;
+
+    // 포맷팅된 값으로 업데이트
+    cell.textContent = formatCurrency(value);
+  });
+
+  console.log('✅ 모든 금액 셀 소수점 표시 업데이트 완료');
+}
+
 /**
  * 벽체 비용 계산 시작
  */
@@ -2279,6 +2318,21 @@ async function renderOrderFormTab() {
       // 실시간 업데이트 (재렌더링 없이 DOM만 수정, Debounce 적용으로 렉 방지)
       debounceUpdateContractPrices();
     });
+  }
+
+  // 소수점 표시 체크박스 이벤트 리스너
+  const showDecimalCheckbox = document.getElementById('showDecimalCheckbox');
+  if (showDecimalCheckbox) {
+    showDecimalCheckbox.addEventListener('change', function () {
+      showDecimalPlaces = this.checked;
+      console.log('🔢 소수점 표시 설정 변경:', showDecimalPlaces ? '표시' : '숨김');
+      updateAllCurrencyDisplay();  // 표시만 업데이트 (계산 로직 변경 없음)
+    });
+  }
+
+  // ✅ 초기 렌더링 시 소수점 표시 설정 적용 (기본: 정수 표시)
+  if (!showDecimalPlaces) {
+    updateAllCurrencyDisplay();
   }
 }
 
@@ -5351,10 +5405,14 @@ function generateOrderFormHeader() {
             <th rowspan="3">단위</th>
             <th rowspan="3">수량</th>
             <th colspan="8">
-                계약도급
-                <input type="text" id="contractRatioInput" value="1.2"
-                       style="width: 50px; margin-left: 5px; text-align: center; font-size: 0.9em;"
-                       placeholder="1.2" />
+                <div style="display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap;">
+                    계약도급
+                    <input type="text" id="contractRatioInput" value="1.2"
+                           style="width: 50px; text-align: center; font-size: 0.9em;" placeholder="1.2" />
+                    <label style="font-size: 0.8em; font-weight: normal; color: #fff; cursor: pointer; white-space: nowrap;">
+                        <input type="checkbox" id="showDecimalCheckbox" style="cursor: pointer; vertical-align: middle; margin-right: 3px;" />소수점 표시
+                    </label>
+                </div>
             </th>
             <th rowspan="3">비고</th>
             <th colspan="8">발주단가</th>

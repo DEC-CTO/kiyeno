@@ -14,7 +14,12 @@
       "Bash(tasklist:*)",
       "Bash(findstr:*)",
       "Bash(taskkill:*)",
-      "Bash(cmd //c \"taskkill /F /PID 45184 & taskkill /F /PID 41228\")"
+      "Bash(cmd //c \"taskkill /F /PID 45184 & taskkill /F /PID 41228\")",
+      "Bash(powershell -Command:*)",
+      "Bash(node -e:*)",
+      "Bash(node replace-script.js:*)",
+      "Bash(git checkout:*)",
+      "Bash(del \"c:\\ClaudeProject\\ReReKiyeno\\replace-script.js\")"
     ]
   }
 }
