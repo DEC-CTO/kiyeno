@@ -6500,6 +6500,11 @@ function updateContractPricesRealtime() {
   });
 
   console.log('✅ 총계 행 업데이트 완료');
+
+  // ✅ 소수점 표시 설정 적용 (체크박스 해제 시 정수로 표시)
+  if (!showDecimalPlaces) {
+    updateAllCurrencyDisplay();
+  }
 }
 
 /**
