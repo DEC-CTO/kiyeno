@@ -47,6 +47,10 @@ namespace QTO
         // 벽체 타입 생성 데이터
         public static List<WallTypeCreationData> wallTypesToCreate = new List<WallTypeCreationData>();
 
+        // 벽체 색상 매핑 데이터
+        public static List<WallColorMapping> wallColorMappings = new List<WallColorMapping>();
+        public static List<string> elementsToClearColor = new List<string>();
+
         // WebSocket 클라이언트 (순수 WebSocket)
         private ClientWebSocket webSocket;
         private CancellationTokenSource cancellationTokenSource;
@@ -315,6 +319,37 @@ namespace QTO
                             m_exEvent.Raise();
                         }
                         break;
+
+                    case "APPLY_WALL_COLORS":
+                        if (command.Data != null)
+                        {
+                            var data = command.Data as JObject;
+                            if (data?["ColorMappings"] != null)
+                            {
+                                wallColorMappings = data["ColorMappings"].ToObject<List<WallColorMapping>>();
+                                UpdateStatus($"벽체 색상 적용 요청 받음: {wallColorMappings.Count}개 타입");
+                                DozeOff();
+                                m_behavior = "APPLY_WALL_COLORS";
+                                m_exEvent.Raise();
+                            }
+                        }
+                        break;
+
+                    case "CLEAR_WALL_COLORS":
+                        if (command.Data != null)
+                        {
+                            var data = command.Data as JObject;
+                            if (data?["ElementIds"] != null)
+                            {
+                                elementsToClearColor = data["ElementIds"].ToObject<List<string>>();
+                                UpdateStatus($"벽체 색상 초기화 요청 받음: {elementsToClearColor.Count}개 객체");
+                                DozeOff();
+                                m_behavior = "CLEAR_WALL_COLORS";
+                                m_exEvent.Raise();
+                            }
+                        }
+                        break;
+
                     case "GET_REVIT_INFO":
                         SendRevitInfo();
                         break;
@@ -1312,6 +1347,14 @@ namespace QTO
                 {
                     CreateWallTypesInRevit(m_doc, app);
                 }
+                else if (QTOForm.m_behavior == "APPLY_WALL_COLORS")
+                {
+                    ApplyWallColors(m_uidoc, m_doc);
+                }
+                else if (QTOForm.m_behavior == "CLEAR_WALL_COLORS")
+                {
+                    ClearWallColors(m_uidoc, m_doc);
+                }
 
                 else if (QTOForm.m_behavior == "None")
                 {
@@ -1738,6 +1781,149 @@ namespace QTO
             return walls;
         }
 
+        /// <summary>
+        /// 벽체에 색상 적용
+        /// </summary>
+        private void ApplyWallColors(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                var colorMappings = QTOForm.wallColorMappings;
+                if (colorMappings == null || colorMappings.Count == 0)
+                {
+                    form?.UpdateStatus("적용할 색상 데이터가 없습니다.");
+                    return;
+                }
+
+                View activeView = doc.ActiveView;
+                int successCount = 0;
+
+                using (Transaction trans = new Transaction(doc, "벽체 색상 적용"))
+                {
+                    trans.Start();
+
+                    foreach (var mapping in colorMappings)
+                    {
+                        // Revit Color 생성
+                        Autodesk.Revit.DB.Color revitColor = new Autodesk.Revit.DB.Color(
+                            (byte)mapping.Color.R,
+                            (byte)mapping.Color.G,
+                            (byte)mapping.Color.B
+                        );
+
+                        // 그래픽 오버라이드 설정
+                        OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+                        ogs.SetSurfaceForegroundPatternColor(revitColor);
+                        ogs.SetSurfaceBackgroundPatternColor(revitColor);
+
+                        // 솔리드 패턴 적용
+                        FillPatternElement solidPattern = GetSolidFillPattern(doc);
+                        if (solidPattern != null)
+                        {
+                            ogs.SetSurfaceForegroundPatternId(solidPattern.Id);
+                            ogs.SetSurfaceBackgroundPatternId(solidPattern.Id);
+                        }
+
+                        // 투명도 설정 (30%)
+                        //ogs.SetSurfaceTransparency(30);
+
+                        // 각 ElementId에 오버라이드 적용
+                        foreach (string elementIdStr in mapping.ElementIds)
+                        {
+                            if (int.TryParse(elementIdStr, out int id))
+                            {
+                                ElementId elemId = new ElementId(id);
+                                if (doc.GetElement(elemId) != null)
+                                {
+                                    activeView.SetElementOverrides(elemId, ogs);
+                                    successCount++;
+                                }
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
+
+                form?.UpdateStatus($"✅ 색상 적용 완료: {successCount}개 객체");
+            }
+            catch (Exception ex)
+            {
+                form?.UpdateStatus($"❌ 색상 적용 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 솔리드 채우기 패턴 가져오기
+        /// </summary>
+        private FillPatternElement GetSolidFillPattern(Document doc)
+        {
+            FilteredElementCollector collector = new FilteredElementCollector(doc);
+            collector.OfClass(typeof(FillPatternElement));
+
+            foreach (FillPatternElement fpe in collector)
+            {
+                FillPattern fp = fpe.GetFillPattern();
+                if (fp != null && fp.IsSolidFill)
+                {
+                    return fpe;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 벽체 색상 초기화
+        /// </summary>
+        private void ClearWallColors(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                var elementIds = QTOForm.elementsToClearColor;
+                if (elementIds == null || elementIds.Count == 0)
+                {
+                    form?.UpdateStatus("초기화할 객체가 없습니다.");
+                    return;
+                }
+
+                View activeView = doc.ActiveView;
+                int successCount = 0;
+
+                using (Transaction trans = new Transaction(doc, "벽체 색상 초기화"))
+                {
+                    trans.Start();
+
+                    // 기본 오버라이드 설정 (모든 오버라이드 제거)
+                    OverrideGraphicSettings defaultOgs = new OverrideGraphicSettings();
+
+                    foreach (string elementIdStr in elementIds)
+                    {
+                        if (int.TryParse(elementIdStr, out int id))
+                        {
+                            ElementId elemId = new ElementId(id);
+                            if (doc.GetElement(elemId) != null)
+                            {
+                                activeView.SetElementOverrides(elemId, defaultOgs);
+                                successCount++;
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
+
+                // 초기화 후 리스트 클리어
+                QTOForm.elementsToClearColor.Clear();
+
+                form?.UpdateStatus($"✅ 색상 초기화 완료: {successCount}개 객체");
+            }
+            catch (Exception ex)
+            {
+                form?.UpdateStatus($"❌ 색상 초기화 오류: {ex.Message}");
+            }
+        }
+
         public string GetName()
         {
             return "WallSelectionHandler";
@@ -1769,5 +1955,25 @@ namespace QTO
         {
             return false;
         }
+    }
+
+    /// <summary>
+    /// 벽체 색상 매핑 데이터 클래스
+    /// </summary>
+    public class WallColorMapping
+    {
+        public string Name { get; set; }
+        public List<string> ElementIds { get; set; }
+        public ColorRGB Color { get; set; }
+    }
+
+    /// <summary>
+    /// RGB 색상 데이터 클래스
+    /// </summary>
+    public class ColorRGB
+    {
+        public int R { get; set; }
+        public int G { get; set; }
+        public int B { get; set; }
     }
 }

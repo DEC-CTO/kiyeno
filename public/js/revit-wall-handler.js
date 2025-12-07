@@ -12,6 +12,9 @@ let pendingWallData = null; // 실명 입력 대기 중인 벽체 데이터
 let selectedNames = [];  // 선택된 Name 목록
 let selectedLevels = []; // 선택된 Level 목록
 
+// 벽체 색상 매핑 저장소 (Name → {color, elementIds})
+let wallColorMap = new Map();
+
 // 소수점 반올림 함수
 // 면적: 2자리 (3째자리 반올림), 길이/높이/두께: 3자리 (4째자리 반올림)
 function roundToDecimals(value, decimals) {
@@ -1619,6 +1622,265 @@ window.clearRevitHighlights = function() {
     console.log(`🔄 ${highlightedRows.length}개 행의 하이라이트가 제거되었습니다.`);
 };
 
+// =============================================================================
+// 벽체 색상 반영 기능
+// =============================================================================
+
+/**
+ * HSL을 RGB로 변환
+ */
+function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+        r = g = b = l;
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
+
+/**
+ * RGB를 HEX로 변환
+ */
+function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+}
+
+/**
+ * 구분하기 쉬운 랜덤 색상 배열 생성 (Golden Ratio 방식)
+ * @param {number} count - 필요한 색상 개수
+ * @returns {Array<{hex: string, rgb: {r, g, b}}>} 색상 배열
+ */
+function generateDistinctColors(count) {
+    const colors = [];
+    const goldenRatioConjugate = 0.618033988749895;
+    let hue = Math.random(); // 시작점 랜덤화
+
+    for (let i = 0; i < count; i++) {
+        hue = (hue + goldenRatioConjugate) % 1;
+        const saturation = 0.65 + Math.random() * 0.15; // 65-80%
+        const lightness = 0.55 + Math.random() * 0.15;  // 55-70%
+
+        const rgb = hslToRgb(hue, saturation, lightness);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+
+        colors.push({
+            hex: hex,
+            rgb: rgb
+        });
+    }
+
+    return colors;
+}
+
+/**
+ * Name별로 벽체 그룹화
+ */
+function groupWallsByName(walls) {
+    const groups = new Map();
+
+    walls.forEach(wall => {
+        const name = wall.Name || '미지정';
+        if (!groups.has(name)) {
+            groups.set(name, []);
+        }
+        groups.get(name).push(wall);
+    });
+
+    return groups;
+}
+
+/**
+ * 웹 테이블에 색상 적용
+ */
+function applyColorsToTable() {
+    const tableRows = document.querySelectorAll('#revitTableBody tr');
+
+    tableRows.forEach((row, index) => {
+        const wall = filteredRevitWallData[index];
+        if (!wall) return;
+
+        const name = wall.Name || '미지정';
+        const colorData = wallColorMap.get(name);
+
+        if (colorData) {
+            // 배경색 적용 (투명도 추가하여 가독성 확보)
+            row.style.backgroundColor = colorData.color.hex + '40'; // 25% 투명도
+            row.style.borderLeft = `4px solid ${colorData.color.hex}`;
+            row.classList.add('wall-colored');
+        }
+    });
+
+    console.log('✅ 테이블 색상 적용 완료');
+}
+
+/**
+ * Revit으로 색상 데이터 전송
+ */
+async function sendColorsToRevit() {
+    // Revit 전송용 데이터 구성
+    const colorData = [];
+
+    wallColorMap.forEach((value, name) => {
+        colorData.push({
+            Name: name,
+            ElementIds: value.elementIds,
+            Color: {
+                R: value.color.rgb.r,
+                G: value.color.rgb.g,
+                B: value.color.rgb.b
+            }
+        });
+    });
+
+    console.log('📤 Revit으로 색상 데이터 전송:', colorData);
+
+    // WebSocket을 통한 전송
+    if (window.socketService && window.socketService.isConnected) {
+        window.socketService.sendRevitCommand('APPLY_WALL_COLORS', {
+            ColorMappings: colorData
+        });
+        console.log('✅ WebSocket으로 색상 데이터 전송 완료');
+    } else {
+        console.warn('⚠️ Revit 연결 없음, 웹 색상만 적용됨');
+    }
+}
+
+/**
+ * 벽체 타입별 색상 적용 (웹 테이블 + Revit)
+ */
+window.applyWallColors = async function() {
+    console.log('🎨 벽체 색상 반영 시작');
+
+    // 데이터 확인
+    if (!filteredRevitWallData || filteredRevitWallData.length === 0) {
+        showToast('표시된 벽체 데이터가 없습니다.', 'warning');
+        return;
+    }
+
+    try {
+        // 1. Name별로 벽체 그룹화
+        const wallGroups = groupWallsByName(filteredRevitWallData);
+        const uniqueNames = Array.from(wallGroups.keys());
+
+        console.log(`📊 ${uniqueNames.length}개의 벽체 타입 발견`);
+
+        // 2. 색상 생성
+        const colors = generateDistinctColors(uniqueNames.length);
+
+        // 3. 색상 매핑 생성 및 저장
+        wallColorMap.clear();
+        uniqueNames.forEach((name, index) => {
+            const walls = wallGroups.get(name);
+            const elementIds = walls.map(w => w.Id).filter(id => id);
+
+            wallColorMap.set(name, {
+                color: colors[index],
+                elementIds: elementIds
+            });
+        });
+
+        // 4. 웹 테이블에 색상 적용
+        applyColorsToTable();
+
+        // 5. Revit에 색상 전송
+        await sendColorsToRevit();
+
+        showToast(`${uniqueNames.length}개 벽체 타입에 색상이 적용되었습니다.`, 'success');
+
+    } catch (error) {
+        console.error('❌ 색상 적용 오류:', error);
+        showToast('색상 적용 중 오류가 발생했습니다.', 'error');
+    }
+};
+
+/**
+ * 웹 테이블 색상 제거
+ */
+function clearTableColors() {
+    const coloredRows = document.querySelectorAll('#revitTableBody tr.wall-colored');
+
+    coloredRows.forEach(row => {
+        row.style.backgroundColor = '';
+        row.style.borderLeft = '';
+        row.classList.remove('wall-colored');
+    });
+
+    console.log(`✅ ${coloredRows.length}개 행 색상 제거 완료`);
+}
+
+/**
+ * Revit 색상 초기화 전송
+ */
+async function sendClearColorsToRevit() {
+    // 초기화할 ElementId 수집
+    const allElementIds = [];
+    wallColorMap.forEach(value => {
+        allElementIds.push(...value.elementIds);
+    });
+
+    if (allElementIds.length === 0) {
+        console.log('ℹ️ 초기화할 색상이 없습니다.');
+        return;
+    }
+
+    console.log('📤 Revit으로 색상 초기화 전송:', allElementIds.length, '개');
+
+    if (window.socketService && window.socketService.isConnected) {
+        window.socketService.sendRevitCommand('CLEAR_WALL_COLORS', {
+            ElementIds: allElementIds
+        });
+        console.log('✅ WebSocket으로 색상 초기화 전송 완료');
+    } else {
+        console.warn('⚠️ Revit 연결 없음');
+    }
+}
+
+/**
+ * 벽체 색상 초기화 (웹 테이블 + Revit)
+ */
+window.clearWallColors = async function() {
+    console.log('🧹 벽체 색상 초기화 시작');
+
+    try {
+        // 1. Revit 색상 초기화 전송 (먼저 전송해야 elementIds 사용 가능)
+        await sendClearColorsToRevit();
+
+        // 2. 웹 테이블 색상 제거
+        clearTableColors();
+
+        // 3. 색상 맵 초기화
+        wallColorMap.clear();
+
+        showToast('벽체 색상이 초기화되었습니다.', 'success');
+
+    } catch (error) {
+        console.error('❌ 색상 초기화 오류:', error);
+        showToast('색상 초기화 중 오류가 발생했습니다.', 'error');
+    }
+};
 
 // 페이지 로드 시 드롭다운 초기화
 document.addEventListener('DOMContentLoaded', function() {
