@@ -19,7 +19,11 @@
       "Bash(node -e:*)",
       "Bash(node replace-script.js:*)",
       "Bash(git checkout:*)",
-      "Bash(del \"c:\\ClaudeProject\\ReReKiyeno\\replace-script.js\")"
+      "Bash(del \"c:\\ClaudeProject\\ReReKiyeno\\replace-script.js\")",
+      "Skill(document-skills:docx)",
+      "Skill(document-skills:docx:*)",
+      "Bash(node create-docx.js:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
