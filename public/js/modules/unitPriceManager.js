@@ -1484,9 +1484,18 @@ function addComponentRow(componentData = null) {
 function removeComponentRow(button) {
     const row = button.closest('tr');
     if (row) {
-        row.remove();
+        // 품명 정보 추출 (첫 번째 td의 select 또는 텍스트)
+        const firstCell = row.querySelector('td:first-child');
+        const itemName = firstCell?.querySelector('select')?.selectedOptions[0]?.text
+                      || firstCell?.textContent?.trim()
+                      || '이 구성품';
+
+        // 확인 대화상자 표시
+        if (confirm(`"${itemName}"을(를) 삭제하시겠습니까?`)) {
+            row.remove();
+            calculateGrandTotal();
+        }
     }
-    calculateGrandTotal();
 }
 
 // 행별 계산

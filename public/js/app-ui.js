@@ -1026,8 +1026,14 @@ function createModal(title, content, buttons = []) {
     `;
     
     const modalHeader = document.createElement('div');
+    modalHeader.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;';
     modalHeader.innerHTML = `
-        <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600;">${title}</h3>
+        <h3 style="margin: 0; font-size: 18px; font-weight: 600;">${title}</h3>
+        <button class="modal-close-btn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6b7280; padding: 0; line-height: 1; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: all 0.2s;"
+                onmouseover="this.style.background='#f3f4f6'; this.style.color='#1f2937';"
+                onmouseout="this.style.background='none'; this.style.color='#6b7280';">
+            &times;
+        </button>
     `;
     
     const modalContent = document.createElement('div');
@@ -1035,16 +1041,8 @@ function createModal(title, content, buttons = []) {
     
     const modalFooter = document.createElement('div');
     modalFooter.style.cssText = 'margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end;';
-    
-    // 기본 닫기 버튼이 없으면 추가
-    if (buttons.length === 0) {
-        buttons.push({
-            text: '닫기',
-            class: 'btn-secondary',
-            onClick: (modal) => modal.remove()
-        });
-    }
-    
+
+    // 버튼이 있을 때만 표시 (상단 X 버튼이 기본 닫기 역할)
     buttons.forEach(button => {
         const btn = document.createElement('button');
         btn.textContent = button.text;
@@ -1067,7 +1065,13 @@ function createModal(title, content, buttons = []) {
     modal.appendChild(modalContent);
     modal.appendChild(modalFooter);
     modalOverlay.appendChild(modal);
-    
+
+    // X 버튼 클릭 이벤트 추가
+    const closeBtn = modalHeader.querySelector('.modal-close-btn');
+    if (closeBtn) {
+        closeBtn.onclick = () => modalOverlay.remove();
+    }
+
     // 클릭 외부 영역 클릭 시 닫기
     modalOverlay.onclick = (e) => {
         if (e.target === modalOverlay) {

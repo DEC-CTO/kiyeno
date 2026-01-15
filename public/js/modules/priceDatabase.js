@@ -2864,20 +2864,23 @@ class PriceDatabase extends EventEmitter {
   }
 
   // 경량 자재 추가 (기존 코드 호환성)
-  addLightweightComponent(materialData) {
+  async addLightweightComponent(materialData) {
     try {
       // 캐시 초기화 강제
       this.getLightweightComponents();
 
-      // 새로운 ID 생성 (현재 최대 ID + 1)
-      const maxId = Math.max(
-        ...this.lightweightItemsCache.map(
-          (item) => parseInt(item.id.replace(/[A-Z]/g, '')) || 0
-        )
-      );
+      // 새로운 ID 생성 (현재 최대 ID + 1) - 빈 배열 처리 추가
+      let maxId = 0;
+      if (this.lightweightItemsCache && this.lightweightItemsCache.length > 0) {
+        maxId = Math.max(
+          ...this.lightweightItemsCache.map(
+            (item) => parseInt(item.id?.replace(/[A-Z]/g, '')) || 0
+          )
+        );
+      }
       const newId = `LC${String(maxId + 1).padStart(3, '0')}`;
 
-      // 새 자재 생성 (기본 노무비 설정 포함)
+      // 새 자재 생성 (입력된 노무비 설정 사용)
       const newMaterial = {
         id: newId,
         name: materialData.name,
@@ -2886,19 +2889,19 @@ class PriceDatabase extends EventEmitter {
         unit: materialData.unit,
         price: materialData.price,
         note: materialData.note || '',
-        laborCost: 0,
-        laborProductivity: 0,
-        laborCompensation: 0,
-        baseLabor: 0,
-        laborSettings: {
+        laborCost: materialData.laborCost || 0,
+        laborProductivity: materialData.laborProductivity || 0,
+        laborCompensation: materialData.laborCompensation || 0,
+        baseLabor: materialData.baseLabor || 0,
+        laborSettings: materialData.laborSettings || {
           workers: [{ type: '조공', cost: 0 }],
           productivity: 0,
           compensation: 0,
         },
-        workType1: '경량',
-        workType2: '경량',
-        location: '벽체',
-        work: '',
+        workType1: materialData.workType1 || '경량',
+        workType2: materialData.workType2 || '경량',
+        location: materialData.location || '벽체',
+        work: materialData.work || '',
       };
 
       // 메모리 내 데이터에 추가
@@ -2909,6 +2912,14 @@ class PriceDatabase extends EventEmitter {
         ...newMaterial,
         timestamp: new Date().toISOString(),
       });
+
+      // IndexedDB에 저장
+      try {
+        await this.lightweightComponents.put(newMaterial);
+        console.log('✅ 경량부품 IndexedDB 저장 완료:', newId);
+      } catch (dbError) {
+        console.error('❌ 경량부품 IndexedDB 저장 실패:', dbError);
+      }
 
       console.log('경량 자재 추가:', newId, materialData);
 

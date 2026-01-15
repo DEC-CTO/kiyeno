@@ -1410,9 +1410,7 @@ function showMaterialManagementModalDirectly() {
         </style>
     `;
     
-    createModal('자재 관리', content, [
-        { text: '닫기', class: 'btn-secondary', onClick: (modal) => modal.remove() }
-    ]);
+    createModal('자재 관리', content, []);
     
     // 기본으로 벽체 경량 자재 표시
     showLightweightMaterials();
@@ -2711,9 +2709,8 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                     <strong>색상 구분:</strong> 
                     <span style="color: #1e40af;">🔵 기본정보</span> | 
                     <span style="color: #dc2626;">🔴 가격/노무비</span> | 
-                    <span style="color: #16a34a;">🟢 공종/부위</span> | 
+                    <span style="color: #16a34a;">🟢 공종/부위</span> |
                     <span style="color: #6b7280;">⚪ 자동생성</span>
-                    <br><strong>*</strong> 필수 입력 항목 | 규격은 자재명에서 자동 추출됩니다.
                 </p>
             </div>
         </div>
@@ -2835,7 +2832,7 @@ function saveLightweightMaterial(modal = null) {
 }
 
 // 경량부품 추가 (편집 모달 재사용)
-function addLightweightMaterial(modal = null) {
+async function addLightweightMaterial(modal = null) {
     try {
         const materialData = {
             name: document.getElementById('editMaterialName')?.value.trim() || '',
@@ -2845,8 +2842,8 @@ function addLightweightMaterial(modal = null) {
             unit: document.getElementById('editMaterialUnit')?.value || 'M',
             price: parseInt(document.getElementById('editMaterialPrice')?.value.replace(/,/g, '')) || 0,
             laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value.replace(/,/g, '')) || 0,
-            laborProductivity: parseFloat(document.getElementById('editMaterialLaborProductivity')?.value) || 0,
-            laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 0,
+            laborProductivity: parseFloat(document.getElementById('editLightweightLaborProductivity')?.value) || 0,
+            laborCompensation: parseInt(document.getElementById('editLightweightLaborCompensation')?.value) || 0,
             workType1: document.getElementById('editMaterialWorkType1')?.value.trim() || '',
             workType2: document.getElementById('editMaterialWorkType2')?.value.trim() || '',
             location: document.getElementById('editMaterialLocation')?.value.trim() || '',
@@ -2887,16 +2884,21 @@ function addLightweightMaterial(modal = null) {
             throw new Error('올바른 자재비를 입력해주세요.');
         }
 
-        // 데이터베이스에 추가
-        const newMaterial = window.priceDB.addLightweightComponent(materialData);
-        
+        // 확인 대화상자 표시
+        if (!confirm(`"${materialData.name}"을(를) 추가하시겠습니까?`)) {
+            return;
+        }
+
+        // 데이터베이스에 추가 (async 함수로 변경됨)
+        const newMaterial = await window.priceDB.addLightweightComponent(materialData);
+
         if (newMaterial) {
             // UI 새로고침
             showLightweightMaterials();
-            
+
             // 성공 메시지
             showToast(`경량부품이 추가되었습니다: ${materialData.name}`, 'success');
-            
+
             // 서브 모달 닫기
             if (modal) {
                 closeSubModal(modal);
@@ -2922,8 +2924,8 @@ async function updateLightweightMaterial(materialId, modal = null) {
             unit: document.getElementById('editMaterialUnit')?.value || 'M',
             price: parseInt(document.getElementById('editMaterialPrice')?.value.replace(/,/g, '')) || 0,
             laborCost: parseInt(document.getElementById('editMaterialLaborCost')?.value.replace(/,/g, '')) || 0,
-            laborProductivity: parseFloat(document.getElementById('editMaterialLaborProductivity')?.value) || 0,
-            laborCompensation: parseInt(document.getElementById('editMaterialLaborCompensation')?.value) || 0,
+            laborProductivity: parseFloat(document.getElementById('editLightweightLaborProductivity')?.value) || 0,
+            laborCompensation: parseInt(document.getElementById('editLightweightLaborCompensation')?.value) || 0,
             workType1: document.getElementById('editMaterialWorkType1')?.value.trim() || '',
             workType2: document.getElementById('editMaterialWorkType2')?.value.trim() || '',
             location: document.getElementById('editMaterialLocation')?.value.trim() || '',
