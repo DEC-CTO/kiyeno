@@ -2177,7 +2177,7 @@ function showLightweightMaterials() {
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">공종1</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">공종2</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 80px; text-align: center;">부위</th>
-                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 120px; text-align: center;">작업</th>
+                        <th style="padding: 6px; border: 1px solid #ddd; min-width: 120px; text-align: center;">비고</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 160px; text-align: center;">관리</th>
                     </tr>
                     <tr style="background: #ffffff;">
@@ -2634,8 +2634,8 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                                style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">작업</label>
-                        <input type="text" id="editMaterialWork" value="${material.work || ''}" 
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">비고</label>
+                        <input type="text" id="editMaterialWork" value="${material.work || ''}"
                                style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
                     </div>
                 </div>
@@ -3722,19 +3722,37 @@ function toggleRevitDataSection() {
 // 경량부품 필터링 함수
 function filterLightweightMaterials() {
     if (!window.priceDB) return;
-    
+
     const filters = {
         category: document.getElementById('filterLightweightCategory')?.value.toLowerCase() || '',
         name: document.getElementById('filterLightweightName')?.value.toLowerCase() || '',
         spec: document.getElementById('filterLightweightSpec')?.value.toLowerCase() || ''
     };
-    
+
     const lightweightData = window.priceDB.getLightweightComponents();
     const filtered = lightweightData.items.filter(item => {
         const categoryName = lightweightData.categories[item.category]?.name || item.category;
-        
+
+        // 표시용 카테고리 이름 계산 (테이블에 표시되는 값과 동일하게)
+        let categoryDisplayName = '';
+        if (categoryName.includes('STUD')) {
+            categoryDisplayName = '스터드';
+        } else if (categoryName.includes('RUNNER')) {
+            categoryDisplayName = '런너';
+        } else if (item.name.includes('메거진피스')) {
+            categoryDisplayName = '피스';
+        } else if (item.name.includes('타정총알')) {
+            categoryDisplayName = '타정총알';
+        } else if (item.name.includes('용접봉')) {
+            categoryDisplayName = '용접봉';
+        } else {
+            categoryDisplayName = categoryName;
+        }
+
         return (
-            (filters.category === '' || categoryName.toLowerCase().includes(filters.category)) &&
+            (filters.category === '' ||
+             categoryName.toLowerCase().includes(filters.category) ||
+             categoryDisplayName.toLowerCase().includes(filters.category)) &&
             (filters.name === '' || item.name.toLowerCase().includes(filters.name)) &&
             (filters.spec === '' || (item.spec && item.spec.toLowerCase().includes(filters.spec)))
         );

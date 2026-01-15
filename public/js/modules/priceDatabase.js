@@ -528,7 +528,7 @@ class PriceDatabase extends EventEmitter {
           category: 'STUD_KS',
           name: '메탈 스터드 50형 ㉿',
           spec: '50형',
-          size: '0.8T*60*45',
+          size: '0.8T*50*45',
           unit: 'M',
           price: 1160,
           laborCost: 3696,
