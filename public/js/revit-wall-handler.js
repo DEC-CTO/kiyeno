@@ -1361,6 +1361,9 @@ window.applyRevitFilters = function() {
     // 테이블 업데이트
     updateRevitDataTable();
 
+    // 필터 적용 후 기존 색상 재적용
+    reapplyColorsToTable();
+
     console.log(`🔍 필터 적용됨: Name=${selectedNames.length}개, Level=${selectedLevels.length}개, 결과=${filteredRevitWallData.length}개`);
 };
 
@@ -1390,6 +1393,9 @@ window.clearRevitFilters = function() {
 
     // 테이블 업데이트
     updateRevitDataTable();
+
+    // 필터 초기화 후 기존 색상 재적용
+    reapplyColorsToTable();
 
     console.log('🔄 필터가 초기화되었습니다.');
 };
@@ -1713,12 +1719,20 @@ function groupWallsByName(walls) {
 }
 
 /**
- * 웹 테이블에 색상 적용
+ * 웹 테이블에 색상 적용 (체크박스 선택된 행만)
  */
 function applyColorsToTable() {
     const tableRows = document.querySelectorAll('#revitTableBody tr');
 
-    tableRows.forEach((row, index) => {
+    tableRows.forEach((row) => {
+        const checkbox = row.querySelector('.revit-row-checkbox');
+
+        // 체크되지 않은 행은 건너뛰기
+        if (!checkbox || !checkbox.checked) {
+            return;
+        }
+
+        const index = parseInt(row.getAttribute('data-wall-index'));
         const wall = filteredRevitWallData[index];
         if (!wall) return;
 
@@ -1770,27 +1784,46 @@ async function sendColorsToRevit() {
 
 /**
  * 벽체 타입별 색상 적용 (웹 테이블 + Revit)
+ * 체크박스로 선택된 벽체만 색상 적용
  */
 window.applyWallColors = async function() {
     console.log('🎨 벽체 색상 반영 시작');
 
-    // 데이터 확인
-    if (!filteredRevitWallData || filteredRevitWallData.length === 0) {
-        showToast('표시된 벽체 데이터가 없습니다.', 'warning');
+    // 1. 체크박스 선택 상태 확인
+    const checkedBoxes = document.querySelectorAll('.revit-row-checkbox:checked');
+
+    if (checkedBoxes.length === 0) {
+        showToast('색상을 적용할 벽체를 선택해주세요.', 'warning');
         return;
     }
 
     try {
-        // 1. Name별로 벽체 그룹화
-        const wallGroups = groupWallsByName(filteredRevitWallData);
+        // 2. 선택된 벽체만 수집
+        const selectedWalls = [];
+        checkedBoxes.forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            const index = parseInt(row.getAttribute('data-wall-index'));
+            const wall = filteredRevitWallData[index];
+            if (wall) selectedWalls.push(wall);
+        });
+
+        if (selectedWalls.length === 0) {
+            showToast('선택된 벽체 데이터를 찾을 수 없습니다.', 'warning');
+            return;
+        }
+
+        console.log(`📊 ${selectedWalls.length}개의 벽체 선택됨`);
+
+        // 3. Name별로 벽체 그룹화 (선택된 벽체만)
+        const wallGroups = groupWallsByName(selectedWalls);
         const uniqueNames = Array.from(wallGroups.keys());
 
         console.log(`📊 ${uniqueNames.length}개의 벽체 타입 발견`);
 
-        // 2. 색상 생성
+        // 4. 색상 생성
         const colors = generateDistinctColors(uniqueNames.length);
 
-        // 3. 색상 매핑 생성 및 저장
+        // 5. 색상 매핑 생성 및 저장
         wallColorMap.clear();
         uniqueNames.forEach((name, index) => {
             const walls = wallGroups.get(name);
@@ -1802,10 +1835,10 @@ window.applyWallColors = async function() {
             });
         });
 
-        // 4. 웹 테이블에 색상 적용
+        // 6. 웹 테이블에 색상 적용 (선택된 행만)
         applyColorsToTable();
 
-        // 5. Revit에 색상 전송
+        // 7. Revit에 색상 전송
         await sendColorsToRevit();
 
         showToast(`${uniqueNames.length}개 벽체 타입에 색상이 적용되었습니다.`, 'success');
@@ -1832,25 +1865,59 @@ function clearTableColors() {
 }
 
 /**
- * Revit 색상 초기화 전송
+ * 테이블에 wallColorMap 기반으로 색상 재적용
+ * (필터 적용/초기화 후 호출)
  */
-async function sendClearColorsToRevit() {
-    // 초기화할 ElementId 수집
-    const allElementIds = [];
-    wallColorMap.forEach(value => {
-        allElementIds.push(...value.elementIds);
+function reapplyColorsToTable() {
+    if (wallColorMap.size === 0) {
+        console.log('ℹ️ 재적용할 색상 정보가 없습니다.');
+        return;
+    }
+
+    const tableRows = document.querySelectorAll('#revitTableBody tr');
+    let appliedCount = 0;
+
+    tableRows.forEach((row) => {
+        const index = parseInt(row.getAttribute('data-wall-index'));
+        const wall = filteredRevitWallData[index];
+        if (!wall) return;
+
+        // ElementId로 wallColorMap에서 색상 찾기
+        const wallId = wall.Id;
+        let colorData = null;
+
+        wallColorMap.forEach((value, name) => {
+            if (value.elementIds.includes(wallId)) {
+                colorData = value;
+            }
+        });
+
+        if (colorData) {
+            row.style.backgroundColor = colorData.color.hex + '40';
+            row.style.borderLeft = `4px solid ${colorData.color.hex}`;
+            row.classList.add('wall-colored');
+            appliedCount++;
+        }
     });
 
-    if (allElementIds.length === 0) {
+    console.log(`🎨 ${appliedCount}개 행에 색상 재적용 완료`);
+}
+
+/**
+ * Revit 색상 초기화 전송 (선택된 ElementId만)
+ * @param {Array} elementIds - 초기화할 ElementId 배열
+ */
+async function sendClearColorsToRevit(elementIds) {
+    if (!elementIds || elementIds.length === 0) {
         console.log('ℹ️ 초기화할 색상이 없습니다.');
         return;
     }
 
-    console.log('📤 Revit으로 색상 초기화 전송:', allElementIds.length, '개');
+    console.log('📤 Revit으로 색상 초기화 전송:', elementIds.length, '개');
 
     if (window.socketService && window.socketService.isConnected) {
         window.socketService.sendRevitCommand('CLEAR_WALL_COLORS', {
-            ElementIds: allElementIds
+            ElementIds: elementIds
         });
         console.log('✅ WebSocket으로 색상 초기화 전송 완료');
     } else {
@@ -1859,22 +1926,80 @@ async function sendClearColorsToRevit() {
 }
 
 /**
+ * 선택된 행의 테이블 색상만 제거
+ * @param {NodeList} checkedBoxes - 체크된 체크박스 NodeList
+ */
+function clearSelectedTableColors(checkedBoxes) {
+    checkedBoxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        if (row) {
+            row.style.backgroundColor = '';
+            row.style.borderLeft = '';
+            row.classList.remove('wall-colored');
+        }
+    });
+    console.log(`✅ ${checkedBoxes.length}개 선택된 행 색상 제거 완료`);
+}
+
+/**
+ * wallColorMap에서 특정 ElementId들 제거
+ * @param {Array} elementIds - 제거할 ElementId 배열
+ */
+function removeFromWallColorMap(elementIds) {
+    const elementIdSet = new Set(elementIds);
+
+    wallColorMap.forEach((value, name) => {
+        // 해당 ElementId 제거
+        value.elementIds = value.elementIds.filter(id => !elementIdSet.has(id));
+
+        // elementIds가 비어있으면 맵에서 삭제
+        if (value.elementIds.length === 0) {
+            wallColorMap.delete(name);
+        }
+    });
+}
+
+/**
  * 벽체 색상 초기화 (웹 테이블 + Revit)
  */
 window.clearWallColors = async function() {
     console.log('🧹 벽체 색상 초기화 시작');
 
+    // 1. 체크박스 선택 상태 확인
+    const checkedBoxes = document.querySelectorAll('.revit-row-checkbox:checked');
+
+    if (checkedBoxes.length === 0) {
+        showToast('초기화할 벽체를 선택해주세요.', 'warning');
+        return;
+    }
+
     try {
-        // 1. Revit 색상 초기화 전송 (먼저 전송해야 elementIds 사용 가능)
-        await sendClearColorsToRevit();
+        // 2. 선택된 벽체의 ElementId 수집
+        const selectedElementIds = [];
+        checkedBoxes.forEach(checkbox => {
+            const row = checkbox.closest('tr');
+            const index = parseInt(row.getAttribute('data-wall-index'));
+            const wall = filteredRevitWallData[index];
+            if (wall && wall.Id) {
+                selectedElementIds.push(wall.Id);
+            }
+        });
 
-        // 2. 웹 테이블 색상 제거
-        clearTableColors();
+        if (selectedElementIds.length === 0) {
+            showToast('선택된 벽체 데이터를 찾을 수 없습니다.', 'warning');
+            return;
+        }
 
-        // 3. 색상 맵 초기화
-        wallColorMap.clear();
+        // 3. Revit 색상 초기화 전송 (선택된 것만)
+        await sendClearColorsToRevit(selectedElementIds);
 
-        showToast('벽체 색상이 초기화되었습니다.', 'success');
+        // 4. 웹 테이블 색상 제거 (선택된 행만)
+        clearSelectedTableColors(checkedBoxes);
+
+        // 5. wallColorMap에서 해당 ElementId 제거
+        removeFromWallColorMap(selectedElementIds);
+
+        showToast(`${selectedElementIds.length}개 벽체 색상이 초기화되었습니다.`, 'success');
 
     } catch (error) {
         console.error('❌ 색상 초기화 오류:', error);
