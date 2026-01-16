@@ -67,7 +67,7 @@ namespace QTO
             //string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
             //serverPath = Path.GetDirectoryName(assemblyPath);
             serverPath = @"C:\ClaudeProject\ReReKiyeno";
-            // WebSocket 클라이언트 초기화
+            //WebSocket 클라이언트 초기화
             InitializeWebSocketClient();
         }
 
@@ -1764,7 +1764,7 @@ namespace QTO
                             if (boundaryElement is Wall wall)
                             {
                                 // 중복 방지
-                                if (!walls.Any(w => w.Id.IntegerValue == wall.Id.IntegerValue))
+                                if (!walls.Any(w => w.Id.Value == wall.Id.Value))
                                 {
                                     walls.Add(wall);
                                 }
@@ -1795,7 +1795,7 @@ namespace QTO
                     return;
                 }
 
-                View activeView = doc.ActiveView;
+                Autodesk.Revit.DB.View activeView = doc.ActiveView;
                 int successCount = 0;
 
                 using (Transaction trans = new Transaction(doc, "벽체 색상 적용"))
@@ -1813,15 +1813,26 @@ namespace QTO
 
                         // 그래픽 오버라이드 설정
                         OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+
+                        // 1. 표면(Surface) 색상 설정 - 3D 뷰, 입면도 등
                         ogs.SetSurfaceForegroundPatternColor(revitColor);
                         ogs.SetSurfaceBackgroundPatternColor(revitColor);
+
+                        // 2. 절단면(Cut) 색상 설정 - 평면도, 단면도 등
+                        ogs.SetCutForegroundPatternColor(revitColor);
+                        ogs.SetCutBackgroundPatternColor(revitColor);
 
                         // 솔리드 패턴 적용
                         FillPatternElement solidPattern = GetSolidFillPattern(doc);
                         if (solidPattern != null)
                         {
+                            // 표면 패턴
                             ogs.SetSurfaceForegroundPatternId(solidPattern.Id);
                             ogs.SetSurfaceBackgroundPatternId(solidPattern.Id);
+
+                            // 절단면 패턴
+                            ogs.SetCutForegroundPatternId(solidPattern.Id);
+                            ogs.SetCutBackgroundPatternId(solidPattern.Id);
                         }
 
                         // 투명도 설정 (30%)
@@ -1887,7 +1898,7 @@ namespace QTO
                     return;
                 }
 
-                View activeView = doc.ActiveView;
+                Autodesk.Revit.DB.View activeView = doc.ActiveView;
                 int successCount = 0;
 
                 using (Transaction trans = new Transaction(doc, "벽체 색상 초기화"))
