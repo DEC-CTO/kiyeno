@@ -152,7 +152,13 @@ function createRevitTypeMappingModalContent() {
 function createProjectManagementPanel() {
     return `
         <div class="project-panel">
-            <h3><i class="fas fa-project-diagram"></i> 벽체 타입 관리</h3>
+            <!-- 헤더 영역: 타이틀 + 닫기 버튼 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0;"><i class="fas fa-project-diagram"></i> 벽체 타입 관리</h3>
+                <button class="modal-close-btn" onclick="closeRevitTypeMatching()" title="닫기" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 5px 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
 
             <!-- 기본 작업 드롭다운 -->
             <div class="action-section">
@@ -184,15 +190,10 @@ function createProjectManagementPanel() {
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- 모든 변경사항 저장 버튼을 드롭다운 옆으로 이동 -->
+
+                    <!-- 모든 변경사항 저장 버튼 -->
                     <button class="btn btn-success" onclick="saveAllChanges()" style="margin-left: 5px;">
                         <i class="fas fa-save"></i> 모든 변경사항 저장
-                    </button>
-                    
-                    <!-- 닫기 버튼 -->
-                    <button class="btn btn-secondary" onclick="closeRevitTypeMatching()">
-                        <i class="fas fa-times"></i> 닫기
                     </button>
                 </div>
             </div>

@@ -444,6 +444,52 @@ const unitPriceDB = new UnitPriceDB();
 // 일위대가 관리 메인 함수들
 // =============================================================================
 
+// 일위대가 관리 모달 닫기 (우측 상단 X 버튼용)
+function closeUnitPriceManagementModal() {
+    // 모달 닫기 전 세션 저장
+    saveUnitPriceSession();
+
+    // 서브 모달 찾아서 닫기
+    const subModal = document.querySelector('.sub-modal-overlay');
+    if (subModal && typeof closeSubModal === 'function') {
+        closeSubModal(subModal);
+    }
+}
+
+// 전역 함수로 노출
+window.closeUnitPriceManagementModal = closeUnitPriceManagementModal;
+
+// 일위대가 기본 정보 모달 닫기 함수
+function closeUnitPriceBasicModal() {
+    const subModal = document.querySelector('.sub-modal-overlay');
+    if (subModal && typeof closeSubModal === 'function') {
+        closeSubModal(subModal);
+    }
+}
+window.closeUnitPriceBasicModal = closeUnitPriceBasicModal;
+
+// 세부 아이템 수정 모달 닫기 함수
+function closeUnitPriceDetailModal() {
+    const subModal = document.querySelector('.sub-modal-overlay');
+    if (subModal && typeof closeSubModal === 'function') {
+        closeSubModal(subModal);
+    }
+
+    // 일위대가 관리로 돌아가기
+    setTimeout(() => {
+        // 혹시 있을 수 있는 자재선택 모달 제거
+        const materialSelectModal = document.querySelector('.material-select-modal');
+        if (materialSelectModal) materialSelectModal.remove();
+
+        // 항상 일위대가 관리 모달 열기
+        if (typeof window.openUnitPriceManagement === 'function') {
+            window.openUnitPriceManagement();
+            console.log('✅ 닫기 → 일위대가 관리 복귀');
+        }
+    }, 100);
+}
+window.closeUnitPriceDetailModal = closeUnitPriceDetailModal;
+
 // 일위대가 관리 모달 열기
 async function openUnitPriceManagement() {
     try {
@@ -475,15 +521,9 @@ async function openUnitPriceManagement() {
         const modalHTML = createUnitPriceManagementModal();
         console.log('✅ 모달 HTML 생성 완료');
 
-        // 모달 표시 (닫기 버튼 추가)
+        // 모달 표시 (하단 버튼 없이, 우측 상단 X 버튼 사용)
         console.log('🖼️ createSubModal 호출 시작...');
-        const modal = createSubModal('💰 일위대가 관리', modalHTML, [
-            { text: '닫기', class: 'btn-secondary', onClick: (modal) => {
-                // 모달 닫기 전 세션 저장
-                saveUnitPriceSession();
-                closeSubModal(modal);
-            }}
-        ], {
+        const modal = createSubModal('💰 일위대가 관리', modalHTML, [], {
             disableBackgroundClick: true,
             disableEscapeKey: true,
             width: '1300px'
@@ -536,7 +576,14 @@ async function openUnitPriceManagement() {
 function createUnitPriceManagementModal() {
     return `
         <div class="unit-price-management-container">
-            <!-- 헤더 및 컨트롤 -->
+            <!-- 헤더: 우측 상단 닫기 버튼 -->
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button class="modal-close-btn" onclick="closeUnitPriceManagementModal()" title="닫기" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 5px 10px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- 컨트롤 버튼 -->
             <div class="unit-price-header">
                 <div class="controls-section">
                     <button class="btn btn-success" onclick="openUnitPriceBasicModal()">
@@ -717,8 +764,32 @@ function showUnitPriceBasicModal(editData = null) {
             .custom-input-wrapper button:hover {
                 background: #4b5563;
             }
+            .unit-price-basic-modal-header {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 10px;
+            }
+
+            .unit-price-basic-modal-close {
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+                padding: 5px 10px;
+                transition: color 0.2s;
+            }
+
+            .unit-price-basic-modal-close:hover {
+                color: #333;
+            }
         </style>
 
+        <div class="unit-price-basic-modal-header">
+            <button class="unit-price-basic-modal-close" onclick="closeUnitPriceBasicModal()" title="닫기">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <div class="unit-price-basic-form">
             <div class="form-grid">
                 <!-- 아이템명 -->
@@ -851,9 +922,8 @@ function showUnitPriceBasicModal(editData = null) {
         currentUnitPriceData = {};
     }
     
-    // 기본 정보 입력 모달 표시 (취소 및 세부 설정 버튼)
+    // 기본 정보 입력 모달 표시 (세부 설정 버튼만 - 닫기는 상단 X 버튼 사용)
     const modal = createSubModal(modalTitle, basicModalHTML, [
-        { text: '닫기', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
         { text: isEdit ? '수정 계속' : '세부 설정', class: 'btn-primary', onClick: (modal) => proceedToDetailInput(isEdit) }
     ], {
         disableBackgroundClick: true,
@@ -1159,28 +1229,8 @@ function openUnitPriceDetailModal(isEdit = false) {
         }
     });
     
-    // 세부 입력 모달 표시 (취소 및 저장 버튼)
+    // 세부 입력 모달 표시 (저장 버튼만 - 닫기는 상단 X 버튼 사용)
     const modal = createSubModal(modalTitle, detailModalHTML, [
-        { 
-            text: '닫기', 
-            class: 'btn-secondary', 
-            onClick: (modal) => {
-                closeSubModal(modal);
-                
-                // 간단하고 직관적인 방식: 항상 일위대가 관리로 돌아가기
-                setTimeout(() => {
-                    // 혹시 있을 수 있는 자재선택 모달 제거
-                    const materialSelectModal = document.querySelector('.material-select-modal');
-                    if (materialSelectModal) materialSelectModal.remove();
-                    
-                    // 항상 일위대가 관리 모달 열기
-                    if (typeof window.openUnitPriceManagement === 'function') {
-                        window.openUnitPriceManagement();
-                        console.log('✅ 닫기 → 일위대가 관리 복귀');
-                    }
-                }, 100);
-            }
-        },
         { text: isEdit ? '수정 완료' : '저장', class: 'btn-primary', onClick: (modal) => saveUnitPriceItem() }
     ], {
         disableBackgroundClick: true,
@@ -1229,6 +1279,11 @@ function openUnitPriceDetailModal(isEdit = false) {
 function createDetailModalHTML(itemSummary) {
     return `
         <div style="min-width: 840px; max-width: 1300px;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button onclick="closeUnitPriceDetailModal()" title="닫기" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 5px 10px; transition: color 0.2s;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <div class="unit-price-detail-form">
                 <div class="detail-header">
                     <h4><i class="fas fa-info-circle"></i> ${itemSummary}</h4>

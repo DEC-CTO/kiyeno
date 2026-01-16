@@ -203,6 +203,25 @@
                   <i class="fas fa-times"></i> 필터 초기화
                 </button>
               </div>
+              <!-- 선택 항목 필터 버튼 -->
+              <div class="filter-group">
+                <button
+                  class="btn btn-sm btn-warning"
+                  onclick="filterCheckedOnly()"
+                  title="체크된 항목만 표시"
+                >
+                  <i class="fas fa-filter"></i> 선택 항목만
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  onclick="clearCheckedFilter()"
+                  title="선택 필터 해제"
+                  style="display: none;"
+                  id="clearCheckedFilterBtn"
+                >
+                  <i class="fas fa-times"></i> 선택 필터 해제
+                </button>
+              </div>
               <!-- Revit 연동 메뉴 -->
               <div class="filter-group">
                 <div class="dropdown">

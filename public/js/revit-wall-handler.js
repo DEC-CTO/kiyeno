@@ -15,6 +15,13 @@ let selectedLevels = []; // 선택된 Level 목록
 // 벽체 색상 매핑 저장소 (Name → {color, elementIds})
 let wallColorMap = new Map();
 
+// Shift+클릭 범위 선택을 위한 마지막 체크박스 인덱스
+let lastCheckedIndex = -1;
+
+// 체크 필터 상태
+let isCheckedFilterActive = false;
+let checkedElementIds = [];
+
 // 소수점 반올림 함수
 // 면적: 2자리 (3째자리 반올림), 길이/높이/두께: 3자리 (4째자리 반올림)
 function roundToDecimals(value, decimals) {
@@ -530,7 +537,8 @@ function updateRevitDataTable() {
     
     // 테이블 초기화
     tableBody.innerHTML = '';
-    
+    lastCheckedIndex = -1; // Shift+클릭 인덱스 초기화
+
     if (!revitWallData || revitWallData.length === 0) {
         selectionText.textContent = 'Revit 데이터가 없습니다.';
         updateFilterCheckboxes(); // 필터 체크박스 목록 초기화
@@ -567,7 +575,7 @@ function updateRevitDataTable() {
         // 새로운 WallInfo 구조에 맞게 컬럼 구성
         row.innerHTML = `
             <td class="col-select">
-                <input type="checkbox" class="revit-row-checkbox" onchange="updateRevitSelection()">
+                <input type="checkbox" class="revit-row-checkbox" onclick="handleCheckboxShiftClick(event, ${index})">
             </td>
             <td class="col-revit-id">${wall.Id || ''}</td>
             <td class="col-revit-name">${wall.Name || ''}</td>
@@ -673,6 +681,36 @@ window.editRoomName = function(index) {
         updateRevitDataTable();
         showToast('실명이 수정되었습니다.', 'info');
     }
+};
+
+/**
+ * Shift+클릭으로 체크박스 범위 선택 처리
+ * @param {Event} event - 클릭 이벤트
+ * @param {number} currentIndex - 현재 클릭한 체크박스의 인덱스
+ */
+window.handleCheckboxShiftClick = function(event, currentIndex) {
+    const checkboxes = document.querySelectorAll('.revit-row-checkbox');
+    const currentCheckbox = checkboxes[currentIndex];
+
+    // Shift 키가 눌린 상태이고, 이전에 클릭한 체크박스가 있는 경우
+    if (event.shiftKey && lastCheckedIndex !== -1 && lastCheckedIndex !== currentIndex) {
+        const start = Math.min(lastCheckedIndex, currentIndex);
+        const end = Math.max(lastCheckedIndex, currentIndex);
+        const newState = currentCheckbox.checked;
+
+        // 범위 내 모든 체크박스를 같은 상태로 설정
+        for (let i = start; i <= end; i++) {
+            checkboxes[i].checked = newState;
+        }
+
+        console.log(`🔲 Shift+클릭: ${start} ~ ${end} 범위 ${newState ? '선택' : '해제'}`);
+    }
+
+    // 마지막 클릭 인덱스 업데이트
+    lastCheckedIndex = currentIndex;
+
+    // 선택 상태 업데이트
+    updateRevitSelection();
 };
 
 /**
@@ -1342,7 +1380,7 @@ window.selectAllLevels = function(checked) {
  */
 window.applyRevitFilters = function() {
     // 필터링 적용 (OR 조건으로 다중 선택 지원)
-    const filteredData = revitWallData.filter(wall => {
+    let filteredData = revitWallData.filter(wall => {
         // Name 필터: 선택된 항목이 없으면 전체, 있으면 선택된 항목 중 하나라도 매칭
         const nameMatch = selectedNames.length === 0 || selectedNames.includes(wall.Name);
 
@@ -1352,6 +1390,12 @@ window.applyRevitFilters = function() {
         // AND 조건: 두 필터 모두 만족해야 함
         return nameMatch && levelMatch;
     });
+
+    // 체크 필터가 활성화된 경우 추가 필터링
+    if (isCheckedFilterActive && checkedElementIds.length > 0) {
+        const checkedIdSet = new Set(checkedElementIds);
+        filteredData = filteredData.filter(wall => checkedIdSet.has(wall.Id));
+    }
 
     // 필터링 후 정렬 (Level → Name 순)
     sortWallData(filteredData);
@@ -1364,7 +1408,16 @@ window.applyRevitFilters = function() {
     // 필터 적용 후 기존 색상 재적용
     reapplyColorsToTable();
 
-    console.log(`🔍 필터 적용됨: Name=${selectedNames.length}개, Level=${selectedLevels.length}개, 결과=${filteredRevitWallData.length}개`);
+    // 체크 필터 활성화 시 모든 행 체크 상태로 표시
+    if (isCheckedFilterActive) {
+        setTimeout(() => {
+            const checkboxes = document.querySelectorAll('.revit-row-checkbox');
+            checkboxes.forEach(cb => cb.checked = true);
+            updateRevitSelection();
+        }, 100);
+    }
+
+    console.log(`🔍 필터 적용됨: Name=${selectedNames.length}개, Level=${selectedLevels.length}개, 체크필터=${isCheckedFilterActive}, 결과=${filteredRevitWallData.length}개`);
 };
 
 /**
@@ -1398,6 +1451,88 @@ window.clearRevitFilters = function() {
     reapplyColorsToTable();
 
     console.log('🔄 필터가 초기화되었습니다.');
+};
+
+/**
+ * 체크된 항목만 필터링하여 표시
+ */
+window.filterCheckedOnly = function() {
+    const checkedBoxes = document.querySelectorAll('.revit-row-checkbox:checked');
+
+    if (checkedBoxes.length === 0) {
+        showToast('선택된 벽체가 없습니다.', 'warning');
+        return;
+    }
+
+    // 체크된 ElementId 수집
+    checkedElementIds = [];
+    checkedBoxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const index = parseInt(row.getAttribute('data-wall-index'));
+        const wall = filteredRevitWallData[index];
+        if (wall && wall.Id) {
+            checkedElementIds.push(wall.Id);
+        }
+    });
+
+    if (checkedElementIds.length === 0) {
+        showToast('선택된 벽체 데이터를 찾을 수 없습니다.', 'warning');
+        return;
+    }
+
+    // 필터 적용
+    isCheckedFilterActive = true;
+    applyCheckedFilter();
+
+    // UI 업데이트
+    const clearBtn = document.getElementById('clearCheckedFilterBtn');
+    if (clearBtn) {
+        clearBtn.style.display = 'inline-block';
+    }
+
+    showToast(`${checkedElementIds.length}개 선택된 항목만 표시`, 'success');
+    console.log(`🎯 선택 필터 적용: ${checkedElementIds.length}개 항목`);
+};
+
+/**
+ * 체크 필터 적용 (내부 함수)
+ */
+function applyCheckedFilter() {
+    if (!isCheckedFilterActive || checkedElementIds.length === 0) return;
+
+    // 기존 필터링된 데이터에서 체크된 것만 추가 필터링
+    const checkedIdSet = new Set(checkedElementIds);
+    updateFilteredData(filteredRevitWallData.filter(wall => checkedIdSet.has(wall.Id)));
+
+    // 테이블 다시 렌더링
+    updateRevitDataTable();
+
+    // 필터링된 항목 모두 체크 상태로 표시
+    setTimeout(() => {
+        const checkboxes = document.querySelectorAll('.revit-row-checkbox');
+        checkboxes.forEach(cb => cb.checked = true);
+        updateRevitSelection();
+    }, 100);
+}
+
+/**
+ * 선택 필터 해제
+ */
+window.clearCheckedFilter = function() {
+    isCheckedFilterActive = false;
+    checkedElementIds = [];
+
+    // 기존 Name/Level 필터 다시 적용
+    applyRevitFilters();
+
+    // UI 업데이트
+    const clearBtn = document.getElementById('clearCheckedFilterBtn');
+    if (clearBtn) {
+        clearBtn.style.display = 'none';
+    }
+
+    showToast('선택 필터가 해제되었습니다.', 'info');
+    console.log('🔄 선택 필터 해제됨');
 };
 
 /**
@@ -1564,51 +1699,65 @@ window.highlightRevitRow = function(revitId) {
 };
 
 /**
- * 여러 RevitID 동시 하이라이트
+ * 여러 RevitID 동시 하이라이트 + 체크박스 자동 체크
  */
 window.highlightMultipleRevitRows = function(revitIds) {
     console.log('🎯 다중 RevitID 하이라이트 요청:', revitIds);
-    
+
     if (!Array.isArray(revitIds) || revitIds.length === 0) {
         console.warn('유효한 RevitID 배열이 제공되지 않았습니다.');
         return false;
     }
-    
+
     // 기존 하이라이트 제거
     clearRevitHighlights();
-    
+
     let highlightedCount = 0;
+    let checkedCount = 0;
     const tableRows = document.querySelectorAll('#revitTableBody tr');
-    
-    revitIds.forEach(revitId => {
-        tableRows.forEach((row, index) => {
-            const revitIdCell = row.querySelector('.col-revit-id');
-            if (revitIdCell && revitIdCell.textContent.trim() === revitId.toString()) {
-                row.classList.add('revit-row-highlight');
-                highlightedCount++;
-                console.log(`✅ RevitID ${revitId} 행 하이라이트 적용 (인덱스: ${index})`);
+    const revitIdSet = new Set(revitIds.map(id => id.toString()));
+
+    tableRows.forEach((row, index) => {
+        const revitIdCell = row.querySelector('.col-revit-id');
+        if (revitIdCell && revitIdSet.has(revitIdCell.textContent.trim())) {
+            // 1. 하이라이트 적용
+            row.classList.add('revit-row-highlight');
+            highlightedCount++;
+
+            // 2. 체크박스 자동 체크 (새 기능)
+            const checkbox = row.querySelector('.revit-row-checkbox');
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                checkedCount++;
             }
-        });
+
+            console.log(`✅ RevitID ${revitIdCell.textContent.trim()} 행 하이라이트 + 체크 (인덱스: ${index})`);
+        }
     });
-    
+
     if (highlightedCount > 0) {
         // 첫 번째 하이라이트된 행으로 스크롤
         const firstHighlighted = document.querySelector('.revit-row-highlight');
         if (firstHighlighted) {
             setTimeout(() => {
-                firstHighlighted.scrollIntoView({ 
-                    behavior: 'smooth', 
+                firstHighlighted.scrollIntoView({
+                    behavior: 'smooth',
                     block: 'center'
                 });
             }, 100);
         }
-        
-        // 10초 후 모든 하이라이트 제거
+
+        // 10초 후 하이라이트만 제거 (체크박스는 유지)
         setTimeout(() => {
             clearRevitHighlights();
         }, 10000);
-        
-        showToast(`${highlightedCount}개 행이 하이라이트되었습니다.`, 'success');
+
+        // 선택 상태 업데이트
+        if (typeof updateRevitSelection === 'function') {
+            updateRevitSelection();
+        }
+
+        showToast(`Revit에서 ${highlightedCount}개 벽체 선택됨 (${checkedCount}개 체크)`, 'info');
         return true;
     } else {
         console.warn('⚠️ 일치하는 RevitID를 찾을 수 없습니다.');
