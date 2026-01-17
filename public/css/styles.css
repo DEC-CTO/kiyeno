@@ -1047,7 +1047,7 @@ body {
     display: none;
     min-width: 200px;
     margin-top: 2px;
-    font-size: 12px;
+    font-size: 13px;
     overflow: hidden;
 }
 
@@ -1265,7 +1265,7 @@ body {
     background-color: transparent;
     border: 0;
     text-decoration: none;
-    font-size: 11px;
+    font-size: 13px;
     transition: background-color 0.2s ease;
 }
 
@@ -1277,7 +1277,7 @@ body {
 
 .dropdown-item i {
     margin-right: 8px;
-    width: 14px;
+    width: 16px;
     text-align: center;
 }
 
@@ -1655,6 +1655,52 @@ body {
 
 .wall-selection-button:hover i {
     color: white;
+}
+
+/* =============================================================================
+   색상 관련 버튼 스타일 (벽체 색상 반영, 색상표 생성)
+   ============================================================================= */
+.color-action-button {
+    background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%) !important;
+    border-left: 4px solid #db2777;
+    color: #333 !important;
+}
+
+.color-action-button:hover {
+    background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%) !important;
+    transform: translateX(2px);
+    color: #333 !important;
+}
+
+.color-action-button i {
+    color: #9d174d !important;
+}
+
+.color-action-button:hover i {
+    color: #831843 !important;
+}
+
+/* =============================================================================
+   색상 초기화 버튼 스타일
+   ============================================================================= */
+.color-reset-button {
+    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%) !important;
+    border-left: 4px solid #64748b;
+    color: #333 !important;
+}
+
+.color-reset-button:hover {
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+    transform: translateX(2px);
+    color: #333 !important;
+}
+
+.color-reset-button i {
+    color: #475569 !important;
+}
+
+.color-reset-button:hover i {
+    color: #1e293b !important;
 }
 
 /* Revit 연동 상태 표시 */

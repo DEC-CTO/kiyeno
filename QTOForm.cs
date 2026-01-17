@@ -51,6 +51,10 @@ namespace QTO
         public static List<WallColorMapping> wallColorMappings = new List<WallColorMapping>();
         public static List<string> elementsToClearColor = new List<string>();
 
+        // 범례뷰 생성 데이터
+        public static List<LegendItem> legendItems = new List<LegendItem>();
+        public static string legendViewName = "";
+
         // WebSocket 클라이언트 (순수 WebSocket)
         private ClientWebSocket webSocket;
         private CancellationTokenSource cancellationTokenSource;
@@ -345,6 +349,22 @@ namespace QTO
                                 UpdateStatus($"벽체 색상 초기화 요청 받음: {elementsToClearColor.Count}개 객체");
                                 DozeOff();
                                 m_behavior = "CLEAR_WALL_COLORS";
+                                m_exEvent.Raise();
+                            }
+                        }
+                        break;
+
+                    case "CREATE_LEGEND_VIEW":
+                        if (command.Data != null)
+                        {
+                            var data = command.Data as JObject;
+                            if (data?["LegendItems"] != null)
+                            {
+                                legendItems = data["LegendItems"].ToObject<List<LegendItem>>();
+                                legendViewName = data["ViewName"]?.ToString() ?? "QTO 벽체 범례";
+                                UpdateStatus($"범례뷰 생성 요청 받음: {legendItems.Count}개 타입");
+                                DozeOff();
+                                m_behavior = "CREATE_LEGEND_VIEW";
                                 m_exEvent.Raise();
                             }
                         }
@@ -1355,6 +1375,10 @@ namespace QTO
                 {
                     ClearWallColors(m_uidoc, m_doc);
                 }
+                else if (QTOForm.m_behavior == "CREATE_LEGEND_VIEW")
+                {
+                    CreateLegendView(m_uidoc, m_doc);
+                }
 
                 else if (QTOForm.m_behavior == "None")
                 {
@@ -1935,6 +1959,270 @@ namespace QTO
             }
         }
 
+        /// <summary>
+        /// 범례뷰 생성 (Drafting View 사용)
+        /// </summary>
+        private void CreateLegendView(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                var items = QTOForm.legendItems;
+                string viewName = QTOForm.legendViewName;
+
+                if (items == null || items.Count == 0)
+                {
+                    form?.UpdateStatus("범례 데이터가 없습니다.");
+                    TaskDialog.Show("알림", "색상이 반영되지 않았습니다.\n먼저 '벽체 색상 반영'을 실행해주세요.");
+                    return;
+                }
+
+                // 기존 동일 이름 뷰 확인 (트랜잭션 시작 전)
+                ViewDrafting existingView = new FilteredElementCollector(doc)
+                    .OfClass(typeof(ViewDrafting))
+                    .Cast<ViewDrafting>()
+                    .FirstOrDefault(v => v.Name == viewName);
+
+                // 기존 뷰가 있으면 먼저 삭제 (별도 트랜잭션)
+                if (existingView != null)
+                {
+                    try
+                    {
+                        using (Transaction deleteTrans = new Transaction(doc, "기존 색상표 삭제"))
+                        {
+                            deleteTrans.Start();
+
+                            // 기존 QTO_Color_* FilledRegionType 삭제
+                            var oldColorTypes = new FilteredElementCollector(doc)
+                                .OfClass(typeof(FilledRegionType))
+                                .Cast<FilledRegionType>()
+                                .Where(t => t.Name.StartsWith("QTO_Color_"))
+                                .ToList();
+
+                            foreach (var oldType in oldColorTypes)
+                            {
+                                try { doc.Delete(oldType.Id); } catch { }
+                            }
+
+                            // 기존 뷰 삭제
+                            doc.Delete(existingView.Id);
+
+                            deleteTrans.Commit();
+                            form?.UpdateStatus($"기존 제도뷰 '{viewName}' 삭제 완료");
+                        }
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        form?.UpdateStatus($"❌ 기존 색상표 삭제 실패: {deleteEx.Message}");
+                        TaskDialog.Show("알림", $"기존 색상표 뷰를 삭제할 수 없습니다.\n\n수동으로 '{viewName}' 뷰를 삭제한 후 다시 실행해주세요.");
+                        return;
+                    }
+                }
+
+                using (Transaction trans = new Transaction(doc, "범례뷰 생성"))
+                {
+                    trans.Start();
+
+                    // 1. Drafting View 타입 찾기
+                    ViewFamilyType draftingViewType = new FilteredElementCollector(doc)
+                        .OfClass(typeof(ViewFamilyType))
+                        .Cast<ViewFamilyType>()
+                        .FirstOrDefault(vft => vft.ViewFamily == ViewFamily.Drafting);
+
+                    if (draftingViewType == null)
+                    {
+                        form?.UpdateStatus("❌ 제도 뷰 타입을 찾을 수 없습니다.");
+                        trans.RollBack();
+                        return;
+                    }
+
+                    // 새 Drafting View 생성
+                    ViewDrafting draftingView = ViewDrafting.Create(doc, draftingViewType.Id);
+                    draftingView.Name = viewName;
+
+                    // 뷰 스케일을 1:50으로 설정
+                    draftingView.Scale = 50;
+
+                    // 2. 솔리드 패턴 가져오기
+                    FillPatternElement solidPattern = GetSolidFillPattern(doc);
+
+                    // 3. 텍스트 타입 가져오기 (가장 작은 텍스트 타입 선택)
+                    TextNoteType textType = new FilteredElementCollector(doc)
+                        .OfClass(typeof(TextNoteType))
+                        .Cast<TextNoteType>()
+                        .OrderBy(t => t.get_Parameter(BuiltInParameter.TEXT_SIZE)?.AsDouble() ?? 0)
+                        .FirstOrDefault();
+
+                    if (textType == null)
+                    {
+                        form?.UpdateStatus("❌ 텍스트 타입을 찾을 수 없습니다.");
+                        trans.RollBack();
+                        return;
+                    }
+
+                    // 4. 범례 항목 생성 (1:50 스케일 기준)
+                    // 1:50 스케일에서 출력 시 보이는 크기를 기준으로 계산
+                    // 출력 시 15mm 박스 → 모델에서 15mm × 50 = 750mm
+                    double yOffset = 0;
+                    double boxWidth = 750.0 / 304.8;   // 750mm → feet (출력 시 15mm)
+                    double boxHeight = 450.0 / 304.8;  // 450mm → feet (출력 시 9mm)
+                    double spacing = 400.0 / 304.8;    // 400mm → feet (출력 시 8mm)
+                    double textOffset = 150.0 / 304.8; // 150mm → feet (출력 시 3mm)
+
+                    foreach (var item in items)
+                    {
+                        // 색상 사각형 위치
+                        XYZ boxOrigin = new XYZ(0, yOffset, 0);
+
+                        // FilledRegion 생성을 위한 CurveLoop
+                        CurveLoop curveLoop = new CurveLoop();
+                        XYZ p1 = boxOrigin;
+                        XYZ p2 = new XYZ(boxOrigin.X + boxWidth, boxOrigin.Y, 0);
+                        XYZ p3 = new XYZ(boxOrigin.X + boxWidth, boxOrigin.Y - boxHeight, 0);
+                        XYZ p4 = new XYZ(boxOrigin.X, boxOrigin.Y - boxHeight, 0);
+
+                        curveLoop.Append(Line.CreateBound(p1, p2));
+                        curveLoop.Append(Line.CreateBound(p2, p3));
+                        curveLoop.Append(Line.CreateBound(p3, p4));
+                        curveLoop.Append(Line.CreateBound(p4, p1));
+
+                        // FilledRegionType 찾기 또는 생성 (색상 적용)
+                        FilledRegionType filledRegionType = GetOrCreateFilledRegionType(doc, item.Color, solidPattern);
+
+                        if (filledRegionType != null)
+                        {
+                            // FilledRegion 생성
+                            FilledRegion region = FilledRegion.Create(
+                                doc,
+                                filledRegionType.Id,
+                                draftingView.Id,
+                                new List<CurveLoop> { curveLoop }
+                            );
+                        }
+
+                        // 텍스트 레이블 (타입명 + 개수)
+                        XYZ textPosition = new XYZ(boxWidth + textOffset, yOffset - boxHeight / 2, 0);
+                        string labelText = $"{item.TypeName} ({item.Count}개)";
+
+                        TextNoteOptions textOptions = new TextNoteOptions
+                        {
+                            TypeId = textType.Id,
+                            HorizontalAlignment = HorizontalTextAlignment.Left
+                        };
+
+                        TextNote.Create(doc, draftingView.Id, textPosition, labelText, textOptions);
+
+                        // 다음 항목 위치
+                        yOffset -= (boxHeight + spacing);
+                    }
+
+                    trans.Commit();
+
+                    // 제도뷰 활성화
+                    uidoc.ActiveView = draftingView;
+
+                    form?.UpdateStatus($"✅ 범례뷰 '{viewName}' 생성 완료 ({items.Count}개 항목)");
+                }
+            }
+            catch (Exception ex)
+            {
+                form?.UpdateStatus($"❌ 범례뷰 생성 오류: {ex.Message}");
+                TaskDialog.Show("오류", $"범례뷰 생성 중 오류 발생:\n{ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// FilledRegionType 찾기 또는 생성
+        /// </summary>
+        private FilledRegionType GetOrCreateFilledRegionType(Document doc, ColorRGB color, FillPatternElement solidPattern)
+        {
+            try
+            {
+                // 색상값 로그
+                form?.UpdateStatus($"색상 생성: R={color.R}, G={color.G}, B={color.B}");
+
+                // 새 타입 이름
+                string typeName = $"QTO_Color_{color.R}_{color.G}_{color.B}";
+
+                // 이미 존재하는 타입 확인
+                FilledRegionType existingColorType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FilledRegionType))
+                    .Cast<FilledRegionType>()
+                    .FirstOrDefault(t => t.Name == typeName);
+
+                if (existingColorType != null)
+                {
+                    // 기존 타입도 색상 업데이트 (색상이 변경되었을 수 있음)
+                    Autodesk.Revit.DB.Color updateColor = new Autodesk.Revit.DB.Color(
+                        (byte)color.R,
+                        (byte)color.G,
+                        (byte)color.B
+                    );
+
+                    if (solidPattern != null)
+                    {
+                        existingColorType.ForegroundPatternColor = updateColor;
+                        existingColorType.ForegroundPatternId = solidPattern.Id;
+                    }
+
+                    return existingColorType;
+                }
+
+                // 기존 FilledRegionType 중 하나를 복제 기반으로 사용
+                FilledRegionType baseType = new FilteredElementCollector(doc)
+                    .OfClass(typeof(FilledRegionType))
+                    .Cast<FilledRegionType>()
+                    .FirstOrDefault();
+
+                if (baseType == null)
+                {
+                    form?.UpdateStatus("❌ 기본 FilledRegionType을 찾을 수 없습니다.");
+                    return null;
+                }
+
+                // 새로 복제
+                FilledRegionType newType = baseType.Duplicate(typeName) as FilledRegionType;
+
+                if (newType != null)
+                {
+                    // Revit Color 생성
+                    Autodesk.Revit.DB.Color revitColor = new Autodesk.Revit.DB.Color(
+                        (byte)color.R,
+                        (byte)color.G,
+                        (byte)color.B
+                    );
+
+                    // 솔리드 패턴 적용
+                    if (solidPattern != null)
+                    {
+                        // Foreground (전경) 설정 - 메인 색상
+                        newType.ForegroundPatternColor = revitColor;
+                        newType.ForegroundPatternId = solidPattern.Id;
+
+                        // Background (배경) 설정
+                        newType.BackgroundPatternColor = revitColor;
+                        newType.BackgroundPatternId = solidPattern.Id;
+
+                        // 투명하지 않게 설정
+                        try
+                        {
+                            newType.IsMasking = true;
+                        }
+                        catch { }
+                    }
+
+                    form?.UpdateStatus($"✅ FilledRegionType '{typeName}' 생성 완료");
+                }
+
+                return newType;
+            }
+            catch (Exception ex)
+            {
+                form?.UpdateStatus($"FilledRegionType 생성 오류: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"FilledRegionType 생성 오류: {ex.Message}");
+                return null;
+            }
+        }
+
         public string GetName()
         {
             return "WallSelectionHandler";
@@ -1986,5 +2274,15 @@ namespace QTO
         public int R { get; set; }
         public int G { get; set; }
         public int B { get; set; }
+    }
+
+    /// <summary>
+    /// 범례 항목 데이터 클래스
+    /// </summary>
+    public class LegendItem
+    {
+        public string TypeName { get; set; }
+        public ColorRGB Color { get; set; }
+        public int Count { get; set; }
     }
 }

@@ -2179,6 +2179,66 @@ window.clearWallColors = async function() {
     }
 };
 
+/**
+ * Revit에서 색상표 생성
+ * 벽체 타입별 색상 범례를 드래프팅 뷰로 생성합니다.
+ */
+window.createLegendView = async function() {
+    console.log('📋 색상표 생성 시작');
+
+    // wallColorMap이 비어있는지 확인
+    if (!wallColorMap || wallColorMap.size === 0) {
+        console.warn('⚠️ wallColorMap이 비어있음 - 색상 반영이 필요합니다.');
+        showToast('먼저 벽체 색상 반영을 실행해주세요.', 'warning');
+        alert('색상이 반영되지 않았습니다.\n\n먼저 "벽체 색상 반영"을 실행한 후 다시 시도해주세요.');
+        return;
+    }
+
+    // Revit 연결 확인
+    if (!window.socketService || !window.socketService.isConnected) {
+        showToast('Revit 연결이 필요합니다.', 'error');
+        return;
+    }
+
+    try {
+        // 범례 데이터 구성 (wallColorMap에서)
+        const legendItems = [];
+        wallColorMap.forEach((value, wallTypeName) => {
+            // value.color는 {hex, rgb} 구조이므로 rgb에서 색상값 추출
+            const rgb = value.color.rgb || value.color;
+            legendItems.push({
+                TypeName: wallTypeName,
+                Color: {
+                    R: Math.round(rgb.r) || 0,
+                    G: Math.round(rgb.g) || 0,
+                    B: Math.round(rgb.b) || 0
+                },
+                Count: value.elementIds.length
+            });
+            console.log(`범례 항목: ${wallTypeName}, RGB(${Math.round(rgb.r)}, ${Math.round(rgb.g)}, ${Math.round(rgb.b)}), ${value.elementIds.length}개`);
+        });
+
+        if (legendItems.length === 0) {
+            showToast('범례에 표시할 벽체 타입이 없습니다.', 'warning');
+            return;
+        }
+
+        console.log('📤 색상표 생성 명령 전송:', legendItems.length, '개 타입');
+
+        // Revit으로 CREATE_LEGEND_VIEW 명령 전송
+        window.socketService.sendRevitCommand('CREATE_LEGEND_VIEW', {
+            LegendItems: legendItems,
+            ViewName: 'QTO 벽체 색상표'
+        });
+
+        showToast(`색상표 생성 명령을 전송했습니다. (${legendItems.length}개 타입)`, 'success');
+
+    } catch (error) {
+        console.error('❌ 색상표 생성 오류:', error);
+        showToast('색상표 생성 중 오류가 발생했습니다.', 'error');
+    }
+};
+
 // 페이지 로드 시 드롭다운 초기화
 document.addEventListener('DOMContentLoaded', function() {
     initializeDropdown();
