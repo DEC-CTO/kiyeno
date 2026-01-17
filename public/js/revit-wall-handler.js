@@ -778,19 +778,42 @@ window.toggleAllRevitSelection = function() {
 };
 
 /**
- * Revit 데이터 지우기
+ * Revit 데이터 지우기 (선택된 항목만 삭제)
  */
 window.clearRevitData = function() {
-    if (revitWallData.length === 0) {
-        showToast('삭제할 Revit 데이터가 없습니다.', 'info');
+    // 1. 체크된 항목 확인
+    const checkedBoxes = document.querySelectorAll('.revit-row-checkbox:checked');
+
+    if (checkedBoxes.length === 0) {
+        alert('삭제할 벽체를 선택하세요.');
         return;
     }
-    
-    if (confirm(`정말로 ${revitWallData.length}개의 Revit 벽체 데이터를 모두 삭제하시겠습니까?`)) {
-        revitWallData = [];
-        updateFilteredData([]);
-        updateRevitDataTable();
-        showToast('Revit 데이터가 모두 삭제되었습니다.', 'success');
+
+    // 2. 선택된 ElementId 수집
+    const selectedIds = new Set();
+    checkedBoxes.forEach(checkbox => {
+        const row = checkbox.closest('tr');
+        const index = parseInt(row.getAttribute('data-wall-index'));
+        const wall = filteredRevitWallData[index];
+        if (wall && wall.Id) {
+            selectedIds.add(wall.Id);
+        }
+    });
+
+    if (selectedIds.size === 0) {
+        showToast('삭제할 벽체 데이터를 찾을 수 없습니다.', 'warning');
+        return;
+    }
+
+    // 3. 확인 메시지 (선택된 개수로 표시)
+    if (confirm(`정말로 ${selectedIds.size}개의 선택된 벽체 데이터를 삭제하시겠습니까?`)) {
+        // 4. 선택된 항목만 제거
+        revitWallData = revitWallData.filter(wall => !selectedIds.has(wall.Id));
+
+        // 5. 필터 재적용 및 테이블 업데이트
+        applyRevitFilters();
+
+        showToast(`${selectedIds.size}개의 벽체 데이터가 삭제되었습니다.`, 'success');
     }
 };
 
