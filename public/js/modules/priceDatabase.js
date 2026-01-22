@@ -2886,6 +2886,7 @@ class PriceDatabase extends EventEmitter {
         name: materialData.name,
         category: materialData.category,
         spec: materialData.spec,
+        size: materialData.size || '',
         unit: materialData.unit,
         price: materialData.price,
         note: materialData.note || '',
@@ -2898,9 +2899,9 @@ class PriceDatabase extends EventEmitter {
           productivity: 0,
           compensation: 0,
         },
-        workType1: materialData.workType1 || '경량',
-        workType2: materialData.workType2 || '경량',
-        location: materialData.location || '벽체',
+        workType1: materialData.workType1 || '',
+        workType2: materialData.workType2 || '',
+        location: materialData.location || '',
         work: materialData.work || '',
       };
 

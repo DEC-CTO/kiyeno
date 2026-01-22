@@ -2594,8 +2594,10 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 (원)</label>
-                        <input type="text" id="editMaterialLaborCost" value="${(material.laborCost || 0).toLocaleString()}" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                        <input type="text" id="editMaterialLaborCost" value="${(material.laborCost || 0).toLocaleString()}"
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fff0f0; color: #dc2626; font-weight: 600;"
+                               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
+                               placeholder="직접 입력 또는 아래 계산기 사용">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
@@ -2734,9 +2736,9 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
         disableEscapeKey: true
     });
 
-    // 모달 로드 후 초기 계산 실행
+    // 모달 로드 후 초기 계산 실행 (추가 모드에서만)
     setTimeout(() => {
-        if (typeof window.calculateLightweightLaborCost === 'function') {
+        if (isAddMode && typeof window.calculateLightweightLaborCost === 'function') {
             window.calculateLightweightLaborCost();
         }
     }, 300);
@@ -2828,6 +2830,7 @@ function saveLightweightMaterial(modal = null) {
     } catch (error) {
         console.error('❌ 경량부품 추가 실패:', error);
         showToast(`추가 실패: ${error.message}`, 'error');
+        alert(error.message);
     }
 }
 
@@ -2910,6 +2913,7 @@ async function addLightweightMaterial(modal = null) {
     } catch (error) {
         console.error('❌ 경량부품 추가 실패:', error);
         showToast(`추가 실패: ${error.message}`, 'error');
+        alert(error.message);
     }
 }
 
@@ -2969,11 +2973,14 @@ async function updateLightweightMaterial(materialId, modal = null) {
             throw new Error('노무비 보할은 0-500% 범위내에서 입력해주세요.');
         }
 
-        // 노무비 계산 설정 유효성 검사
-        if (updateData.laborSettings) {
-            if (!updateData.laborSettings.workers || updateData.laborSettings.workers.length === 0) {
-                throw new Error('작업자 설정이 필요합니다.');
-            }
+        // 노무비 계산 설정 유효성 검사 - 실제 계산기 사용 시에만 검사
+        // workers 중 cost > 0인 것이 있어야 계산기를 실제로 사용한 것임
+        const hasActiveWorkers = updateData.laborSettings &&
+            updateData.laborSettings.workers &&
+            updateData.laborSettings.workers.some(w => w.cost > 0);
+
+        if (hasActiveWorkers) {
+            // 계산기를 실제로 사용한 경우에만 productivity/compensation 검사
             if (!updateData.laborSettings.productivity || updateData.laborSettings.productivity <= 0) {
                 throw new Error('올바른 생산성 값을 입력해주세요.');
             }
@@ -2981,6 +2988,7 @@ async function updateLightweightMaterial(materialId, modal = null) {
                 throw new Error('올바른 보할 값을 입력해주세요.');
             }
         }
+        // 계산기 미사용 시 (모든 workers의 cost가 0이면) laborSettings 검사 스킵
 
         // 데이터베이스 업데이트
         const success = window.priceDB.updateLightweightComponent(materialId, updateData);
@@ -3037,6 +3045,7 @@ async function updateLightweightMaterial(materialId, modal = null) {
     } catch (error) {
         console.error('❌ 경량부품 수정 실패:', error);
         showToast(`수정 실패: ${error.message}`, 'error');
+        alert(error.message);
     }
 }
 
@@ -3058,6 +3067,7 @@ function performLightweightDeletion(materialId) {
     } catch (error) {
         console.error('❌ 경량부품 삭제 실패:', error);
         showToast(`삭제 실패: ${error.message}`, 'error');
+        alert(error.message);
     }
 }
 
@@ -3200,8 +3210,10 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">M2 노무비 (원)</label>
-                        <input type="text" id="editGypsumLaborCostM2" value="${(material.laborCost || 0).toLocaleString()}" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                        <input type="text" id="editGypsumLaborCostM2" value="${(material.laborCost || 0).toLocaleString()}"
+                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fff0f0; color: #dc2626; font-weight: 600;"
+                               oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
+                               placeholder="직접 입력 또는 아래 계산기 사용">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
@@ -3435,6 +3447,7 @@ function saveGypsumBoard(modal = null) {
     } catch (error) {
         console.error('석고보드 추가 실패:', error);
         showToast('추가 실패: ' + error.message, 'error');
+        alert(error.message);
     }
 }
 
@@ -3566,6 +3579,7 @@ async function updateGypsumBoard(materialId, modal = null) {
     } catch (error) {
         console.error('석고보드 편집 실패:', error);
         showToast('편집 실패: ' + error.message, 'error');
+        alert(error.message);
     }
 }
 
@@ -3587,6 +3601,7 @@ function performGypsumDeletion(materialId) {
     } catch (error) {
         console.error('석고보드 삭제 실패:', error);
         showToast('삭제 실패: ' + error.message, 'error');
+        alert(error.message);
     }
 }
 
