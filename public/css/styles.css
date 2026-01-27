@@ -483,6 +483,59 @@ body {
     background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
 }
 
+/* 일위대가 방식 - 딥블루 계열 */
+.btn-deepblue {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+}
+.btn-deepblue:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+/* 간소화 방식 - 오렌지 계열 */
+.btn-excel {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    color: white;
+}
+.btn-excel:hover {
+    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+}
+
+/* 컨트롤 섹션 구분 */
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.controls-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    user-select: none;
+}
+
+.controls-section-label i {
+    font-size: 10px;
+    color: #94a3b8;
+}
+
+.controls-section-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.controls-section-divider {
+    width: 1px;
+    background: #cbd5e1;
+    align-self: stretch;
+    margin: 0 8px;
+}
+
 /* 파란색 버튼 (문서 출력용) */
 .btn-blue {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -1146,9 +1199,13 @@ body {
         align-items: stretch;
         gap: 8px;
     }
-    
 
-    
+    .controls-section-divider {
+        width: 100%;
+        height: 1px;
+        margin: 4px 0;
+    }
+
     .area-calculation-section {
         margin-left: 0;
         border-left: none;

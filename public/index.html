@@ -91,32 +91,60 @@
             </div>
           </div>
 
-          <!-- 자재 관리 버튼 -->
-          <button
-            class="btn btn-green"
-            id="materialManageBtn"
-            onclick="showMaterialManageModal()"
-          >
-            <i class="fas fa-tools"></i> 자재 관리
-          </button>
+          <!-- 일위대가 방식 섹션 -->
+          <div class="controls-section">
+            <div class="controls-section-label">
+              <i class="fas fa-caret-right"></i> 일위대가 방식
+            </div>
+            <div class="controls-section-buttons">
+              <button
+                class="btn btn-deepblue"
+                id="materialManageBtn"
+                onclick="showMaterialManageModal()"
+              >
+                <i class="fas fa-tools"></i> 자재 관리
+              </button>
+              <button
+                class="btn btn-deepblue"
+                id="wallTypeManageBtn"
+                onclick="openRevitTypeMatching()"
+              >
+                <i class="fas fa-layer-group"></i> 벽체 타입 관리
+              </button>
+              <button
+                class="btn btn-deepblue"
+                id="unitPriceManageBtn"
+                onclick="openUnitPriceManagement()"
+              >
+                <i class="fas fa-calculator"></i> 일위대가 관리
+              </button>
+            </div>
+          </div>
 
-          <!-- 벽체 타입 관리 버튼 -->
-          <button
-            class="btn btn-purple"
-            id="wallTypeManageBtn"
-            onclick="openRevitTypeMatching()"
-          >
-            <i class="fas fa-layer-group"></i> 벽체 타입 관리
-          </button>
+          <div class="controls-section-divider"></div>
 
-          <!-- 일위대가 관리 버튼 -->
-          <button
-            class="btn btn-orange"
-            id="unitPriceManageBtn"
-            onclick="openUnitPriceManagement()"
-          >
-            <i class="fas fa-calculator"></i> 일위대가 관리
-          </button>
+          <!-- 간소화 방식 (엑셀 단가표) 섹션 -->
+          <div class="controls-section">
+            <div class="controls-section-label">
+              <i class="fas fa-caret-right"></i> 간소화 방식 (엑셀 단가표)
+            </div>
+            <div class="controls-section-buttons">
+              <button
+                class="btn btn-excel"
+                id="btnExcelUnitPriceManagement"
+                onclick="openExcelUnitPriceModal()"
+              >
+                <i class="fas fa-file-excel"></i> 엑셀 단가표 관리
+              </button>
+              <button
+                class="btn btn-excel"
+                id="btnExcelWallTypeManagement"
+                onclick="openExcelWallTypeModal()"
+              >
+                <i class="fas fa-th-list"></i> 엑셀 벽체타입 관리
+              </button>
+            </div>
+          </div>
 
         </div>
 
@@ -422,7 +450,12 @@
     <script src="js/modules/unitPriceManager.js?v=2"></script>
     <script src="js/modules/revitTypeMatching.js?v=2"></script>
     <script src="js/modules/priceComparisonManager.js?v=2"></script>
-    
+
+    <!-- 엑셀 단가표 모듈 -->
+    <script src="js/modules/excelUnitPriceImporter.js?v=1"></script>
+    <script src="js/modules/excelPriceManager.js?v=1"></script>
+    <script src="js/modules/excelWallTypeManager.js?v=1"></script>
+
     <!-- 메인 애플리케이션 파일들 -->
     <script src="js/app-core.js?v=6"></script>
     <script src="js/app-calculator.js?v=6"></script>
