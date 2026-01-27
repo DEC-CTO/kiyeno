@@ -180,12 +180,53 @@ async function calculateSingleWallCost(wall, sequence) {
       return null;
     }
 
+    // 면적: 3째자리 반올림 → 2자리, 길이/높이/두께: 4째자리 반올림 → 3자리
+    const area = Math.round((parseFloat(wall.Area) || 0) * 100) / 100;
+
+    // ── 엑셀 방식 간소화 계산 (source === 'excel') ──
+    if (wallTypeMatch.source === 'excel') {
+      console.log(`📊 엑셀 방식 간소화 계산: ${wall.Name}`);
+
+      // 엑셀 벽체타입에 저장된 M2당 단가 사용
+      const materialUnitPrice = wallTypeMatch.totalMaterialPrice || 0;
+      const laborUnitPrice = wallTypeMatch.totalLaborPrice || 0;
+      const unitPrice = materialUnitPrice + laborUnitPrice;
+
+      const materialCost = Math.round(materialUnitPrice * area);
+      const laborCost = Math.round(laborUnitPrice * area);
+      const totalCostValue = materialCost + laborCost;
+
+      return {
+        elementId: wall.Id,
+        wallName: wall.Name,
+        roomName: wall.RoomName || '미지정',
+        area: area,
+        height: Math.round((parseFloat(wall.Height) || 0) * 1000) / 1000,
+        length: Math.round((parseFloat(wall.Length) || 0) * 1000) / 1000,
+        thickness: Math.round((parseFloat(wall.Thickness) || 0) * 1000) / 1000,
+        level: wall.Level || '',
+
+        wallType: wallTypeMatch,
+        layerPricing: {},   // 엑셀 방식은 레이어별 상세 없음
+        source: 'excel',    // 계산 방식 표시
+
+        materialCost: materialCost,
+        laborCost: laborCost,
+        totalCost: totalCostValue,
+        materialUnitPrice: materialUnitPrice,
+        laborUnitPrice: laborUnitPrice,
+        unitPrice: unitPrice,
+
+        calculatedAt: new Date().toISOString(),
+        sequence: sequence,
+      };
+    }
+
+    // ── 상세 일위대가 방식 (기존 로직 그대로) ──
     // 2. 레이어별 자재 정보 추출
     const layerPricing = await extractLayerPricing(wallTypeMatch);
 
-    // 3. 면적 기반 총 금액 계산 (소수점 반올림 적용)
-    // 면적: 3째자리 반올림 → 2자리, 길이/높이/두께: 4째자리 반올림 → 3자리
-    const area = Math.round((parseFloat(wall.Area) || 0) * 100) / 100;
+    // 3. 면적 기반 총 금액 계산
     const totalCost = calculateTotalCost(layerPricing, area);
 
     return {
@@ -202,6 +243,7 @@ async function calculateSingleWallCost(wall, sequence) {
       // 매칭 정보
       wallType: wallTypeMatch,
       layerPricing: layerPricing,
+      source: 'detailed',  // 계산 방식 표시
 
       // 계산 결과
       materialCost: totalCost.materialCost, // 총 자재비
@@ -277,6 +319,32 @@ async function findMatchingWallType(wallTypeName) {
         }
       } else {
         console.log('❌ loadRevitWallTypes 함수 없음');
+      }
+    }
+
+    // ── 엑셀 벽체타입(KiyenoExcelDB) 검색 (fallback) ──
+    console.log('🔄 엑셀 벽체타입(excelWallTypes) 검색 시도...');
+    if (typeof ExcelUnitPriceImporter !== 'undefined' && ExcelUnitPriceImporter.getAllExcelWallTypes) {
+      try {
+        const excelWallTypes = await ExcelUnitPriceImporter.getAllExcelWallTypes();
+        if (excelWallTypes && excelWallTypes.length > 0) {
+          console.log(`📋 엑셀 벽체타입: ${excelWallTypes.length}개`);
+          const excelMatch = excelWallTypes.find(
+            (wt) => wt.name === wallTypeName
+          );
+          if (excelMatch) {
+            console.log('✅ 엑셀 벽체타입 매칭 성공:', excelMatch.name);
+            // source 필드가 'excel'인 객체 반환 (기존 revitWallType와 구분)
+            excelMatch.source = 'excel';
+            return excelMatch;
+          } else {
+            console.log('❌ 엑셀 벽체타입에서도 매칭 실패');
+          }
+        } else {
+          console.log('❌ 엑셀 벽체타입 데이터 없음');
+        }
+      } catch (excelError) {
+        console.warn('⚠️ 엑셀 벽체타입 검색 중 오류:', excelError);
       }
     }
 
@@ -1460,6 +1528,7 @@ function renderComparisonResults() {
         materialUnitPrice: result.materialUnitPrice, // M2당 자재비 (첫 번째 값)
         laborUnitPrice: result.laborUnitPrice, // M2당 노무비 (첫 번째 값)
         unitPrice: result.unitPrice, // M2당 단가 (첫 번째 값)
+        source: result.source || 'detailed', // 계산 방식 (excel 또는 detailed)
       };
     }
 
@@ -1485,8 +1554,12 @@ function renderComparisonResults() {
     grandTotalCost += data.totalCost;
 
     const row = document.createElement('tr');
+    // 엑셀 방식 벽체에 배지 표시
+    const sourceBadge = data.source === 'excel'
+      ? ' <span style="display:inline-block; font-size:9px; padding:1px 4px; background:#dbeafe; color:#1e40af; border-radius:3px; font-weight:500; vertical-align:middle;">엑셀</span>'
+      : '';
     row.innerHTML = `
-            <td>${wallName}</td>
+            <td>${wallName}${sourceBadge}</td>
             <td>${data.count}개</td>
             <td>M2</td>
             <td class="text-right">${data.totalArea.toFixed(2)}</td>
@@ -4563,8 +4636,56 @@ async function generateOrderFormDataRows() {
 
   console.log('✅ 발주서 데이터 행 생성 진행 중...');
 
-  // 타입별로 그룹핑
-  const groupedByType = groupResultsByType(calculationResults);
+  // ── 엑셀 방식 벽체 제외 (발주서에서는 상세 구성품 정보가 필요) ──
+  const detailedResults = calculationResults.filter(r => r.source !== 'excel');
+  const excelResults = calculationResults.filter(r => r.source === 'excel');
+
+  if (excelResults.length > 0) {
+    // 엑셀 방식 벽체 알림 배너
+    const excelGrouped = {};
+    excelResults.forEach(r => {
+      if (!excelGrouped[r.wallName]) {
+        excelGrouped[r.wallName] = { area: 0, totalCost: 0 };
+      }
+      excelGrouped[r.wallName].area += r.area;
+      excelGrouped[r.wallName].totalCost += r.totalCost;
+    });
+
+    let excelListHtml = '';
+    Object.entries(excelGrouped).forEach(([name, data]) => {
+      excelListHtml += `<div style="margin-left: 16px; font-size: 12px;">- ${name}: ${data.area.toFixed(2)}㎡, ₩${Math.round(data.totalCost).toLocaleString()}</div>`;
+    });
+
+    html += `
+      <tr>
+        <td colspan="34" style="padding: 0; border: none;">
+          <div style="margin: 8px 0; padding: 10px 16px; background: #fffbeb; border: 1px solid #f59e0b; border-radius: 6px; color: #92400e; font-size: 12px;">
+            <div style="font-weight: 600; margin-bottom: 4px;">
+              <i class="fas fa-exclamation-triangle" style="margin-right: 4px;"></i>
+              엑셀 단가 적용 벽체 (발주서 미포함)
+            </div>
+            <div style="color: #78350f; margin-bottom: 4px;">다음 벽체는 상세 구성품 정보가 없어 발주서에 포함되지 않습니다:</div>
+            ${excelListHtml}
+            <div style="color: #a16207; margin-top: 4px; font-size: 11px;">(단가비교표에서 금액 확인 가능)</div>
+          </div>
+        </td>
+      </tr>
+    `;
+    console.log(`⚠️ 엑셀 방식 벽체 ${excelResults.length}개 발주서에서 제외됨`);
+  }
+
+  if (detailedResults.length === 0) {
+    return html + `
+      <tr>
+        <td colspan="34" style="padding: 20px; text-align: center; color: #6c757d;">
+          상세 일위대가 방식 벽체가 없습니다. 발주서를 생성할 수 없습니다.
+        </td>
+      </tr>
+    `;
+  }
+
+  // 타입별로 그룹핑 (엑셀 방식 제외된 상세 방식만)
+  const groupedByType = groupResultsByType(detailedResults);
 
   // 각 타입별 처리
   for (const [typeName, results] of Object.entries(groupedByType)) {
