@@ -339,8 +339,12 @@
                 </button>
               </div>
               <div class="filter-group">
-                <button class="btn btn-sm btn-deepblue" onclick="calculateWallCosts()">
-                  <i class="fas fa-calculator"></i> 계산하기
+                <button class="btn btn-sm btn-deepblue" id="btnCalculateDetailed" onclick="calculateWallCostsDetailed()">
+                  <i class="fas fa-calculator"></i> 일위대가 계산
+                </button>
+                <span style="color: #64748b; margin: 0 4px;">|</span>
+                <button class="btn btn-sm btn-excel" id="btnCalculateExcel" onclick="calculateWallCostsExcel()">
+                  <i class="fas fa-file-excel"></i> 엑셀 계산
                 </button>
               </div>
             </div>

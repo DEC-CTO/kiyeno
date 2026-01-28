@@ -122,6 +122,269 @@ window.calculateWallCosts = async function () {
 };
 
 /**
+ * 일위대가 전용 벽체 비용 계산 (wallTypeMasters만 검색)
+ * 엑셀 벽체타입은 검색하지 않음 — 완전 분리
+ */
+window.calculateWallCostsDetailed = async function () {
+  try {
+    console.log('🔢 [일위대가] 벽체 비용 계산 시작');
+
+    // 1. 선택된 벽체 확인
+    const selectedWalls = getSelectedRevitWalls();
+    if (!selectedWalls || selectedWalls.length === 0) {
+      alert('계산할 벽체를 선택해주세요.');
+      return;
+    }
+
+    console.log(`📊 선택된 벽체: ${selectedWalls.length}개`);
+
+    // 2. 로딩 표시
+    showCalculationProgress(selectedWalls.length);
+
+    // 3. 기존 일위대가 결과 필터링 (엑셀 결과는 유지)
+    const excelResults = calculationResults.filter(r => r.source === 'excel');
+    calculationResults = [...excelResults];  // 엑셀 결과 유지
+    window.calculationResults = calculationResults;
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    // 렌더링 플래그 리셋
+    isOrderFormRendered = false;
+    isPriceComparisonRendered = false;
+
+    for (let i = 0; i < selectedWalls.length; i++) {
+      const wall = selectedWalls[i];
+
+      // 일위대가 전용 매칭
+      const wallTypeMatch = await findMatchingWallTypeDetailed(wall.Name);
+      if (!wallTypeMatch) {
+        console.warn(`⚠️ [일위대가] 매칭 실패: ${wall.Name}`);
+        failedCount++;
+        updateCalculationProgress(i + 1, selectedWalls.length);
+        continue;
+      }
+
+      // 상세 계산 수행
+      const result = await calculateSingleWallCostDetailed(wall, wallTypeMatch, successCount + 1);
+      if (result) {
+        calculationResults.push(result);
+        successCount++;
+      } else {
+        failedCount++;
+      }
+      updateCalculationProgress(i + 1, selectedWalls.length);
+    }
+
+    window.calculationResults = calculationResults;
+    hideCalculationProgress();
+
+    if (successCount === 0) {
+      alert('[일위대가] 계산할 수 있는 벽체가 없습니다.\n벽체 타입 관리에서 매칭을 확인해주세요.');
+      return;
+    }
+
+    if (failedCount > 0) {
+      showToast(
+        `[일위대가] 계산 완료: 성공 ${successCount}개, 실패 ${failedCount}개`,
+        'warning'
+      );
+    } else {
+      showToast(`[일위대가] 계산 완료: ${successCount}개`, 'success');
+    }
+
+    showResultsPanel();
+    renderCalculationResults();
+
+    console.log(`✅ [일위대가] 벽체 비용 계산 완료: ${successCount}개`);
+  } catch (error) {
+    console.error('❌ [일위대가] 벽체 비용 계산 실패:', error);
+    hideCalculationProgress();
+    alert('[일위대가] 벽체 비용 계산 중 오류가 발생했습니다: ' + error.message);
+  }
+};
+
+/**
+ * 엑셀 전용 벽체 비용 계산 (excelWallTypes만 검색)
+ * 일위대가 벽체타입은 검색하지 않음 — 완전 분리
+ */
+window.calculateWallCostsExcel = async function () {
+  try {
+    console.log('🔢 [엑셀] 벽체 비용 계산 시작');
+
+    // 1. 선택된 벽체 확인
+    const selectedWalls = getSelectedRevitWalls();
+    if (!selectedWalls || selectedWalls.length === 0) {
+      alert('계산할 벽체를 선택해주세요.');
+      return;
+    }
+
+    console.log(`📊 선택된 벽체: ${selectedWalls.length}개`);
+
+    // 2. 로딩 표시
+    showCalculationProgress(selectedWalls.length);
+
+    // 3. 기존 엑셀 결과 필터링 (일위대가 결과는 유지)
+    const detailedResults = calculationResults.filter(r => r.source === 'detailed');
+    calculationResults = [...detailedResults];  // 일위대가 결과 유지
+    window.calculationResults = calculationResults;
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    // 렌더링 플래그 리셋
+    isOrderFormRendered = false;
+    isPriceComparisonRendered = false;
+
+    for (let i = 0; i < selectedWalls.length; i++) {
+      const wall = selectedWalls[i];
+
+      // 엑셀 전용 매칭
+      const wallTypeMatch = await findMatchingWallTypeExcel(wall.Name);
+      if (!wallTypeMatch) {
+        console.warn(`⚠️ [엑셀] 매칭 실패: ${wall.Name}`);
+        failedCount++;
+        updateCalculationProgress(i + 1, selectedWalls.length);
+        continue;
+      }
+
+      // 간소화 계산 수행
+      const result = calculateSingleWallCostExcel(wall, wallTypeMatch, successCount + 1);
+      if (result) {
+        calculationResults.push(result);
+        successCount++;
+      } else {
+        failedCount++;
+      }
+      updateCalculationProgress(i + 1, selectedWalls.length);
+    }
+
+    window.calculationResults = calculationResults;
+    hideCalculationProgress();
+
+    if (successCount === 0) {
+      alert('[엑셀] 계산할 수 있는 벽체가 없습니다.\n엑셀 벽체타입 관리에서 매칭을 확인해주세요.');
+      return;
+    }
+
+    if (failedCount > 0) {
+      showToast(
+        `[엑셀] 계산 완료: 성공 ${successCount}개, 실패 ${failedCount}개`,
+        'warning'
+      );
+    } else {
+      showToast(`[엑셀] 계산 완료: ${successCount}개`, 'success');
+    }
+
+    showResultsPanel();
+    renderCalculationResults();
+
+    console.log(`✅ [엑셀] 벽체 비용 계산 완료: ${successCount}개`);
+  } catch (error) {
+    console.error('❌ [엑셀] 벽체 비용 계산 실패:', error);
+    hideCalculationProgress();
+    alert('[엑셀] 벽체 비용 계산 중 오류가 발생했습니다: ' + error.message);
+  }
+};
+
+/**
+ * 일위대가 전용 단일 벽체 계산 (상세 구성품 기반)
+ */
+async function calculateSingleWallCostDetailed(wall, wallTypeMatch, sequence) {
+  try {
+    console.log(`🧮 [일위대가] 벽체 계산 중 (${sequence}): ${wall.Name}`);
+
+    // 면적: 3째자리 반올림 → 2자리
+    const area = Math.round((parseFloat(wall.Area) || 0) * 100) / 100;
+
+    // 레이어별 자재 단가 추출
+    const layerPricing = await extractLayerPricing(wallTypeMatch);
+
+    // 면적 기반 총 금액 계산
+    const totalCost = calculateTotalCost(layerPricing, area);
+
+    return {
+      elementId: wall.Id,
+      wallName: wall.Name,
+      roomName: wall.RoomName || '미지정',
+      area: area,
+      height: Math.round((parseFloat(wall.Height) || 0) * 1000) / 1000,
+      length: Math.round((parseFloat(wall.Length) || 0) * 1000) / 1000,
+      thickness: Math.round((parseFloat(wall.Thickness) || 0) * 1000) / 1000,
+      level: wall.Level || '',
+
+      wallType: wallTypeMatch,
+      layerPricing: layerPricing,
+      source: 'detailed',
+
+      materialCost: totalCost.materialCost,
+      laborCost: totalCost.laborCost,
+      totalCost: totalCost.totalCost,
+      materialUnitPrice: totalCost.materialUnitPrice,
+      laborUnitPrice: totalCost.laborUnitPrice,
+      unitPrice: totalCost.unitPrice,
+
+      calculatedAt: new Date().toISOString(),
+      sequence: sequence,
+    };
+  } catch (error) {
+    console.error(`❌ [일위대가] 벽체 계산 실패: ${wall.Name}`, error);
+    showToast(`[일위대가] 벽체 계산 실패: ${wall.Name || wall.Id}`, 'error');
+    return null;
+  }
+}
+
+/**
+ * 엑셀 전용 단일 벽체 계산 (M2 단가 기반)
+ */
+function calculateSingleWallCostExcel(wall, wallTypeMatch, sequence) {
+  try {
+    console.log(`🧮 [엑셀] 벽체 계산 중 (${sequence}): ${wall.Name}`);
+
+    // 면적: 3째자리 반올림 → 2자리
+    const area = Math.round((parseFloat(wall.Area) || 0) * 100) / 100;
+
+    // 엑셀 벽체타입에 저장된 M2당 단가 사용
+    const materialUnitPrice = wallTypeMatch.totalMaterialPrice || 0;
+    const laborUnitPrice = wallTypeMatch.totalLaborPrice || 0;
+    const unitPrice = materialUnitPrice + laborUnitPrice;
+
+    const materialCost = Math.round(materialUnitPrice * area);
+    const laborCost = Math.round(laborUnitPrice * area);
+    const totalCostValue = materialCost + laborCost;
+
+    return {
+      elementId: wall.Id,
+      wallName: wall.Name,
+      roomName: wall.RoomName || '미지정',
+      area: area,
+      height: Math.round((parseFloat(wall.Height) || 0) * 1000) / 1000,
+      length: Math.round((parseFloat(wall.Length) || 0) * 1000) / 1000,
+      thickness: Math.round((parseFloat(wall.Thickness) || 0) * 1000) / 1000,
+      level: wall.Level || '',
+
+      wallType: wallTypeMatch,
+      layerPricing: {},   // 엑셀 방식은 레이어별 상세 없음
+      source: 'excel',
+
+      materialCost: materialCost,
+      laborCost: laborCost,
+      totalCost: totalCostValue,
+      materialUnitPrice: materialUnitPrice,
+      laborUnitPrice: laborUnitPrice,
+      unitPrice: unitPrice,
+
+      calculatedAt: new Date().toISOString(),
+      sequence: sequence,
+    };
+  } catch (error) {
+    console.error(`❌ [엑셀] 벽체 계산 실패: ${wall.Name}`, error);
+    showToast(`[엑셀] 벽체 계산 실패: ${wall.Name || wall.Id}`, 'error');
+    return null;
+  }
+}
+
+/**
  * 선택된 Revit 벽체 데이터 가져오기
  */
 function getSelectedRevitWalls() {
@@ -354,6 +617,83 @@ async function findMatchingWallType(wallTypeName) {
     return null;
   } catch (error) {
     console.error('벽체 타입 매칭 검색 실패:', error);
+    return null;
+  }
+}
+
+/**
+ * 일위대가 전용 벽체 타입 매칭 (wallTypeMasters / revitWallTypes만 검색)
+ * 엑셀 벽체타입은 검색하지 않음
+ */
+async function findMatchingWallTypeDetailed(wallTypeName) {
+  try {
+    console.log('🔍 [일위대가] 벽체 타입 매칭 검색:', wallTypeName);
+
+    // window.revitWallTypes에서만 검색 (KiyenoMaterialsDB/wallTypeMasters)
+    if (
+      window.revitWallTypes &&
+      Array.isArray(window.revitWallTypes) &&
+      window.revitWallTypes.length > 0
+    ) {
+      const match = window.revitWallTypes.find(
+        (wt) => wt.wallType === wallTypeName
+      );
+      if (match) {
+        console.log('✅ [일위대가] 벽체 타입 매칭 성공:', match.wallType);
+        match.source = 'detailed';
+        return match;
+      }
+    } else {
+      // 데이터가 없으면 로드 시도
+      if (typeof window.loadRevitWallTypes === 'function') {
+        window.loadRevitWallTypes();
+        if (window.revitWallTypes && window.revitWallTypes.length > 0) {
+          const match = window.revitWallTypes.find(
+            (wt) => wt.wallType === wallTypeName
+          );
+          if (match) {
+            match.source = 'detailed';
+            return match;
+          }
+        }
+      }
+    }
+
+    console.log('❌ [일위대가] 매칭 실패:', wallTypeName);
+    return null;
+  } catch (error) {
+    console.error('[일위대가] 벽체 타입 매칭 검색 실패:', error);
+    return null;
+  }
+}
+
+/**
+ * 엑셀 전용 벽체 타입 매칭 (KiyenoExcelDB/excelWallTypes만 검색)
+ * 일위대가 벽체타입은 검색하지 않음
+ */
+async function findMatchingWallTypeExcel(wallTypeName) {
+  try {
+    console.log('🔍 [엑셀] 벽체 타입 매칭 검색:', wallTypeName);
+
+    // ExcelUnitPriceImporter에서만 검색
+    if (typeof ExcelUnitPriceImporter !== 'undefined' && ExcelUnitPriceImporter.getAllExcelWallTypes) {
+      const excelWallTypes = await ExcelUnitPriceImporter.getAllExcelWallTypes();
+      if (excelWallTypes && excelWallTypes.length > 0) {
+        const match = excelWallTypes.find(
+          (wt) => wt.name === wallTypeName
+        );
+        if (match) {
+          console.log('✅ [엑셀] 벽체 타입 매칭 성공:', match.name);
+          match.source = 'excel';
+          return match;
+        }
+      }
+    }
+
+    console.log('❌ [엑셀] 매칭 실패:', wallTypeName);
+    return null;
+  } catch (error) {
+    console.error('[엑셀] 벽체 타입 매칭 검색 실패:', error);
     return null;
   }
 }
