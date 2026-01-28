@@ -17,7 +17,7 @@
 
 /* 헤더 스타일 */
 .unitprice-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 20px 25px;
     margin: 0;
@@ -67,7 +67,7 @@
 }
 
 .unitprice-header #unitPriceSearchInput:focus {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.1);
     border: none;
     outline: none;
 }

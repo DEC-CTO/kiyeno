@@ -391,7 +391,7 @@
 .components-table th,
 .materials-detail-table th,
 .summary-table th {
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 12px 8px;
     text-align: center;
@@ -482,7 +482,7 @@
    단일 벽체 내역서 스타일
    ============================================================================= */
 .single-wall-breakdown .wall-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 20px;
     border-radius: 8px;
@@ -525,7 +525,7 @@
 
 .report-header {
     text-align: center;
-    background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #334155 0%, #475569 100%);
     color: white;
     padding: 30px;
     border-radius: 8px;

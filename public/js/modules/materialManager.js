@@ -284,7 +284,7 @@ function showMaterialManagementModalDirectly() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h4><i class="fas fa-database"></i> 자재 관리</h4>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="font-size: 12px; color: #6b7280;">상태: ${dataStatus.status}</span>
+                        <span style="font-size: 15px; color: white; font-weight: 500;">상태: ${dataStatus.status}</span>
                     </div>
                 </div>
                 
@@ -292,14 +292,14 @@ function showMaterialManagementModalDirectly() {
                 <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center; justify-content: space-between;">
                     <!-- 자재 유형 선택 탭 -->
                     <div style="display: flex; gap: 5px; align-items: center;">
-                        <button onclick="showLightweightMaterials()" id="lightweightTab" class="btn btn-primary btn-sm material-tab active">
+                        <button onclick="showLightweightMaterials()" id="lightweightTab" class="btn btn-gray btn-sm material-tab active">
                             <i class="fas fa-tools"></i> 벽체 경량 자재
                         </button>
-                        <button onclick="showGypsumBoards()" id="gypsumTab" class="btn btn-outline-primary btn-sm material-tab">
+                        <button onclick="showGypsumBoards()" id="gypsumTab" class="btn btn-outline-gray btn-sm material-tab">
                             <i class="fas fa-square"></i> 석고보드
                         </button>
                         <div style="margin-left: 15px; display: flex; gap: 5px;">
-                            <button onclick="openMaterialEditModal('add')" class="btn btn-success btn-sm" style="padding: 6px 12px;">
+                            <button onclick="openMaterialEditModal('add')" class="btn btn-gray btn-sm" style="padding: 6px 12px;">
                                 <i class="fas fa-plus"></i> 자재 추가
                             </button>
                         </div>

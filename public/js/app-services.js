@@ -62,14 +62,14 @@ window.addGypsumWorker = function() {
     
     const workerHTML = `
         <div class="worker-item" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+            <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
                 <option value="반장">반장</option>
                 <option value="조공" selected>조공</option>
                 <option value="특별직">특별직</option>
                 <option value="기타">기타</option>
             </select>
             <input type="text" class="worker-cost" value="220,000" 
-                   style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                   style="flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;" 
                    oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                    onchange="window.calculateGypsumLaborCost()">
             <button type="button" onclick="window.removeGypsumWorker(this)" 
@@ -174,14 +174,14 @@ window.addLightweightWorker = function() {
     newWorkerDiv.setAttribute('data-index', currentIndex);
     
     newWorkerDiv.innerHTML = `
-        <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+        <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
             <option value="반장">반장</option>
             <option value="조공" selected>조공</option>
             <option value="특별직">특별직</option>
             <option value="기타">기타</option>
         </select>
         <input type="text" class="worker-cost" value="220,000" 
-               style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+               style="flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;" 
                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                onchange="window.calculateLightweightLaborCost()">
         <button type="button" onclick="window.removeLightweightWorker(this)"
@@ -1330,7 +1330,7 @@ function showMaterialManagementModalDirectly() {
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h4><i class="fas fa-database"></i> 자재 관리</h4>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <span style="font-size: 12px; color: #6b7280;">상태: ${dataStatus.status}</span>
+                        <span style="font-size: 15px; color: white; font-weight: 500;">상태: ${dataStatus.status}</span>
                     </div>
                 </div>
                 
@@ -1338,14 +1338,14 @@ function showMaterialManagementModalDirectly() {
                 <div style="display: flex; gap: 10px; margin-top: 15px; align-items: center; justify-content: space-between;">
                     <!-- 자재 유형 선택 탭 -->
                     <div style="display: flex; gap: 5px; align-items: center;">
-                        <button onclick="showLightweightMaterials()" id="lightweightTab" class="btn btn-primary btn-sm material-tab active">
+                        <button onclick="showLightweightMaterials()" id="lightweightTab" class="btn btn-gray btn-sm material-tab active">
                             <i class="fas fa-tools"></i> 벽체 경량 자재
                         </button>
-                        <button onclick="showGypsumBoards()" id="gypsumTab" class="btn btn-outline-primary btn-sm material-tab">
+                        <button onclick="showGypsumBoards()" id="gypsumTab" class="btn btn-outline-gray btn-sm material-tab">
                             <i class="fas fa-square"></i> 석고보드
                         </button>
                         <div style="margin-left: 15px; display: flex; gap: 5px;">
-                            <button onclick="openMaterialEditModal('add')" class="btn btn-success btn-sm" style="padding: 6px 12px;">
+                            <button onclick="openMaterialEditModal('add')" class="btn btn-gray btn-sm" style="padding: 6px 12px;">
                                 <i class="fas fa-plus"></i> 자재 추가
                             </button>
                         </div>
@@ -1943,7 +1943,7 @@ function showImportConfirmation(importedData, fileName) {
                     </ul>
                 </div>
                 
-                <div style="background: #fef3c7; padding: 15px; border-radius: 4px; border-left: 4px solid #f59e0b;">
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 4px; border-left: 4px solid #f59e0b;">
                     <p style="margin: 0; font-size: 14px;">
                         <strong>⚠️ 주의사항</strong><br>
                         현재 작업 중인 데이터가 모두 대체됩니다.<br>
@@ -2006,9 +2006,9 @@ function showModificationsSummary() {
                             <div style="font-size: 24px; font-weight: bold; color: #059669;">${summary.lightweightComponents.added + summary.gypsumBoards.added}</div>
                             <div style="font-size: 12px; color: #065f46;">추가된 자재</div>
                         </div>
-                        <div style="text-align: center; padding: 12px; background: #fef3c7; border-radius: 6px;">
+                        <div style="text-align: center; padding: 12px; background: #f1f5f9; border-radius: 6px;">
                             <div style="font-size: 24px; font-weight: bold; color: #d97706;">${summary.lightweightComponents.modified + summary.gypsumBoards.modified}</div>
-                            <div style="font-size: 12px; color: #92400e;">수정된 자재</div>
+                            <div style="font-size: 12px; color: #475569;">수정된 자재</div>
                         </div>
                         <div style="text-align: center; padding: 12px; background: #fecaca; border-radius: 6px;">
                             <div style="font-size: 24px; font-weight: bold; color: #dc2626;">${summary.lightweightComponents.deleted + summary.gypsumBoards.deleted}</div>
@@ -2129,8 +2129,8 @@ function showLightweightMaterials() {
     const gypsumTab = document.getElementById('gypsumTab');
     
     if (lightweightTab && gypsumTab) {
-        lightweightTab.className = 'btn btn-primary btn-sm material-tab active';
-        gypsumTab.className = 'btn btn-outline-primary btn-sm material-tab';
+        lightweightTab.className = 'btn btn-gray btn-sm material-tab active';
+        gypsumTab.className = 'btn btn-outline-gray btn-sm material-tab';
     }
     
     if (!window.priceDB) {
@@ -2162,8 +2162,8 @@ function showLightweightMaterials() {
     const tableHTML = `
         <div class="material-table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                    <tr>
+                <thead style="position: sticky; top: 0;">
+                    <tr style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 60px; text-align: center;">ID</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 100px; text-align: center;">품목</th>
                         <th style="padding: 6px; border: 1px solid #ddd; min-width: 150px; text-align: center;">자재명</th>
@@ -2208,8 +2208,8 @@ function showLightweightMaterials() {
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd; text-align: center;">
-                            <button onclick="clearLightweightFilters()" 
-                                    style="padding: 4px 8px; background: #28a745; color: white; border: none; border-radius: 3px; font-size: 10px; cursor: pointer;"
+                            <button onclick="clearLightweightFilters()"
+                                    style="padding: 4px 8px; background: #64748b; color: white; border: none; border-radius: 3px; font-size: 10px; cursor: pointer;"
                                     title="필터 초기화">초기화</button>
                         </th>
                     </tr>
@@ -2287,10 +2287,10 @@ function showLightweightMaterials() {
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.work || ''}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
-                                <button onclick="editLightweightMaterial('${item.id}')" class="btn btn-sm" style="padding: 2px 4px; margin-right: 2px; background: #3b82f6; color: white; font-size: 10px;" title="자재 편집">
+                                <button onclick="editLightweightMaterial('${item.id}')" class="btn btn-sm" style="padding: 2px 4px; margin-right: 2px; background: #64748b; color: white; font-size: 10px;" title="자재 편집">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="deleteLightweightMaterial('${item.id}')" class="btn btn-sm" style="padding: 2px 4px; background: #dc2626; color: white; font-size: 10px;" title="자재 삭제">
+                                <button onclick="deleteLightweightMaterial('${item.id}')" class="btn btn-sm" style="padding: 2px 4px; background: #94a3b8; color: white; font-size: 10px;" title="자재 삭제">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -2322,8 +2322,8 @@ function showGypsumBoards() {
     const gypsumTab = document.getElementById('gypsumTab');
     
     if (lightweightTab && gypsumTab) {
-        lightweightTab.className = 'btn btn-outline-primary btn-sm material-tab';
-        gypsumTab.className = 'btn btn-primary btn-sm material-tab active';
+        lightweightTab.className = 'btn btn-outline-gray btn-sm material-tab';
+        gypsumTab.className = 'btn btn-gray btn-sm material-tab active';
     }
     
     if (!window.priceDB) {
@@ -2362,17 +2362,17 @@ function showGypsumBoards() {
     const tableHTML = `
         <div class="material-table-container" style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd;">
             <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
-                <thead style="background: #f8f9fa; position: sticky; top: 0;">
-                    <tr>
+                <thead style="position: sticky; top: 0;">
+                    <tr style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">ID</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">품목</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 120px; text-align: center;">품명</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">규격</th>
-                        <th colspan="3" style="padding: 8px; border: 1px solid #ddd; background: #e3f2fd; text-align: center;">치수</th>
+                        <th colspan="3" style="padding: 8px; border: 1px solid #ddd; background: #334155; color: white; text-align: center;">치수</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">단위</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 50px; text-align: center;">수량</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">장당단가</th>
-                        <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #fff3e0; text-align: center;">M2</th>
+                        <th colspan="2" style="padding: 8px; border: 1px solid #ddd; background: #334155; color: white; text-align: center;">M2</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">기준 생산성</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">기준 보할</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 60px; text-align: center;">공종1</th>
@@ -2381,12 +2381,12 @@ function showGypsumBoards() {
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 80px; text-align: center;">작업</th>
                         <th rowspan="2" style="padding: 8px; border: 1px solid #ddd; min-width: 100px; text-align: center;">관리</th>
                     </tr>
-                    <tr>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; background: #e3f2fd; text-align: center;">W</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; background: #e3f2fd; text-align: center;">H</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 40px; background: #e3f2fd; text-align: center;">T</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">자재비</th>
-                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; background: #fff3e0; text-align: center;">노무비</th>
+                    <tr style="background: #64748b; color: white;">
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; text-align: center;">W</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 50px; text-align: center;">H</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 40px; text-align: center;">T</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; text-align: center;">자재비</th>
+                        <th style="padding: 4px; border: 1px solid #ddd; min-width: 70px; text-align: center;">노무비</th>
                     </tr>
                     <tr style="background: #ffffff;">
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
@@ -2420,7 +2420,7 @@ function showGypsumBoards() {
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;"></th>
                         <th style="padding: 4px; border: 1px solid #ddd;">
-                            <button onclick="clearGypsumFilters()" style="width: 100%; padding: 4px; font-size: 10px; background: #dc2626; color: white; border: none; border-radius: 2px;" title="필터 초기화">
+                            <button onclick="clearGypsumFilters()" style="width: 100%; padding: 4px; font-size: 10px; background: #64748b; color: white; border: none; border-radius: 2px;" title="필터 초기화">
                                 초기화
                             </button>
                         </th>
@@ -2450,10 +2450,10 @@ function showGypsumBoards() {
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.location || '-'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">${item.work || '석고보드 설치'}</td>
                             <td style="padding: 4px; border: 1px solid #ddd; text-align: center;">
-                                <button onclick="editGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px; background: #3b82f6; color: white;" title="석고보드 편집">
+                                <button onclick="editGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; margin-right: 2px; background: #64748b; color: white;" title="석고보드 편집">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button onclick="deleteGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; background: #dc2626; color: white;" title="석고보드 삭제">
+                                <button onclick="deleteGypsumBoard('${item.id}')" class="btn btn-sm" style="padding: 2px 6px; background: #94a3b8; color: white;" title="석고보드 삭제">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </td>
@@ -2542,13 +2542,13 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                     <!-- Row 1: 기본 정보 (파란색) -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">ID *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">ID *</label>
                         <input type="text" id="editMaterialId" value="${material.id}" disabled 
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background: #f3f4f6; color: #6b7280;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">품목 *</label>
-                        <select id="editMaterialCategory" style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">품목 *</label>
+                        <select id="editMaterialCategory" style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                             <option value="STUD_KS" ${material.category === 'STUD_KS' ? 'selected' : ''}>STUD - KS형</option>
                             <option value="RUNNER_KS" ${material.category === 'RUNNER_KS' ? 'selected' : ''}>RUNNER - KS형</option>
                             <option value="STUD_BS" ${material.category === 'STUD_BS' ? 'selected' : ''}>STUD - BS형</option>
@@ -2559,25 +2559,25 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">자재명 *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">자재명 *</label>
                         <input type="text" id="editMaterialName" value="${material.name}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     
                     <!-- Row 2: 규격/사이즈 (자동 생성/회색) -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">규격 *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">규격 *</label>
                         <input type="text" id="editMaterialSpec" value="${material.spec}"
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">사이즈 *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">사이즈 *</label>
                         <input type="text" id="editMaterialSize" value="${material.size || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">단위 *</label>
-                        <select id="editMaterialUnit" style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">단위 *</label>
+                        <select id="editMaterialUnit" style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                             <option value="M" ${material.unit === 'M' ? 'selected' : ''}>M (미터)</option>
                             <option value="EA" ${material.unit === 'EA' ? 'selected' : ''}>EA (개)</option>
                             <option value="KG" ${material.unit === 'KG' ? 'selected' : ''}>KG (킬로그램)</option>
@@ -2587,81 +2587,81 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                     
                     <!-- Row 3: 가격 정보 (빨간색) -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">자재비 (원) *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">자재비 (원) *</label>
                         <input type="text" id="editMaterialPrice" value="${(material.price || 0).toLocaleString()}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">노무비 (원)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">노무비 (원)</label>
                         <input type="text" id="editMaterialLaborCost" value="${(material.laborCost || 0).toLocaleString()}"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fff0f0; color: #dc2626; font-weight: 600;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155; font-weight: 600;"
                                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                                placeholder="직접 입력 또는 아래 계산기 사용">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 노무비 (원)</label>
                         <input type="text" id="editMaterialBaseLaborCost" value="0" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155; font-weight: 600;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 생산성</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 생산성</label>
                         <input type="number" id="editMaterialLaborProductivity" value="${material.laborProductivity || laborSettings.productivity}" step="0.001"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                onchange="window.syncProductivityToLightweightCalculator(this.value)">
                     </div>
                     
                     <!-- Row 4: 노무비 보할, 공종 (빨간색/녹색) -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 보할 (%)</label>
                         <input type="number" id="editMaterialLaborCompensation" value="${material.laborCompensation || laborSettings.compensation}" min="0" max="500" step="1"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                onchange="window.syncCompensationToLightweightCalculator(this.value)">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종1</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">공종1</label>
                         <input type="text" id="editMaterialWorkType1" value="${material.workType1 || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4; color: #16a34a;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종2</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">공종2</label>
                         <input type="text" id="editMaterialWorkType2" value="${material.workType2 || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4; color: #16a34a;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155;">
                     </div>
                     
                     <!-- Row 5: 부위, 작업, 비고 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">부위</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">부위</label>
                         <input type="text" id="editMaterialLocation" value="${material.location || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">비고</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">비고</label>
                         <input type="text" id="editMaterialWork" value="${material.work || ''}"
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                 </div>
             </div>
 
             <!-- Section 2: 노무비 계산 섹션 -->
-            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #fef3c7;">
-                <h5 style="margin: 0 0 15px 0; color: #92400e;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #f1f5f9;">
+                <h5 style="margin: 0 0 15px 0; color: #475569;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
 
                     <!-- 기준 노무비 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
-                        <h6 style="margin: 0 0 10px 0; color: #92400e;">기준 노무비 설정</h6>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; background: #f8fafc;">
+                        <h6 style="margin: 0 0 10px 0; color: #475569;">기준 노무비 설정</h6>
                         <div id="workersList" style="margin-bottom: 10px;">
                             ${laborSettings.workers.map((worker, index) => `
                                 <div class="worker-item" data-index="${index}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                    <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+                                    <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
                                         <option value="반장" ${worker.type === '반장' ? 'selected' : ''}>반장</option>
                                         <option value="조공" ${worker.type === '조공' ? 'selected' : ''}>조공</option>
                                         <option value="특별직" ${worker.type === '특별직' ? 'selected' : ''}>특별직</option>
                                         <option value="기타" ${worker.type === '기타' ? 'selected' : ''}>기타</option>
                                     </select>
                                     <input type="text" class="worker-cost" value="${worker.cost ? worker.cost.toLocaleString() : '0'}" 
-                                           style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                                           style="flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;" 
                                            oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                                            onchange="window.calculateLightweightLaborCost()">
                                     <button type="button" onclick="window.removeLightweightWorker(this)"
@@ -2671,33 +2671,33 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                         </div>
                         
                         <button type="button" onclick="window.addLightweightWorker()" 
-                                style="width: 100%; padding: 8px; background: #16a34a; color: white; border: none; border-radius: 4px; margin-bottom: 10px; cursor: pointer;">
+                                style="width: 100%; padding: 8px; background: #475569; color: white; border: none; border-radius: 4px; margin-bottom: 10px; cursor: pointer;">
                             + 작업자 추가
                         </button>
                         
-                        <div style="background: #fbbf24; padding: 8px; border-radius: 4px; color: #92400e; font-size: 13px; text-align: center;">
+                        <div style="background: #e2e8f0; padding: 8px; border-radius: 4px; color: #334155; font-size: 13px; text-align: center;">
                             <div>합계: <span id="lightweightTotalCost">0</span>원 | 작업자 수: <span id="lightweightWorkerCount">0</span>명</div>
                             <div style="font-weight: 600; margin-top: 4px;">→ 기준 노무비: <span id="lightweightBaseLaborCost">0</span>원</div>
                         </div>
                     </div>
 
                     <!-- 생산성 & 보할 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
-                        <h6 style="margin: 0 0 10px 0; color: #92400e;">생산성 및 보할 설정</h6>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; background: #f8fafc;">
+                        <h6 style="margin: 0 0 10px 0; color: #475569;">생산성 및 보할 설정</h6>
                         <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 생산성</label>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 생산성</label>
                             <input type="number" id="editLightweightLaborProductivity" value="${laborSettings.productivity}" step="0.01" 
-                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" 
                                    onchange="window.calculateLightweightLaborCost()">
                         </div>
                         <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 보할 (%)</label>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 보할 (%)</label>
                             <input type="number" id="editLightweightLaborCompensation" value="${laborSettings.compensation}" step="1" min="0" max="500"
-                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" 
                                    onchange="window.calculateLightweightLaborCost()">
                         </div>
 
-                        <div style="background: #16a34a; padding: 10px; border-radius: 4px; color: white; text-align: center;">
+                        <div style="background: #475569; padding: 10px; border-radius: 4px; color: white; text-align: center;">
                             <div style="font-size: 14px; margin-bottom: 4px;">최종 노무비</div>
                             <div style="font-size: 18px; font-weight: 700;" id="finalLightweightLaborCost">0원</div>
                             <div style="font-size: 11px; margin-top: 4px; opacity: 0.9;">기준노무비 ÷ 생산성 × 보할</div>
@@ -2705,15 +2705,6 @@ function editLightweightMaterial(materialId, modal = null, isAddMode = false) {
                     </div>
                 </div>
             </div>
-            </div>
-            <div style="background: linear-gradient(90deg, #dbeafe 0%, #fef2f2 50%, #f0fdf4 100%); padding: 15px; border-radius: 4px; margin-top: 15px;">
-                <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.4;">
-                    <strong>색상 구분:</strong> 
-                    <span style="color: #1e40af;">🔵 기본정보</span> | 
-                    <span style="color: #dc2626;">🔴 가격/노무비</span> | 
-                    <span style="color: #16a34a;">🟢 공종/부위</span> |
-                    <span style="color: #6b7280;">⚪ 자동생성</span>
-                </p>
             </div>
         </div>
     `;
@@ -3126,7 +3117,7 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
     };
 
     const content = `
-        <div style="min-width: 700px; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
+        <div style="min-width: 700px; max-width: 1000px;">
             <h4><i class="fas fa-${isAddMode ? 'plus' : 'edit'}"></i> 석고보드 ${isAddMode ? '추가' : '편집'}${isAddMode ? '' : ': ' + material.name}</h4>
 
             <!-- Section 1: 기본 정보 편집 -->
@@ -3141,8 +3132,8 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                     </div>
                     <!-- 품목 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">품목 *</label>
-                        <select id="editGypsumCategory" style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">품목 *</label>
+                        <select id="editGypsumCategory" style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                             <option value="STANDARD" ${material.category === 'STANDARD' ? 'selected' : ''}>일반석고보드</option>
                             <option value="MOISTURE" ${material.category === 'MOISTURE' ? 'selected' : ''}>방수석고보드</option>
                             <option value="FIRE" ${material.category === 'FIRE' ? 'selected' : ''}>방화석고보드</option>
@@ -3154,128 +3145,128 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                     </div>
                     <!-- 품명 -->
                     <div style="grid-column: span 2;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">품명 *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">품명 *</label>
                         <input type="text" id="editGypsumName" value="${material.name}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <!-- 규격 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">규격 *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">규격 *</label>
                         <input type="text" id="editGypsumSpec" value="${material.spec || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <!-- 치수 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">폭(W) *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">폭(W) *</label>
                         <input type="number" id="editGypsumW" value="${material.w}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">높이(H) *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">높이(H) *</label>
                         <input type="number" id="editGypsumH" value="${material.h}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">두께(T) *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">두께(T) *</label>
                         <input type="number" id="editGypsumT" value="${material.t}" step="0.1" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <!-- 단위, 수량 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">단위 *</label>
-                        <select id="editGypsumUnit" style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">단위 *</label>
+                        <select id="editGypsumUnit" style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                             <option value="매" ${material.unit === '매' ? 'selected' : ''}>매</option>
                             <option value="M2" ${material.unit === 'M2' ? 'selected' : ''}>M2</option>
                             <option value="EA" ${material.unit === 'EA' ? 'selected' : ''}>EA</option>
                         </select>
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #1e40af;">수량</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">수량</label>
                         <input type="number" id="editGypsumQty" value="${material.qty}" step="0.01" 
-                               style="width: 100%; padding: 8px; border: 1px solid #1e40af; border-radius: 4px; background: #dbeafe;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <!-- 장당단가 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">장당단가 (원) *</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">장당단가 (원) *</label>
                         <input type="text" id="editGypsumPrice" value="${(material.unitPrice || 0).toLocaleString()}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <!-- M2 자재비, 노무비 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">M2 자재비 (원)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">M2 자재비 (원)</label>
                         <input type="text" id="editGypsumMaterialCostM2" value="${(material.materialCost || 0).toLocaleString()}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">M2 노무비 (원)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">M2 노무비 (원)</label>
                         <input type="text" id="editGypsumLaborCostM2" value="${(material.laborCost || 0).toLocaleString()}"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fff0f0; color: #dc2626; font-weight: 600;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155; font-weight: 600;"
                                oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                                placeholder="직접 입력 또는 아래 계산기 사용">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 노무비 (원)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 노무비 (원)</label>
                         <input type="text" id="editGypsumBaseLaborCost" value="0" readonly
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef9f9; color: #dc2626; font-weight: 600;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc; color: #334155; font-weight: 600;">
                     </div>
                     <!-- 노무비 생산성, 보할 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 생산성</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 생산성</label>
                         <input type="number" id="editGypsumLaborProductivity" value="${material.laborProductivity || laborSettings.productivity}" step="0.01"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                onchange="window.syncProductivityToCalculator(this.value)">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #dc2626;">기준 보할 (%)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 보할 (%)</label>
                         <input type="number" id="editGypsumLaborCompensation" value="${material.laborCompensation || laborSettings.compensation}"
-                               style="width: 100%; padding: 8px; border: 1px solid #dc2626; border-radius: 4px; background: #fef2f2;"
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;"
                                onchange="window.syncCompensationToCalculator(this.value)">
                     </div>
                     <!-- 공종, 부위, 작업 -->
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종1</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">공종1</label>
                         <input type="text" id="editGypsumWorkType1" value="${material.workType1 || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">공종2</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">공종2</label>
                         <input type="text" id="editGypsumWorkType2" value="${material.workType2 || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">부위</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">부위</label>
                         <input type="text" id="editGypsumLocation" value="${material.location || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                     <div>
-                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #16a34a;">작업</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">작업</label>
                         <input type="text" id="editGypsumWork" value="${material.work || ''}" 
-                               style="width: 100%; padding: 8px; border: 1px solid #16a34a; border-radius: 4px; background: #f0fdf4;">
+                               style="width: 100%; padding: 8px; border: 1px solid #64748b; border-radius: 4px; background: #f8fafc;">
                     </div>
                 </div>
             </div>
 
             <!-- Section 2: 노무비 계산 섹션 -->
-            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #fef3c7;">
-                <h5 style="margin: 0 0 15px 0; color: #92400e;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin: 15px 0; background: #f1f5f9;">
+                <h5 style="margin: 0 0 15px 0; color: #475569;"><i class="fas fa-calculator"></i> 노무비 계산</h5>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
 
                     <!-- 기준 노무비 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
-                        <h6 style="margin: 0 0 10px 0; color: #92400e;">기준 노무비 설정</h6>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; background: #f8fafc;">
+                        <h6 style="margin: 0 0 10px 0; color: #475569;">기준 노무비 설정</h6>
                         <div id="workersList" style="margin-bottom: 10px;">
                             ${laborSettings.workers.map((worker, index) => `
                                 <div class="worker-item" data-index="${index}" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-                                    <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;">
+                                    <select class="worker-type" style="width: 80px; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
                                         <option value="반장" ${worker.type === '반장' ? 'selected' : ''}>반장</option>
                                         <option value="조공" ${worker.type === '조공' ? 'selected' : ''}>조공</option>
                                         <option value="특별직" ${worker.type === '특별직' ? 'selected' : ''}>특별직</option>
                                         <option value="기타" ${worker.type === '기타' ? 'selected' : ''}>기타</option>
                                     </select>
                                     <input type="text" class="worker-cost" value="${worker.cost ? worker.cost.toLocaleString() : '0'}" 
-                                           style="flex: 1; padding: 4px; border: 1px solid #d97706; border-radius: 4px; font-size: 12px;" 
+                                           style="flex: 1; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;" 
                                            oninput="this.value = parseInt(this.value.replace(/,/g, '')) ? parseInt(this.value.replace(/,/g, '')).toLocaleString() : ''"
                                            onchange="window.calculateGypsumLaborCost()">
                                     <button type="button" onclick="window.removeGypsumWorker(this)" 
@@ -3284,31 +3275,31 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                             `).join('')}
                         </div>
                         <button type="button" onclick="window.addGypsumWorker()" 
-                                style="width: 100%; padding: 6px; background: #16a34a; color: white; border: none; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">+ 작업자 추가</button>
+                                style="width: 100%; padding: 6px; background: #475569; color: white; border: none; border-radius: 4px; font-size: 12px; margin-bottom: 10px;">+ 작업자 추가</button>
                         
-                        <div style="background: #fbbf24; padding: 8px; border-radius: 4px; color: #92400e; font-size: 13px; text-align: center;">
+                        <div style="background: #e2e8f0; padding: 8px; border-radius: 4px; color: #334155; font-size: 13px; text-align: center;">
                             <div>합계: <span id="totalLaborCost">0</span>원 | 작업자 수: <span id="workerCount">0</span>명</div>
                             <div style="font-weight: 600; margin-top: 4px;">→ 기준 노무비: <span id="baseLaborCost">0</span>원</div>
                         </div>
                     </div>
 
                     <!-- 생산성 & 보할 설정 -->
-                    <div style="border: 1px solid #d97706; border-radius: 6px; padding: 12px; background: #fffbeb;">
-                        <h6 style="margin: 0 0 10px 0; color: #92400e;">생산성 및 보할 설정</h6>
+                    <div style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; background: #f8fafc;">
+                        <h6 style="margin: 0 0 10px 0; color: #475569;">생산성 및 보할 설정</h6>
                         <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 생산성</label>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 생산성</label>
                             <input type="number" id="editLaborProductivity" value="${laborSettings.productivity}" step="0.01" 
-                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" 
                                    onchange="window.calculateGypsumLaborCost()">
                         </div>
                         <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #92400e;">기준 보할 (%)</label>
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #475569;">기준 보할 (%)</label>
                             <input type="number" id="editLaborCompensation" value="${laborSettings.compensation}" step="1" min="0" max="500"
-                                   style="width: 100%; padding: 8px; border: 1px solid #d97706; border-radius: 4px;" 
+                                   style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;" 
                                    onchange="window.calculateGypsumLaborCost()">
                         </div>
                         
-                        <div style="background: #16a34a; padding: 10px; border-radius: 4px; color: white; text-align: center;">
+                        <div style="background: #475569; padding: 10px; border-radius: 4px; color: white; text-align: center;">
                             <div style="font-size: 14px; margin-bottom: 4px;">최종 노무비</div>
                             <div style="font-size: 18px; font-weight: 700;" id="finalLaborCost">0원</div>
                             <div style="font-size: 11px; margin-top: 4px; opacity: 0.9;">기준노무비 ÷ 생산성 × 보할</div>
@@ -3317,16 +3308,6 @@ function editGypsumBoard(materialId, modal = null, isAddMode = false) {
                 </div>
             </div>
 
-            <div style="background: linear-gradient(90deg, #dbeafe 0%, #fef2f2 50%, #f0fdf4 100%); padding: 15px; border-radius: 4px; margin-top: 15px;">
-                <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.4;">
-                    <strong>색상 구분:</strong> 
-                    <span style="color: #1e40af;">🔵 기본정보</span> | 
-                    <span style="color: #dc2626;">🔴 가격/노무비</span> | 
-                    <span style="color: #16a34a;">🟢 공종/부위</span> | 
-                    <span style="color: #d97706;">🟡 노무비계산</span>
-                    <br><strong>*</strong> 필수 입력 항목 | 노무비는 실시간 자동 계산됩니다.
-                </p>
-            </div>
         </div>
     `;
 
@@ -3631,7 +3612,7 @@ window.clearGypsumFilters = clearGypsumFilters;
 // 통합 자재 편집/추가 모달 호출 함수
 function openMaterialEditModal(mode, materialId = null) {
     const lightweightTab = document.getElementById('lightweightTab');
-    const isLightweight = lightweightTab && lightweightTab.classList.contains('btn-primary');
+    const isLightweight = lightweightTab && lightweightTab.classList.contains('btn-gray');
     
     if (isLightweight) {
         // 경량자재 편집/추가

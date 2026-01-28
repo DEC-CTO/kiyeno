@@ -1131,7 +1131,7 @@ function createSubModal(title, content, buttons = [], options = {}) {
         max-height: 90vh;
         overflow: auto;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        border: 2px solid #007bff;
+        border: 2px solid #64748b;
     `;
     
     // 제목 추가
@@ -1233,6 +1233,9 @@ function createSubModal(title, content, buttons = [], options = {}) {
 
     document.body.appendChild(subModalOverlay);
 
+    // 브라우저 페이지 스크롤 숨기기 (모달 뒤 이중 스크롤 방지)
+    document.body.style.overflow = 'hidden';
+
     return subModalOverlay;
 }
 
@@ -1276,6 +1279,12 @@ function closeSubModal(subModalOverlay) {
     // 서브 모달 제거
     if (subModalOverlay && subModalOverlay.parentNode) {
         subModalOverlay.remove();
+    }
+
+    // 다른 서브 모달이 없으면 body 스크롤 복원
+    const remainingSubModals = document.querySelectorAll('.sub-modal-overlay');
+    if (remainingSubModals.length === 0) {
+        document.body.style.overflow = '';
     }
 }
 

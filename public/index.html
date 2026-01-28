@@ -225,7 +225,7 @@
               <!-- 필터 초기화 버튼 -->
               <div class="filter-group">
                 <button
-                  class="btn btn-sm btn-secondary"
+                  class="btn btn-sm btn-gray"
                   onclick="clearRevitFilters()"
                 >
                   <i class="fas fa-times"></i> 필터 초기화
@@ -234,7 +234,7 @@
               <!-- 선택 항목 필터 버튼 -->
               <div class="filter-group">
                 <button
-                  class="btn btn-sm btn-warning"
+                  class="btn btn-sm btn-gray"
                   onclick="filterCheckedOnly()"
                   title="체크된 항목만 표시"
                 >
@@ -254,7 +254,7 @@
               <div class="filter-group">
                 <div class="dropdown">
                   <button
-                    class="btn btn-sm btn-purple dropdown-toggle"
+                    class="btn btn-sm btn-gray dropdown-toggle"
                     onclick="toggleDropdown('revitIntegration')"
                   >
                     <i class="fas fa-cube"></i> Revit 연동
@@ -305,7 +305,7 @@
               <div class="filter-group">
                 <div class="dropdown">
                   <button
-                    class="btn btn-sm btn-primary dropdown-toggle"
+                    class="btn btn-sm btn-gray dropdown-toggle"
                     type="button"
                     id="exportImportDropdown"
                     data-toggle="dropdown"
@@ -329,17 +329,17 @@
                 </div>
               </div>
               <div class="filter-group">
-                <button class="btn btn-sm btn-danger" onclick="clearRevitData()">
+                <button class="btn btn-sm btn-gray" onclick="clearRevitData()">
                   <i class="fas fa-trash"></i> 데이터 지우기
                 </button>
               </div>
               <div class="filter-group">
-                <button class="btn btn-sm btn-info" onclick="selectInRevit()">
+                <button class="btn btn-sm btn-gray" onclick="selectInRevit()">
                   <i class="fas fa-crosshairs"></i> Revit 객체 선택
                 </button>
               </div>
               <div class="filter-group">
-                <button class="btn btn-sm btn-success" onclick="calculateWallCosts()">
+                <button class="btn btn-sm btn-deepblue" onclick="calculateWallCosts()">
                   <i class="fas fa-calculator"></i> 계산하기
                 </button>
               </div>
@@ -957,7 +957,7 @@
         // 모달 HTML 생성
         let modalHTML = `
               <div style="text-align: left; line-height: 1.6; max-width: 600px;">
-                  <h3 style="color: #8b5cf6; margin-bottom: 15px; text-align: center;">
+                  <h3 style="color: #475569; margin-bottom: 15px; text-align: center;">
                       <i class="fas fa-calculator"></i> ${title} 면적 계산 결과
                   </h3>
 
@@ -965,10 +965,10 @@
                       <h4 style="margin: 0 0 10px 0; color: #333;">📊 타입별 면적 정보</h4>
                       <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                           <thead>
-                              <tr style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
-                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: left;">WallType</th>
-                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: right;">면적 (m²)</th>
-                                  <th style="border: 1px solid #5b21b6; padding: 10px; text-align: right;">비율 (%)</th>
+                              <tr style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">
+                                  <th style="border: 1px solid #334155; padding: 10px; text-align: left;">WallType</th>
+                                  <th style="border: 1px solid #334155; padding: 10px; text-align: right;">면적 (m²)</th>
+                                  <th style="border: 1px solid #334155; padding: 10px; text-align: right;">비율 (%)</th>
                               </tr>
                           </thead>
                           <tbody>
@@ -985,7 +985,7 @@
 
           modalHTML += `
                   <tr style="background: ${rowClass};">
-                      <td style="border: 1px solid #ddd; padding: 10px; font-weight: 600; color: #8b5cf6;">${wallType}</td>
+                      <td style="border: 1px solid #ddd; padding: 10px; font-weight: 600; color: #475569;">${wallType}</td>
                       <td style="border: 1px solid #ddd; padding: 10px; text-align: right; font-weight: 600; color: #0066cc;">${area.toFixed(
                         3
                       )}</td>
@@ -999,14 +999,14 @@
         modalHTML += `
                           </tbody>
                           <tfoot>
-                              <tr style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); font-weight: bold;">
-                                  <td style="border: 1px solid #ddd; padding: 10px; color: #1976d2;">총계 (${
+                              <tr style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); font-weight: bold;">
+                                  <td style="border: 1px solid #ddd; padding: 10px; color: #334155;">총계 (${
                                     wallTypeAreas.size
                                   }개 타입)</td>
                                   <td style="border: 1px solid #ddd; padding: 10px; text-align: right; color: #d32f2f; font-size: 16px;">${totalArea.toFixed(
                                     3
                                   )}</td>
-                                  <td style="border: 1px solid #ddd; padding: 10px; text-align: right; color: #1976d2;">100.0%</td>
+                                  <td style="border: 1px solid #ddd; padding: 10px; text-align: right; color: #334155;">100.0%</td>
                               </tr>
                           </tfoot>
                       </table>

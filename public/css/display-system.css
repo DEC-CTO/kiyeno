@@ -7,7 +7,7 @@
 }
 
 .display-mode-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 8px 15px;
     border: none;
@@ -24,7 +24,7 @@
 }
 
 .display-mode-button:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6c5ce7 100%);
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
@@ -75,11 +75,11 @@
 
 .display-mode-dropdown-item:hover {
     background: #f8fafc;
-    color: #667eea;
+    color: #475569;
 }
 
 .display-mode-dropdown-item.active {
-    background: #667eea;
+    background: #475569;
     color: white;
 }
 
@@ -130,7 +130,7 @@
 
 /* 헤더 스타일 */
 .display-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     position: sticky;
     top: 0;
@@ -147,7 +147,7 @@
 
 /* 서브 헤더 스타일 */
 .display-table thead tr:nth-child(2) th {
-    background: linear-gradient(135deg, #5a67d8 0%, #6c5ce7 100%);
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     font-size: 10px;
     padding: 6px 4px;
 }
@@ -189,7 +189,7 @@
 .display-table td:first-child {
     background: #f1f5f9;
     font-weight: 600;
-    color: #667eea;
+    color: #475569;
 }
 
 /* 금액 표시 스타일 */

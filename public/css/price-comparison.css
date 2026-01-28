@@ -41,7 +41,7 @@
     align-items: center;
     padding: 20px 30px;
     border-bottom: 2px solid #e0e0e0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     border-radius: 12px 12px 0 0;
 }
 
@@ -72,7 +72,7 @@
 }
 
 .price-comparison-project-name label {
-    color: #667eea;
+    color: #475569;
     font-weight: 600;
     font-size: 14px;
 }
@@ -88,7 +88,7 @@
 .price-comparison-close-btn {
     background: white;
     border: none;
-    color: #667eea;
+    color: #475569;
     font-size: 24px;
     cursor: pointer;
     width: 36px;
@@ -134,14 +134,14 @@
 }
 
 .price-comparison-btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
 }
 
 .price-comparison-btn-primary:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(71, 85, 105, 0.4);
 }
 
 .price-comparison-btn-success {
@@ -204,7 +204,7 @@
 
 /* 헤더 스타일 */
 .price-comparison-table thead tr:first-child th {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     font-weight: 600;
     font-size: 12px;
@@ -217,8 +217,8 @@
 }
 
 .price-comparison-table thead tr:nth-child(2) th {
-    background: #e3f2fd;
-    color: #1976d2;
+    background: #f1f5f9;
+    color: #334155;
     font-weight: 600;
     font-size: 11px;
     padding: 10px 8px;
@@ -267,7 +267,7 @@
 
 .price-comparison-table input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #64748b;
     background: #f0f4ff;
 }
 

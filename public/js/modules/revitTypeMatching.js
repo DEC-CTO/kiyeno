@@ -48,13 +48,40 @@ function openRevitTypeMatching() {
         
         // 모달 표시 (배경 클릭 방지 옵션 적용)
         console.log('🔧 createSubModal 호출 중...');
-        const modal = createSubModal('🏗️ 벽체 타입 관리', modalHTML, [], {
+        const modal = createSubModal('', modalHTML, [], {
             disableBackgroundClick: true,
-            disableEscapeKey: true
+            disableEscapeKey: true,
+            width: '95vw'
         });
         
         console.log('✅ 모달 생성 완료:', modal ? '성공' : '실패');
-        
+
+        // 서브모달 외곽 스크롤 제거 (내부 flex 레이아웃이 스크롤 처리)
+        if (modal) {
+            // 오버레이 자체 스크롤 제거
+            modal.style.overflow = 'hidden';
+
+            const subModalInner = modal.querySelector('.sub-modal');
+            if (subModalInner) {
+                subModalInner.style.overflow = 'hidden';
+                subModalInner.style.padding = '0';
+                subModalInner.style.maxHeight = '95vh';
+                subModalInner.style.height = '95vh';
+                subModalInner.style.boxSizing = 'border-box';
+                // flex column으로 변경하여 sub-modal-content가 남은 공간을 채우게 함
+                subModalInner.style.display = 'flex';
+                subModalInner.style.flexDirection = 'column';
+            }
+
+            // .sub-modal-content가 남은 높이를 채우도록 설정 (높이 체인 유효화)
+            const subModalContent = modal.querySelector('.sub-modal-content');
+            if (subModalContent) {
+                subModalContent.style.flex = '1';
+                subModalContent.style.overflow = 'hidden';
+                subModalContent.style.minHeight = '0';
+            }
+        }
+
         // 모달이 DOM에 추가된 후 초기화
         if (modal) {
             // DOM 업데이트를 위해 지연시간과 반복 체크 사용
@@ -75,7 +102,6 @@ function openRevitTypeMatching() {
                     loadRevitWallTypes(); // 이 함수 내에서 동기화됨
                     updateRevitWallTable();
                     initializeTypeMappingTabs();
-                    
                     return;
                 } else if (attempts < maxAttempts) {
                     console.log('⏳ DOM 요소를 찾지 못함, 재시도...');
@@ -151,93 +177,95 @@ function createRevitTypeMappingModalContent() {
 
 function createProjectManagementPanel() {
     return `
-        <div class="project-panel">
-            <!-- 헤더 영역: 타이틀 + 닫기 버튼 -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0;"><i class="fas fa-project-diagram"></i> 벽체 타입 관리</h3>
-                <button class="modal-close-btn" onclick="closeRevitTypeMatching()" title="닫기" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #666; padding: 5px 10px;">
-                    <i class="fas fa-times"></i>
-                </button>
+        <div style="display: flex; flex-direction: column; height: 100%; padding: 0;">
+            <!-- 모달 헤더 -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #334155; flex-shrink: 0;">
+                <h3 style="margin: 0; font-size: 15px; font-weight: 600; color: white;">
+                    <i class="fas fa-project-diagram"></i> 벽체 타입 관리
+                </h3>
+                <button onclick="closeRevitTypeMatching()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; line-height: 1;"
+                        onmouseover="this.style.color='white'; this.style.background='#475569'"
+                        onmouseout="this.style.color='#94a3b8'; this.style.background='none'"
+                        title="닫기">&times;</button>
             </div>
 
-            <!-- 기본 작업 드롭다운 -->
-            <div class="action-section">
-                <h4><i class="fas fa-tools"></i> 기본 작업</h4>
-                <div class="dropdown-container" style="display: flex; align-items: center; gap: 10px;">
-                    <div class="dropdown" style="position: relative;">
-                        <button class="btn btn-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()">
-                            <i class="fas fa-plus"></i> 벽체 작업
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="dropdown-menu" id="revitActionsDropdown" style="display: none;">
-                            <div class="dropdown-item" onclick="addRevitWallType()">
-                                <i class="fas fa-plus"></i> 새 WallType 생성
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item" onclick="showWallTypePreview()">
-                                <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
-                                <i class="fas fa-trash-alt"></i> 선택 삭제
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="dropdown-item" onclick="exportRevitWallTypesToJSON()">
-                                <i class="fas fa-download"></i> JSON 내보내기
-                            </div>
-                            <div class="dropdown-item" onclick="importRevitWallTypesFromJSON()">
-                                <i class="fas fa-upload"></i> JSON 불러오기
-                            </div>
+            <!-- 상단 툴바 -->
+            <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap;">
+                <div class="dropdown" style="position: relative;">
+                    <button class="btn btn-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()" style="padding: 5px 12px; font-size: 12px;">
+                        <i class="fas fa-plus"></i> 벽체 작업
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu" id="revitActionsDropdown" style="display: none;">
+                        <div class="dropdown-item" onclick="addRevitWallType()">
+                            <i class="fas fa-plus"></i> 새 WallType 생성
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="showWallTypePreview()">
+                            <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
+                            <i class="fas fa-trash-alt"></i> 선택 삭제
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="exportRevitWallTypesToJSON()">
+                            <i class="fas fa-download"></i> JSON 내보내기
+                        </div>
+                        <div class="dropdown-item" onclick="importRevitWallTypesFromJSON()">
+                            <i class="fas fa-upload"></i> JSON 불러오기
                         </div>
                     </div>
-
-                    <!-- 모든 변경사항 저장 버튼 -->
-                    <button class="btn btn-success" onclick="saveAllChanges()" style="margin-left: 5px;">
-                        <i class="fas fa-save"></i> 모든 변경사항 저장
-                    </button>
                 </div>
+
+                <div style="flex: 1;"></div>
+                <span style="font-size: 11px; color: #94a3b8;">
+                    좌클릭: 레이어 선택 &nbsp;|&nbsp; 우클릭: 레이어 해제
+                </span>
             </div>
 
-            <!-- 벽체 타입 데이터 테이블 -->
-            <div class="action-section">
-                <h4><i class="fas fa-table"></i> 벽체 타입 목록</h4>
-                <div class="wall-table-container responsive-wall-table" style="max-height: 500px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
-                    <table class="wall-table-small">
-                        <thead>
-                            <tr class="header-main-row">
-                                <th rowspan="2" class="header-main" style="width: 40px;">
-                                    <input type="checkbox" id="selectAllRevitWalls" onchange="toggleAllRevitWallSelection()">
-                                </th>
-                                <th rowspan="2" class="header-main col-no" title="순서 번호">No</th>
-                                <th rowspan="2" class="header-main col-walltype" title="벽체 타입명">WallType</th>
-                                <th colspan="3" class="header-main" title="좌측 마감 레이어">좌측마감</th>
-                                <th rowspan="2" class="header-main col-column col-priority-high" title="구조체">구조체</th>
-                                <th rowspan="2" class="header-main col-infill col-priority-high" title="단열제">단열제</th>
-                                <th colspan="3" class="header-main col-priority-high" title="우측 마감 레이어">우측마감</th>
-                                <th rowspan="2" class="header-main col-column2 col-priority-medium" title="옵션1">옵션1</th>
-                                <th rowspan="2" class="header-main col-channel col-priority-low" title="옵션2">옵션2</th>
-                                <th rowspan="2" class="header-main col-runner col-priority-low" title="옵션3">옵션3</th>
-                                <th rowspan="2" class="header-main col-steel col-priority-low" title="옵션4">옵션4</th>
-                                <th rowspan="2" class="header-main col-thickness col-priority-medium" title="벽체 두께 (밀리미터)">두께(mm)</th>
-                            </tr>
-                            <tr class="header-sub-row">
-                                <th class="header-sub col-layer" title="레이어 3">Layer3</th>
-                                <th class="header-sub col-layer" title="레이어 2">Layer2</th>
-                                <th class="header-sub col-layer" title="레이어 1">Layer1</th>
-                                <th class="header-sub col-layer" title="레이어 1">Layer1</th>
-                                <th class="header-sub col-layer" title="레이어 2">Layer2</th>
-                                <th class="header-sub col-layer" title="레이어 3">Layer3</th>
-                            </tr>
-                        </thead>
-                        <tbody id="revit-wall-table-body">
-                            <tr>
-                                <td colspan="16" style="text-align: center; padding: 20px; color: #6c757d;">
-                                    벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- 테이블 영역 (단일 스크롤 컨테이너 — excelWallTypeManager 방식) -->
+            <div style="flex: 1; overflow: auto; position: relative;">
+                <table style="width: max-content; min-width: 100%; border-collapse: collapse; font-size: 11px;">
+                    <thead style="position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 40px; min-width: 40px;">
+                                <input type="checkbox" id="selectAllRevitWalls" onchange="toggleAllRevitWallSelection()">
+                            </th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 40px; min-width: 40px;" title="순서 번호">No</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 80px; min-width: 80px;" title="벽체 타입명">WallType</th>
+                            <th colspan="3" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap;" title="좌측 마감 레이어">좌측마감</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="구조체">구조체</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="단열제">단열제</th>
+                            <th colspan="3" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap;" title="우측 마감 레이어">우측마감</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션1">옵션1</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션2">옵션2</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션3">옵션3</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션4">옵션4</th>
+                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 60px; min-width: 60px;" title="벽체 두께 (밀리미터)">두께(mm)</th>
+                        </tr>
+                        <tr>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 3">Layer3</th>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 2">Layer2</th>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 1">Layer1</th>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 1">Layer1</th>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 2">Layer2</th>
+                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 3">Layer3</th>
+                        </tr>
+                    </thead>
+                    <tbody id="revit-wall-table-body">
+                        <tr>
+                            <td colspan="16" style="text-align: center; padding: 20px; color: #6c757d; border: 1px solid #cbd5e1;">
+                                벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 상태 표시줄 -->
+            <div style="padding: 6px 16px; background: #f1f5f9; border-top: 1px solid #e2e8f0; font-size: 11px; color: #64748b; flex-shrink: 0;">
+                벽체 타입 목록
             </div>
         </div>
     `;
@@ -263,26 +291,7 @@ function initializeTypeMappingTabs() {
 // 데이터 관리 함수들
 // =============================================================================
 
-async function saveAllChanges() {
-    console.log('💾 모든 변경사항 저장 중...');
-    
-    try {
-        // 1. LocalStorage 저장 (기존 방식 유지)
-        const localStorageSuccess = saveRevitWallTypes();
-        
-        // 2. IndexedDB wallTypeMasters 테이블에도 저장
-        const indexedDBSuccess = await saveToWallTypeMasters();
-        
-        if (localStorageSuccess && indexedDBSuccess) {
-            alert('✅ 모든 변경사항이 저장되었습니다.');
-        } else {
-            alert('❌ 저장 중 오류가 발생했습니다.');
-        }
-    } catch (error) {
-        console.error('❌ 저장 중 오류:', error);
-        alert('❌ 저장 중 오류가 발생했습니다: ' + error.message);
-    }
-}
+// saveAllChanges()는 제거됨 — saveRevitWallTypes()에서 실시간 IndexedDB 동기화 처리
 
 // IndexedDB wallTypeMasters 테이블에 저장
 async function saveToWallTypeMasters() {
@@ -418,7 +427,9 @@ function loadRevitWallTypes() {
     }
 }
 
-// 벽체 타입 데이터 저장
+// 벽체 타입 데이터 저장 (LocalStorage 즉시 + IndexedDB 디바운스)
+let _indexedDBSaveTimer = null;
+
 function saveRevitWallTypes() {
     try {
         const dataToSave = {
@@ -428,6 +439,19 @@ function saveRevitWallTypes() {
         };
         localStorage.setItem('kiyeno_revit_wall_types', JSON.stringify(dataToSave));
         console.log('✅ Revit 벽체 타입 데이터 저장됨:', window.revitWallTypes.length, '개');
+
+        // IndexedDB 디바운스 저장 (마지막 변경 후 500ms 후 저장)
+        if (_indexedDBSaveTimer) clearTimeout(_indexedDBSaveTimer);
+        _indexedDBSaveTimer = setTimeout(() => {
+            saveToWallTypeMasters().then(success => {
+                if (success) {
+                    console.log('✅ IndexedDB 자동 동기화 완료');
+                }
+            }).catch(err => {
+                console.error('❌ IndexedDB 자동 동기화 실패:', err);
+            });
+        }, 500);
+
         return true;
     } catch (error) {
         console.error('❌ 벽체 타입 데이터 저장 실패:', error);
@@ -460,63 +484,67 @@ function updateRevitWallTable() {
 function createRevitWallTableRow(wall) {
     const isSelected = selectedRevitWalls.has(wall.id);
     
+    const tdBase = 'padding: 4px; text-align: center; border: 1px solid #cbd5e1; font-size: 11px;';
+    const tdMat = `${tdBase} cursor: pointer; background: #f8fafc; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;`;
+    const placeholder = '<span style="color: #999;">클릭하여 선택</span>';
+
     return `
         <tr data-wall-id="${wall.id}" class="${isSelected ? 'selected' : ''}">
-            <td style="text-align: center;">
-                <input type="checkbox" ${isSelected ? 'checked' : ''} 
+            <td style="${tdBase}">
+                <input type="checkbox" ${isSelected ? 'checked' : ''}
                        onchange="toggleRevitWallSelection(${wall.id})">
             </td>
-            <td style="text-align: center;">${wall.no}</td>
-            <td style="text-align: center;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer3_1')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_1')" class="material-cell">
-                ${wall.layer3_1 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdBase} color: #94a3b8;">${wall.no}</td>
+            <td style="${tdBase} font-weight: 600; color: #1e293b; min-width: 80px;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer3_1')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_1')">
+                ${wall.layer3_1 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer2_1')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_1')" class="material-cell">
-                ${wall.layer2_1 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer2_1')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_1')">
+                ${wall.layer2_1 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer1_1')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_1')" class="material-cell">
-                ${wall.layer1_1 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer1_1')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_1')">
+                ${wall.layer1_1 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'column1')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'column1')" class="material-cell col-column col-priority-high">
-                ${wall.column1 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'column1')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'column1')">
+                ${wall.column1 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'infill')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'infill')" class="material-cell col-infill col-priority-high">
-                ${wall.infill || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'infill')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'infill')">
+                ${wall.infill || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer1_2')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_2')" class="material-cell col-layer col-priority-high">
-                ${wall.layer1_2 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer1_2')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_2')">
+                ${wall.layer1_2 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer2_2')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_2')" class="material-cell col-layer col-priority-high">
-                ${wall.layer2_2 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer2_2')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_2')">
+                ${wall.layer2_2 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'layer3_2')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_2')" class="material-cell col-layer col-priority-high">
-                ${wall.layer3_2 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer3_2')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_2')">
+                ${wall.layer3_2 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'column2')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'column2')" class="material-cell col-column2 col-priority-medium">
-                ${wall.column2 || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'column2')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'column2')">
+                ${wall.column2 || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'channel')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'channel')" class="material-cell col-channel col-priority-low">
-                ${wall.channel || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'channel')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'channel')">
+                ${wall.channel || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'runner')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'runner')" class="material-cell col-runner col-priority-low">
-                ${wall.runner || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'runner')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'runner')">
+                ${wall.runner || placeholder}
             </td>
-            <td style="text-align: center; cursor: pointer;" onclick="selectMaterial(${wall.id}, 'steelPlate')" 
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'steelPlate')" class="material-cell col-steel col-priority-low">
-                ${wall.steelPlate || '<span style="color: #999;">클릭하여 선택</span>'}
+            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'steelPlate')"
+                oncontextmenu="clearMaterial(event, ${wall.id}, 'steelPlate')">
+                ${wall.steelPlate || placeholder}
             </td>
-            <td style="text-align: center;" ondblclick="editRevitWallThickness(${wall.id})" class="col-thickness col-priority-medium">${wall.thickness || ''}</td>
+            <td style="${tdBase} color: #475569;" ondblclick="editRevitWallThickness(${wall.id})">${wall.thickness || ''}</td>
         </tr>
     `;
 }
@@ -801,7 +829,7 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
             
             <div class="unit-price-table-wrapper" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 500px; overflow-y: auto;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;" id="unitPriceSelectionTable">
-                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                    <thead style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; position: sticky; top: 0; z-index: 10;">
                         <tr>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">선택</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
@@ -908,7 +936,7 @@ async function generateUnitPriceTableRows() {
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.unit || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #059669; font-weight: 500;">₩${materialCost.toLocaleString()}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #dc2626; font-weight: 500;">₩${laborCost.toLocaleString()}</td>
-                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #7c3aed; font-weight: 500;">₩${expenseCost.toLocaleString()}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #64748b; font-weight: 500;">₩${expenseCost.toLocaleString()}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: right; font-size: 12px; color: #1e293b; font-weight: 600; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);">₩${totalCost.toLocaleString()}</td>
             </tr>
         `;
@@ -1013,7 +1041,7 @@ async function refreshUnitPriceSelectionTable() {
         console.log('✅ 일위대가 선택 테이블 새로고침 완료');
         
         // 새로고침 완료를 시각적으로 표시
-        tbody.style.backgroundColor = '#f0f9ff';
+        tbody.style.backgroundColor = '#f8fafc';
         setTimeout(() => {
             tbody.style.backgroundColor = '';
         }, 1000);
@@ -1359,8 +1387,9 @@ function addRevitTypeMappingStyles() {
 
         .project-content {
             flex: 1;
-            overflow-y: auto;
+            overflow: hidden;
             padding: 20px;
+            min-height: 0;
         }
 
         .panel-description {
@@ -1374,7 +1403,7 @@ function addRevitTypeMappingStyles() {
             padding: 20px;
             background: #f8fafc;
             border-radius: 8px;
-            border-left: 4px solid #f59e0b;
+            border-left: 4px solid #94a3b8;
         }
 
         .action-section h4 {
@@ -1428,46 +1457,17 @@ function addRevitTypeMappingStyles() {
             justify-content: flex-end;
         }
 
-        /* 작은 벽체 테이블 스타일 */
-        .wall-table-small {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            background: white;
-        }
-
-        .wall-table-small th,
-        .wall-table-small td {
-            border: 1px solid #e2e8f0;
-            padding: 4px 6px;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        .wall-table-small .header-main {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-weight: 600;
-            font-size: 10px;
-        }
-
-        .wall-table-small .header-sub {
-            background: #f8fafc;
-            color: #4a5568;
-            font-weight: 500;
-            font-size: 9px;
-        }
-
-        .wall-table-small tbody tr:nth-child(even) {
+        /* 벽체 테이블 tbody 스타일 (인라인 스타일 보완) */
+        #revit-wall-table-body tr:nth-child(even) {
             background: #f8fafc;
         }
 
-        .wall-table-small tbody tr:hover {
+        #revit-wall-table-body tr:hover {
             background: #e2e8f0;
         }
 
-        .wall-table-small tbody tr.selected {
-            background: #dbeafe;
+        #revit-wall-table-body tr.selected {
+            background: #e2e8f0;
         }
 
         /* 자재 셀 스타일 */
@@ -1478,8 +1478,8 @@ function addRevitTypeMappingStyles() {
         }
 
         .material-cell:hover {
-            background: #e0f2fe;
-            border-color: #0ea5e9 !important;
+            background: #f1f5f9;
+            border-color: #94a3b8 !important;
         }
 
 
@@ -1558,19 +1558,19 @@ function addRevitTypeMappingStyles() {
         }
 
         .material-table-container .table-primary {
-            background-color: #cce5ff !important;
+            background-color: #e2e8f0 !important;
         }
 
         /* 선택된 자재 정보 스타일 */
         .selected-material-info {
-            background: #e7f3ff;
-            border: 1px solid #b8daff;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             padding: 12px;
         }
 
         .selected-material-info strong {
-            color: #004085;
+            color: #334155;
         }
 
         /* 벽체 타입 생성 모달 스타일 */
@@ -1596,8 +1596,8 @@ function addRevitTypeMappingStyles() {
 
         .wall-type-creation-form input:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            border-color: #64748b;
+            box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
         }
     `;
     
@@ -1655,7 +1655,6 @@ window.exportRevitWallTypesToJSON = exportRevitWallTypesToJSON;
 window.importRevitWallTypesFromJSON = importRevitWallTypesFromJSON;
 
 // 기타 유틸리티 함수들
-window.saveAllChanges = saveAllChanges;
 window.initializeTypeMappingTabs = initializeTypeMappingTabs;
 
 // =============================================================================
@@ -1951,8 +1950,8 @@ async function getLayerStructure(wallType) {
 function createLayerPreviewModalHTML(wallTypesData) {
     let html = `
         <div class="layer-preview-container" style="max-height: 600px; overflow-y: auto;">
-            <div style="margin-bottom: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
-                <h4 style="margin: 0 0 10px 0; color: #1e40af;">
+            <div style="margin-bottom: 20px; padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid #64748b;">
+                <h4 style="margin: 0 0 10px 0; color: #334155;">
                     <i class="fas fa-info-circle"></i> 생성 예정 벽체 타입
                 </h4>
                 <p style="margin: 0; color: #475569;">
@@ -2001,7 +2000,7 @@ function createLayerPreviewModalHTML(wallTypesData) {
                                 <td style="padding: 10px; font-size: 11px; color: #6b7280;">${layer.position}</td>
                                 <td style="padding: 10px; font-size: 11px; font-weight: 600;">${layer.materialName}</td>
                                 <td style="padding: 10px; font-size: 11px; color: #6b7280;">${layer.spec}</td>
-                                <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 600; color: #3b82f6;">${layer.thickness}</td>
+                                <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 600; color: #475569;">${layer.thickness}</td>
                             </tr>
                         `).join('')}
                         <tr style="background: #f9fafb; font-weight: 700;">

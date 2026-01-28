@@ -14,7 +14,7 @@
 .material-selector {
     width: 100%;
     padding: 4px 8px;
-    border: 2px solid #007bff;
+    border: 2px solid #64748b;
     border-radius: 4px;
     font-size: inherit;
     font-family: inherit;
@@ -25,12 +25,12 @@
 }
 
 .material-selector:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    border-color: #475569;
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
 }
 
 .material-selector:hover {
-    border-color: #0056b3;
+    border-color: #475569;
 }
 
 /* 옵션 그룹 스타일 */
@@ -52,7 +52,7 @@
 }
 
 .material-selector option:selected {
-    background-color: #007bff;
+    background-color: #475569;
     color: white;
 }
 
@@ -97,8 +97,8 @@
 }
 
 .material-search-input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.25);
+    border-color: #64748b;
+    box-shadow: 0 0 0 1px rgba(100, 116, 139, 0.25);
 }
 
 /* 자재 매핑 상태 표시 */
@@ -118,8 +118,8 @@
 
 /* 자재 선택 중 상태 */
 .material-cell-editing {
-    background: linear-gradient(90deg, #e3f2fd 0%, #f8f9fa 100%);
-    border-left: 3px solid #007bff;
+    background: linear-gradient(90deg, #f1f5f9 0%, #f8f9fa 100%);
+    border-left: 3px solid #64748b;
 }
 
 /* 반응형 디자인 */
@@ -199,7 +199,7 @@
 
 /* 접근성 개선 */
 .material-selector:focus-visible {
-    outline: 2px solid #007bff;
+    outline: 2px solid #64748b;
     outline-offset: 2px;
 }
 

@@ -96,7 +96,7 @@
 }
 
 #roomNameModal .wall-info .highlight {
-    color: #007bff;
+    color: #475569;
     font-weight: 600;
 }
 
@@ -122,8 +122,8 @@
 
 #roomNameModal .input-group input:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    border-color: #64748b;
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
 }
 
 #roomNameModal .modal-footer {
@@ -230,11 +230,11 @@
 }
 
 .new-wall {
-    border-color: #007bff;
+    border-color: #64748b;
 }
 
 .new-wall h5 {
-    color: #007bff;
+    color: #475569;
     margin-bottom: 10px;
     text-align: center;
 }
@@ -337,7 +337,7 @@ body {
    ============================================================================= */
 .header {
     padding: 15px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     text-align: left;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -396,24 +396,24 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 주요 액션 - 초록색 */
+/* 주요 액션 - 짙은 그레이 */
 .btn-primary {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
 }
 
-/* 보조 액션 - 파란색 */
+/* 보조 액션 - 밝은 그레이 */
 .btn-secondary {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
     color: white;
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
 }
 
 /* 위험 액션 - 빨간색 */
@@ -454,6 +454,26 @@ body {
 
 .btn-success:hover {
     background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+/* 그레이 버튼 (Revit 섹션용) */
+.btn-gray {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+    color: white;
+}
+.btn-gray:hover {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
+}
+
+/* 그레이 아웃라인 버튼 (탭 비활성용) */
+.btn-outline-gray {
+    background: white;
+    color: #475569;
+    border: 1px solid #94a3b8;
+}
+.btn-outline-gray:hover {
+    background: #f1f5f9;
+    color: #334155;
 }
 
 /* 자재 관리 - 녹색 */
@@ -670,7 +690,7 @@ body {
    헤더 스타일
    ============================================================================= */
 .header-main-row .header-main {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     font-weight: bold;
     font-size: 10px;
@@ -763,24 +783,24 @@ body {
 
 .data-row.dragging {
     opacity: 0.8;
-    background: #e3f2fd !important;
-    border: 1px solid #2196f3;
-    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+    background: #f1f5f9 !important;
+    border: 1px solid #64748b;
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.2);
     z-index: 1000;
     transform: scale(1.01);
     transition: none;
 }
 
 .data-row.drag-over-top {
-    border-top: 2px solid #3b82f6;
+    border-top: 2px solid #64748b;
     border-top-style: solid;
-    background: rgba(59, 130, 246, 0.03);
+    background: rgba(100, 116, 139, 0.03);
 }
 
 .data-row.drag-over-bottom {
-    border-bottom: 2px solid #3b82f6;
+    border-bottom: 2px solid #64748b;
     border-bottom-style: solid;
-    background: rgba(59, 130, 246, 0.03);
+    background: rgba(100, 116, 139, 0.03);
 }
 
 .drag-handle {
@@ -813,7 +833,7 @@ body {
 }
 
 .data-row:hover .drag-handle i {
-    color: #3b82f6;
+    color: #64748b;
     opacity: 1;
 }
 
@@ -888,12 +908,12 @@ body {
 }
 
 .data-row:hover:not(.selected):not(.range-selected) {
-    background: #e3f2fd;
+    background: #f1f5f9;
 }
 
 .data-row.selected {
-    background: #bbdefb;
-    box-shadow: inset 0 0 0 2px #2196f3;
+    background: #e2e8f0;
+    box-shadow: inset 0 0 0 2px #64748b;
 }
 
 .data-row.range-selected {
@@ -1229,7 +1249,7 @@ body {
    ============================================================================= */
 .revit-data-section {
     background: #f8f9fa;
-    border-top: 3px solid #8b5cf6;
+    border-top: 3px solid #64748b;
     padding: 0;
     margin-top: 5px; /* 간격 축소 */
     height: calc(100vh - 150px); /* 화면 높이에서 상단 여백 제외 */
@@ -1240,7 +1260,7 @@ body {
 }
 
 .revit-header {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 15px 30px;
     display: flex;
@@ -1274,7 +1294,7 @@ body {
 }
 
 .dropdown-toggle {
-    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     border: none;
     padding: 8px 16px;
@@ -1286,9 +1306,9 @@ body {
 }
 
 .dropdown-toggle:hover {
-    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 4px 8px rgba(71, 85, 105, 0.3);
 }
 
 .dropdown-menu {
@@ -1357,13 +1377,13 @@ body {
 }
 
 .revit-selection-info {
-    background: #e3f2fd;
-    border: 1px solid #90caf9;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
     border-radius: 4px;
     padding: 8px 12px;
     margin-bottom: 15px;
     font-size: 12px;
-    color: #1976d2;
+    color: #334155;
 }
 
 /* Revit 필터 스타일 */
@@ -1406,8 +1426,8 @@ body {
 
 .filter-group select:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    border-color: #64748b;
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
 }
 
 .filter-group .btn-sm {
@@ -1415,17 +1435,15 @@ body {
     font-size: 11px;
 }
 
-.filter-group .btn-info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-    border-color: #17a2b8;
+.filter-group .btn-gray {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
     color: white;
 }
 
-.filter-group .btn-info:hover {
-    background: linear-gradient(135deg, #138496 0%, #117a8b 100%);
-    border-color: #117a8b;
+.filter-group .btn-gray:hover {
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(23, 162, 184, 0.3);
+    box-shadow: 0 2px 4px rgba(71, 85, 105, 0.3);
 }
 
 /* 반응형 필터 스타일 */
@@ -1518,12 +1536,12 @@ body {
 }
 
 .revit-table th {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 10px 8px;
     text-align: center;
     font-weight: 600;
-    border: 1px solid #5b21b6;
+    border: 1px solid #334155;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -1565,12 +1583,12 @@ body {
 }
 
 .revit-table tbody tr.selected {
-    background: #bbdefb;
-    box-shadow: inset 0 0 0 2px #2196f3;
+    background: #e2e8f0;
+    box-shadow: inset 0 0 0 2px #64748b;
 }
 
 .revit-table tbody tr.selected:hover {
-    background: #90caf9;
+    background: #cbd5e1;
 }
 
 /* Revit 테이블 열 너비 - 균등 분할 */
@@ -1694,70 +1712,34 @@ body {
 }
 
 /* =============================================================================
-   벽체 선택 버튼 스타일
+   Revit 드롭다운 항목 스타일 (색상 제거 — 통일)
    ============================================================================= */
-.wall-selection-button {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    border-left: 4px solid #065f46;
-}
-
-.wall-selection-button:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-    transform: translateX(2px);
-}
-
-.wall-selection-button i {
-    color: #a7f3d0;
-}
-
-.wall-selection-button:hover i {
-    color: white;
-}
-
-/* =============================================================================
-   색상 관련 버튼 스타일 (벽체 색상 반영, 색상표 생성)
-   ============================================================================= */
-.color-action-button {
-    background: linear-gradient(135deg, #f9a8d4 0%, #f472b6 100%) !important;
-    border-left: 4px solid #db2777;
-    color: #333 !important;
-}
-
-.color-action-button:hover {
-    background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%) !important;
-    transform: translateX(2px);
-    color: #333 !important;
-}
-
-.color-action-button i {
-    color: #9d174d !important;
-}
-
-.color-action-button:hover i {
-    color: #831843 !important;
-}
-
-/* =============================================================================
-   색상 초기화 버튼 스타일
-   ============================================================================= */
+.wall-selection-button,
+.color-action-button,
 .color-reset-button {
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%) !important;
-    border-left: 4px solid #64748b;
-    color: #333 !important;
+    background: transparent !important;
+    border-left: none;
+    color: #334155 !important;
 }
 
+.wall-selection-button:hover,
+.color-action-button:hover,
 .color-reset-button:hover {
-    background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+    background: #f1f5f9 !important;
     transform: translateX(2px);
-    color: #333 !important;
-}
-
-.color-reset-button i {
-    color: #475569 !important;
-}
-
-.color-reset-button:hover i {
     color: #1e293b !important;
+}
+
+.wall-selection-button i,
+.color-action-button i,
+.color-reset-button i {
+    color: #64748b !important;
+}
+
+.wall-selection-button:hover i,
+.color-action-button:hover i,
+.color-reset-button:hover i {
+    color: #334155 !important;
 }
 
 /* Revit 연동 상태 표시 */
@@ -1784,13 +1766,13 @@ body {
 
 /* 선택 상태 인디케이터 */
 .selection-status {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 8px 12px;
     border-radius: 6px;
     font-size: 11px;
     margin: 10px 0;
-    border-left: 4px solid #1e40af;
+    border-left: 4px solid #334155;
     animation: pulse 2s infinite;
 }
 
@@ -1835,7 +1817,7 @@ body {
 }
 
 .material-manage-table th {
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    background: linear-gradient(135deg, #475569 0%, #334155 100%);
     color: white;
     padding: 12px 8px;
     text-align: center;
@@ -1859,7 +1841,7 @@ body {
 }
 
 .material-manage-table tbody tr:hover {
-    background: #e3f2fd;
+    background: #f1f5f9;
 }
 
 .material-manage-table tbody tr.new-row {
@@ -2059,7 +2041,7 @@ body {
 }
 
 .modal-header h2 i {
-    color: #007bff;
+    color: #475569;
     font-size: 22px;
 }
 
@@ -2152,7 +2134,7 @@ body {
 .toggle-btn {
     display: inline-block;
     cursor: pointer;
-    color: #3b82f6;
+    color: #475569;
     font-weight: bold;
     font-size: 14px;
     margin-right: 5px;
@@ -2201,14 +2183,14 @@ body {
 }
 
 .multi-select-button:hover {
-    border-color: #007bff;
+    border-color: #64748b;
     background: #f8f9fa;
 }
 
 .multi-select-button:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    border-color: #64748b;
+    box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
 }
 
 /* 드롭다운 화살표 아이콘 */
