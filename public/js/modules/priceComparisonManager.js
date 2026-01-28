@@ -503,7 +503,17 @@ function renderDetailItems(items, type) {
         html += `
             <tr>
                 <td>${itemNo}</td>
-                <td>${item.itemName}</td>
+                <td style="white-space: nowrap;">
+                    ${item.itemName}
+                    <button class="btn-view-material-walls"
+                            data-item-name="${escapeHtml(item.itemName)}"
+                            data-item-spec="${escapeHtml(item.spec || '')}"
+                            data-unit-price-ids="${escapeHtml((item.originalUnitPriceIds || []).join(','))}"
+                            title="이 자재가 사용된 벽체를 Revit 3D 뷰에서 색상으로 표시"
+                            style="margin-left: 4px; padding: 2px 5px; background: #2563eb; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 10px;">
+                        <i class="fas fa-cube"></i>
+                    </button>
+                </td>
                 <td>${item.spec || ''}</td>
                 <td>${item.unit}</td>
                 <td class="number-cell">${formatQuantity(item.quantity)}</td>
@@ -2672,8 +2682,14 @@ async function convertCalculationResultsToDetailSections() {
                     materialUnitPrice: layer.materialPrice || 0,
                     laborUnitPrice: layer.laborPrice || 0,
                     materialAmount: 0,
-                    laborAmount: 0
+                    laborAmount: 0,
+                    originalUnitPriceIds: []  // ★ 원본 unitPriceId 저장용
                 };
+            }
+
+            // ★ 원본 unitPriceId 저장 (중복 방지)
+            if (layer.materialName && !groupedItems[itemKey].originalUnitPriceIds.includes(layer.materialName)) {
+                groupedItems[itemKey].originalUnitPriceIds.push(layer.materialName);
             }
 
             // 수량 = 벽체 면적 (레이어는 이미 M2당 단가임)
@@ -2718,6 +2734,8 @@ async function convertCalculationResultsToDetailSections() {
                 orderPriceQuantity: 0,                            // 발주단가 수량 (발주수량 자동 복사)
                 orderPriceUnitPrice: 0,                           // 발주단가 단가 (입력 가능)
                 orderPriceAmount: 0,                              // 발주단가 금액 (자동 계산)
+                // ★ 원본 unitPriceIds 저장 (정확한 벽체 매칭용)
+                originalUnitPriceIds: item.originalUnitPriceIds || [],
                 // 업체별 필드
                 vendors: [
                     { name: '업체1', unitPrice: 0, amount: 0, quantity: 0 },
@@ -2746,6 +2764,8 @@ async function convertCalculationResultsToDetailSections() {
                 orderPriceQuantity: 0,                            // 발주단가 수량 (발주수량 자동 복사)
                 orderPriceUnitPrice: 0,                           // 발주단가 단가 (입력 가능)
                 orderPriceAmount: 0,                              // 발주단가 금액 (자동 계산)
+                // ★ 원본 unitPriceIds 저장 (정확한 벽체 매칭용)
+                originalUnitPriceIds: item.originalUnitPriceIds || [],
                 // 업체별 필드
                 vendors: [
                     { name: '업체1', unitPrice: 0, amount: 0, quantity: 0 },
@@ -2808,5 +2828,269 @@ window.renderPriceComparisonTable = async function() {
     renderTableHead();
     renderTableBody();
 };
+
+// =============================================================================
+// Phase 10: 자재별 Revit 벽체 3D 뷰 색상 표시 기능
+// =============================================================================
+
+/**
+ * HTML 이스케이프 처리
+ */
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * 특수문자와 공백 제거하여 정규화 (비교용)
+ * 예: "9.5T*1PLY" → "95t1ply", "C-STUD" → "cstud"
+ */
+function normalizeForSearch(str) {
+    if (!str) return '';
+    return str.toLowerCase().replace(/[^a-z0-9가-힣]/g, '');
+}
+
+/**
+ * 특정 자재가 포함된 벽체의 ElementId 목록 반환
+ * @param {string} itemName - 품명 (예: "C-STUD")
+ * @param {string} spec - 규격 (예: "65형")
+ * @param {string} unitPriceIds - 원본 unitPriceId 목록 (콤마 구분, 정확한 매칭용)
+ * @returns {Array<string>} ElementId 배열
+ */
+function findWallsByMaterial(itemName, spec, unitPriceIds = '') {
+    const matchingWalls = [];
+
+    // calculationResults가 없으면 빈 배열 반환
+    if (!window.calculationResults || !Array.isArray(window.calculationResults)) {
+        console.warn('⚠️ calculationResults가 없습니다. 먼저 계산을 실행해 주세요.');
+        return matchingWalls;
+    }
+
+    // ★ unitPriceIds가 있으면 정확한 매칭 모드
+    const exactMatchIds = unitPriceIds ? unitPriceIds.split(',').filter(id => id.trim()) : [];
+    const useExactMatch = exactMatchIds.length > 0;
+
+    // 검색어 정규화 (특수문자 제거) - 폴백 매칭용
+    const normalizedItemName = normalizeForSearch(itemName);
+    const normalizedSpec = spec ? normalizeForSearch(spec) : '';
+
+    if (useExactMatch) {
+        console.log(`🔍 자재 검색 (정확한 매칭): 품명="${itemName}", 규격="${spec || ''}", IDs: ${exactMatchIds.length}개`);
+    } else {
+        console.log(`🔍 자재 검색 (폴백 매칭): 품명="${itemName}"(${normalizedItemName}), 규격="${spec || ''}"(${normalizedSpec})`);
+    }
+
+    // calculationResults에서 검색
+    for (const result of window.calculationResults) {
+        let hasMaterial = false;
+
+        // 일위대가 방식: layerPricing 검색
+        // layerPricing 구조: { layer3_1: { materialName: "unitPrice_...", ... }, ... }
+        if (result.layerPricing && typeof result.layerPricing === 'object') {
+            for (const [layerKey, layer] of Object.entries(result.layerPricing)) {
+                if (layer && layer.materialName) {
+                    // ★ 정확한 매칭 모드: unitPriceId로 정확히 비교
+                    if (useExactMatch) {
+                        if (exactMatchIds.includes(layer.materialName)) {
+                            hasMaterial = true;
+                            console.log(`  ✅ 정확한 매칭: ${result.wallName} - ${layerKey}`);
+                            console.log(`     ID: "${layer.materialName}"`);
+                            break;
+                        }
+                    } else {
+                        // 폴백: 품명/규격 포함 매칭 (기존 로직)
+                        const normalizedMaterial = normalizeForSearch(layer.materialName);
+                        const nameMatch = normalizedMaterial.includes(normalizedItemName);
+                        const specMatch = !normalizedSpec || normalizedMaterial.includes(normalizedSpec);
+
+                        if (nameMatch && specMatch) {
+                            hasMaterial = true;
+                            console.log(`  ✅ 폴백 매칭: ${result.wallName} - ${layerKey}`);
+                            console.log(`     원본: "${layer.materialName}"`);
+                            console.log(`     정규화 비교: "${normalizedMaterial}".includes("${normalizedItemName}") && includes("${normalizedSpec}")`);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 엑셀 방식: wallType에서 레이어 정보 검색
+        if (!hasMaterial && result.source === 'excel' && result.wallType) {
+            const layerFields = ['layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
+                                 'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'];
+
+            for (const field of layerFields) {
+                const unitPriceId = result.wallType[field];
+                if (unitPriceId && window.ExcelUnitPriceImporter) {
+                    const unitPrice = window.excelUnitPriceCache?.[unitPriceId];
+                    if (unitPrice) {
+                        const normalizedItem = normalizeForSearch(unitPrice.item);
+                        const normalizedUnitSpec = normalizeForSearch(unitPrice.spec);
+
+                        const nameMatch = normalizedItem.includes(normalizedItemName);
+                        const specMatch = !normalizedSpec || normalizedUnitSpec.includes(normalizedSpec);
+
+                        if (nameMatch && specMatch) {
+                            hasMaterial = true;
+                            console.log(`  ✅ 엑셀 매칭: ${result.wallName} - ${field}: "${unitPrice.item} ${unitPrice.spec}"`);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // elementId로 벽체 추가
+        if (hasMaterial && result.elementId) {
+            matchingWalls.push(result.elementId);
+        }
+    }
+
+    console.log(`🔍 "${itemName} ${spec || ''}" 검색 결과: ${matchingWalls.length}개 벽체`);
+    return matchingWalls;
+}
+
+/**
+ * 자재별 벽체 3D 뷰 색상 표시 버튼 클릭 핸들러
+ * @param {string} itemName - 품명
+ * @param {string} spec - 규격
+ * @param {string} unitPriceIds - 원본 unitPriceId 목록 (콤마 구분, 정확한 매칭용)
+ */
+async function handleViewMaterialWalls(itemName, spec, unitPriceIds = '') {
+    // 1. 연결 상태 확인
+    if (!window.socketService?.isConnected) {
+        alert('서버에 연결되어 있지 않습니다.');
+        return;
+    }
+    if (!window.socketService?.revitConnected) {
+        alert('Revit이 연결되어 있지 않습니다.\nRevit을 실행하고 애드인을 활성화해 주세요.');
+        return;
+    }
+
+    // 2. 해당 자재가 포함된 벽체 찾기 (★ unitPriceIds로 정확한 매칭)
+    const elementIds = findWallsByMaterial(itemName, spec, unitPriceIds);
+
+    if (elementIds.length === 0) {
+        const materialName = spec ? `${itemName} ${spec}` : itemName;
+        alert(`"${materialName}"이(가) 포함된 벽체가 없습니다.\n\n※ 먼저 [계산하기] 버튼으로 벽체를 계산해 주세요.`);
+        return;
+    }
+
+    // 3. 컬러 피커 모달 표시
+    showColorPickerModal(itemName, spec, elementIds);
+}
+
+/**
+ * 컬러 피커 모달 표시
+ * @param {string} itemName - 품명
+ * @param {string} spec - 규격
+ * @param {Array} elementIds - 적용할 벽체 ElementId 배열
+ */
+function showColorPickerModal(itemName, spec, elementIds) {
+    const viewName = spec ? `${itemName} ${spec}` : itemName;
+
+    const modalHTML = `
+        <div style="position: relative; padding-top: 5px;">
+            <!-- X 닫기 버튼 -->
+            <button id="btnCloseColorModal" style="
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 28px;
+                height: 28px;
+                border: none;
+                background: #64748b;
+                color: white;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 20px;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+            " title="닫기">&times;</button>
+
+            <div style="text-align: center; padding-top: 10px;">
+                <p style="margin-bottom: 15px; font-size: 14px; color: #334155;">
+                    <strong>${escapeHtml(viewName)}</strong>
+                    <br>
+                    <span style="color: #64748b; font-size: 12px;">${elementIds.length}개 벽체에 색상 적용</span>
+                </p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="font-size: 13px; color: #64748b;">색상:</label>
+                        <input type="color" id="materialColorPicker" value="#ff6b6b"
+                               style="width: 60px; height: 36px; cursor: pointer; border: 2px solid #cbd5e1; border-radius: 6px; padding: 2px;">
+                    </div>
+                    <button id="btnApplyColor" class="btn btn-blue" style="padding: 8px 24px; border-radius: 6px; background: #2563eb; color: white; border: none; font-size: 13px;">적용</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const modal = window.createSubModal('', modalHTML, [], {
+        width: '400px',
+        disableBackgroundClick: true,
+        disableEscapeKey: true
+    });
+
+    // 모달의 패딩 조정
+    const subModal = modal?.querySelector?.('.sub-modal');
+    if (subModal) {
+        subModal.style.padding = '20px';
+    }
+
+    // X 닫기 버튼 이벤트
+    document.getElementById('btnCloseColorModal')?.addEventListener('click', () => {
+        window.closeSubModal?.(modal);
+    });
+
+    // 적용 버튼 이벤트
+    document.getElementById('btnApplyColor')?.addEventListener('click', () => {
+        const colorInput = document.getElementById('materialColorPicker');
+        const hexColor = colorInput?.value || '#ff6b6b';
+        const rgb = hexToRgb(hexColor);
+
+        // Revit 명령 전송
+        window.socketService.sendRevitCommand('DUPLICATE_3D_VIEW_WITH_COLOR', {
+            viewName: viewName,
+            elementIds: elementIds,
+            color: rgb
+        });
+
+        window.showToast?.(`${viewName}: ${elementIds.length}개 벽체 색상 표시 요청...`, 'info');
+
+        window.closeSubModal?.(modal);
+    });
+}
+
+/**
+ * HEX → RGB 변환
+ */
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : { r: 255, g: 100, b: 100 };
+}
+
+// 이벤트 위임: 자재별 3D 뷰 버튼 클릭 처리
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-view-material-walls');
+    if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const itemName = btn.dataset.itemName;
+        const spec = btn.dataset.itemSpec;
+        const unitPriceIds = btn.dataset.unitPriceIds || '';  // ★ 정확한 매칭용 ID 목록
+        handleViewMaterialWalls(itemName, spec, unitPriceIds);
+    }
+});
 
 console.log('✅ 단가비교표 관리 모듈 로드 완료');

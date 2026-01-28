@@ -55,6 +55,9 @@ namespace QTO
         public static List<LegendItem> legendItems = new List<LegendItem>();
         public static string legendViewName = "";
 
+        // 3D 뷰 복제 + 색상 적용 데이터
+        public static DuplicateViewData duplicateViewData = null;
+
         // WebSocket 클라이언트 (순수 WebSocket)
         private ClientWebSocket webSocket;
         private CancellationTokenSource cancellationTokenSource;
@@ -367,6 +370,23 @@ namespace QTO
                                 m_behavior = "CREATE_LEGEND_VIEW";
                                 m_exEvent.Raise();
                             }
+                        }
+                        break;
+
+                    case "DUPLICATE_3D_VIEW_WITH_COLOR":
+                        if (command.Data != null)
+                        {
+                            var data = command.Data as JObject;
+                            duplicateViewData = new DuplicateViewData
+                            {
+                                ViewName = data?["viewName"]?.ToString() ?? "자재 3D 뷰",
+                                ElementIds = data?["elementIds"]?.ToObject<List<string>>() ?? new List<string>(),
+                                Color = data?["color"]?.ToObject<ColorRGB>() ?? new ColorRGB { R = 255, G = 100, B = 100 }
+                            };
+                            UpdateStatus($"3D 뷰 복제 요청 받음: {duplicateViewData.ViewName} ({duplicateViewData.ElementIds.Count}개 객체)");
+                            DozeOff();
+                            m_behavior = "DUPLICATE_3D_VIEW_WITH_COLOR";
+                            m_exEvent.Raise();
                         }
                         break;
 
@@ -1379,6 +1399,10 @@ namespace QTO
                 {
                     CreateLegendView(m_uidoc, m_doc);
                 }
+                else if (QTOForm.m_behavior == "DUPLICATE_3D_VIEW_WITH_COLOR")
+                {
+                    DuplicateViewWithColor(m_uidoc, m_doc);
+                }
 
                 else if (QTOForm.m_behavior == "None")
                 {
@@ -1889,6 +1913,128 @@ namespace QTO
         }
 
         /// <summary>
+        /// 3D 뷰 복제 후 지정 객체에 색상 오버라이드 적용
+        /// </summary>
+        private void DuplicateViewWithColor(UIDocument uidoc, Document doc)
+        {
+            try
+            {
+                var viewData = QTOForm.duplicateViewData;
+                if (viewData == null)
+                {
+                    MessageBox.Show("복제할 뷰 데이터가 없습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // 현재 활성 뷰가 3D 뷰인지 확인
+                Autodesk.Revit.DB.View activeView = doc.ActiveView;
+                View3D source3DView = activeView as View3D;
+                if (source3DView == null)
+                {
+                    MessageBox.Show("현재 활성 뷰가 3D 뷰가 아닙니다.\n3D 뷰를 활성화한 후 다시 시도하세요.", "3D 뷰 필요", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                View3D newView = null;
+                int successCount = 0;
+
+                using (Transaction trans = new Transaction(doc, "3D 뷰 복제 및 색상 적용"))
+                {
+                    trans.Start();
+
+                    // 1. 3D 뷰 복제
+                    ElementId newViewId = source3DView.Duplicate(ViewDuplicateOption.Duplicate);
+                    newView = doc.GetElement(newViewId) as View3D;
+
+                    if (newView == null)
+                    {
+                        trans.RollBack();
+                        MessageBox.Show("3D 뷰 복제에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    // 2. 뷰 이름 설정 (중복 시 번호 추가)
+                    string baseName = viewData.ViewName;
+                    string finalName = baseName;
+                    int suffix = 1;
+                    while (true)
+                    {
+                        try
+                        {
+                            newView.Name = finalName;
+                            break;
+                        }
+                        catch
+                        {
+                            finalName = $"{baseName} ({suffix++})";
+                            if (suffix > 100) break;
+                        }
+                    }
+
+                    // 3. 기존 색상 오버라이드 리셋 (원본 뷰에서 복제된 색상 제거)
+                    OverrideGraphicSettings resetOgs = new OverrideGraphicSettings();
+                    FilteredElementCollector wallCollector = new FilteredElementCollector(doc, newView.Id);
+                    wallCollector.OfCategory(BuiltInCategory.OST_Walls);
+                    foreach (Element wall in wallCollector)
+                    {
+                        newView.SetElementOverrides(wall.Id, resetOgs);
+                    }
+
+                    // 4. 새 색상 오버라이드 설정
+                    Autodesk.Revit.DB.Color revitColor = new Autodesk.Revit.DB.Color(
+                        (byte)viewData.Color.R,
+                        (byte)viewData.Color.G,
+                        (byte)viewData.Color.B
+                    );
+
+                    OverrideGraphicSettings ogs = new OverrideGraphicSettings();
+                    ogs.SetSurfaceForegroundPatternColor(revitColor);
+                    ogs.SetSurfaceBackgroundPatternColor(revitColor);
+                    ogs.SetCutForegroundPatternColor(revitColor);
+                    ogs.SetCutBackgroundPatternColor(revitColor);
+
+                    FillPatternElement solidPattern = GetSolidFillPattern(doc);
+                    if (solidPattern != null)
+                    {
+                        ogs.SetSurfaceForegroundPatternId(solidPattern.Id);
+                        ogs.SetSurfaceBackgroundPatternId(solidPattern.Id);
+                        ogs.SetCutForegroundPatternId(solidPattern.Id);
+                        ogs.SetCutBackgroundPatternId(solidPattern.Id);
+                    }
+
+                    // 5. 지정된 ElementId에만 새 색상 적용
+                    foreach (string elementIdStr in viewData.ElementIds)
+                    {
+                        if (int.TryParse(elementIdStr, out int id))
+                        {
+                            ElementId elemId = new ElementId(id);
+                            if (doc.GetElement(elemId) != null)
+                            {
+                                newView.SetElementOverrides(elemId, ogs);
+                                successCount++;
+                            }
+                        }
+                    }
+
+                    trans.Commit();
+                }
+
+                // 6. 복제된 뷰로 전환
+                if (newView != null)
+                {
+                    uidoc.ActiveView = newView;
+                }
+
+                form?.UpdateStatus($"✅ 3D 뷰 복제 완료: \"{newView?.Name}\" ({successCount}개 객체 색상 적용)");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"3D 뷰 복제 오류:\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                form?.UpdateStatus($"❌ 3D 뷰 복제 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 솔리드 채우기 패턴 가져오기
         /// </summary>
         private FillPatternElement GetSolidFillPattern(Document doc)
@@ -2284,5 +2430,15 @@ namespace QTO
         public string TypeName { get; set; }
         public ColorRGB Color { get; set; }
         public int Count { get; set; }
+    }
+
+    /// <summary>
+    /// 3D 뷰 복제 + 색상 적용 데이터 클래스
+    /// </summary>
+    public class DuplicateViewData
+    {
+        public string ViewName { get; set; }
+        public List<string> ElementIds { get; set; }
+        public ColorRGB Color { get; set; }
     }
 }
