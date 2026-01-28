@@ -213,6 +213,14 @@
                   onmouseout="this.style.background='#475569'">
             <i class="fas fa-file-upload"></i> 엑셀 불러오기
           </button>
+
+          <div style="border-left: 1px solid #d1d5db; height: 20px;"></div>
+
+          <button id="btnCreateRevitWallTypes" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                  onmouseover="this.style.background='#334155'"
+                  onmouseout="this.style.background='#475569'">
+            <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
+          </button>
           <div style="flex: 1;"></div>
           <span style="font-size: 11px; color: #94a3b8;">
             좌클릭: 레이어 선택 &nbsp;|&nbsp; 우클릭: 레이어 해제
@@ -545,6 +553,12 @@
       btnImport.addEventListener('click', handleImportWallTypes);
     }
 
+    // Revit 벽체타입 생성
+    const btnRevit = document.getElementById('btnCreateRevitWallTypes');
+    if (btnRevit) {
+      btnRevit.addEventListener('click', handleCreateRevitWallTypes);
+    }
+
     // 전체 선택 체크박스
     const selectAll = document.getElementById('selectAllWallTypes');
     if (selectAll) {
@@ -555,6 +569,7 @@
           selectedWallTypes.clear();
         }
         renderTableBody();
+        updateStatusBar();
       });
     }
 
@@ -575,6 +590,7 @@
           if (selectAll) {
             selectAll.checked = selectedWallTypes.size === allWallTypes.length && allWallTypes.length > 0;
           }
+          updateStatusBar();
         }
       });
 
@@ -1230,7 +1246,17 @@
 
     const totalCount = allWallTypes.length;
     const unitPriceCount = allUnitPrices.length;
-    bar.textContent = `총 ${totalCount}개 벽체타입 | 사용 가능한 일위대가: ${unitPriceCount}개`;
+    const selectionCount = selectedWallTypes.size;
+
+    // Revit 연결 상태
+    const revitConnected = window.socketService?.revitConnected;
+    const revitStatus = revitConnected
+      ? '<span style="color:#22c55e">● Revit 연결됨</span>'
+      : '<span style="color:#9ca3af">○ Revit 미연결</span>';
+
+    const selectionText = selectionCount > 0 ? `선택: ${selectionCount}개 | ` : '';
+
+    bar.innerHTML = `${revitStatus} | ${selectionText}총 ${totalCount}개 벽체타입 | 사용 가능한 일위대가: ${unitPriceCount}개`;
   }
 
   // ========================================
@@ -1805,6 +1831,233 @@
       document.body.appendChild(input);
       input.click();
     });
+  }
+
+  // ========================================
+  // Phase 9: Revit 벽체타입 생성 기능
+  // ========================================
+
+  /**
+   * 벽체타입 → Revit 레이어 구조 변환 (동기, unitPriceMap 캐시 사용)
+   * @param {Object} wallType - excelWallType 객체
+   * @returns {{ wallTypeName: string, layers: Array, totalThickness: number, errors: Array, hasErrors: boolean }}
+   */
+  function getExcelLayerStructure(wallType) {
+    const layers = [];
+    const errors = [];
+    let totalThickness = 0;
+
+    // LAYER_COLUMNS의 field → group 매핑 (extra 컬럼의 group 결정에도 사용)
+    const fieldToGroup = {};
+    for (const col of LAYER_COLUMNS) {
+      fieldToGroup[col.field] = col.group;
+    }
+
+    const orderedColumns = getOrderedColumnList();
+
+    for (const col of orderedColumns) {
+      let unitPriceId = null;
+      let positionLabel = '';
+
+      if (col.type === 'fixed') {
+        unitPriceId = wallType[col.field];
+        positionLabel = `${col.group} - ${col.label}`;
+      } else if (col.type === 'extra') {
+        // extra 컬럼: extraLayers 배열에서 unitPriceId 추출
+        const extraEntry = Array.isArray(wallType.extraLayers) ? wallType.extraLayers[col.extraIndex] : null;
+        unitPriceId = extraEntry?.unitPriceId || null;
+        // insertAfter 필드를 통해 소속 그룹 결정
+        const parentGroup = extraEntry?.insertAfter ? (fieldToGroup[extraEntry.insertAfter] || '옵션') : '옵션';
+        positionLabel = `${parentGroup} - ${col.label}`;
+      }
+
+      // 비어있는 레이어 건너뛰기
+      if (!unitPriceId) continue;
+
+      const up = unitPriceMap[unitPriceId];
+      if (!up) {
+        // 삭제된 단가 참조
+        errors.push({ position: positionLabel, message: '단가 데이터 없음' });
+        continue;
+      }
+
+      const thickness = up.thickness || 0;
+      totalThickness += thickness;
+
+      layers.push({
+        position: positionLabel,
+        materialName: up.item || '',
+        spec: up.spec || '',
+        thickness: thickness,
+        isUnitPrice: true
+      });
+    }
+
+    return {
+      wallTypeName: wallType.name || '',
+      layers,
+      totalThickness,
+      errors,
+      hasErrors: errors.length > 0
+    };
+  }
+
+  /**
+   * 미리보기 모달 HTML 생성
+   * @param {Array} wallTypesData - getExcelLayerStructure() 결과 배열
+   * @returns {{ html: string, validCount: number, errorCount: number, validWallTypes: Array }}
+   */
+  function buildExcelLayerPreviewHTML(wallTypesData) {
+    const validWallTypes = wallTypesData.filter(d => !d.hasErrors);
+    const errorWallTypes = wallTypesData.filter(d => d.hasErrors);
+    let html = '<div style="max-height: 500px; overflow-y: auto; padding: 10px;">';
+
+    // 유효한 벽체타입
+    for (const wt of validWallTypes) {
+      html += `<div style="margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #16a34a; margin-bottom: 6px;">
+          &#10003; ${escapeHtml(wt.wallTypeName)} (두께: ${wt.totalThickness}mm, 레이어: ${wt.layers.length}개)
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-left: 10px;">
+          <thead>
+            <tr style="background: #f1f5f9;">
+              <th style="border: 1px solid #e2e8f0; padding: 4px 8px; text-align: left;">위치</th>
+              <th style="border: 1px solid #e2e8f0; padding: 4px 8px; text-align: left;">품명/규격</th>
+              <th style="border: 1px solid #e2e8f0; padding: 4px 8px; text-align: right;">두께</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      for (const layer of wt.layers) {
+        html += `<tr>
+              <td style="border: 1px solid #e2e8f0; padding: 3px 8px;">${escapeHtml(layer.position)}</td>
+              <td style="border: 1px solid #e2e8f0; padding: 3px 8px;">${escapeHtml(layer.materialName)} ${escapeHtml(layer.spec)}</td>
+              <td style="border: 1px solid #e2e8f0; padding: 3px 8px; text-align: right;">${layer.thickness}mm</td>
+            </tr>`;
+      }
+      html += `</tbody></table></div>`;
+    }
+
+    // 오류 있는 벽체타입
+    for (const wt of errorWallTypes) {
+      html += `<div style="margin-bottom: 16px;">
+        <div style="font-weight: 600; color: #dc2626; margin-bottom: 6px;">
+          &#10007; ${escapeHtml(wt.wallTypeName)} (오류: 삭제된 단가 ${wt.errors.length}개)
+        </div>
+        <ul style="margin: 0 0 0 20px; padding: 0; font-size: 12px; color: #6b7280;">`;
+      for (const err of wt.errors) {
+        html += `<li>${escapeHtml(err.position)}: ${escapeHtml(err.message)}</li>`;
+      }
+      html += `</ul></div>`;
+    }
+
+    // 요약
+    html += `<div style="border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px; font-size: 13px; color: #475569;">
+      총 ${wallTypesData.length}개 중 <strong style="color: #16a34a;">${validWallTypes.length}개 생성 가능</strong>`;
+    if (errorWallTypes.length > 0) {
+      html += `, <strong style="color: #dc2626;">${errorWallTypes.length}개 오류</strong>`;
+    }
+    html += `</div></div>`;
+
+    return { html, validCount: validWallTypes.length, errorCount: errorWallTypes.length, validWallTypes };
+  }
+
+  /**
+   * [Revit 생성] 버튼 클릭 핸들러 — 메인 진입점
+   */
+  function handleCreateRevitWallTypes() {
+    // 선택된 벽체 확인
+    if (selectedWallTypes.size === 0) {
+      alert('벽체타입을 선택해 주세요.');
+      return;
+    }
+
+    // 선택된 벽체타입에 대해 레이어 구조 변환
+    const wallTypesData = [];
+    for (const wtId of selectedWallTypes) {
+      const wt = allWallTypes.find(w => w.id === wtId);
+      if (!wt) continue;
+      wallTypesData.push(getExcelLayerStructure(wt));
+    }
+
+    if (wallTypesData.length === 0) {
+      alert('선택된 벽체타입을 찾을 수 없습니다.');
+      return;
+    }
+
+    // 미리보기 HTML 생성
+    const preview = buildExcelLayerPreviewHTML(wallTypesData);
+
+    // 버튼 구성
+    const buttons = [
+      {
+        text: '취소',
+        className: 'btn-secondary',
+        onClick: (subModalOverlay) => {
+          if (subModalOverlay && subModalOverlay.parentNode) {
+            subModalOverlay.parentNode.removeChild(subModalOverlay);
+          }
+        }
+      }
+    ];
+
+    if (preview.validCount > 0) {
+      buttons.push({
+        text: `생성하기 (${preview.validCount}개)`,
+        className: 'btn-blue',
+        onClick: (subModalOverlay) => {
+          sendExcelWallTypesToRevit(preview.validWallTypes, wallTypesData.length);
+          if (subModalOverlay && subModalOverlay.parentNode) {
+            subModalOverlay.parentNode.removeChild(subModalOverlay);
+          }
+        }
+      });
+    }
+
+    // 미리보기 모달 표시
+    createSubModal('Revit 벽체타입 생성', preview.html, buttons, { width: '700px' });
+  }
+
+  /**
+   * Revit으로 벽체타입 데이터 전송
+   * @param {Array} validWallTypes - getExcelLayerStructure() 결과 중 오류 없는 것들
+   * @param {number} totalCount - 전체 선택 수 (로그용)
+   */
+  function sendExcelWallTypesToRevit(validWallTypes, totalCount) {
+    // 서버 연결 확인
+    if (!window.socketService?.isConnected) {
+      alert('서버에 연결되어 있지 않습니다.');
+      return;
+    }
+
+    // Revit 연결 확인
+    if (!window.socketService?.revitConnected) {
+      alert('Revit이 연결되어 있지 않습니다.');
+      return;
+    }
+
+    // PascalCase JSON 변환 (revitTypeMatching.js 형식과 동일)
+    const revitData = validWallTypes.map(wallData => ({
+      WallTypeName: wallData.wallTypeName,
+      TotalThickness: wallData.totalThickness,
+      Layers: wallData.layers.map(layer => ({
+        Position: layer.position,
+        MaterialId: '',
+        MaterialName: layer.materialName,
+        Specification: layer.spec,
+        Thickness: layer.thickness,
+        IsUnitPrice: true
+      }))
+    }));
+
+    // WebSocket 전송
+    window.socketService.sendRevitCommand('CREATE_WALL_TYPES', revitData);
+
+    // 토스트 알림
+    if (typeof showToast === 'function') {
+      showToast(`Revit으로 ${validWallTypes.length}개 벽체타입 전송 중...`, 'info');
+    }
+
+    console.log(`[ExcelWallType] Revit 전송: ${validWallTypes.length}/${totalCount}개`, revitData);
   }
 
   // ========================================
