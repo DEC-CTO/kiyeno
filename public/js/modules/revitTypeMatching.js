@@ -16,6 +16,35 @@ let revitWallTypeCounter = 0;
 let selectedRevitWalls = new Set();
 let selectedMaterialData = null;
 
+// =============================================================================
+// 컬럼 추가 기능용 상수 (excelWallTypeManager.js와 동일)
+// =============================================================================
+
+// 기본 12개 레이어 컬럼 정의
+const LAYER_COLUMNS = [
+    { field: 'layer3_1', label: 'Layer3', group: '좌측마감' },
+    { field: 'layer2_1', label: 'Layer2', group: '좌측마감' },
+    { field: 'layer1_1', label: 'Layer1', group: '좌측마감' },
+    { field: 'column1',  label: '구조체', group: '중앙' },
+    { field: 'infill',   label: '단열재', group: '중앙' },
+    { field: 'layer1_2', label: 'Layer1', group: '우측마감' },
+    { field: 'layer2_2', label: 'Layer2', group: '우측마감' },
+    { field: 'layer3_2', label: 'Layer3', group: '우측마감' },
+    { field: 'column2',  label: '옵션1',  group: '옵션' },
+    { field: 'channel',  label: '옵션2',  group: '옵션' },
+    { field: 'runner',   label: '옵션3',  group: '옵션' },
+    { field: 'steelPlate', label: '옵션4', group: '옵션' }
+];
+
+// 컬럼 추가 가능 위치 정의
+const INSERT_POSITIONS = [
+    { afterField: 'layer1_1',   label: '좌측마감 뒤' },
+    { afterField: 'column1',    label: '구조체 뒤' },
+    { afterField: 'infill',     label: '단열재 뒤' },
+    { afterField: 'layer3_2',   label: '우측마감 뒤' },
+    { afterField: 'steelPlate', label: '옵션 뒤 (맨 끝)' }
+];
+
 /**
  * revitWallTypes 업데이트 및 전역 변수 동기화 헬퍼 함수
  * 이제 window.revitWallTypes를 직접 사용하므로 동기화 불필요
@@ -191,36 +220,42 @@ function createProjectManagementPanel() {
 
             <!-- 상단 툴바 -->
             <div style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; flex-wrap: wrap;">
-                <div class="dropdown" style="position: relative;">
-                    <button class="btn btn-primary dropdown-toggle" onclick="toggleRevitActionsDropdown()" style="padding: 5px 12px; font-size: 12px;">
-                        <i class="fas fa-plus"></i> 벽체 작업
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="dropdown-menu" id="revitActionsDropdown" style="display: none;">
-                        <div class="dropdown-item" onclick="addRevitWallType()">
-                            <i class="fas fa-plus"></i> 새 WallType 생성
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item" onclick="showWallTypePreview()">
-                            <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item" onclick="deleteSelectedRevitWalls()">
-                            <i class="fas fa-trash-alt"></i> 선택 삭제
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item" onclick="exportRevitWallTypesToJSON()">
-                            <i class="fas fa-download"></i> JSON 내보내기
-                        </div>
-                        <div class="dropdown-item" onclick="importRevitWallTypesFromJSON()">
-                            <i class="fas fa-upload"></i> JSON 불러오기
-                        </div>
-                    </div>
-                </div>
+                <button onclick="addRevitWallType()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-plus"></i> 새 벽체타입
+                </button>
+                <button onclick="handleAddExtraColumn()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-columns"></i> 컬럼 추가
+                </button>
+                <button onclick="deleteSelectedRevitWalls()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-trash-alt"></i> 선택 삭제
+                </button>
+                <span style="color: #cbd5e1; margin: 0 4px;">|</span>
+                <button onclick="exportRevitWallTypesToJSON()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-download"></i> JSON 내보내기
+                </button>
+                <button onclick="importRevitWallTypesFromJSON()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-upload"></i> JSON 불러오기
+                </button>
+                <span style="color: #cbd5e1; margin: 0 4px;">|</span>
+                <button onclick="showWallTypePreview()" style="padding: 5px 12px; font-size: 12px; border: none; background: #475569; color: white; border-radius: 4px; cursor: pointer; white-space: nowrap;"
+                        onmouseover="this.style.background='#334155'"
+                        onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-cubes"></i> 벽체타입 생성 (Revit)
+                </button>
 
                 <div style="flex: 1;"></div>
                 <span style="font-size: 11px; color: #94a3b8;">
-                    좌클릭: 레이어 선택 &nbsp;|&nbsp; 우클릭: 레이어 해제
+                    좌클릭: 레이어 선택 &nbsp;|&nbsp; 우클릭: 레이어 해제 &nbsp;|&nbsp; 모든 변경사항 자동 저장
                 </span>
             </div>
 
@@ -228,35 +263,12 @@ function createProjectManagementPanel() {
             <div style="flex: 1; overflow: auto; position: relative;">
                 <table style="width: max-content; min-width: 100%; border-collapse: collapse; font-size: 11px;">
                     <thead style="position: sticky; top: 0; z-index: 10;">
-                        <tr>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 40px; min-width: 40px;">
-                                <input type="checkbox" id="selectAllRevitWalls" onchange="toggleAllRevitWallSelection()">
-                            </th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 40px; min-width: 40px;" title="순서 번호">No</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 80px; min-width: 80px;" title="벽체 타입명">WallType</th>
-                            <th colspan="3" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap;" title="좌측 마감 레이어">좌측마감</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="구조체">구조체</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="단열제">단열제</th>
-                            <th colspan="3" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap;" title="우측 마감 레이어">우측마감</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션1">옵션1</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션2">옵션2</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션3">옵션3</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="옵션4">옵션4</th>
-                            <th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; width: 60px; min-width: 60px;" title="벽체 두께 (밀리미터)">두께(mm)</th>
-                        </tr>
-                        <tr>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 3">Layer3</th>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 2">Layer2</th>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 1">Layer1</th>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 1">Layer1</th>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 2">Layer2</th>
-                            <th style="padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;" title="레이어 3">Layer3</th>
-                        </tr>
+                        ${buildTableHeader()}
                     </thead>
                     <tbody id="revit-wall-table-body">
                         <tr>
-                            <td colspan="16" style="text-align: center; padding: 20px; color: #6c757d; border: 1px solid #cbd5e1;">
-                                벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
+                            <td colspan="20" style="text-align: center; padding: 20px; color: #6c757d; border: 1px solid #cbd5e1;">
+                                벽체 타입이 없습니다. "새 벽체타입" 버튼을 클릭하여 추가하세요.
                             </td>
                         </tr>
                     </tbody>
@@ -408,14 +420,19 @@ function loadRevitWallTypes() {
             console.log('📝 새로운 Revit 벽체 타입 목록 시작');
         }
         
-        // ID가 누락된 항목 수정
+        // ID가 누락된 항목 수정 + extraLayers 마이그레이션
         window.revitWallTypes.forEach((wall, index) => {
             if (!wall.id) {
                 wall.id = ++revitWallTypeCounter;
             }
             wall.no = index + 1;
+
+            // extraLayers 마이그레이션 (기존 데이터 호환)
+            if (!Array.isArray(wall.extraLayers)) {
+                wall.extraLayers = [];
+            }
         });
-        
+
         console.log('🌐 window.revitWallTypes 로드 완료:', window.revitWallTypes.length, '개');
         
         return true;
@@ -459,6 +476,201 @@ function saveRevitWallTypes() {
     }
 }
 
+// =============================================================================
+// 컬럼 추가 기능용 헬퍼 함수들
+// =============================================================================
+
+/**
+ * 모든 벽체 중 최대 extraLayers 개수 반환
+ */
+function getMaxExtraLayers() {
+    let max = 0;
+    for (const wt of window.revitWallTypes) {
+        if (Array.isArray(wt.extraLayers) && wt.extraLayers.length > max) {
+            max = wt.extraLayers.length;
+        }
+    }
+    return max;
+}
+
+/**
+ * extraLayers를 insertAfter 위치별로 그룹핑
+ * @returns {Object} { 'column1': [{ extraIndex: 0, label: '구조체2' }, ...], ... }
+ */
+function getExtrasGroupedByPosition() {
+    const result = {};
+    const maxExtras = getMaxExtraLayers();
+
+    if (maxExtras === 0) return result;
+
+    // 첫 번째 벽체의 extraLayers 구조를 기준으로 그룹핑
+    const refWt = window.revitWallTypes.find(wt => Array.isArray(wt.extraLayers) && wt.extraLayers.length > 0);
+    if (!refWt) return result;
+
+    for (let i = 0; i < refWt.extraLayers.length; i++) {
+        const extra = refWt.extraLayers[i];
+        const afterField = extra.insertAfter || 'steelPlate';
+
+        if (!result[afterField]) {
+            result[afterField] = [];
+        }
+        result[afterField].push({
+            extraIndex: i,
+            label: extra.label || `추가${i + 1}`
+        });
+    }
+
+    return result;
+}
+
+/**
+ * 기본 12개 + 추가 컬럼을 순서대로 반환
+ * @returns {Array} [{ type: 'fixed', field, label, group }, { type: 'extra', extraIndex, label }, ...]
+ */
+function getOrderedColumnList() {
+    const extrasMap = getExtrasGroupedByPosition();
+    const result = [];
+
+    for (const col of LAYER_COLUMNS) {
+        // 기본 컬럼 추가
+        result.push({ type: 'fixed', field: col.field, label: col.label, group: col.group });
+
+        // 해당 컬럼 뒤에 올 추가 컬럼들 추가
+        if (extrasMap[col.field]) {
+            for (const extra of extrasMap[col.field]) {
+                result.push({ type: 'extra', extraIndex: extra.extraIndex, label: extra.label });
+            }
+        }
+    }
+
+    return result;
+}
+
+/**
+ * 추가 컬럼 기본 라벨 생성 (구조체2, 구조체3 등)
+ */
+function getPositionDefaultLabel(insertAfter) {
+    const posConfig = {
+        'layer1_1': '좌측마감추가',
+        'column1': '구조체',
+        'infill': '단열재',
+        'layer3_2': '우측마감추가',
+        'steelPlate': '옵션추가'
+    };
+
+    const baseLabel = posConfig[insertAfter] || '추가';
+
+    // 동일 위치에 이미 있는 컬럼 수 확인
+    const extrasMap = getExtrasGroupedByPosition();
+    const existingCount = (extrasMap[insertAfter] || []).length;
+
+    // 첫 번째 추가는 "구조체2", 두 번째는 "구조체3" 등
+    const suffix = existingCount + 2;
+    return `${baseLabel}${suffix > 2 ? suffix : (baseLabel.includes('추가') ? '' : '2')}`;
+}
+
+/**
+ * 테이블 전체 재렌더링 (헤더 + 바디)
+ */
+function rebuildTable() {
+    // 테이블 헤더 재생성
+    const thead = document.querySelector('#revit-wall-table-body')?.closest('table')?.querySelector('thead');
+    if (thead) {
+        thead.innerHTML = buildTableHeader();
+    }
+
+    // 테이블 바디 재생성
+    updateRevitWallTable();
+}
+
+/**
+ * 추가 컬럼 헤더 셀 HTML 생성 (삭제 버튼 포함)
+ */
+function buildExtraHeaderCells(extrasMap, afterField) {
+    let html = '';
+    if (extrasMap[afterField]) {
+        for (const extra of extrasMap[afterField]) {
+            html += `<th rowspan="2" style="padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px; position: relative;">
+                ${extra.label}
+                <span class="extra-col-delete" data-extra-index="${extra.extraIndex}"
+                      onclick="handleDeleteExtraColumn(${extra.extraIndex})"
+                      style="cursor: pointer; color: #f87171; margin-left: 4px; font-weight: bold;"
+                      title="이 컬럼 삭제">&times;</span>
+            </th>`;
+        }
+    }
+    return html;
+}
+
+/**
+ * 동적 테이블 헤더 HTML 생성
+ */
+function buildTableHeader() {
+    const extrasMap = getExtrasGroupedByPosition();
+
+    const thBase = 'padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 600; color: white; background: linear-gradient(135deg, #475569 0%, #334155 100%); border: 1px solid #334155; white-space: nowrap;';
+    const thSub = 'padding: 4px 3px; text-align: center; font-size: 9px; font-weight: 500; color: white; background: linear-gradient(135deg, #64748b 0%, #475569 100%); border: 1px solid #334155; white-space: nowrap; min-width: 90px;';
+
+    let mainRow = '';
+    let subRow = '';
+
+    // 체크박스
+    mainRow += `<th rowspan="2" style="${thBase} width: 40px; min-width: 40px;">
+        <input type="checkbox" id="selectAllRevitWalls" onchange="toggleAllRevitWallSelection()">
+    </th>`;
+
+    // No
+    mainRow += `<th rowspan="2" style="${thBase} width: 40px; min-width: 40px;" title="순서 번호">No</th>`;
+
+    // WallType
+    mainRow += `<th rowspan="2" style="${thBase} width: 80px; min-width: 80px;" title="벽체 타입명">WallType</th>`;
+
+    // 좌측마감 (colspan=3)
+    mainRow += `<th colspan="3" style="${thBase}" title="좌측 마감 레이어">좌측마감</th>`;
+    subRow += `<th style="${thSub}" title="레이어 3">Layer3</th>`;
+    subRow += `<th style="${thSub}" title="레이어 2">Layer2</th>`;
+    subRow += `<th style="${thSub}" title="레이어 1">Layer1</th>`;
+
+    // 좌측마감 뒤 추가 컬럼
+    mainRow += buildExtraHeaderCells(extrasMap, 'layer1_1');
+
+    // 구조체
+    mainRow += `<th rowspan="2" style="${thBase} min-width: 90px;" title="구조체">구조체</th>`;
+
+    // 구조체 뒤 추가 컬럼
+    mainRow += buildExtraHeaderCells(extrasMap, 'column1');
+
+    // 단열재
+    mainRow += `<th rowspan="2" style="${thBase} min-width: 90px;" title="단열제">단열재</th>`;
+
+    // 단열재 뒤 추가 컬럼
+    mainRow += buildExtraHeaderCells(extrasMap, 'infill');
+
+    // 우측마감 (colspan=3)
+    mainRow += `<th colspan="3" style="${thBase}" title="우측 마감 레이어">우측마감</th>`;
+    subRow += `<th style="${thSub}" title="레이어 1">Layer1</th>`;
+    subRow += `<th style="${thSub}" title="레이어 2">Layer2</th>`;
+    subRow += `<th style="${thSub}" title="레이어 3">Layer3</th>`;
+
+    // 우측마감 뒤 추가 컬럼
+    mainRow += buildExtraHeaderCells(extrasMap, 'layer3_2');
+
+    // 옵션 (colspan=4)
+    mainRow += `<th colspan="4" style="${thBase}" title="옵션 레이어">옵션</th>`;
+    subRow += `<th style="${thSub}" title="옵션1">옵션1</th>`;
+    subRow += `<th style="${thSub}" title="옵션2">옵션2</th>`;
+    subRow += `<th style="${thSub}" title="옵션3">옵션3</th>`;
+    subRow += `<th style="${thSub}" title="옵션4">옵션4</th>`;
+
+    // 옵션 뒤 추가 컬럼
+    mainRow += buildExtraHeaderCells(extrasMap, 'steelPlate');
+
+    // 두께
+    mainRow += `<th rowspan="2" style="${thBase} width: 60px; min-width: 60px;" title="벽체 두께 (밀리미터)">두께(mm)</th>`;
+
+    return `<tr>${mainRow}</tr><tr>${subRow}</tr>`;
+}
+
 // 벽체 테이블 업데이트 함수
 function updateRevitWallTable() {
     const tableBody = document.getElementById('revit-wall-table-body');
@@ -468,25 +680,58 @@ function updateRevitWallTable() {
         tableBody.innerHTML = `
             <tr>
                 <td colspan="17" style="text-align: center; padding: 20px; color: #6c757d;">
-                    벽체 타입이 없습니다. "새 WallType 생성" 버튼을 클릭하여 추가하세요.
+                    벽체 타입이 없습니다. "새 벽체타입" 버튼을 클릭하여 추가하세요.
                 </td>
             </tr>
         `;
         return;
     }
     
+    // WallType 이름으로 정렬
+    const sorted = [...window.revitWallTypes].sort((a, b) => (a.wallType || '').localeCompare(b.wallType || '', 'ko'));
+    sorted.forEach((wall, i) => { wall.no = i + 1; });
+
     // 벽체 데이터를 테이블 행으로 변환
-    const tableRows = window.revitWallTypes.map(wall => createRevitWallTableRow(wall)).join('');
+    const tableRows = sorted.map(wall => createRevitWallTableRow(wall)).join('');
     tableBody.innerHTML = tableRows;
 }
 
 // 벽체 테이블 행 생성 함수 (클릭 가능한 자재 셀 포함)
 function createRevitWallTableRow(wall) {
     const isSelected = selectedRevitWalls.has(wall.id);
-    
+    const orderedColumns = getOrderedColumnList();
+
     const tdBase = 'padding: 4px; text-align: center; border: 1px solid #cbd5e1; font-size: 11px;';
     const tdMat = `${tdBase} cursor: pointer; background: #f8fafc; min-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px;`;
     const placeholder = '<span style="color: #999;">클릭하여 선택</span>';
+
+    // 레이어 셀들 동적 생성
+    let layerCells = '';
+    for (const col of orderedColumns) {
+        if (col.type === 'fixed') {
+            // 기본 12개 레이어
+            const value = wall[col.field] || '';
+            layerCells += `
+                <td style="${tdMat}" onclick="selectMaterial(${wall.id}, '${col.field}')"
+                    oncontextmenu="clearMaterial(event, ${wall.id}, '${col.field}')">
+                    ${value || placeholder}
+                </td>
+            `;
+        } else {
+            // 추가 레이어
+            const extras = Array.isArray(wall.extraLayers) ? wall.extraLayers : [];
+            const extraItem = extras[col.extraIndex] || {};
+            const value = extraItem.unitPriceId || '';
+            const displayValue = value ? getUnitPriceDisplayName(value) : '';
+
+            layerCells += `
+                <td style="${tdMat}" onclick="selectMaterialExtra(${wall.id}, ${col.extraIndex})"
+                    oncontextmenu="clearMaterialExtra(event, ${wall.id}, ${col.extraIndex})">
+                    ${displayValue || placeholder}
+                </td>
+            `;
+        }
+    }
 
     return `
         <tr data-wall-id="${wall.id}" class="${isSelected ? 'selected' : ''}">
@@ -496,57 +741,310 @@ function createRevitWallTableRow(wall) {
             </td>
             <td style="${tdBase} color: #94a3b8;">${wall.no}</td>
             <td style="${tdBase} font-weight: 600; color: #1e293b; min-width: 80px;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer3_1')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_1')">
-                ${wall.layer3_1 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer2_1')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_1')">
-                ${wall.layer2_1 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer1_1')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_1')">
-                ${wall.layer1_1 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'column1')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'column1')">
-                ${wall.column1 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'infill')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'infill')">
-                ${wall.infill || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer1_2')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer1_2')">
-                ${wall.layer1_2 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer2_2')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer2_2')">
-                ${wall.layer2_2 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'layer3_2')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'layer3_2')">
-                ${wall.layer3_2 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'column2')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'column2')">
-                ${wall.column2 || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'channel')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'channel')">
-                ${wall.channel || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'runner')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'runner')">
-                ${wall.runner || placeholder}
-            </td>
-            <td style="${tdMat}" onclick="selectMaterial(${wall.id}, 'steelPlate')"
-                oncontextmenu="clearMaterial(event, ${wall.id}, 'steelPlate')">
-                ${wall.steelPlate || placeholder}
-            </td>
+            ${layerCells}
             <td style="${tdBase} color: #475569;" ondblclick="editRevitWallThickness(${wall.id})">${wall.thickness || ''}</td>
         </tr>
     `;
+}
+
+/**
+ * 일위대가 ID로 표시명 가져오기
+ */
+function getUnitPriceDisplayName(unitPriceId) {
+    if (!unitPriceId) return '';
+
+    // unitPrice_ 접두사 처리
+    const id = unitPriceId.startsWith('unitPrice_') ? unitPriceId.substring(10) : unitPriceId;
+
+    // unitPriceDB에서 조회
+    if (window.unitPriceDB && window.unitPriceDB instanceof UnitPriceDB) {
+        const unitPrice = window.unitPriceDB.getItemByIdSync(id);
+        if (unitPrice) {
+            return `${unitPrice.item || ''} ${unitPrice.spec || ''}`.trim();
+        }
+    }
+
+    return unitPriceId; // 찾지 못하면 ID 그대로 반환
+}
+
+// =============================================================================
+// 컬럼 추가/삭제 함수들
+// =============================================================================
+
+/**
+ * 기존 벽체들의 extraLayers 구조를 복사하여 새 벽체용 빈 템플릿 생성
+ */
+function getExistingExtraLayersTemplate() {
+    const ref = window.revitWallTypes.find(wt => Array.isArray(wt.extraLayers) && wt.extraLayers.length > 0);
+    if (!ref) return [];
+    return ref.extraLayers.map(e => ({ unitPriceId: '', label: e.label, insertAfter: e.insertAfter }));
+}
+
+/**
+ * 컬럼 추가 버튼 핸들러 — 위치 선택 모달 표시
+ */
+function handleAddExtraColumn() {
+    const positionHTML = buildPositionSelectionHTML();
+
+    const posModal = createSubModal('', positionHTML, [], {
+        disableBackgroundClick: false,
+        disableEscapeKey: false,
+        width: '360px'
+    });
+
+    setTimeout(() => {
+        const btnClose = document.getElementById('btnClosePositionModal');
+        if (btnClose) {
+            btnClose.addEventListener('click', () => closeSubModal(posModal));
+        }
+
+        const container = document.getElementById('positionSelectionList');
+        if (container) {
+            container.addEventListener('click', (e) => {
+                const option = e.target.closest('.position-option');
+                if (!option) return;
+                const afterField = option.dataset.afterField;
+                closeSubModal(posModal);
+                addExtraColumnAt(afterField);
+            });
+        }
+    }, 100);
+}
+
+/**
+ * 위치 선택 모달 HTML 생성
+ */
+function buildPositionSelectionHTML() {
+    let listHTML = '';
+    for (const pos of INSERT_POSITIONS) {
+        listHTML += `<div class="position-option" data-after-field="${pos.afterField}"
+            style="padding: 10px 16px; cursor: pointer; border-bottom: 1px solid #f1f5f9; font-size: 13px; display: flex; justify-content: space-between; align-items: center;"
+            onmouseover="this.style.background='#f0f9ff'"
+            onmouseout="this.style.background='white'">
+            <span style="font-weight: 500; color: #1e293b;">${pos.label}</span>
+            <i class="fas fa-plus" style="color: #94a3b8; font-size: 11px;"></i>
+        </div>`;
+    }
+
+    return `
+        <div style="display: flex; flex-direction: column; padding: 0;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #334155; flex-shrink: 0;">
+                <h3 style="margin: 0; font-size: 14px; font-weight: 600; color: white;">
+                    <i class="fas fa-columns"></i> 컬럼 추가 위치 선택
+                </h3>
+                <button id="btnClosePositionModal" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 4px; line-height: 1;"
+                        onmouseover="this.style.color='white'; this.style.background='#475569'"
+                        onmouseout="this.style.color='#94a3b8'; this.style.background='none'"
+                        title="닫기">&times;</button>
+            </div>
+            <div id="positionSelectionList">
+                ${listHTML}
+            </div>
+            <div style="padding: 8px 16px; background: #f1f5f9; border-top: 1px solid #e2e8f0; font-size: 10px; color: #94a3b8;">
+                추가된 컬럼은 선택한 위치 뒤에 배치됩니다
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * 지정 위치에 추가 컬럼 생성 (모든 벽체에 적용)
+ */
+function addExtraColumnAt(insertAfter) {
+    try {
+        const newLabel = getPositionDefaultLabel(insertAfter);
+
+        for (const wt of window.revitWallTypes) {
+            const extras = Array.isArray(wt.extraLayers) ? [...wt.extraLayers] : [];
+            extras.push({ unitPriceId: '', label: newLabel, insertAfter: insertAfter });
+            wt.extraLayers = extras;
+        }
+
+        saveRevitWallTypes();
+        rebuildTable();
+
+        const posLabel = INSERT_POSITIONS.find(p => p.afterField === insertAfter)?.label || '맨 끝';
+        if (typeof showToast === 'function') {
+            showToast(`컬럼 "${newLabel}" 추가 (${posLabel})`, 'success');
+        }
+    } catch (err) {
+        console.error('❌ 컬럼 추가 실패:', err);
+        if (typeof showToast === 'function') {
+            showToast('컬럼 추가 실패: ' + err.message, 'error');
+        }
+    }
+}
+
+/**
+ * 추가 컬럼 삭제 (모든 벽체에서 해당 인덱스 제거)
+ */
+function handleDeleteExtraColumn(extraIndex) {
+    let colLabel = `추가${extraIndex + 1}`;
+    for (const wt of window.revitWallTypes) {
+        if (Array.isArray(wt.extraLayers) && wt.extraLayers[extraIndex] && wt.extraLayers[extraIndex].label) {
+            colLabel = wt.extraLayers[extraIndex].label;
+            break;
+        }
+    }
+
+    if (!confirm(`"${colLabel}" 컬럼을 삭제하시겠습니까?\n모든 벽체타입에서 해당 컬럼 데이터가 삭제됩니다.`)) return;
+
+    try {
+        for (const wt of window.revitWallTypes) {
+            const extras = Array.isArray(wt.extraLayers) ? [...wt.extraLayers] : [];
+            if (extras.length > extraIndex) {
+                extras.splice(extraIndex, 1);
+            }
+            wt.extraLayers = extras;
+        }
+
+        saveRevitWallTypes();
+        rebuildTable();
+
+        if (typeof showToast === 'function') {
+            showToast(`"${colLabel}" 컬럼 삭제 완료`, 'success');
+        }
+    } catch (err) {
+        console.error('❌ 컬럼 삭제 실패:', err);
+        if (typeof showToast === 'function') {
+            showToast('컬럼 삭제 실패: ' + err.message, 'error');
+        }
+    }
+}
+
+// =============================================================================
+// 추가 레이어 선택/해제 함수들
+// =============================================================================
+
+/**
+ * 추가 레이어 셀 좌클릭 — 일위대가 선택 모달
+ */
+async function selectMaterialExtra(wallId, extraIndex) {
+    console.log(`🎯 추가 레이어 선택: 벽체 ${wallId}, extraIndex ${extraIndex}`);
+
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
+    if (!wall) {
+        alert('벽체를 찾을 수 없습니다.');
+        return;
+    }
+
+    const extras = Array.isArray(wall.extraLayers) ? wall.extraLayers : [];
+    const extraItem = extras[extraIndex];
+    const fieldLabel = extraItem?.label || `추가${extraIndex + 1}`;
+
+    try {
+        const tableRowsHTML = await generateUnitPriceTableRows();
+
+        const modalHTML = `
+            <div class="unitprice-selection-container">
+                <div class="unitprice-header">
+                    <h4><i class="fas fa-calculator"></i> ${wall.wallType} - ${fieldLabel} 일위대가 선택</h4>
+                </div>
+                <div class="unit-price-table-wrapper" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px; max-height: 500px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;" id="unitPriceSelectionTable">
+                        <thead style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">선택</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">재료비</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">노무비</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600;">경비</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600;">총계</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRowsHTML}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        createSubModal(`💰 ${fieldLabel} 일위대가 선택`, modalHTML, [
+            { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
+            { text: '선택된 일위대가 지우기', class: 'btn-warning', onClick: (modal) => clearExtraUnitPriceFromModal(wallId, extraIndex, modal) },
+            { text: '적용', class: 'btn-primary', onClick: (modal) => applyExtraUnitPrice(wallId, extraIndex, modal) }
+        ], {
+            disableBackgroundClick: false,
+            disableEscapeKey: false,
+            maxWidth: '95vw',
+            width: '1200px'
+        });
+    } catch (error) {
+        console.error('❌ 추가 레이어 선택 중 오류:', error);
+        alert('일위대가 선택 중 오류가 발생했습니다: ' + error.message);
+    }
+}
+
+/**
+ * 추가 레이어에 일위대가 적용
+ */
+function applyExtraUnitPrice(wallId, extraIndex, modal) {
+    if (!selectedMaterialData) {
+        alert('일위대가를 선택해주세요.');
+        return;
+    }
+
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
+    if (!wall) {
+        alert('벽체를 찾을 수 없습니다.');
+        return;
+    }
+
+    if (!Array.isArray(wall.extraLayers) || !wall.extraLayers[extraIndex]) {
+        alert('추가 레이어를 찾을 수 없습니다.');
+        return;
+    }
+
+    wall.extraLayers[extraIndex].unitPriceId = `unitPrice_${selectedMaterialData.id}`;
+
+    saveRevitWallTypes();
+    updateRevitWallTable();
+    closeSubModal(modal);
+
+    selectedMaterialData = null;
+    console.log(`✅ 추가 레이어 일위대가 적용됨: ${wall.wallType} - extraIndex ${extraIndex}`);
+}
+
+/**
+ * 추가 레이어 일위대가 지우기 (모달에서)
+ */
+function clearExtraUnitPriceFromModal(wallId, extraIndex, modal) {
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
+    if (!wall || !Array.isArray(wall.extraLayers) || !wall.extraLayers[extraIndex]) return;
+
+    wall.extraLayers[extraIndex].unitPriceId = '';
+
+    saveRevitWallTypes();
+    updateRevitWallTable();
+    closeSubModal(modal);
+
+    console.log(`🗑️ 추가 레이어 해제됨: ${wall.wallType} - extraIndex ${extraIndex}`);
+}
+
+/**
+ * 추가 레이어 셀 우클릭 — 일위대가 해제
+ */
+function clearMaterialExtra(event, wallId, extraIndex) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const wall = window.revitWallTypes.find(w => w.id === wallId);
+    if (!wall || !Array.isArray(wall.extraLayers) || !wall.extraLayers[extraIndex]) return;
+
+    wall.extraLayers[extraIndex].unitPriceId = '';
+
+    saveRevitWallTypes();
+    updateRevitWallTable();
+
+    console.log(`🗑️ 추가 레이어 해제됨: ${wall.wallType} - extraIndex ${extraIndex}`);
 }
 
 // =============================================================================
@@ -592,89 +1090,15 @@ function toggleRevitActionsDropdown() {
 
 function addRevitWallType() {
     console.log('➕ 새 벽체 타입 추가 시작');
-    
-    // 드롭다운 닫기
-    const dropdown = document.getElementById('revitActionsDropdown');
-    if (dropdown) dropdown.style.display = 'none';
-    
-    return createWallTypeModal();
-}
 
-// 벽체 타입 생성 모달 생성
-function createWallTypeModal() {
     const defaultName = `WallType_${revitWallTypeCounter + 1}`;
-    
-    const modalHTML = `
-        <div class="wall-type-creation-form">
-            <div class="form-group">
-                <label for="newWallTypeName">
-                    <i class="fas fa-tag"></i> WallType 이름 <span style="color: #dc3545;">*</span>
-                </label>
-                <input type="text" id="newWallTypeName" value="${defaultName}" 
-                       class="form-control"
-                       placeholder="WallType 이름을 입력하세요"
-                       onkeydown="handleWallTypeCreationKeydown(event)">
-            </div>
-            
-            <div class="form-group">
-                <label for="newWallThickness">
-                    <i class="fas fa-ruler-horizontal"></i> 벽체 두께 (mm)
-                </label>
-                <input type="number" id="newWallThickness" 
-                       class="form-control"
-                       placeholder="벽체 두께를 입력하세요 (예: 100)"
-                       min="1" max="9999"
-                       onkeydown="handleWallTypeCreationKeydown(event)">
-            </div>
-            
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> 
-                벽체 타입을 추가한 후 자재 매핑을 설정할 수 있습니다.
-            </div>
-        </div>
-    `;
-    
-    return createSubModal('➕ 새 벽체 타입 추가', modalHTML, [
-        { text: '취소', class: 'btn-secondary', onClick: (modal) => closeSubModal(modal) },
-        { text: '추가', class: 'btn-primary', onClick: (modal) => createNewWallType(modal) }
-    ], {
-        disableBackgroundClick: true,
-        disableEscapeKey: false
-    });
-}
 
-function createNewWallType(modal) {
-    const nameInput = document.getElementById('newWallTypeName');
-    const thicknessInput = document.getElementById('newWallThickness');
-    
-    if (!nameInput) {
-        alert('입력 필드를 찾을 수 없습니다.');
-        return;
-    }
-    
-    const wallName = nameInput.value.trim();
-    const wallThickness = parseInt(thicknessInput?.value) || 0;
-    
-    if (!wallName) {
-        alert('벽체 타입명을 입력해주세요.');
-        nameInput.focus();
-        return;
-    }
-    
-    // 중복 이름 확인
-    const isDuplicate = window.revitWallTypes.some(wall => wall.wallType && wall.wallType.toLowerCase() === wallName.toLowerCase());
-    if (isDuplicate) {
-        alert('이미 존재하는 벽체 타입명입니다.');
-        nameInput.focus();
-        return;
-    }
-    
-    // 새 벽체 타입 생성
+    // 새 벽체 타입 생성 (모달 없이 바로 추가)
     const newWallType = {
         id: ++revitWallTypeCounter,
         no: window.revitWallTypes.length + 1,
-        wallType: wallName,
-        thickness: wallThickness,
+        wallType: defaultName,
+        thickness: 0,
         layer3_1: '',
         layer2_1: '',
         layer1_1: '',
@@ -687,20 +1111,17 @@ function createNewWallType(modal) {
         channel: '',
         runner: '',
         steelPlate: '',
+        extraLayers: getExistingExtraLayersTemplate(),
         createdAt: new Date().toISOString(),
         source: 'manual'
     };
-    
+
     window.revitWallTypes.push(newWallType);
-    syncRevitWallTypes(); // 상태 확인
+    syncRevitWallTypes();
     saveRevitWallTypes();
     updateRevitWallTable();
-    
-    // 모달 닫기
-    closeSubModal(modal);
-    
+
     console.log('✅ 새 벽체 타입 추가됨:', newWallType);
-    alert(`"${wallName}" 벽체 타입이 추가되었습니다.`);
 }
 
 function handleWallTypeCreationKeydown(event) {
@@ -1645,6 +2066,14 @@ window.clearMaterial = clearMaterial;
 window.clearMaterialFromModal = clearMaterialFromModal;
 window.filterMaterialSelectionTable = filterMaterialSelectionTable;
 
+// 컬럼 추가/삭제 함수들
+window.handleAddExtraColumn = handleAddExtraColumn;
+window.handleDeleteExtraColumn = handleDeleteExtraColumn;
+
+// 추가 레이어 선택/해제 함수들
+window.selectMaterialExtra = selectMaterialExtra;
+window.clearMaterialExtra = clearMaterialExtra;
+
 // 벽체 편집 함수들
 window.editRevitWallType = editRevitWallType;
 window.editRevitWallThickness = editRevitWallThickness;
@@ -1927,6 +2356,56 @@ async function getLayerStructure(wallType) {
 
         totalThickness += thickness;
         console.log(`  ✓ ${config.name}: ${displayName} (${thickness}mm)`);
+    }
+
+    // 추가 레이어 (extraLayers) 처리
+    if (Array.isArray(wallType.extraLayers)) {
+        for (let i = 0; i < wallType.extraLayers.length; i++) {
+            const extra = wallType.extraLayers[i];
+            const extraMaterialId = extra.unitPriceId;
+            if (!extraMaterialId) continue;
+
+            let extraDisplayName = extraMaterialId;
+            let extraSpec = '';
+            let extraIsUnitPrice = false;
+
+            if (isUnitPriceId(extraMaterialId)) {
+                extraIsUnitPrice = true;
+                const unitPrice = await getUnitPriceData(extraMaterialId);
+                if (!unitPrice) {
+                    errors.push(`${extra.label || '추가' + (i+1)}: 일위대가 ${extraMaterialId}를 찾을 수 없음`);
+                    continue;
+                }
+                extraDisplayName = unitPrice.basic?.itemName || '알 수 없는 일위대가';
+                extraSpec = `일위대가 (구성품 ${unitPrice.components?.length || 0}개)`;
+            } else {
+                const material = await getMaterialData(extraMaterialId);
+                if (!material) {
+                    errors.push(`${extra.label || '추가' + (i+1)}: 자재 ${extraMaterialId}를 찾을 수 없음`);
+                    continue;
+                }
+                extraDisplayName = material.name || material.item;
+                extraSpec = material.spec || material.size || '';
+            }
+
+            const extraThickness = await extractThicknessFromMaterial(extraMaterialId);
+            if (extraThickness === null) {
+                errors.push(`${extra.label || '추가' + (i+1)}: ${extraDisplayName} 두께 추출 실패`);
+                continue;
+            }
+
+            layers.push({
+                position: extra.label || `추가${i + 1}`,
+                materialId: extraMaterialId,
+                materialName: extraDisplayName,
+                spec: extraSpec,
+                thickness: extraThickness,
+                isUnitPrice: extraIsUnitPrice
+            });
+
+            totalThickness += extraThickness;
+            console.log(`  ✓ ${extra.label}: ${extraDisplayName} (${extraThickness}mm)`);
+        }
     }
 
     const result = {

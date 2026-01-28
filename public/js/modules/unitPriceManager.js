@@ -584,21 +584,19 @@ function createUnitPriceManagementModal() {
             </div>
 
             <!-- 컨트롤 버튼 -->
-            <div class="unit-price-header">
-                <div class="controls-section">
-                    <button class="btn btn-success" onclick="openUnitPriceBasicModal()">
-                        <i class="fas fa-plus"></i> 새 일위대가 추가
-                    </button>
-                    <button class="btn btn-primary" onclick="loadUnitPriceDataFromDB()">
-                        <i class="fas fa-sync-alt"></i> DB에서 로드
-                    </button>
-                    <button class="btn btn-info" onclick="exportUnitPriceData()">
-                        <i class="fas fa-download"></i> 데이터 내보내기
-                    </button>
-                    <button class="btn btn-warning" onclick="importUnitPriceData()">
-                        <i class="fas fa-upload"></i> 데이터 가져오기
-                    </button>
-                </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                <button onclick="openUnitPriceBasicModal()" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-plus"></i> 새 일위대가 추가
+                </button>
+                <button onclick="loadUnitPriceDataFromDB()" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-sync-alt"></i> DB에서 로드
+                </button>
+                <button onclick="exportUnitPriceData()" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-download"></i> 데이터 내보내기
+                </button>
+                <button onclick="importUnitPriceData()" style="padding: 6px 14px; font-size: 12px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
+                    <i class="fas fa-upload"></i> 데이터 가져오기
+                </button>
             </div>
             
             <!-- 일위대가 목록 -->
@@ -659,8 +657,11 @@ function showUnitPriceBasicModal(editData = null) {
             .unit-price-basic-form .form-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin-bottom: 20px;
+                gap: 16px;
+                padding: 20px;
+                background: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
             }
 
             .unit-price-basic-form .form-group {
@@ -670,33 +671,37 @@ function showUnitPriceBasicModal(editData = null) {
 
             .unit-price-basic-form .form-group label {
                 font-weight: 600;
-                margin-bottom: 8px;
-                color: #374151;
-                font-size: 14px;
+                margin-bottom: 6px;
+                color: #475569;
+                font-size: 12px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .unit-price-basic-form .form-group select,
             .unit-price-basic-form .form-group input {
-                padding: 10px 12px;
-                border: 2px solid #d1d5db;
-                border-radius: 6px;
-                font-size: 14px;
+                padding: 8px 10px;
+                border: 1px solid #cbd5e1;
+                border-radius: 4px;
+                font-size: 13px;
                 transition: all 0.2s;
                 font-family: inherit;
+                background: white;
+                color: #1e293b;
             }
 
             .unit-price-basic-form .form-group select:focus,
             .unit-price-basic-form .form-group input:focus {
                 outline: none;
-                border-color: #3b82f6;
-                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+                border-color: #64748b;
+                box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.15);
             }
 
             .unit-price-basic-form .form-group input[readonly] {
-                background-color: #f3f4f6;
-                color: #6b7280;
+                background-color: #f1f5f9;
+                color: #64748b;
                 cursor: not-allowed;
-                border-color: #e5e7eb;
+                border-color: #e2e8f0;
             }
 
             .unit-price-basic-form .required {
@@ -706,42 +711,42 @@ function showUnitPriceBasicModal(editData = null) {
             }
 
             .unit-price-basic-form select {
-                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%236b7280' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
                 background-repeat: no-repeat;
-                background-position: right 10px center;
-                background-size: 16px;
+                background-position: right 8px center;
+                background-size: 12px;
                 appearance: none;
                 -webkit-appearance: none;
                 -moz-appearance: none;
-                padding-right: 40px;
+                padding-right: 28px;
                 cursor: pointer;
             }
 
             .unit-price-basic-form select:hover {
-                border-color: #9ca3af;
+                border-color: #94a3b8;
             }
 
             .unit-price-basic-form optgroup {
                 font-weight: 700;
-                color: #1f2937;
-                background: #f9fafb;
-                font-size: 13px;
+                color: #1e293b;
+                background: #f1f5f9;
+                font-size: 12px;
             }
 
             .unit-price-basic-form option {
-                padding: 8px 12px;
-                font-size: 14px;
+                padding: 6px 10px;
+                font-size: 13px;
             }
 
             .unit-price-basic-form option[data-custom="true"] {
-                background-color: #e8f5e8;
+                background-color: #f1f5f9;
                 font-weight: 600;
-                color: #16a34a;
+                color: #475569;
             }
 
             .custom-input-wrapper {
                 display: flex;
-                gap: 8px;
+                gap: 6px;
                 align-items: center;
             }
 
@@ -750,38 +755,40 @@ function showUnitPriceBasicModal(editData = null) {
             }
 
             .custom-input-wrapper button {
-                padding: 10px 16px;
-                background: #6b7280;
+                padding: 8px 12px;
+                background: #475569;
                 color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 4px;
                 cursor: pointer;
                 white-space: nowrap;
-                font-size: 13px;
+                font-size: 12px;
                 transition: background 0.2s;
             }
 
             .custom-input-wrapper button:hover {
-                background: #4b5563;
+                background: #334155;
             }
             .unit-price-basic-modal-header {
                 display: flex;
                 justify-content: flex-end;
-                margin-bottom: 10px;
+                margin-bottom: 4px;
             }
 
             .unit-price-basic-modal-close {
                 background: none;
                 border: none;
-                font-size: 24px;
+                font-size: 20px;
                 cursor: pointer;
-                color: #666;
-                padding: 5px 10px;
+                color: #94a3b8;
+                padding: 4px 8px;
                 transition: color 0.2s;
+                border-radius: 4px;
             }
 
             .unit-price-basic-modal-close:hover {
-                color: #333;
+                color: #1e293b;
+                background: #f1f5f9;
             }
         </style>
 
@@ -1289,14 +1296,14 @@ function createDetailModalHTML(itemSummary) {
                     <h4><i class="fas fa-info-circle"></i> ${itemSummary}</h4>
                 </div>
             
-            <div class="controls-section">
-                <button class="btn btn-success btn-sm" onclick="addComponentRow()">
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+                <button onclick="addComponentRow()" style="padding: 5px 12px; font-size: 11px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 5px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
                     <i class="fas fa-plus"></i> 구성품 추가
                 </button>
-                <button class="btn btn-primary btn-sm" onclick="openBulkQuantityCalculator()" style="margin-left: 8px;">
+                <button onclick="openBulkQuantityCalculator()" style="padding: 5px 12px; font-size: 11px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 5px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
                     <i class="fas fa-calculator"></i> 소요량 계산
                 </button>
-                <button class="btn btn-info btn-sm" onclick="exportUnitPriceDetailToExcel()" style="margin-left: 8px;">
+                <button onclick="exportUnitPriceDetailToExcel()" style="padding: 5px 12px; font-size: 11px; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; background: #475569; color: white; display: inline-flex; align-items: center; gap: 5px;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#475569'">
                     <i class="fas fa-file-excel"></i> Excel로 내보내기
                 </button>
             </div>
@@ -1306,25 +1313,25 @@ function createDetailModalHTML(itemSummary) {
                 <table class="unit-price-detail-table" style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;">
                     <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 10;">
                         <tr>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 160px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">품명</th>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">싸이즈</th>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">단위</th>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">수량</th>
-                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; text-align: center; font-weight: 600;">재료비</th>
-                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; text-align: center; font-weight: 600;">노무비</th>
-                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; text-align: center; font-weight: 600;">경비</th>
-                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; text-align: center; font-weight: 600;">합계</th>
-                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">삭제</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #334155; min-width: 160px; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; font-weight: 600;">품명</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #334155; min-width: 120px; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; font-weight: 600;">싸이즈</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; font-weight: 600;">단위</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #334155; min-width: 80px; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; font-weight: 600;">수량</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #334155; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 600;">재료비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #334155; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 600;">노무비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #334155; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 600;">경비</th>
+                            <th colspan="2" style="padding: 12px 8px; border: 1px solid #334155; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 600;">합계</th>
+                            <th rowspan="2" style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; font-weight: 600;">삭제</th>
                         </tr>
                         <tr>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #ecfdf5; color: #065f46; text-align: center; font-weight: 500;">단가</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #ecfdf5; color: #065f46; text-align: center; font-weight: 500;">금액</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #eff6ff; color: #1e40af; text-align: center; font-weight: 500;">단가</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #eff6ff; color: #1e40af; text-align: center; font-weight: 500;">금액</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #fefbeb; color: #92400e; text-align: center; font-weight: 500;">단가</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #fefbeb; color: #92400e; text-align: center; font-weight: 500;">금액</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 80px; background: #fef2f2; color: #b91c1c; text-align: center; font-weight: 500;">단가</th>
-                            <th style="padding: 8px; border: 1px solid #e2e8f0; min-width: 90px; background: #fef2f2; color: #b91c1c; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 80px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 90px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 80px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 90px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 80px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 90px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">금액</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 80px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">단가</th>
+                            <th style="padding: 8px; border: 1px solid #334155; min-width: 90px; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; text-align: center; font-weight: 500;">금액</th>
                         </tr>
                     </thead>
                     <tbody id="componentsTable">
@@ -1339,13 +1346,13 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="3" step="0.1" oninput="calculateGrandTotal()" placeholder="3.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-material-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 자재운반비 및 양중비 -->
@@ -1355,13 +1362,13 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="1.5" step="0.1" oninput="calculateGrandTotal()" placeholder="1.5" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-material-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 자재비 이윤 -->
@@ -1371,13 +1378,13 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="15" step="0.1" oninput="calculateGrandTotal()" placeholder="15.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-material-price">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="fixed-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-material-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 공구손료 및 기계경비 -->
@@ -1387,45 +1394,45 @@ function createDetailModalHTML(itemSummary) {
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: center;">%</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151;"><input type="number" class="fixed-quantity" value="2" step="0.1" oninput="calculateGrandTotal()" placeholder="2.0" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right; background: white;"></td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f3f4f6; color: #374151; text-align: right;" class="fixed-expense-price">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="fixed-expense-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="fixed-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="fixed-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-expense-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="fixed-total-amount">0원</td>
                             <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f3f4f6;"></td>
                         </tr>
                         <!-- 단수 정리 -->
                         <tr class="fixed-row rounding-row">
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; font-weight: 600;">단수 정리</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: center;">원미만</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: center;">절사</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e;"><select class="rounding-unit" onchange="calculateGrandTotal()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: white;">
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; font-weight: 600;">단수 정리</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; text-align: center;">원미만</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; text-align: center;">절사</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155;"><select class="rounding-unit" onchange="calculateGrandTotal()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: white;">
                                 <option value="1">원</option>
                                 <option value="10">10원</option>
                                 <option value="100" selected>100원</option>
                                 <option value="1000">1000원</option>
                             </select></td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="rounding-material-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f0f9ff; color: #1e40af; font-weight: 600;" class="rounding-labor-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #fef3c7; color: #92400e; text-align: right;">0</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="rounding-expense-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="rounding-total-price">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #dc2626; font-weight: 600;" class="rounding-total-amount">0원</td>
-                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #fef3c7;"></td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; text-align: right;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="rounding-material-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; text-align: right;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="rounding-labor-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #334155; text-align: right;">0</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="rounding-expense-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="rounding-total-price">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="rounding-total-amount">0원</td>
+                            <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; background: #f8fafc;"></td>
                         </tr>
                     </tbody>
                     <tfoot style="background: #f9fafb; position: sticky; bottom: 0;">
                         <tr class="summary-row">
-                            <td colspan="4" style="padding: 12px 8px; border: 1px solid #e2e8f0; font-weight: 700; text-align: center; background: #6366f1; color: white;"><strong>총 합계</strong></td>
-                            <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #ecfdf5; color: #065f46;">0원</td>
-                            <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #eff6ff; color: #1e40af;">0원</td>
-                            <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: 600; background: #fefbeb; color: #92400e;">0원</td>
-                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; font-weight: bold; background: #fef2f2; color: #b91c1c;">0원</td>
-                            <td style="border: 1px solid #e2e8f0; background: #6366f1;"></td>
+                            <td colspan="4" style="padding: 12px 8px; border: 1px solid #334155; font-weight: 700; text-align: center; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;"><strong>총 합계</strong></td>
+                            <td colspan="2" id="totalMaterial" style="padding: 8px; border: 1px solid #334155; text-align: right; font-weight: 600; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">0원</td>
+                            <td colspan="2" id="totalLabor" style="padding: 8px; border: 1px solid #334155; text-align: right; font-weight: 600; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">0원</td>
+                            <td colspan="2" id="totalExpense" style="padding: 8px; border: 1px solid #334155; text-align: right; font-weight: 600; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">0원</td>
+                            <td colspan="2" id="grandTotal" style="padding: 8px; border: 1px solid #334155; text-align: right; font-weight: bold; background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">0원</td>
+                            <td style="border: 1px solid #334155; background: linear-gradient(135deg, #475569 0%, #334155 100%);"></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -1501,21 +1508,21 @@ function addComponentRow(componentData = null) {
                 ${data.materialPrice ? data.materialPrice.toLocaleString() + '원' : '0원'}
             </span>
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f0fdf4; color: #166534; font-weight: 600;" class="material-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="material-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right;">
             <span class="component-labor-price" style="font-size: 12px; color: #374151;">
                 ${data.laborPrice ? data.laborPrice.toLocaleString() + '원' : '0원'}
             </span>
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;" class="labor-amount">${data.laborAmount ? data.laborAmount.toLocaleString() + '원' : '0원'}</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="labor-amount">${data.laborAmount ? data.laborAmount.toLocaleString() + '원' : '0원'}</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0;">
             <input type="number" class="expense-price" value="${data.expensePrice}" min="0"
                    oninput="calculateRowTotal(this)"
                    style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; text-align: right;">
         </td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fffbeb; color: #a16207; font-weight: 600;" class="expense-amount">0원</td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f4f4f5; color: #52525b; font-weight: 600;" class="total-price">0원</td>
-        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: bold; font-size: 12px;" class="total-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="expense-amount">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: 600;" class="total-price">0원</td>
+        <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: right; background: #f8fafc; color: #334155; font-weight: bold; font-size: 12px;" class="total-amount">0원</td>
         <td style="padding: 6px; border: 1px solid #e2e8f0; text-align: center;">
             <button onclick="removeComponentRow(this)" class="btn btn-sm" 
                     style="padding: 2px 6px; background: #dc2626; color: white; border: none; border-radius: 3px; font-size: 11px;">
@@ -2189,21 +2196,21 @@ async function renderUnitPriceItemsList() {
     const tableHTML = `
         <div class="unit-price-table-wrapper" style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px; background: white;">
-                <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; position: sticky; top: 0; z-index: 10;">
+                <thead style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; position: sticky; top: 0; z-index: 10;">
                     <tr>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">간격</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">높이</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">SIZE</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 70px; text-align: center; font-weight: 600;">부위</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">공종1</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">공종2</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">재료비</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">노무비</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 90px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">경비</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 100px; text-align: center; font-weight: 600; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">총계</th>
-                        <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 140px; text-align: center; font-weight: 600;">작업</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">간격</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">높이</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">SIZE</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">부위</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; font-weight: 600;">공종1</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; font-weight: 600;">공종2</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; font-weight: 600;">단위</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 90px; text-align: center; font-weight: 600;">재료비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 90px; text-align: center; font-weight: 600;">노무비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 90px; text-align: center; font-weight: 600;">경비</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 100px; text-align: center; font-weight: 600;">총계</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 140px; text-align: center; font-weight: 600;">작업</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2220,13 +2227,13 @@ async function renderUnitPriceItemsList() {
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType1 || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType2 || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.unit || ''}</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #ecfdf5; color: #065f46; font-weight: 600;">${Math.round(costs.material).toLocaleString()}원</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #eff6ff; color: #1e40af; font-weight: 600;">${Math.round(costs.labor).toLocaleString()}원</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fefbeb; color: #92400e; font-weight: 600;">${Math.round(costs.expense).toLocaleString()}원</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; background: #fef2f2; color: #b91c1c; font-weight: 600;">${Math.round(costs.total).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: 600;">${Math.round(costs.material).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: 600;">${Math.round(costs.labor).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: 600;">${Math.round(costs.expense).toLocaleString()}원</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: right; color: #334155; font-weight: 600;">${Math.round(costs.total).toLocaleString()}원</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">
-                                    <button onclick="editUnitPriceItem('${item.id}')" class="btn btn-sm" 
-                                            style="padding: 4px 8px; background: #3b82f6; color: white; border: none; border-radius: 4px; margin-right: 4px; font-size: 11px;">
+                                    <button onclick="editUnitPriceItem('${item.id}')" class="btn btn-sm"
+                                            style="padding: 4px 8px; background: #475569; color: white; border: none; border-radius: 4px; margin-right: 4px; font-size: 11px;">
                                         <i class="fas fa-edit"></i> 수정
                                     </button>
                                     <button onclick="deleteUnitPriceItem('${item.id}')" class="btn btn-sm"
@@ -2916,7 +2923,7 @@ function createMaterialSelectModal() {
                 z-index: 100001 !important; position: relative !important;
             ">
                 <!-- 헤더 -->
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
                     <h3 style="margin: 0; font-size: 18px; font-weight: 600;">
                         <i class="fas fa-search" style="margin-right: 8px;"></i>
                         자재 선택
@@ -2935,7 +2942,7 @@ function createMaterialSelectModal() {
                         <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px;">🔍 품명별 필터</label>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                             <button class="material-filter-chip active" data-filter="all" onclick="setMaterialFilter('all')" style="
-                                padding: 6px 12px; border: 2px solid #3b82f6; background: #3b82f6; color: white; 
+                                padding: 6px 12px; border: 2px solid #475569; background: #475569; color: white;
                                 border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.2s;
                                 font-weight: 500;
                             ">전체</button>
@@ -2982,8 +2989,8 @@ function createMaterialSelectModal() {
                             ">
                         </div>
                         <button onclick="clearMaterialFilters()" style="
-                            margin-left: 10px; margin-top: 20px; padding: 8px 12px; 
-                            background: #ef4444; color: white; border: none; border-radius: 6px; 
+                            margin-left: 10px; margin-top: 20px; padding: 8px 12px;
+                            background: #475569; color: white; border: none; border-radius: 6px;
                             font-size: 12px; cursor: pointer;
                         " title="필터 초기화">초기화</button>
                     </div>
@@ -2994,13 +3001,6 @@ function createMaterialSelectModal() {
                     자재 데이터를 로드하는 중...
                 </div>
                 
-                <!-- 하단 버튼 -->
-                <div style="padding: 20px; border-top: 1px solid #e2e8f0; text-align: right;">
-                    <button onclick="closeMaterialSelectModal()" style="
-                        padding: 10px 20px; background: #6b7280; color: white; border: none; 
-                        border-radius: 6px; cursor: pointer; margin-right: 10px;
-                    ">취소</button>
-                </div>
             </div>
         </div>
     `;
@@ -3296,15 +3296,15 @@ function renderMaterialsList(materials) {
     const tableHTML = `
         <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 6px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-                <thead style="background: #f9fafb; position: sticky; top: 0;">
+                <thead style="background: linear-gradient(135deg, #475569 0%, #334155 100%); position: sticky; top: 0;">
                     <tr>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: left; font-weight: 600;">품명</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">규격</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">싸이즈</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">단위</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">재료비 단가</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600;">노무비 단가</th>
-                        <th style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: 600;">선택</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">품명</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">규격</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">싸이즈</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">단위</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">재료비 단가</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">노무비 단가</th>
+                        <th style="padding: 10px 8px; border-bottom: 1px solid #334155; text-align: center; font-weight: 600; color: white;">선택</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -3321,13 +3321,13 @@ function renderMaterialsList(materials) {
                             <td style="padding: 8px; border-bottom: 1px solid #f3f4f6; text-align: center;">
                                 <div style="display: flex; gap: 4px; justify-content: center;">
                                     <button onclick="selectUnitPriceMaterial(${index})" style="
-                                        padding: 4px 8px; background: #10b981; color: white; border: none; 
+                                        padding: 4px 8px; background: #475569; color: white; border: none;
                                         border-radius: 4px; cursor: pointer; font-size: 11px;
                                     " title="이 자재 선택">
                                         <i class="fas fa-check"></i> 선택
                                     </button>
                                     <button onclick="editMaterialFromSelector(${index})" style="
-                                        padding: 4px 8px; background: #f59e0b; color: white; border: none; 
+                                        padding: 4px 8px; background: #64748b; color: white; border: none;
                                         border-radius: 4px; cursor: pointer; font-size: 11px;
                                     " title="이 자재 수정">
                                         <i class="fas fa-edit"></i> 수정
@@ -3419,9 +3419,9 @@ function setMaterialFilter(filterType) {
     // 선택된 필터 칩 활성화
     const selectedChip = document.querySelector(`[data-filter="${filterType}"]`);
     if (selectedChip) {
-        selectedChip.style.background = '#3b82f6';
+        selectedChip.style.background = '#475569';
         selectedChip.style.color = 'white';
-        selectedChip.style.borderColor = '#3b82f6';
+        selectedChip.style.borderColor = '#475569';
         selectedChip.style.fontWeight = '500';
         selectedChip.classList.add('active');
     }
@@ -4510,7 +4510,7 @@ function createBulkQuantityCalculatorModal() {
                 max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
             ">
                 <!-- 헤더 -->
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: linear-gradient(135deg, #475569 0%, #334155 100%); padding: 20px; display: flex; justify-content: space-between; align-items: center;">
                     <h3 style="margin: 0; color: white; font-size: 20px; font-weight: 600;">
                         <i class="fas fa-calculator" style="margin-right: 8px;"></i>
                         6개 자재 소요량 일괄 계산기 (5개 기본 + 석고피스)
@@ -4528,8 +4528,8 @@ function createBulkQuantityCalculatorModal() {
                     <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px;">
                         
                         <!-- 1. 스터드 -->
-                        <div style="background: #fff; border: 2px solid #dc2626; border-radius: 8px; padding: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #dc2626; font-weight: 600; text-align: center; font-size: 14px;">
+                        <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #334155; font-weight: 600; text-align: center; font-size: 14px;">
                                 🔧 스터드
                             </h5>
                             <div style="margin-bottom: 8px;">
@@ -4543,22 +4543,22 @@ function createBulkQuantityCalculatorModal() {
                             </div>
                             <div style="margin-bottom: 8px;">
                                 <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
-                                <input type="number" id="studPremium" value="1.05" min="1" max="2" step="0.01" 
+                                <input type="number" id="studPremium" value="1.05" min="1" max="2" step="0.01"
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
-                            <div style="background: #fef2f2; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
                                 <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="studFormula" style="font-size: 11px; font-family: monospace; color: #dc2626;">-</div>
+                                <div id="studFormula" style="font-size: 11px; font-family: monospace; color: #334155;">-</div>
                             </div>
-                            <div style="text-align: center; padding: 6px; background: #dc2626; border-radius: 4px;">
+                            <div style="text-align: center; padding: 6px; background: #475569; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="studResult">0</strong>
-                                <div style="font-size: 9px; color: #fecaca;">개</div>
+                                <div style="font-size: 9px; color: #e2e8f0;">개</div>
                             </div>
                         </div>
 
                         <!-- 2. 런너 -->
-                        <div style="background: #fff; border: 2px solid #ea580c; border-radius: 8px; padding: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #ea580c; font-weight: 600; text-align: center; font-size: 14px;">
+                        <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #334155; font-weight: 600; text-align: center; font-size: 14px;">
                                 🔗 런너
                             </h5>
                             <div style="margin-bottom: 8px;">
@@ -4570,22 +4570,22 @@ function createBulkQuantityCalculatorModal() {
                             </div>
                             <div style="margin-bottom: 8px;">
                                 <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
-                                <input type="number" id="runnerPremium" value="0.34" min="0.1" max="2" step="0.01" 
+                                <input type="number" id="runnerPremium" value="0.34" min="0.1" max="2" step="0.01"
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
-                            <div style="background: #fff7ed; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
                                 <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="runnerFormula" style="font-size: 11px; font-family: monospace; color: #ea580c;">-</div>
+                                <div id="runnerFormula" style="font-size: 11px; font-family: monospace; color: #334155;">-</div>
                             </div>
-                            <div style="text-align: center; padding: 6px; background: #ea580c; border-radius: 4px;">
+                            <div style="text-align: center; padding: 6px; background: #475569; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="runnerResult">0</strong>
-                                <div style="font-size: 9px; color: #fed7aa;">개</div>
+                                <div style="font-size: 9px; color: #e2e8f0;">개</div>
                             </div>
                         </div>
 
                         <!-- 3. 피스 -->
-                        <div style="background: #fff; border: 2px solid #ca8a04; border-radius: 8px; padding: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #ca8a04; font-weight: 600; text-align: center; font-size: 14px;">
+                        <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #334155; font-weight: 600; text-align: center; font-size: 14px;">
                                 📌 피스
                             </h5>
                             <div style="margin-bottom: 8px;">
@@ -4598,22 +4598,22 @@ function createBulkQuantityCalculatorModal() {
                             </div>
                             <div style="margin-bottom: 8px;">
                                 <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">기본값</label>
-                                <input type="number" id="pieceBase" value="12" min="1" step="1" 
+                                <input type="number" id="pieceBase" value="12" min="1" step="1"
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
-                            <div style="background: #fffbeb; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
                                 <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="pieceFormula" style="font-size: 11px; font-family: monospace; color: #ca8a04;">-</div>
+                                <div id="pieceFormula" style="font-size: 11px; font-family: monospace; color: #334155;">-</div>
                             </div>
-                            <div style="text-align: center; padding: 6px; background: #ca8a04; border-radius: 4px;">
+                            <div style="text-align: center; padding: 6px; background: #475569; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="pieceResult">0</strong>
-                                <div style="font-size: 9px; color: #fef3c7;">개</div>
+                                <div style="font-size: 9px; color: #e2e8f0;">개</div>
                             </div>
                         </div>
 
                         <!-- 4. 타정총알 -->
-                        <div style="background: #fff; border: 2px solid #65a30d; border-radius: 8px; padding: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #65a30d; font-weight: 600; text-align: center; font-size: 14px;">
+                        <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #334155; font-weight: 600; text-align: center; font-size: 14px;">
                                 🔨🔩 타정총알
                             </h5>
                             <div style="margin-bottom: 8px;">
@@ -4626,22 +4626,22 @@ function createBulkQuantityCalculatorModal() {
                             </div>
                             <div style="margin-bottom: 8px;">
                                 <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
-                                <input type="number" id="nailBulletPremium" value="1.00" min="1" max="2" step="0.01" 
+                                <input type="number" id="nailBulletPremium" value="1.00" min="1" max="2" step="0.01"
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
-                            <div style="background: #f7fee7; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
                                 <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="nailBulletFormula" style="font-size: 11px; font-family: monospace; color: #65a30d;">-</div>
+                                <div id="nailBulletFormula" style="font-size: 11px; font-family: monospace; color: #334155;">-</div>
                             </div>
-                            <div style="text-align: center; padding: 6px; background: #65a30d; border-radius: 4px;">
+                            <div style="text-align: center; padding: 6px; background: #475569; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="nailBulletResult">0</strong>
-                                <div style="font-size: 9px; color: #dcfce7;">SET</div>
+                                <div style="font-size: 9px; color: #e2e8f0;">SET</div>
                             </div>
                         </div>
 
                         <!-- 5. 용접봉 -->
-                        <div style="background: #fff; border: 2px solid #7c3aed; border-radius: 8px; padding: 15px;">
-                            <h5 style="margin: 0 0 12px 0; color: #7c3aed; font-weight: 600; text-align: center; font-size: 14px;">
+                        <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 15px;">
+                            <h5 style="margin: 0 0 12px 0; color: #334155; font-weight: 600; text-align: center; font-size: 14px;">
                                 ⚡ 용접봉
                             </h5>
                             <div style="margin-bottom: 8px;">
@@ -4654,55 +4654,55 @@ function createBulkQuantityCalculatorModal() {
                             </div>
                             <div style="margin-bottom: 8px;">
                                 <label style="display: block; margin-bottom: 3px; font-size: 11px; color: #374151; font-weight: 500;">할증률</label>
-                                <input type="number" id="weldingPremium" value="1.00" min="1" max="2" step="0.01" 
+                                <input type="number" id="weldingPremium" value="1.00" min="1" max="2" step="0.01"
                                        oninput="calculateAllQuantities()" style="width: 100%; padding: 4px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11px;">
                             </div>
-                            <div style="background: #faf5ff; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
+                            <div style="background: #f1f5f9; padding: 6px; border-radius: 4px; margin-bottom: 8px;">
                                 <div style="font-size: 12px; color: #374151; margin-bottom: 2px;">계산식:</div>
-                                <div id="weldingFormula" style="font-size: 11px; font-family: monospace; color: #7c3aed;">-</div>
+                                <div id="weldingFormula" style="font-size: 11px; font-family: monospace; color: #334155;">-</div>
                             </div>
-                            <div style="text-align: center; padding: 6px; background: #7c3aed; border-radius: 4px;">
+                            <div style="text-align: center; padding: 6px; background: #475569; border-radius: 4px;">
                                 <strong style="color: white; font-size: 14px;" id="weldingResult">0</strong>
-                                <div style="font-size: 9px; color: #ede9fe;">KG</div>
+                                <div style="font-size: 9px; color: #e2e8f0;">KG</div>
                             </div>
                         </div>
 
                     </div>
                     
                     <!-- 6. 석고피스 (하단 전체 너비) -->
-                    <div style="background: #fff; border: 2px solid #be185d; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                        <h5 style="margin: 0 0 20px 0; color: #be185d; font-weight: 600; text-align: center; font-size: 16px;">
+                    <div style="background: #fff; border: 2px solid #475569; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                        <h5 style="margin: 0 0 20px 0; color: #334155; font-weight: 600; text-align: center; font-size: 16px;">
                             🧱 석고피스 계산기
                         </h5>
-                        
+
                         <!-- 석고피스 계산 영역 -->
                         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
                             <!-- 입력 섹션 -->
                             <div>
-                                <h6 style="margin: 0 0 15px 0; color: #be185d; font-size: 14px; font-weight: 600;">📝 입력값</h6>
+                                <h6 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; font-weight: 600;">📝 입력값</h6>
                                 <div style="display: grid; gap: 12px;">
                                     <div>
                                         <label style="display: block; margin-bottom: 6px; font-size: 12px; color: #374151; font-weight: 500;">가로 (mm)</label>
-                                        <input type="number" id="gypsumWidth" value="900" min="1" step="1" 
+                                        <input type="number" id="gypsumWidth" value="900" min="1" step="1"
                                                oninput="calculateGypsumPiece()" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
                                     </div>
                                     <div>
                                         <label style="display: block; margin-bottom: 6px; font-size: 12px; color: #374151; font-weight: 500;">세로 (mm)</label>
-                                        <input type="number" id="gypsumHeight" value="1800" min="1" step="1" 
+                                        <input type="number" id="gypsumHeight" value="1800" min="1" step="1"
                                                oninput="calculateGypsumPiece()" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px;">
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <!-- 계산 결과 섹션 -->
                             <div>
-                                <h6 style="margin: 0 0 15px 0; color: #be185d; font-size: 14px; font-weight: 600;">📊 계산 결과</h6>
-                                
+                                <h6 style="margin: 0 0 15px 0; color: #334155; font-size: 14px; font-weight: 600;">📊 계산 결과</h6>
+
                                 <!-- 계산 테이블 -->
-                                <div style="background: #fdf2f8; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
+                                <div style="background: #f1f5f9; border-radius: 8px; overflow: hidden; margin-bottom: 15px;">
                                     <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
                                         <thead>
-                                            <tr style="background: #be185d; color: white;">
+                                            <tr style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white;">
                                                 <th style="padding: 8px; text-align: center; font-weight: 600;">사이즈</th>
                                                 <th style="padding: 8px; text-align: center; font-weight: 600;">가로</th>
                                                 <th style="padding: 8px; text-align: center; font-weight: 600;">세로</th>
@@ -4717,20 +4717,20 @@ function createBulkQuantityCalculatorModal() {
                                                 <td style="padding: 8px; text-align: center; font-weight: 500;" id="gypsumSize">-</td>
                                                 <td style="padding: 8px; text-align: center;" id="gypsumWidthDisplay">-</td>
                                                 <td style="padding: 8px; text-align: center;" id="gypsumHeightDisplay">-</td>
-                                                <td style="padding: 8px; text-align: center; color: #059669;" id="gypsumWidthCount">-</td>
-                                                <td style="padding: 8px; text-align: center; color: #059669;" id="gypsumHeightCount">-</td>
-                                                <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: 600;" id="gypsumTotal">-</td>
-                                                <td style="padding: 8px; text-align: center; color: #be185d; font-weight: 600;" id="gypsumM2Count">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #334155;" id="gypsumWidthCount">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #334155;" id="gypsumHeightCount">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #334155; font-weight: 600;" id="gypsumTotal">-</td>
+                                                <td style="padding: 8px; text-align: center; color: #334155; font-weight: 600;" id="gypsumM2Count">-</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- 최종 결과 -->
-                                <div style="background: #be185d; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <div style="color: #fce7f3; font-size: 12px; margin-bottom: 5px;">최종 석고피스 소요량</div>
+                                <div style="background: linear-gradient(135deg, #475569 0%, #334155 100%); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="color: #e2e8f0; font-size: 12px; margin-bottom: 5px;">최종 석고피스 소요량</div>
                                     <div style="color: white; font-size: 18px; font-weight: 700;" id="gypsumPieceResult">0</div>
-                                    <div style="color: #fce7f3; font-size: 11px;">개</div>
+                                    <div style="color: #e2e8f0; font-size: 11px;">개</div>
                                 </div>
                             </div>
                         </div>
@@ -4740,11 +4740,11 @@ function createBulkQuantityCalculatorModal() {
                 <!-- 하단 버튼 -->
                 <div style="padding: 20px; border-top: 1px solid #e2e8f0; background: #f8fafc; text-align: right; display: flex; gap: 12px; justify-content: flex-end;">
                     <button onclick="closeBulkQuantityCalculatorModal()" style="
-                        padding: 12px 24px; background: #6b7280; color: white; border: none; 
+                        padding: 12px 24px; background: #64748b; color: white; border: none;
                         border-radius: 6px; cursor: pointer; font-weight: 500;
                     ">취소</button>
                     <button onclick="applyBulkCalculatedQuantities()" style="
-                        padding: 12px 24px; background: #10b981; color: white; border: none; 
+                        padding: 12px 24px; background: #475569; color: white; border: none;
                         border-radius: 6px; cursor: pointer; font-weight: 600;
                     ">일괄 적용</button>
                 </div>
