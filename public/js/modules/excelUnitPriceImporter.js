@@ -211,7 +211,7 @@ const ExcelUnitPriceImporter = (function () {
               const unit = columnMap.unit !== undefined
                 ? String(row[columnMap.unit] || '').trim() || 'M2' : 'M2';
               const thickness = columnMap.thickness !== undefined
-                ? parseNumericValue(row[columnMap.thickness]) : 0;
+                ? parseNumericValue(row[columnMap.thickness], false) : 0;
               const quantity = columnMap.quantity !== undefined
                 ? (parseNumericValue(row[columnMap.quantity]) || 1) : 1;
               const totalPrice = columnMap.totalPrice !== undefined
@@ -309,12 +309,13 @@ const ExcelUnitPriceImporter = (function () {
    * @param {*} value
    * @returns {number}
    */
-  function parseNumericValue(value) {
+  function parseNumericValue(value, round = true) {
     if (value === null || value === undefined || value === '') return 0;
-    if (typeof value === 'number') return Math.round(value);
+    if (typeof value === 'number') return round ? Math.round(value) : value;
     const cleaned = String(value).replace(/[,\s]/g, '');
     const num = Number(cleaned);
-    return isNaN(num) ? 0 : Math.round(num);
+    if (isNaN(num)) return 0;
+    return round ? Math.round(num) : num;
   }
 
   // ========================================

@@ -13,6 +13,7 @@ if (!window.revitWallTypes) {
 }
 
 let revitWallTypeCounter = 0;
+let _unitPriceCacheMap = null; // 일위대가 동기 조회용 캐시
 let selectedRevitWalls = new Set();
 let selectedMaterialData = null;
 
@@ -672,9 +673,11 @@ function buildTableHeader() {
 }
 
 // 벽체 테이블 업데이트 함수
-function updateRevitWallTable() {
+async function updateRevitWallTable() {
     const tableBody = document.getElementById('revit-wall-table-body');
     if (!tableBody) return;
+
+    await loadUnitPriceCache();
     
     if (!window.revitWallTypes || window.revitWallTypes.length === 0) {
         tableBody.innerHTML = `
@@ -694,6 +697,9 @@ function updateRevitWallTable() {
     // 벽체 데이터를 테이블 행으로 변환
     const tableRows = sorted.map(wall => createRevitWallTableRow(wall)).join('');
     tableBody.innerHTML = tableRows;
+
+    // 모달 오픈 시 모든 벽체 두께 일괄 재계산 (자재 변경 반영)
+    await recalcAllWallThicknesses();
 }
 
 // 벽체 테이블 행 생성 함수 (클릭 가능한 자재 셀 포함)
@@ -710,7 +716,8 @@ function createRevitWallTableRow(wall) {
     for (const col of orderedColumns) {
         if (col.type === 'fixed') {
             // 기본 12개 레이어
-            const value = wall[col.field] || '';
+            const rawValue = wall[col.field] || '';
+            const value = rawValue ? getUnitPriceDisplayName(rawValue) : '';
             layerCells += `
                 <td style="${tdMat}" onclick="selectMaterial(${wall.id}, '${col.field}')"
                     oncontextmenu="clearMaterial(event, ${wall.id}, '${col.field}')">
@@ -748,23 +755,39 @@ function createRevitWallTableRow(wall) {
 }
 
 /**
- * 일위대가 ID로 표시명 가져오기
+ * 일위대가 캐시 로드 (테이블 렌더링 전 호출)
+ */
+async function loadUnitPriceCache() {
+    if (!window.unitPriceDB) return;
+    try {
+        const all = await window.unitPriceDB.getAllUnitPrices();
+        _unitPriceCacheMap = {};
+        for (const up of all) {
+            _unitPriceCacheMap[up.id] = up;
+        }
+    } catch (e) {
+        console.warn('일위대가 캐시 로드 실패:', e);
+        _unitPriceCacheMap = {};
+    }
+}
+
+/**
+ * 일위대가 ID로 표시명 가져오기 (동기, 캐시 사용)
  */
 function getUnitPriceDisplayName(unitPriceId) {
     if (!unitPriceId) return '';
 
-    // unitPrice_ 접두사 처리
     const id = unitPriceId.startsWith('unitPrice_') ? unitPriceId.substring(10) : unitPriceId;
 
-    // unitPriceDB에서 조회
-    if (window.unitPriceDB && window.unitPriceDB instanceof UnitPriceDB) {
-        const unitPrice = window.unitPriceDB.getItemByIdSync(id);
-        if (unitPrice) {
-            return `${unitPrice.item || ''} ${unitPrice.spec || ''}`.trim();
-        }
+    if (_unitPriceCacheMap && _unitPriceCacheMap[id]) {
+        const up = _unitPriceCacheMap[id];
+        const basic = up.basic || up;
+        const name = basic.itemName || basic.item || '';
+        const sizeOrSpec = basic.size || basic.spec || '';
+        return `${name} ${sizeOrSpec}`.trim();
     }
 
-    return unitPriceId; // 찾지 못하면 ID 그대로 반환
+    return unitPriceId;
 }
 
 // =============================================================================
@@ -1718,6 +1741,44 @@ async function recalcWallThickness(wallId) {
     console.log(`📏 벽체 두께 자동계산: ${wall.wallType} -> ${wall.thickness}mm`);
 }
 
+// 모든 벽체 두께 일괄 재계산 (자재 데이터 변경 반영)
+async function recalcAllWallThicknesses() {
+    if (!window.revitWallTypes || window.revitWallTypes.length === 0) return;
+
+    const layerFields = ['layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'];
+
+    let changed = false;
+    for (const wall of window.revitWallTypes) {
+        let total = 0;
+        for (const field of layerFields) {
+            if (wall[field]) {
+                const t = await extractThicknessFromMaterial(wall[field]);
+                if (t !== null) total += t;
+            }
+        }
+        if (Array.isArray(wall.extraLayers)) {
+            for (const extra of wall.extraLayers) {
+                if (extra.unitPriceId) {
+                    const t = await extractThicknessFromMaterial(extra.unitPriceId);
+                    if (t !== null) total += t;
+                }
+            }
+        }
+        const newThickness = Math.round(total * 10) / 10;
+        if (wall.thickness !== newThickness) {
+            wall.thickness = newThickness;
+            changed = true;
+            const cell = document.getElementById(`thickness-${wall.id}`);
+            if (cell) cell.textContent = wall.thickness || '';
+        }
+    }
+    if (changed) {
+        saveRevitWallTypes();
+        console.log('📏 벽체 두께 일괄 재계산 완료');
+    }
+}
+
 // =============================================================================
 // 검색 및 필터링
 // =============================================================================
@@ -2479,8 +2540,8 @@ function createLayerPreviewModalHTML(wallTypesData) {
 
     wallTypesData.forEach((data, index) => {
         const hasErrors = data.hasErrors;
-        const borderColor = hasErrors ? '#ef4444' : '#10b981';
-        const bgColor = hasErrors ? '#fef2f2' : '#f0fdf4';
+        const borderColor = hasErrors ? '#ef4444' : '#64748b';
+        const bgColor = hasErrors ? '#fef2f2' : '#f8fafc';
 
         html += `
             <div class="wall-type-preview" style="margin-bottom: 20px; padding: 20px; background: ${bgColor}; border-radius: 8px; border: 2px solid ${borderColor};">
@@ -2504,7 +2565,7 @@ function createLayerPreviewModalHTML(wallTypesData) {
 
                 <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden;">
                     <thead>
-                        <tr style="background: #1f2937; color: white;">
+                        <tr style="background: linear-gradient(135deg, #475569, #334155); color: white;">
                             <th style="padding: 10px; text-align: left; font-size: 12px;">위치</th>
                             <th style="padding: 10px; text-align: left; font-size: 12px;">자재명</th>
                             <th style="padding: 10px; text-align: left; font-size: 12px;">규격</th>
@@ -2573,7 +2634,6 @@ async function showWallTypePreview() {
             text: '<i class="fas fa-times"></i> 취소',
             className: 'btn btn-secondary',
             onClick: (modal) => {
-                console.log('🔴 취소 버튼 클릭됨');
                 closeSubModal(modal);
             }
         }

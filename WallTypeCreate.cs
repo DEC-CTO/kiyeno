@@ -257,7 +257,7 @@ namespace QTO
                 CompoundStructure compoundStructure = CompoundStructure.CreateSimpleCompoundStructure(layers);
 
                 // 구조 코어 설정
-                SetStructuralCore(compoundStructure, layers.Count);
+                //SetStructuralCore(compoundStructure, layers.Count);
 
                 wallType.SetCompoundStructure(compoundStructure);
             }
