@@ -221,6 +221,18 @@ window.calculateWallCostsExcel = async function () {
 
     console.log(`📊 선택된 벽체: ${selectedWalls.length}개`);
 
+    // 1.5. unitPriceMap 캐시 구축 (결과 표시용)
+    try {
+      const allUnitPrices = await ExcelUnitPriceImporter.getAllImportedUnitPrices();
+      const unitPriceMap = {};
+      allUnitPrices.forEach(up => { unitPriceMap[up.id] = up; });
+      window._excelUnitPriceMapCache = unitPriceMap;
+      console.log(`📦 unitPriceMap 캐시 구축: ${allUnitPrices.length}개`);
+    } catch (e) {
+      console.warn('⚠️ unitPriceMap 캐시 구축 실패:', e);
+      window._excelUnitPriceMapCache = {};
+    }
+
     // 2. 로딩 표시
     showCalculationProgress(selectedWalls.length);
 
@@ -1024,10 +1036,31 @@ function updateCalculationSummary() {
  * 계산 결과 렌더링
  */
 async function renderCalculationResults() {
-  renderIndividualResults();
-  renderSummaryResults();
-  renderComparisonResults();
-  await renderMaterialSummaryTable();
+  console.log('🎨 renderCalculationResults 시작, calculationResults:', calculationResults.length);
+  try {
+    renderIndividualResults();
+    console.log('  ✅ renderIndividualResults 완료');
+  } catch (e) {
+    console.error('  ❌ renderIndividualResults 실패:', e);
+  }
+  try {
+    renderSummaryResults();
+    console.log('  ✅ renderSummaryResults 완료');
+  } catch (e) {
+    console.error('  ❌ renderSummaryResults 실패:', e);
+  }
+  try {
+    renderComparisonResults();
+    console.log('  ✅ renderComparisonResults 완료');
+  } catch (e) {
+    console.error('  ❌ renderComparisonResults 실패:', e);
+  }
+  try {
+    await renderMaterialSummaryTable();
+    console.log('  ✅ renderMaterialSummaryTable 완료');
+  } catch (e) {
+    console.error('  ❌ renderMaterialSummaryTable 실패:', e);
+  }
 }
 
 /**
@@ -1055,12 +1088,20 @@ function createWallResultCard(result) {
   const card = document.createElement('div');
   card.className = 'wall-result-card';
 
-  const layerSections = createLayerSections(result.layerPricing, result.area);
+  // 엑셀 방식과 일위대가 방식 분기
+  const isExcel = result.source === 'excel';
+  const layerSections = isExcel && result.wallType
+    ? createExcelLayerSummary(result.wallType, result.area)
+    : createLayerSections(result.layerPricing, result.area);
+
+  const sourceBadge = isExcel
+    ? ' <span style="display:inline-block; font-size:9px; padding:1px 4px; background:#dbeafe; color:#1e40af; border-radius:3px; font-weight:500; vertical-align:middle;">엑셀</span>'
+    : '';
 
   card.innerHTML = `
         <div class="wall-card-header">
             <div>
-                <div class="wall-card-title">${result.wallName}</div>
+                <div class="wall-card-title">${result.wallName}${sourceBadge}</div>
                 <div style="font-size: 12px; color: #6c757d; margin-top: 2px;">
                     ${result.roomName} | Level: ${result.level}
                 </div>
@@ -1068,12 +1109,12 @@ function createWallResultCard(result) {
             <div class="wall-card-area">${result.area.toFixed(2)} m²</div>
         </div>
 
-        <div class="layer-header">
+        ${isExcel ? '' : `<div class="layer-header">
             <div class="layer-header-item">자재명</div>
             <div class="layer-header-item">재료비</div>
             <div class="layer-header-item">노무비</div>
             <div class="layer-header-item">합계</div>
-        </div>
+        </div>`}
 
         <div class="wall-card-layers">
             ${layerSections}
@@ -1104,6 +1145,97 @@ function createWallResultCard(result) {
     `;
 
   return card;
+}
+
+/**
+ * 엑셀 방식 벽체타입의 레이어 요약 생성
+ * wallType의 12개 기본 레이어 + extraLayers를 순회하여 간소화된 행 표시
+ */
+function createExcelLayerSummary(wallType, area) {
+  const LAYER_FIELDS = [
+    { field: 'layer3_1', label: '좌-Layer3' },
+    { field: 'layer2_1', label: '좌-Layer2' },
+    { field: 'layer1_1', label: '좌-Layer1' },
+    { field: 'column1',  label: '구조체' },
+    { field: 'infill',   label: '단열재' },
+    { field: 'layer1_2', label: '우-Layer1' },
+    { field: 'layer2_2', label: '우-Layer2' },
+    { field: 'layer3_2', label: '우-Layer3' },
+    { field: 'column2',  label: '옵션1' },
+    { field: 'channel',  label: '옵션2' },
+    { field: 'runner',   label: '옵션3' },
+    { field: 'steelPlate', label: '옵션4' }
+  ];
+
+  // unitPriceMap 캐시 가져오기 (excelWallTypeManager에서 사용하는 것과 동일)
+  const unitPriceMap = window._excelUnitPriceMapCache || {};
+
+  const rows = [];
+
+  // 기본 12개 레이어
+  for (const col of LAYER_FIELDS) {
+    const id = wallType[col.field];
+    if (!id) continue;
+    const up = unitPriceMap[id];
+    if (!up) {
+      rows.push({ label: col.label, name: '(삭제됨)', matPrice: 0, labPrice: 0, total: 0 });
+      continue;
+    }
+    rows.push({
+      label: col.label,
+      name: `${up.item || ''} ${up.spec || ''}`.trim(),
+      matPrice: up.materialPrice || 0,
+      labPrice: up.laborPrice || 0,
+      total: (up.materialPrice || 0) + (up.laborPrice || 0)
+    });
+  }
+
+  // 동적 추가 레이어
+  if (Array.isArray(wallType.extraLayers)) {
+    for (const extra of wallType.extraLayers) {
+      const id = extra.unitPriceId;
+      if (!id) continue;
+      const up = unitPriceMap[id];
+      if (!up) {
+        rows.push({ label: extra.label || '추가', name: '(삭제됨)', matPrice: 0, labPrice: 0, total: 0 });
+        continue;
+      }
+      rows.push({
+        label: extra.label || '추가',
+        name: `${up.item || ''} ${up.spec || ''}`.trim(),
+        matPrice: up.materialPrice || 0,
+        labPrice: up.laborPrice || 0,
+        total: (up.materialPrice || 0) + (up.laborPrice || 0)
+      });
+    }
+  }
+
+  if (rows.length === 0) {
+    return '<div style="padding: 10px; color: #94a3b8; text-align: center;">레이어 정보 없음</div>';
+  }
+
+  const html = rows.map(r => `
+    <div class="layer-item" style="display: flex; justify-content: space-between; padding: 4px 8px; border-bottom: 1px solid #f1f5f9;">
+      <div style="flex: 2; font-size: 12px; color: #64748b;">${r.label}</div>
+      <div style="flex: 3; font-size: 12px;">${r.name}</div>
+      <div style="flex: 2; text-align: right; font-size: 12px;">₩${Math.round(r.matPrice).toLocaleString()}</div>
+      <div style="flex: 2; text-align: right; font-size: 12px;">₩${Math.round(r.labPrice).toLocaleString()}</div>
+      <div style="flex: 2; text-align: right; font-size: 12px; font-weight: 500;">₩${Math.round(r.total).toLocaleString()}</div>
+    </div>
+  `).join('');
+
+  return `
+    <div style="margin-bottom: 4px;">
+      <div style="display: flex; justify-content: space-between; padding: 4px 8px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8;">
+        <div style="flex: 2;">위치</div>
+        <div style="flex: 3;">자재명</div>
+        <div style="flex: 2; text-align: right;">자재비/M2</div>
+        <div style="flex: 2; text-align: right;">노무비/M2</div>
+        <div style="flex: 2; text-align: right;">합계/M2</div>
+      </div>
+      ${html}
+    </div>
+  `;
 }
 
 /**
@@ -1203,7 +1335,9 @@ function aggregateMaterialsByType() {
     return [];
   }
 
-  if (orderFormDirectCosts.length === 0) {
+  const hasExcelResults = calculationResults.some(r => r.source === 'excel');
+
+  if (orderFormDirectCosts.length === 0 && !hasExcelResults) {
     console.log('⚠️ 발주서 직접비 데이터가 없습니다. 발주서 탭을 먼저 렌더링하세요.');
     return [];
   }
@@ -1213,7 +1347,7 @@ function aggregateMaterialsByType() {
   // 재료별 집계 맵
   const materialMap = {};
 
-  // 발주서 직접비 데이터를 품명별로 집계
+  // 1. 발주서 직접비 데이터를 품명별로 집계 (일위대가 방식)
   for (let i = 0; i < orderFormDirectCosts.length; i++) {
     const comp = orderFormDirectCosts[i];
 
@@ -1267,6 +1401,85 @@ function aggregateMaterialsByType() {
     materialMap[key].quantity += quantity;
     materialMap[key].materialCost += materialCost;
     materialMap[key].laborCost += laborCost;
+  }
+
+  // 2. 엑셀 방식 결과 별도 집계
+  const excelResults = calculationResults.filter(r => r.source === 'excel');
+  if (excelResults.length > 0) {
+    const unitPriceMap = window._excelUnitPriceMapCache || {};
+    const LAYER_FIELDS = [
+      'layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
+      'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'
+    ];
+
+    for (const result of excelResults) {
+      if (!result.wallType) continue;
+      const area = result.area || 0;
+      const wt = result.wallType;
+
+      // 기본 12개 레이어
+      for (const field of LAYER_FIELDS) {
+        const id = wt[field];
+        if (!id) continue;
+        const up = unitPriceMap[id];
+        if (!up) continue;
+
+        const name = up.item || '';
+        const spec = up.spec || '';
+        const key = `${name}_${spec}`.trim();
+        const quantity = (up.quantity || 1) * area;
+        const matCost = (up.materialPrice || 0) * area;
+        const labCost = (up.laborPrice || 0) * area;
+
+        if (!materialMap[key]) {
+          materialMap[key] = {
+            nameSpec: `${name} ${spec}`.trim(),
+            unit: up.unit || 'M2',
+            quantity: 0,
+            isWelding: false,
+            isSheet: false,
+            materialCost: 0,
+            laborCost: 0,
+          };
+        }
+        materialMap[key].quantity += quantity;
+        materialMap[key].materialCost += Math.round(matCost);
+        materialMap[key].laborCost += Math.round(labCost);
+      }
+
+      // 동적 추가 레이어
+      if (Array.isArray(wt.extraLayers)) {
+        for (const extra of wt.extraLayers) {
+          const id = extra.unitPriceId;
+          if (!id) continue;
+          const up = unitPriceMap[id];
+          if (!up) continue;
+
+          const name = up.item || '';
+          const spec = up.spec || '';
+          const key = `${name}_${spec}`.trim();
+          const quantity = (up.quantity || 1) * area;
+          const matCost = (up.materialPrice || 0) * area;
+          const labCost = (up.laborPrice || 0) * area;
+
+          if (!materialMap[key]) {
+            materialMap[key] = {
+              nameSpec: `${name} ${spec}`.trim(),
+              unit: up.unit || 'M2',
+              quantity: 0,
+              isWelding: false,
+              isSheet: false,
+              materialCost: 0,
+              laborCost: 0,
+            };
+          }
+          materialMap[key].quantity += quantity;
+          materialMap[key].materialCost += Math.round(matCost);
+          materialMap[key].laborCost += Math.round(labCost);
+        }
+      }
+    }
+    console.log(`📦 엑셀 결과 ${excelResults.length}개 벽체에서 자재 집계 추가 완료`);
   }
 
   // 맵을 배열로 변환하고 정렬
@@ -1341,10 +1554,13 @@ async function renderMaterialSummaryTable() {
     return;
   }
 
-  // 발주서가 렌더링되지 않았으면 먼저 렌더링
-  if (orderFormDirectCosts.length === 0) {
+  // 발주서가 렌더링되지 않았으면 먼저 렌더링 (엑셀 결과만 있는 경우 건너뛰기)
+  const hasExcelResults = calculationResults.some(r => r.source === 'excel');
+  if (orderFormDirectCosts.length === 0 && !hasExcelResults) {
     console.log('⚠️ 발주서 데이터가 없습니다. 발주서 탭을 먼저 렌더링합니다...');
     await renderOrderFormTab();
+  } else if (orderFormDirectCosts.length === 0 && hasExcelResults) {
+    console.log('📦 엑셀 결과만 있음 — 발주서 렌더링 건너뛰기, 엑셀 자재 직접 집계');
   }
 
   // 재료별 집계 데이터 가져오기
@@ -2785,8 +3001,8 @@ function sortWallTypeNames(typeNames) {
  */
 function sortCalculationResultsByType(results) {
   return [...results].sort((a, b) => {
-    const typeA = a.wallType.wallType;
-    const typeB = b.wallType.wallType;
+    const typeA = a.wallType?.wallType || a.wallType?.name || a.wallName || '';
+    const typeB = b.wallType?.wallType || b.wallType?.name || b.wallName || '';
 
     // 타입 이름 정렬 로직 재사용
     const letterA = typeA.match(/^[A-Za-z]+/)?.[0] || '';

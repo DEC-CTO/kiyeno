@@ -2627,6 +2627,61 @@ async function convertCalculationResultsToDetailSections() {
     for (const [resultIdx, result] of window.calculationResults.entries()) {
         console.log(`  📋 처리 중: ${resultIdx + 1}/${window.calculationResults.length} - ${result.wallName} (${result.area.toFixed(2)} M2)`);
 
+        // 엑셀 방식 결과 처리
+        if (result.source === 'excel' && result.wallType) {
+            const unitPriceMap = window._excelUnitPriceMapCache || {};
+            const LAYER_FIELDS = [
+                'layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
+                'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'
+            ];
+            const qty = parseFloat(result.area) || 0;
+            const wt = result.wallType;
+
+            // 기본 12개 레이어 + extraLayers 순회
+            const allLayerIds = [];
+            for (const field of LAYER_FIELDS) {
+                if (wt[field]) allLayerIds.push(wt[field]);
+            }
+            if (Array.isArray(wt.extraLayers)) {
+                for (const extra of wt.extraLayers) {
+                    if (extra.unitPriceId) allLayerIds.push(extra.unitPriceId);
+                }
+            }
+
+            for (const upId of allLayerIds) {
+                const up = unitPriceMap[upId];
+                if (!up) continue;
+
+                const materialName = up.item || up.name || '(알 수 없음)';
+                const spec = up.spec || '';
+                const unit = up.unit || 'M2';
+                const itemKey = `${materialName}|${spec}`;
+
+                if (!groupedItems[itemKey]) {
+                    groupedItems[itemKey] = {
+                        itemName: materialName,
+                        spec: spec,
+                        unit: unit,
+                        quantity: 0,
+                        materialUnitPrice: up.materialPrice || 0,
+                        laborUnitPrice: up.laborPrice || 0,
+                        materialAmount: 0,
+                        laborAmount: 0,
+                        originalUnitPriceIds: []
+                    };
+                }
+
+                if (upId && !groupedItems[itemKey].originalUnitPriceIds.includes(upId)) {
+                    groupedItems[itemKey].originalUnitPriceIds.push(upId);
+                }
+
+                groupedItems[itemKey].quantity += qty;
+                groupedItems[itemKey].materialAmount += (up.materialPrice || 0) * qty;
+                groupedItems[itemKey].laborAmount += (up.laborPrice || 0) * qty;
+            }
+            continue;
+        }
+
         // layerPricing이 없으면 스킵
         if (!result.layerPricing) {
             console.warn(`    ⚠️ layerPricing이 없음`);
@@ -2922,10 +2977,28 @@ function findWallsByMaterial(itemName, spec, unitPriceIds = '') {
             const layerFields = ['layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
                                  'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'];
 
+            // 기본 12개 레이어 + extraLayers에서 unitPriceId 수집
+            const allUnitPriceIds = [];
             for (const field of layerFields) {
-                const unitPriceId = result.wallType[field];
-                if (unitPriceId && window.ExcelUnitPriceImporter) {
-                    const unitPrice = window.excelUnitPriceCache?.[unitPriceId];
+                if (result.wallType[field]) allUnitPriceIds.push(result.wallType[field]);
+            }
+            if (Array.isArray(result.wallType.extraLayers)) {
+                for (const extra of result.wallType.extraLayers) {
+                    if (extra.unitPriceId) allUnitPriceIds.push(extra.unitPriceId);
+                }
+            }
+
+            for (const unitPriceId of allUnitPriceIds) {
+                // 정확한 매칭: unitPriceId가 exactMatchIds에 포함되면 바로 매칭
+                if (useExactMatch && exactMatchIds.includes(unitPriceId)) {
+                    hasMaterial = true;
+                    console.log(`  ✅ 엑셀 정확한 매칭: ${result.wallName} - ID: ${unitPriceId}`);
+                    break;
+                }
+
+                // 폴백: 캐시에서 품명/규격 조회 후 비교
+                if (!useExactMatch) {
+                    const unitPrice = window._excelUnitPriceMapCache?.[unitPriceId];
                     if (unitPrice) {
                         const normalizedItem = normalizeForSearch(unitPrice.item);
                         const normalizedUnitSpec = normalizeForSearch(unitPrice.spec);
@@ -2935,7 +3008,7 @@ function findWallsByMaterial(itemName, spec, unitPriceIds = '') {
 
                         if (nameMatch && specMatch) {
                             hasMaterial = true;
-                            console.log(`  ✅ 엑셀 매칭: ${result.wallName} - ${field}: "${unitPrice.item} ${unitPrice.spec}"`);
+                            console.log(`  ✅ 엑셀 매칭: ${result.wallName} - "${unitPrice.item} ${unitPrice.spec}"`);
                             break;
                         }
                     }
