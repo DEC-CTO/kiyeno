@@ -2983,6 +2983,16 @@ async function handleViewMaterialWalls(itemName, spec, unitPriceIds = '') {
     showColorPickerModal(itemName, spec, elementIds);
 }
 
+const COLOR_HISTORY_KEY = 'kiyeno_material_color_history';
+
+function loadColorHistory() {
+    try { return JSON.parse(localStorage.getItem(COLOR_HISTORY_KEY)) || {}; } catch { return {}; }
+}
+
+function saveColorHistory(map) {
+    localStorage.setItem(COLOR_HISTORY_KEY, JSON.stringify(map));
+}
+
 /**
  * 컬러 피커 모달 표시
  * @param {string} itemName - 품명
@@ -2991,6 +3001,8 @@ async function handleViewMaterialWalls(itemName, spec, unitPriceIds = '') {
  */
 function showColorPickerModal(itemName, spec, elementIds) {
     const viewName = spec ? `${itemName} ${spec}` : itemName;
+    const colorHistory = loadColorHistory();
+    const savedColor = colorHistory[viewName] || '#ff6b6b';
 
     const modalHTML = `
         <div style="position: relative; padding-top: 5px;">
@@ -3023,7 +3035,7 @@ function showColorPickerModal(itemName, spec, elementIds) {
                 <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <label style="font-size: 13px; color: #64748b;">색상:</label>
-                        <input type="color" id="materialColorPicker" value="#ff6b6b"
+                        <input type="color" id="materialColorPicker" value="${savedColor}"
                                style="width: 60px; height: 36px; cursor: pointer; border: 2px solid #cbd5e1; border-radius: 6px; padding: 2px;">
                     </div>
                     <button id="btnApplyColor" class="btn btn-blue" style="padding: 8px 24px; border-radius: 6px; background: #2563eb; color: white; border: none; font-size: 13px;">적용</button>
@@ -3061,6 +3073,11 @@ function showColorPickerModal(itemName, spec, elementIds) {
             elementIds: elementIds,
             color: rgb
         });
+
+        // localStorage에 색상 저장
+        const ch = loadColorHistory();
+        ch[viewName] = hexColor;
+        saveColorHistory(ch);
 
         window.showToast?.(`${viewName}: ${elementIds.length}개 벽체 색상 표시 요청...`, 'info');
 

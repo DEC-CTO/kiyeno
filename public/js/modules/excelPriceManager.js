@@ -408,6 +408,19 @@
     }
 
     try {
+      // 품명/규격 변경 시 중복 key 체크
+      if (field === 'item' || field === 'spec') {
+        const newItem = field === 'item' ? newValue : item.item;
+        const newSpec = field === 'spec' ? newValue : item.spec;
+        const newKey = ((newItem || '') + '_' + (newSpec || '')).toLowerCase().replace(/\s+/g, '');
+        const duplicate = allUnitPrices.find(u => u.id !== itemId && u.key === newKey);
+        if (duplicate) {
+          alert(`품명과 규격이 동일한 항목이 이미 존재합니다.\n\n품명: ${newItem}\n규격: ${newSpec}`);
+          cancelCellEdit(cell, originalText);
+          return;
+        }
+      }
+
       // DB 업데이트
       const updateData = { [field]: newValue };
       const updated = await ExcelUnitPriceImporter.updateImportedUnitPrice(itemId, updateData);
@@ -792,12 +805,8 @@
       allUnitPrices = allUnitPrices.filter(u => u.id !== id);
       filteredUnitPrices = filteredUnitPrices.filter(u => u.id !== id);
 
-      // 행 제거 (전체 리렌더 대신 해당 행만 제거)
-      const row = document.querySelector(`tr[data-id="${id}"]`);
-      if (row) row.remove();
-
-      // 행 번호 재정렬
-      renumberRows();
+      // 테이블 전체 리렌더링 (그룹 헤더 갱신 포함)
+      renderTableBody();
       updateStatusBar();
 
       showToast('삭제되었습니다.', 'success');

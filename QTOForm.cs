@@ -58,6 +58,8 @@ namespace QTO
         // 3D 뷰 복제 + 색상 적용 데이터
         public static DuplicateViewData duplicateViewData = null;
 
+
+
         // WebSocket 클라이언트 (순수 WebSocket)
         private ClientWebSocket webSocket;
         private CancellationTokenSource cancellationTokenSource;
@@ -1913,7 +1915,7 @@ namespace QTO
         }
 
         /// <summary>
-        /// 3D 뷰 복제 후 지정 객체에 색상 오버라이드 적용
+        /// 3D 뷰 복제 후 지정 객체에 색상 오버라이드 적용 (자재별 개별 뷰)
         /// </summary>
         private void DuplicateViewWithColor(UIDocument uidoc, Document doc)
         {
@@ -1926,61 +1928,57 @@ namespace QTO
                     return;
                 }
 
-                // 현재 활성 뷰가 3D 뷰인지 확인
                 Autodesk.Revit.DB.View activeView = doc.ActiveView;
-                View3D source3DView = activeView as View3D;
-                if (source3DView == null)
-                {
-                    MessageBox.Show("현재 활성 뷰가 3D 뷰가 아닙니다.\n3D 뷰를 활성화한 후 다시 시도하세요.", "3D 뷰 필요", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
-
-                View3D newView = null;
+                View3D targetView = null;
                 int successCount = 0;
+                string targetViewName = viewData.ViewName; // 자재명이 곧 뷰 이름 (예: "C-STUD 50형")
 
-                using (Transaction trans = new Transaction(doc, "3D 뷰 복제 및 색상 적용"))
+                // 1. 동일 이름의 기존 3D 뷰 검색
+                targetView = new FilteredElementCollector(doc)
+                    .OfClass(typeof(View3D))
+                    .Cast<View3D>()
+                    .FirstOrDefault(v => v.Name == targetViewName && !v.IsTemplate);
+
+                using (Transaction trans = new Transaction(doc, $"자재 색상 적용: {targetViewName}"))
                 {
                     trans.Start();
 
-                    // 1. 3D 뷰 복제
-                    ElementId newViewId = source3DView.Duplicate(ViewDuplicateOption.Duplicate);
-                    newView = doc.GetElement(newViewId) as View3D;
-
-                    if (newView == null)
+                    if (targetView == null)
                     {
-                        trans.RollBack();
-                        MessageBox.Show("3D 뷰 복제에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
+                        // 기존 뷰 없음 → 새로 복제
+                        View3D source3DView = activeView as View3D;
+                        if (source3DView == null)
+                        {
+                            trans.RollBack();
+                            MessageBox.Show("현재 활성 뷰가 3D 뷰가 아닙니다.\n3D 뷰를 활성화한 후 다시 시도하세요.", "3D 뷰 필요", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        ElementId newViewId = source3DView.Duplicate(ViewDuplicateOption.Duplicate);
+                        targetView = doc.GetElement(newViewId) as View3D;
+
+                        if (targetView == null)
+                        {
+                            trans.RollBack();
+                            MessageBox.Show("3D 뷰 복제에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+
+                        try { targetView.Name = targetViewName; } catch { }
                     }
 
-                    // 2. 뷰 이름 설정 (중복 시 번호 추가)
-                    string baseName = viewData.ViewName;
-                    string finalName = baseName;
-                    int suffix = 1;
-                    while (true)
-                    {
-                        try
-                        {
-                            newView.Name = finalName;
-                            break;
-                        }
-                        catch
-                        {
-                            finalName = $"{baseName} ({suffix++})";
-                            if (suffix > 100) break;
-                        }
-                    }
-
-                    // 3. 기존 색상 오버라이드 리셋 (원본 뷰에서 복제된 색상 제거)
+                    // 뷰 내 모든 벽체 색상 리셋
                     OverrideGraphicSettings resetOgs = new OverrideGraphicSettings();
-                    FilteredElementCollector wallCollector = new FilteredElementCollector(doc, newView.Id);
+                    FilteredElementCollector wallCollector = new FilteredElementCollector(doc, targetView.Id);
                     wallCollector.OfCategory(BuiltInCategory.OST_Walls);
                     foreach (Element wall in wallCollector)
                     {
-                        newView.SetElementOverrides(wall.Id, resetOgs);
+                        targetView.SetElementOverrides(wall.Id, resetOgs);
                     }
 
-                    // 4. 새 색상 오버라이드 설정
+                    // 색상 적용
+                    FillPatternElement solidPattern = GetSolidFillPattern(doc);
+
                     Autodesk.Revit.DB.Color revitColor = new Autodesk.Revit.DB.Color(
                         (byte)viewData.Color.R,
                         (byte)viewData.Color.G,
@@ -1993,7 +1991,6 @@ namespace QTO
                     ogs.SetCutForegroundPatternColor(revitColor);
                     ogs.SetCutBackgroundPatternColor(revitColor);
 
-                    FillPatternElement solidPattern = GetSolidFillPattern(doc);
                     if (solidPattern != null)
                     {
                         ogs.SetSurfaceForegroundPatternId(solidPattern.Id);
@@ -2002,7 +1999,6 @@ namespace QTO
                         ogs.SetCutBackgroundPatternId(solidPattern.Id);
                     }
 
-                    // 5. 지정된 ElementId에만 새 색상 적용
                     foreach (string elementIdStr in viewData.ElementIds)
                     {
                         if (int.TryParse(elementIdStr, out int id))
@@ -2010,7 +2006,7 @@ namespace QTO
                             ElementId elemId = new ElementId(id);
                             if (doc.GetElement(elemId) != null)
                             {
-                                newView.SetElementOverrides(elemId, ogs);
+                                targetView.SetElementOverrides(elemId, ogs);
                                 successCount++;
                             }
                         }
@@ -2019,18 +2015,116 @@ namespace QTO
                     trans.Commit();
                 }
 
-                // 6. 복제된 뷰로 전환
-                if (newView != null)
-                {
-                    uidoc.ActiveView = newView;
-                }
+                // 뷰 전환
+                uidoc.ActiveView = targetView;
 
-                form?.UpdateStatus($"✅ 3D 뷰 복제 완료: \"{newView?.Name}\" ({successCount}개 객체 색상 적용)");
+                form?.UpdateStatus($"✅ 색상 적용 완료: \"{targetViewName}\" ({successCount}개 객체)");
+
+                // 개별 색상표 생성 (3D 뷰와 동일 이름)
+                CreateMaterialColorLegend(uidoc, doc, targetViewName, viewData.Color);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"3D 뷰 복제 오류:\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                form?.UpdateStatus($"❌ 3D 뷰 복제 오류: {ex.Message}");
+                MessageBox.Show($"3D 뷰 색상 적용 오류:\n{ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                form?.UpdateStatus($"❌ 3D 뷰 색상 적용 오류: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 자재별 개별 색상표 생성 (3D 뷰와 동일한 이름의 제도뷰)
+        /// </summary>
+        private void CreateMaterialColorLegend(UIDocument uidoc, Document doc, string materialName, ColorRGB color)
+        {
+            try
+            {
+                // 기존 동일 이름 제도뷰 삭제
+                ViewDrafting existingView = new FilteredElementCollector(doc)
+                    .OfClass(typeof(ViewDrafting))
+                    .Cast<ViewDrafting>()
+                    .FirstOrDefault(v => v.Name == materialName);
+
+                if (existingView != null)
+                {
+                    using (Transaction deleteTrans = new Transaction(doc, $"기존 색상표 삭제: {materialName}"))
+                    {
+                        deleteTrans.Start();
+                        doc.Delete(existingView.Id);
+                        deleteTrans.Commit();
+                    }
+                }
+
+                using (Transaction trans = new Transaction(doc, $"색상표 생성: {materialName}"))
+                {
+                    trans.Start();
+
+                    ViewFamilyType draftingViewType = new FilteredElementCollector(doc)
+                        .OfClass(typeof(ViewFamilyType))
+                        .Cast<ViewFamilyType>()
+                        .FirstOrDefault(vft => vft.ViewFamily == ViewFamily.Drafting);
+
+                    if (draftingViewType == null)
+                    {
+                        trans.RollBack();
+                        form?.UpdateStatus("❌ 제도 뷰 타입을 찾을 수 없습니다.");
+                        return;
+                    }
+
+                    ViewDrafting draftingView = ViewDrafting.Create(doc, draftingViewType.Id);
+                    draftingView.Name = materialName;
+                    draftingView.Scale = 50;
+
+                    FillPatternElement solidPattern = GetSolidFillPattern(doc);
+
+                    TextNoteType textType = new FilteredElementCollector(doc)
+                        .OfClass(typeof(TextNoteType))
+                        .Cast<TextNoteType>()
+                        .OrderBy(t => t.get_Parameter(BuiltInParameter.TEXT_SIZE)?.AsDouble() ?? 0)
+                        .FirstOrDefault();
+
+                    if (textType == null)
+                    {
+                        trans.RollBack();
+                        form?.UpdateStatus("❌ 텍스트 타입을 찾을 수 없습니다.");
+                        return;
+                    }
+
+                    double boxWidth = 750.0 / 304.8;
+                    double boxHeight = 450.0 / 304.8;
+                    double textOffset = 150.0 / 304.8;
+
+                    CurveLoop curveLoop = new CurveLoop();
+                    XYZ p1 = new XYZ(0, 0, 0);
+                    XYZ p2 = new XYZ(boxWidth, 0, 0);
+                    XYZ p3 = new XYZ(boxWidth, -boxHeight, 0);
+                    XYZ p4 = new XYZ(0, -boxHeight, 0);
+
+                    curveLoop.Append(Line.CreateBound(p1, p2));
+                    curveLoop.Append(Line.CreateBound(p2, p3));
+                    curveLoop.Append(Line.CreateBound(p3, p4));
+                    curveLoop.Append(Line.CreateBound(p4, p1));
+
+                    FilledRegionType filledRegionType = GetOrCreateFilledRegionType(doc, color, solidPattern);
+                    if (filledRegionType != null)
+                    {
+                        FilledRegion.Create(doc, filledRegionType.Id, draftingView.Id, new List<CurveLoop> { curveLoop });
+                    }
+
+                    XYZ textPosition = new XYZ(boxWidth + textOffset, -boxHeight / 2, 0);
+                    TextNoteOptions textOptions = new TextNoteOptions
+                    {
+                        TypeId = textType.Id,
+                        HorizontalAlignment = HorizontalTextAlignment.Left
+                    };
+                    TextNote.Create(doc, draftingView.Id, textPosition, materialName, textOptions);
+
+                    trans.Commit();
+
+                    form?.UpdateStatus($"✅ 색상표 생성 완료: \"{materialName}\"");
+                }
+            }
+            catch (Exception ex)
+            {
+                form?.UpdateStatus($"❌ 색상표 생성 오류: {ex.Message}");
             }
         }
 
