@@ -1502,14 +1502,17 @@ function toggleDropdown(dropdownId) {
     }
 }
 
-// 문서 클릭 시 드롭다운 닫기
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown')) {
-        document.querySelectorAll('.dropdown').forEach(dropdown => {
-            dropdown.classList.remove('open');
-        });
-    }
-});
+// 문서 클릭 시 드롭다운 닫기 (중복 등록 방지)
+if (!window._appUiDropdownListenerRegistered) {
+    window._appUiDropdownListenerRegistered = true;
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.dropdown')) {
+            document.querySelectorAll('.dropdown').forEach(dropdown => {
+                dropdown.classList.remove('open');
+            });
+        }
+    });
+}
 
 // =============================================================================
 // 기본 작업 함수들

@@ -625,6 +625,9 @@ function buildTableHeader() {
     // WallType
     mainRow += `<th rowspan="2" style="${thBase} width: 80px; min-width: 80px;" title="벽체 타입명">WallType</th>`;
 
+    // 두께
+    mainRow += `<th rowspan="2" style="${thBase} width: 60px; min-width: 60px;" title="벽체 두께 (밀리미터)">두께(mm)</th>`;
+
     // 좌측마감 (colspan=3)
     mainRow += `<th colspan="3" style="${thBase}" title="좌측 마감 레이어">좌측마감</th>`;
     subRow += `<th style="${thSub}" title="레이어 3">Layer3</th>`;
@@ -664,9 +667,6 @@ function buildTableHeader() {
 
     // 옵션 뒤 추가 컬럼
     mainRow += buildExtraHeaderCells(extrasMap, 'steelPlate');
-
-    // 두께
-    mainRow += `<th rowspan="2" style="${thBase} width: 60px; min-width: 60px;" title="벽체 두께 (밀리미터)">두께(mm)</th>`;
 
     return `<tr>${mainRow}</tr><tr>${subRow}</tr>`;
 }
@@ -741,8 +741,8 @@ function createRevitWallTableRow(wall) {
             </td>
             <td style="${tdBase} color: #94a3b8;">${wall.no}</td>
             <td style="${tdBase} font-weight: 600; color: #1e293b; min-width: 80px;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
+            <td style="${tdBase} color: #475569; text-align: center;" id="thickness-${wall.id}">${wall.thickness || ''}</td>
             ${layerCells}
-            <td style="${tdBase} color: #475569;" ondblclick="editRevitWallThickness(${wall.id})">${wall.thickness || ''}</td>
         </tr>
     `;
 }
@@ -1009,6 +1009,9 @@ function applyExtraUnitPrice(wallId, extraIndex, modal) {
     updateRevitWallTable();
     closeSubModal(modal);
 
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
+
     selectedMaterialData = null;
     console.log(`✅ 추가 레이어 일위대가 적용됨: ${wall.wallType} - extraIndex ${extraIndex}`);
 }
@@ -1025,6 +1028,9 @@ function clearExtraUnitPriceFromModal(wallId, extraIndex, modal) {
     saveRevitWallTypes();
     updateRevitWallTable();
     closeSubModal(modal);
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
 
     console.log(`🗑️ 추가 레이어 해제됨: ${wall.wallType} - extraIndex ${extraIndex}`);
 }
@@ -1043,6 +1049,9 @@ function clearMaterialExtra(event, wallId, extraIndex) {
 
     saveRevitWallTypes();
     updateRevitWallTable();
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
 
     console.log(`🗑️ 추가 레이어 해제됨: ${wall.wallType} - extraIndex ${extraIndex}`);
 }
@@ -1514,14 +1523,17 @@ function applySelectedUnitPrice(wallId, fieldName, modal) {
     
     // 벽체에 일위대가 ID 할당 (ID 참조 방식)
     wall[fieldName] = `unitPrice_${selectedMaterialData.id}`;
-    
+
     saveRevitWallTypes();
     updateRevitWallTable();
     closeSubModal(modal);
-    
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
+
     // 선택된 일위대가 데이터 초기화
     selectedMaterialData = null;
-    
+
     console.log(`✅ 일위대가 적용됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}: ${wall[fieldName]}`);
 }
 
@@ -1535,11 +1547,14 @@ function clearUnitPriceFromModal(wallId, fieldName, modal) {
     
     // 해당 필드 값 지우기
     wall[fieldName] = '';
-    
+
     saveRevitWallTypes();
     updateRevitWallTable();
     closeSubModal(modal);
-    
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
+
     console.log(`✅ 일위대가 지움: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
 }
 
@@ -1605,7 +1620,10 @@ function clearMaterial(event, wallId, fieldName) {
     wall[fieldName] = '';
     saveRevitWallTypes();
     updateRevitWallTable();
-    
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
+
     console.log(`🗑️ 자재 제거됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
 }
 
@@ -1620,7 +1638,10 @@ function clearMaterialFromModal(wallId, fieldName, modal) {
     saveRevitWallTypes();
     updateRevitWallTable();
     closeSubModal(modal);
-    
+
+    // 두께 자동 재계산
+    recalcWallThickness(wallId);
+
     console.log(`🗑️ 자재 제거됨: ${wall.wallType} - ${getFieldDisplayName(fieldName)}`);
 }
 
@@ -1661,23 +1682,40 @@ function editRevitWallType(wallId) {
     console.log(`✅ 벽체 타입명 변경됨: ${wallId} -> ${trimmedName}`);
 }
 
-function editRevitWallThickness(wallId) {
+/**
+ * 벽체의 레이어 두께를 자동 재계산
+ */
+async function recalcWallThickness(wallId) {
     const wall = window.revitWallTypes.find(w => w.id === wallId);
     if (!wall) return;
-    
-    const newThickness = prompt('벽체 두께를 입력하세요 (mm):', wall.thickness || '');
-    if (newThickness === null) return;
-    
-    const thickness = parseInt(newThickness);
-    if (isNaN(thickness) || thickness <= 0) {
-        alert('올바른 두께 값을 입력해주세요.');
-        return;
+
+    const layerFields = ['layer3_1', 'layer2_1', 'layer1_1', 'column1', 'infill',
+        'layer1_2', 'layer2_2', 'layer3_2', 'column2', 'channel', 'runner', 'steelPlate'];
+
+    let total = 0;
+    for (const field of layerFields) {
+        if (wall[field]) {
+            const t = await extractThicknessFromMaterial(wall[field]);
+            if (t !== null) total += t;
+        }
     }
-    
-    wall.thickness = thickness;
+    if (Array.isArray(wall.extraLayers)) {
+        for (const extra of wall.extraLayers) {
+            if (extra.unitPriceId) {
+                const t = await extractThicknessFromMaterial(extra.unitPriceId);
+                if (t !== null) total += t;
+            }
+        }
+    }
+
+    wall.thickness = Math.round(total * 10) / 10;
     saveRevitWallTypes();
-    updateRevitWallTable();
-    console.log(`✅ 벽체 두께 변경됨: ${wallId} -> ${thickness}mm`);
+
+    // Update thickness cell without full table rebuild
+    const cell = document.getElementById(`thickness-${wallId}`);
+    if (cell) cell.textContent = wall.thickness || '';
+
+    console.log(`📏 벽체 두께 자동계산: ${wall.wallType} -> ${wall.thickness}mm`);
 }
 
 // =============================================================================
@@ -2076,7 +2114,7 @@ window.clearMaterialExtra = clearMaterialExtra;
 
 // 벽체 편집 함수들
 window.editRevitWallType = editRevitWallType;
-window.editRevitWallThickness = editRevitWallThickness;
+window.recalcWallThickness = recalcWallThickness;
 
 
 // 데이터 내보내기/가져오기

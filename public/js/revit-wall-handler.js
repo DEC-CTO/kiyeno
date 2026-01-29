@@ -633,7 +633,7 @@ function initTableResize() {
 
         resizer.addEventListener('mousedown', (e) => {
             e.preventDefault();
-            e.stopPropagation(); // 이벤트 버블링 방지
+            // stopPropagation 제거 — 체크박스 클릭 차단 방지
 
             // 모든 컬럼 너비를 현재 값으로 고정 (다른 컬럼 움직임 방지)
             headers.forEach(header => {
@@ -1108,33 +1108,39 @@ function downloadFile(content, filename, contentType) {
 }
 
 /**
- * 드롭다운 기능 초기화
+ * 드롭다운 기능 초기화 (명명 함수 + 중복 등록 방지)
  */
+let _dropdownListenerRegistered = false;
+
+function _handleDropdownClick(e) {
+    // 드롭다운 토글
+    if (e.target.matches('.dropdown-toggle') || e.target.closest('.dropdown-toggle')) {
+        e.preventDefault();
+        const dropdown = e.target.closest('.dropdown');
+        const menu = dropdown.querySelector('.dropdown-menu');
+
+        // 다른 열린 드롭다운 닫기
+        document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
+            if (otherMenu !== menu) {
+                otherMenu.classList.remove('show');
+            }
+        });
+
+        // 현재 드롭다운 토글
+        menu.classList.toggle('show');
+    }
+    // 드롭다운 외부 클릭시 닫기
+    else if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+}
+
 function initializeDropdown() {
-    document.addEventListener('click', function(e) {
-        // 드롭다운 토글
-        if (e.target.matches('.dropdown-toggle') || e.target.closest('.dropdown-toggle')) {
-            e.preventDefault();
-            const dropdown = e.target.closest('.dropdown');
-            const menu = dropdown.querySelector('.dropdown-menu');
-            
-            // 다른 열린 드롭다운 닫기
-            document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
-                if (otherMenu !== menu) {
-                    otherMenu.classList.remove('show');
-                }
-            });
-            
-            // 현재 드롭다운 토글
-            menu.classList.toggle('show');
-        }
-        // 드롭다운 외부 클릭시 닫기
-        else if (!e.target.closest('.dropdown')) {
-            document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-    });
+    if (_dropdownListenerRegistered) return;
+    _dropdownListenerRegistered = true;
+    document.addEventListener('click', _handleDropdownClick);
 }
 
 // CSS 스타일 추가

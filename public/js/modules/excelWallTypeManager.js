@@ -267,6 +267,9 @@
     // WallType 이름
     mainRow += `<th rowspan="2" style="${thStyle()}; width: 120px; min-width: 100px;">WallType</th>`;
 
+    // 두께(mm) — WallType 다음에 위치
+    mainRow += `<th rowspan="2" style="${thStyle()}; width: 65px; min-width: 55px;">두께<br>(mm)</th>`;
+
     // 좌측마감 (Layer3, Layer2, Layer1 = 3개)
     mainRow += `<th colspan="3" style="${thStyle()}; background: #cbd5e1;">좌측마감</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer3</th>`;
@@ -306,9 +309,6 @@
 
     // 옵션 뒤 추가 컬럼 (맨 끝)
     mainRow += buildExtraHeaderCells(extrasMap, 'steelPlate');
-
-    // 두께(mm)
-    mainRow += `<th rowspan="2" style="${thStyle()}; width: 65px; min-width: 55px;">두께<br>(mm)</th>`;
 
     // 자재비
     mainRow += `<th rowspan="2" style="${thStyle()}; width: 75px; min-width: 65px;">자재비</th>`;
@@ -456,10 +456,13 @@
       // No
       html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8; font-size: 11px;">${index + 1}</td>`;
 
-      // WallType 이름 (인라인 편집)
-      html += `<td class="wt-name-cell" data-id="${escapeHtml(wt.id)}" style="padding: 4px 6px; border: 1px solid #cbd5e1; cursor: text; font-weight: 600; color: #1e293b; min-width: 100px;">
+      // WallType 이름 (인라인 편집, 중앙정렬)
+      html += `<td class="wt-name-cell" data-id="${escapeHtml(wt.id)}" style="padding: 4px 6px; text-align: center; border: 1px solid #cbd5e1; cursor: text; font-weight: 600; color: #1e293b; min-width: 100px;">
         ${escapeHtml(wt.name || '(이름 없음)')}
       </td>`;
+
+      // 두께 (WallType 다음)
+      html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1; font-size: 11px; color: #475569;">${totals.thickness || ''}</td>`;
 
       // 순서대로 레이어 셀 렌더링 (기본 + 추가 인터리빙)
       for (const col of orderedColumns) {
@@ -488,9 +491,6 @@
           </td>`;
         }
       }
-
-      // 두께
-      html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1; font-size: 11px; color: #475569;">${totals.thickness || ''}</td>`;
 
       // 자재비
       html += `<td style="padding: 4px; text-align: right; border: 1px solid #cbd5e1; font-size: 11px; color: #334155;">${formatNumber(totals.totalMaterialPrice)}</td>`;
