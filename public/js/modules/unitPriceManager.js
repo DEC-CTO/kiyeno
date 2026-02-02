@@ -2204,9 +2204,9 @@ async function renderUnitPriceItemsList() {
                 <thead style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white; position: sticky; top: 0; z-index: 10;">
                     <tr>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">SIZE</th>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">간격</th>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">높이</th>
-                        <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">SIZE</th>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 70px; text-align: center; font-weight: 600;">부위</th>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; font-weight: 600;">공종1</th>
                         <th style="padding: 12px 8px; border: 1px solid #334155; min-width: 60px; text-align: center; font-weight: 600;">공종2</th>
@@ -2225,9 +2225,9 @@ async function renderUnitPriceItemsList() {
                         return `
                             <tr style="border-bottom: 1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 500;">${basic?.itemName || ''}</td>
+                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.size || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.spacing || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.height || ''}</td>
-                                <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.size || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.location || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType1 || ''}</td>
                                 <td style="padding: 8px; border: 1px solid #e2e8f0; text-align: center;">${basic?.workType2 || ''}</td>

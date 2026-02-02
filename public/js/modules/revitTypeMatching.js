@@ -1026,9 +1026,9 @@ async function selectMaterialExtra(wallId, extraIndex) {
                             <tr>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">선택</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
-                                <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
                                 <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
@@ -1343,9 +1343,9 @@ async function createUnitPriceSelectionModal(wallId, fieldName) {
                         <tr>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 60px; text-align: center; font-weight: 600;">선택</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 120px; text-align: center; font-weight: 600;">아이템</th>
+                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">간격</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">높이</th>
-                            <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">SIZE</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">부위</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종1</th>
                             <th style="padding: 12px 8px; border: 1px solid #e2e8f0; min-width: 80px; text-align: center; font-weight: 600;">공종2</th>
@@ -1437,9 +1437,9 @@ async function generateUnitPriceTableRows() {
                     <input type="radio" name="selectedUnitPrice" value="${item.id}" style="transform: scale(1.2);">
                 </td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; font-weight: 500; color: #1e293b;">${basic.itemName || '-'}</td>
+                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.size || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.spacing || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.height || '-'}</td>
-                <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.size || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.location || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.workType1 || '-'}</td>
                 <td style="padding: 10px 8px; border: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #475569;">${basic.workType2 || '-'}</td>
