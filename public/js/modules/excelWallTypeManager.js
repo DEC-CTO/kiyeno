@@ -132,6 +132,7 @@
 
       // 데이터 로드
       allWallTypes = await ExcelUnitPriceImporter.getAllExcelWallTypes();
+      allWallTypes.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
       allUnitPrices = await ExcelUnitPriceImporter.getAllImportedUnitPrices();
 
       // unitPriceMap 생성
@@ -446,15 +447,15 @@
       const totals = calculateTotalsFromCache(wt);
       const isChecked = selectedWallTypes.has(wt.id);
 
-      html += `<tr data-wt-id="${escapeHtml(wt.id)}">`;
+      html += `<tr data-wt-id="${escapeHtml(wt.id)}" draggable="true">`;
 
       // 체크박스
       html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1;">
         <input type="checkbox" class="wt-checkbox" data-id="${escapeHtml(wt.id)}" ${isChecked ? 'checked' : ''}>
       </td>`;
 
-      // No
-      html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8; font-size: 11px;">${index + 1}</td>`;
+      // No (드래그 핸들)
+      html += `<td style="padding: 4px; text-align: center; border: 1px solid #cbd5e1; color: #94a3b8; font-size: 11px; cursor: grab;" title="드래그하여 순서 변경">${index + 1}</td>`;
 
       // WallType 이름 (인라인 편집, 중앙정렬)
       html += `<td class="wt-name-cell" data-id="${escapeHtml(wt.id)}" style="padding: 4px 6px; text-align: center; border: 1px solid #cbd5e1; cursor: text; font-weight: 600; color: #1e293b; min-width: 100px;">
@@ -505,6 +506,51 @@
     });
 
     tbody.innerHTML = html;
+
+    // 드래그 드롭 이벤트 바인딩
+    let dragWtId = null;
+    tbody.querySelectorAll('tr[data-wt-id]').forEach(tr => {
+      tr.addEventListener('dragstart', (e) => {
+        dragWtId = tr.dataset.wtId;
+        e.dataTransfer.effectAllowed = 'move';
+        tr.style.opacity = '0.4';
+      });
+      tr.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        tr.style.borderTop = '2px solid #3b82f6';
+      });
+      tr.addEventListener('dragleave', () => {
+        tr.style.borderTop = '';
+      });
+      tr.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        tr.style.borderTop = '';
+        const targetId = tr.dataset.wtId;
+        if (!dragWtId || dragWtId === targetId) return;
+
+        const fromIdx = allWallTypes.findIndex(w => w.id === dragWtId);
+        const toIdx = allWallTypes.findIndex(w => w.id === targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        const [moved] = allWallTypes.splice(fromIdx, 1);
+        allWallTypes.splice(toIdx, 0, moved);
+
+        // sortOrder 할당 + DB 저장
+        for (let i = 0; i < allWallTypes.length; i++) {
+          allWallTypes[i].sortOrder = i;
+          await ExcelUnitPriceImporter.updateExcelWallType(allWallTypes[i].id, { sortOrder: i });
+        }
+        renderTableBody();
+        dragWtId = null;
+      });
+      tr.addEventListener('dragend', () => {
+        tr.style.opacity = '';
+        tr.style.borderTop = '';
+        dragWtId = null;
+        tbody.querySelectorAll('tr').forEach(r => { r.style.borderTop = ''; });
+      });
+    });
   }
 
   // ========================================

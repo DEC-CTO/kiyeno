@@ -672,6 +672,55 @@ function buildTableHeader() {
     return `<tr>${mainRow}</tr><tr>${subRow}</tr>`;
 }
 
+// =============================================================================
+// 드래그 드롭 순서 변경
+// =============================================================================
+let _dragWallId = null;
+
+function onWallRowDragStart(e, wallId) {
+    _dragWallId = wallId;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+}
+
+function onWallRowDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const tr = e.currentTarget;
+    tr.style.borderTop = '2px solid #3b82f6';
+}
+
+function onWallRowDrop(e, targetWallId) {
+    e.preventDefault();
+    e.currentTarget.style.borderTop = '';
+    if (_dragWallId === null || _dragWallId === targetWallId) return;
+
+    const walls = window.revitWallTypes;
+    const fromIdx = walls.findIndex(w => w.id === _dragWallId);
+    const toIdx = walls.findIndex(w => w.id === targetWallId);
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    // 배열에서 이동
+    const [moved] = walls.splice(fromIdx, 1);
+    walls.splice(toIdx, 0, moved);
+
+    // sortOrder 재할당 + 저장
+    walls.forEach((w, i) => { w.sortOrder = i; });
+    saveRevitWallTypes();
+    updateRevitWallTable();
+    _dragWallId = null;
+}
+
+function onWallRowDragEnd(e) {
+    e.currentTarget.style.opacity = '';
+    e.currentTarget.style.borderTop = '';
+    _dragWallId = null;
+    // 모든 행의 borderTop 초기화
+    document.querySelectorAll('#revit-wall-table-body tr').forEach(tr => {
+        tr.style.borderTop = '';
+    });
+}
+
 // 벽체 테이블 업데이트 함수
 async function updateRevitWallTable() {
     const tableBody = document.getElementById('revit-wall-table-body');
@@ -690,8 +739,12 @@ async function updateRevitWallTable() {
         return;
     }
     
-    // WallType 이름으로 정렬
-    const sorted = [...window.revitWallTypes].sort((a, b) => (a.wallType || '').localeCompare(b.wallType || '', 'ko'));
+    // sortOrder 기반 정렬 (없으면 기존 순서 유지)
+    const sorted = [...window.revitWallTypes].sort((a, b) => {
+        const orderA = a.sortOrder !== undefined ? a.sortOrder : 99999;
+        const orderB = b.sortOrder !== undefined ? b.sortOrder : 99999;
+        return orderA - orderB;
+    });
     sorted.forEach((wall, i) => { wall.no = i + 1; });
 
     // 벽체 데이터를 테이블 행으로 변환
@@ -741,12 +794,16 @@ function createRevitWallTableRow(wall) {
     }
 
     return `
-        <tr data-wall-id="${wall.id}" class="${isSelected ? 'selected' : ''}">
+        <tr data-wall-id="${wall.id}" class="${isSelected ? 'selected' : ''}" draggable="true"
+            ondragstart="onWallRowDragStart(event, ${wall.id})"
+            ondragover="onWallRowDragOver(event)"
+            ondrop="onWallRowDrop(event, ${wall.id})"
+            ondragend="onWallRowDragEnd(event)">
             <td style="${tdBase}">
                 <input type="checkbox" ${isSelected ? 'checked' : ''}
                        onchange="toggleRevitWallSelection(${wall.id})">
             </td>
-            <td style="${tdBase} color: #94a3b8;">${wall.no}</td>
+            <td style="${tdBase} color: #94a3b8; cursor: grab;" title="드래그하여 순서 변경">${wall.no}</td>
             <td style="${tdBase} font-weight: 600; color: #1e293b; min-width: 80px;" ondblclick="editRevitWallType(${wall.id})">${wall.wallType || ''}</td>
             <td style="${tdBase} color: #475569; text-align: center;" id="thickness-${wall.id}">${wall.thickness || ''}</td>
             ${layerCells}
@@ -2176,6 +2233,10 @@ window.clearMaterialExtra = clearMaterialExtra;
 // 벽체 편집 함수들
 window.editRevitWallType = editRevitWallType;
 window.recalcWallThickness = recalcWallThickness;
+window.onWallRowDragStart = onWallRowDragStart;
+window.onWallRowDragOver = onWallRowDragOver;
+window.onWallRowDrop = onWallRowDrop;
+window.onWallRowDragEnd = onWallRowDragEnd;
 
 
 // 데이터 내보내기/가져오기

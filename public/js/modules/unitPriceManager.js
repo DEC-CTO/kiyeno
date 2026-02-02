@@ -1457,10 +1457,15 @@ function createDetailModalHTML(itemSummary) {
 function addComponentRow(componentData = null) {
     const tbody = document.getElementById('componentsTable');
     if (!tbody) return;
-    
+
     const rowIndex = tbody.children.length;
     const row = document.createElement('tr');
     row.className = 'component-row';
+    row.draggable = true;
+    row.ondragstart = function(e) { onComponentDragStart(e); };
+    row.ondragover = function(e) { onComponentDragOver(e); };
+    row.ondrop = function(e) { onComponentDrop(e); };
+    row.ondragend = function(e) { onComponentDragEnd(e); };
     
     const data = componentData || {
         name: '',
@@ -1476,7 +1481,7 @@ function addComponentRow(componentData = null) {
     // 기본 행 생성 (노무비 특별 처리 제거)
     
     row.innerHTML = `
-        <td style="padding: 6px; border: 1px solid #e2e8f0;">
+        <td style="padding: 6px; border: 1px solid #e2e8f0; cursor: grab;" title="드래그하여 순서 변경">
             <div style="display: flex; gap: 4px; align-items: center;">
                 <span class="component-name" style="flex: 1; padding: 4px; font-size: 12px; color: #374151;">
                     ${data.name || '자재를 선택해주세요'}
@@ -5042,6 +5047,49 @@ function applyBulkCalculatedQuantities() {
 
 // =============================================================================
 // 전역 함수 등록 (window 객체에 할당)
+// =============================================================================
+// 구성품 로우 드래그 드롭 순서 변경
+// =============================================================================
+let _dragComponentRow = null;
+
+function onComponentDragStart(e) {
+    _dragComponentRow = e.currentTarget;
+    e.dataTransfer.effectAllowed = 'move';
+    e.currentTarget.style.opacity = '0.4';
+}
+
+function onComponentDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const tr = e.currentTarget;
+    if (tr !== _dragComponentRow) {
+        tr.style.borderTop = '2px solid #6366f1';
+    }
+}
+
+function onComponentDrop(e) {
+    e.preventDefault();
+    const targetRow = e.currentTarget;
+    targetRow.style.borderTop = '';
+    if (!_dragComponentRow || _dragComponentRow === targetRow) return;
+
+    const tbody = document.getElementById('componentsTable');
+    if (!tbody) return;
+
+    // 대상 행 앞에 삽입
+    tbody.insertBefore(_dragComponentRow, targetRow);
+    calculateGrandTotal();
+}
+
+function onComponentDragEnd(e) {
+    e.currentTarget.style.opacity = '';
+    // 모든 행의 borderTop 정리
+    document.querySelectorAll('#componentsTable .component-row').forEach(row => {
+        row.style.borderTop = '';
+    });
+    _dragComponentRow = null;
+}
+
 // =============================================================================
 
 // 일위대가 관리 메인 함수들
