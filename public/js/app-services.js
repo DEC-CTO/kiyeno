@@ -1366,8 +1366,11 @@ function showMaterialManagementModalDirectly() {
                             <div class="dropdown-item" onclick="importAllData()" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 12px;">
                                 📥 전체 데이터 가져오기
                             </div>
-                            <div class="dropdown-item" onclick="resetToOriginal()" style="padding: 8px 12px; cursor: pointer; color: #dc2626; font-size: 12px;">
+                            <div class="dropdown-item" onclick="resetToOriginal()" style="padding: 8px 12px; cursor: pointer; color: #dc2626; border-bottom: 1px solid #eee; font-size: 12px;">
                                 🔄 원본으로 초기화
+                            </div>
+                            <div class="dropdown-item" onclick="fullResetToEmpty()" style="padding: 8px 12px; cursor: pointer; color: #991b1b; font-size: 12px; font-weight: 600;">
+                                🗑️ 완전초기화
                             </div>
                         </div>
                     </div>
@@ -2095,18 +2098,71 @@ function performReset() {
         if (success) {
             showToast('원본 데이터로 초기화되었습니다.', 'success');
             
-            // 자재 관리 모달 새로고침
-            const modal = document.querySelector('.modal');
-            if (modal) {
-                modal.remove();
-                showMaterialManagementModal();
-            }
+            // 모든 모달 제거 후 새로고침
+            document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+            showMaterialManagementModal();
         } else {
             showToast('초기화 실패', 'error');
         }
     } catch (error) {
         console.error('초기화 실패:', error);
         showToast('초기화 실패: ' + error.message, 'error');
+    }
+}
+
+// 완전초기화 확인 모달
+function fullResetToEmpty() {
+    const content = `
+        <div style="text-align: center; padding: 20px;">
+            <div style="font-size: 48px; color: #991b1b; margin-bottom: 16px;">
+                🗑️
+            </div>
+            <h3 style="margin-bottom: 16px; color: #1f2937;">완전초기화</h3>
+            <p style="margin-bottom: 8px; color: #4b5563;">모든 자재 데이터를 삭제하시겠습니까?</p>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px; margin: 16px 0;">
+                <p style="color: #991b1b; font-size: 14px; margin: 0;">
+                    <strong>주의:</strong> 이 작업은 되돌릴 수 없습니다.<br>
+                    기본 자재 데이터와 사용자 데이터가 모두 삭제되어<br>
+                    빈 테이블 상태가 됩니다.<br><br>
+                    복원하려면 "원본으로 초기화"를 사용하세요.
+                </p>
+            </div>
+        </div>
+    `;
+
+    createModal('완전초기화', content, [
+        {
+            text: '취소',
+            class: 'btn-secondary',
+            onClick: (modal) => modal.remove()
+        },
+        {
+            text: '완전초기화',
+            class: 'btn-danger',
+            onClick: async (modal) => {
+                await performFullReset();
+                modal.remove();
+            }
+        }
+    ]);
+}
+
+// 완전초기화 실행
+async function performFullReset() {
+    try {
+        const success = await window.priceDB.fullReset();
+        if (success) {
+            showToast('완전초기화 완료 - 모든 자재 데이터가 삭제되었습니다.', 'success');
+
+            // 모든 모달 제거 후 새로고침
+            document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+            showMaterialManagementModal();
+        } else {
+            showToast('완전초기화 실패', 'error');
+        }
+    } catch (error) {
+        console.error('완전초기화 실패:', error);
+        showToast('완전초기화 실패: ' + error.message, 'error');
     }
 }
 
@@ -2151,11 +2207,12 @@ function showLightweightMaterials() {
     
     if (!container) return;
     
-    // 데이터가 없으면 오류 메시지 표시
-    if (!lightweightData || !lightweightData.items || lightweightData.items.length === 0) {
-        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">경량자재 데이터가 없습니다.</div>';
-        console.error('❌ 경량자재 데이터 로드 실패');
-        return;
+    // 데이터가 없는 경우 빈 배열로 처리 (헤더는 표시)
+    if (!lightweightData) {
+        lightweightData = { items: [], categories: {} };
+    }
+    if (!lightweightData.items) {
+        lightweightData.items = [];
     }
     
     // 벽체 경량 자재 테이블 생성 (14개 컬럼)
@@ -2297,11 +2354,14 @@ function showLightweightMaterials() {
                         </tr>
                         `;
                     }).join('')}
+                    ${lightweightData.items.length === 0 ? `
+                        <tr><td colspan="15" style="padding: 20px; text-align: center; color: #666;">경량자재 데이터가 없습니다.</td></tr>
+                    ` : ''}
                 </tbody>
             </table>
         </div>
     `;
-    
+
     container.innerHTML = tableHTML;
     
     // 통계 업데이트
@@ -2333,14 +2393,14 @@ function showGypsumBoards() {
     
     console.log('🔍 석고보드 데이터 로드 시작');
     
-    // ES6 모듈에서 실제 priceDatabase 인스턴스 가져오기
+    // priceDB 우선 사용 (완전초기화 플래그 등 상태 관리)
     let gypsumData;
-    if (window.priceDatabase && typeof window.priceDatabase.getGypsumBoards === 'function') {
-        console.log('📦 ES6 모듈에서 석고보드 데이터 로드');
-        gypsumData = window.priceDatabase.getGypsumBoards();
-    } else if (window.priceDB && typeof window.priceDB.getGypsumBoards === 'function') {
+    if (window.priceDB && typeof window.priceDB.getGypsumBoards === 'function') {
         console.log('📦 window.priceDB에서 석고보드 데이터 로드');
         gypsumData = window.priceDB.getGypsumBoards();
+    } else if (window.priceDatabase && typeof window.priceDatabase.getGypsumBoards === 'function') {
+        console.log('📦 ES6 모듈에서 석고보드 데이터 로드');
+        gypsumData = window.priceDatabase.getGypsumBoards();
     } else {
         console.error('❌ priceDatabase를 찾을 수 없습니다.');
         showToast('석고보드 데이터를 로드할 수 없습니다.', 'error');
@@ -3635,6 +3695,7 @@ window.performExportAllData = performExportAllData;
 window.performImportAllData = performImportAllData;
 window.showModificationsSummary = showModificationsSummary;
 window.resetToOriginal = resetToOriginal;
+window.fullResetToEmpty = fullResetToEmpty;
 // createSubModal은 app-ui.js에서 전역 노출됨
 // closeSubModal은 app-ui.js에서 전역 노출됨
 window.closeSaveSuccessModal = closeSaveSuccessModal;

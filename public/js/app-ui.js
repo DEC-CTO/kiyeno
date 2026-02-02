@@ -1072,12 +1072,7 @@ function createModal(title, content, buttons = []) {
         closeBtn.onclick = () => modalOverlay.remove();
     }
 
-    // 클릭 외부 영역 클릭 시 닫기
-    modalOverlay.onclick = (e) => {
-        if (e.target === modalOverlay) {
-            modalOverlay.remove();
-        }
-    };
+    // X 버튼으로만 닫기 (배경 클릭 시 닫지 않음)
     
     document.body.appendChild(modalOverlay);
     return modalOverlay;

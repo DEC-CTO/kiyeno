@@ -21,6 +21,7 @@ class PriceDatabase extends EventEmitter {
       gypsumBoards: { added: [], modified: [], deleted: [] },
     };
     this.cache = new Map();
+    this._isFullReset = localStorage.getItem('kiyeno_full_reset') === 'true';
 
     // 원본 데이터 보존
     this.originalLightweightData = null;
@@ -2265,10 +2266,11 @@ class PriceDatabase extends EventEmitter {
       ];
     }
 
-    // 작업용 캐시 초기화 (원본 데이터 복사)
+    // 작업용 캐시 초기화 (원본 데이터 복사) - 완전초기화 상태가 아닐 때만
     if (
-      !this.lightweightItemsCache ||
-      this.lightweightItemsCache.length === 0
+      !this._isFullReset &&
+      (!this.lightweightItemsCache ||
+      this.lightweightItemsCache.length === 0)
     ) {
       this.lightweightItemsCache = JSON.parse(
         JSON.stringify(this.originalLightweightData)
@@ -2824,8 +2826,8 @@ class PriceDatabase extends EventEmitter {
       ];
     }
 
-    // 작업용 캐시 초기화 (원본 데이터 복사)
-    if (!this.gypsumItemsCache || this.gypsumItemsCache.length === 0) {
+    // 작업용 캐시 초기화 (원본 데이터 복사) - 완전초기화 상태가 아닐 때만
+    if (!this._isFullReset && (!this.gypsumItemsCache || this.gypsumItemsCache.length === 0)) {
       this.gypsumItemsCache = JSON.parse(
         JSON.stringify(this.originalGypsumData)
       );
@@ -3633,6 +3635,8 @@ class PriceDatabase extends EventEmitter {
 
   // 원본으로 초기화
   resetToOriginal() {
+    this._isFullReset = false;
+    localStorage.removeItem('kiyeno_full_reset');
     if (this.originalLightweightData) {
       this.lightweightItemsCache = JSON.parse(
         JSON.stringify(this.originalLightweightData)
@@ -3654,6 +3658,36 @@ class PriceDatabase extends EventEmitter {
     localStorage.removeItem('kiyeno_material_state');
 
     console.log('✅ 원본으로 초기화 완료');
+    return true;
+  }
+
+  // 완전초기화 (모든 데이터 삭제 → 빈 테이블)
+  async fullReset() {
+    this._isFullReset = true;
+    localStorage.setItem('kiyeno_full_reset', 'true');
+    this.lightweightItemsCache = [];
+    this.gypsumItemsCache = [];
+
+    this.modifications = {
+      lightweightComponents: { added: [], modified: [], deleted: [] },
+      gypsumBoards: { added: [], modified: [], deleted: [] },
+    };
+
+    localStorage.removeItem('kiyeno_material_state');
+
+    // IndexedDB materials 테이블 클리어
+    if (this.db) {
+      try {
+        const transaction = this.db.transaction(['materials'], 'readwrite');
+        const store = transaction.objectStore('materials');
+        await store.clear();
+        this.cache.clear();
+      } catch (e) {
+        console.warn('IndexedDB materials 클리어 실패:', e);
+      }
+    }
+
+    console.log('✅ 완전초기화 완료 (모든 자재 데이터 삭제)');
     return true;
   }
 
