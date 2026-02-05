@@ -235,8 +235,8 @@ const ExcelUnitPriceImporter = (function () {
                 materialPrice: materialPrice,
                 laborPrice: laborPrice,
                 totalPrice: totalPrice || (materialPrice + laborPrice),
-                materialWorkType: materialWorkType,
-                laborWorkType: laborWorkType,
+                workType1: materialWorkType,
+                workType2: laborWorkType,
                 importedAt: now,
                 updatedAt: now
               });
@@ -605,6 +605,9 @@ const ExcelUnitPriceImporter = (function () {
       totalMaterialPrice: 0,
       totalLaborPrice: 0,
       totalPrice: 0,
+      // 공종별 비용 분포 차트용 (엑셀 방식은 전체를 하나의 공종으로 표시)
+      workType1: '벽',
+      workType2: '',
       createdAt: now,
       updatedAt: now
     };

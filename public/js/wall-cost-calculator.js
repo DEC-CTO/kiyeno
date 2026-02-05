@@ -261,7 +261,7 @@ window.calculateWallCostsExcel = async function () {
       }
 
       // 간소화 계산 수행
-      const result = calculateSingleWallCostExcel(wall, wallTypeMatch, successCount + 1);
+      const result = await calculateSingleWallCostExcel(wall, wallTypeMatch, successCount + 1);
       if (result) {
         calculationResults.push(result);
         successCount++;
@@ -349,7 +349,7 @@ async function calculateSingleWallCostDetailed(wall, wallTypeMatch, sequence) {
 /**
  * 엑셀 전용 단일 벽체 계산 (M2 단가 기반)
  */
-function calculateSingleWallCostExcel(wall, wallTypeMatch, sequence) {
+async function calculateSingleWallCostExcel(wall, wallTypeMatch, sequence) {
   try {
     console.log(`🧮 [엑셀] 벽체 계산 중 (${sequence}): ${wall.Name}`);
 
@@ -365,6 +365,9 @@ function calculateSingleWallCostExcel(wall, wallTypeMatch, sequence) {
     const laborCost = Math.round(laborUnitPrice * area);
     const totalCostValue = materialCost + laborCost;
 
+    // 레이어별 자재 정보 추출 (공종별 비용 분포 차트용)
+    const layerPricing = await extractLayerPricing(wallTypeMatch);
+
     return {
       elementId: wall.Id,
       wallName: wall.Name,
@@ -376,7 +379,7 @@ function calculateSingleWallCostExcel(wall, wallTypeMatch, sequence) {
       level: wall.Level || '',
 
       wallType: wallTypeMatch,
-      layerPricing: {},   // 엑셀 방식은 레이어별 상세 없음
+      layerPricing: layerPricing,
       source: 'excel',
 
       materialCost: materialCost,
@@ -697,6 +700,7 @@ async function findMatchingWallTypeExcel(wallTypeName) {
         if (match) {
           console.log('✅ [엑셀] 벽체 타입 매칭 성공:', match.name);
           match.source = 'excel';
+
           return match;
         }
       }
@@ -831,6 +835,38 @@ async function findMaterialInUnitPriceDB(materialName) {
       }
     } else {
       console.log('❌ unitPriceDB 사용 불가능');
+    }
+
+    // 엑셀 단가표에서 검색
+    console.log('🔄 엑셀 단가표 검색 중...');
+    if (typeof ExcelUnitPriceImporter !== 'undefined' && ExcelUnitPriceImporter.getAllImportedUnitPrices) {
+      const excelUnitPrices = await ExcelUnitPriceImporter.getAllImportedUnitPrices();
+      console.log(`📋 엑셀 단가표 항목 수: ${excelUnitPrices.length}개`);
+
+      const excelItem = excelUnitPrices.find(
+        (item) => item.id && item.id.trim() === searchName.trim()
+      );
+
+      if (excelItem) {
+        console.log(
+          `✅ 엑셀 단가표에서 발견: ${excelItem.item}, 자재공종: ${excelItem.materialWorkType}, 노무공종: ${excelItem.laborWorkType}`
+        );
+        return {
+          name: excelItem.item || excelItem.id,
+          spec: excelItem.spec || '',
+          materialPrice: parseFloat(excelItem.materialPrice) || 0,
+          laborPrice: parseFloat(excelItem.laborPrice) || 0,
+          workType1: excelItem.materialWorkType || '',
+          workType2: excelItem.laborWorkType || '',
+          unit: excelItem.unit || 'M2',
+          source: 'excelUnitPrice',
+          itemId: excelItem.id,
+        };
+      } else {
+        console.log('❌ 엑셀 단가표에서 찾지 못함:', searchName);
+      }
+    } else {
+      console.log('❌ ExcelUnitPriceImporter 사용 불가능');
     }
 
     // priceDatabase에서도 검색 (fallback)
@@ -1636,8 +1672,12 @@ async function renderMaterialSummaryTable() {
  * 공종별 비용 분포 차트 렌더링
  */
 function renderWorkTypeChart() {
+  console.log('📊 renderWorkTypeChart 시작');
   const ctx = document.getElementById('workTypeChart');
-  if (!ctx || calculationResults.length === 0) return;
+  if (!ctx || calculationResults.length === 0) {
+    console.log('⚠️ 차트 생성 중단:', { ctx: !!ctx, resultsCount: calculationResults.length });
+    return;
+  }
 
   // 기존 차트 파괴
   if (workTypeChart) {
@@ -1646,26 +1686,58 @@ function renderWorkTypeChart() {
 
   // 공종별 데이터 집계
   const workTypeData = {};
+  console.log('📦 집계 시작, calculationResults 개수:', calculationResults.length);
 
-  calculationResults.forEach((result) => {
-    Object.values(result.layerPricing || {}).forEach((layer) => {
-      if (!layer.found || !layer.workType1) return;
+  calculationResults.forEach((result, index) => {
+    console.log(`🔍 결과 ${index}:`, {
+      source: result.source,
+      hasWorkType1: !!result.wallType?.workType1,
+      workType1: result.wallType?.workType1,
+      totalCost: result.totalCost
+    });
 
-      const workType = layer.workType1;
-      const cost = (layer.materialPrice + layer.laborPrice) * result.area;
+    // 엑셀 계산 방식: wallType.workType1 사용 (전체를 하나의 공종으로 표시)
+    if (result.source === 'excel' && result.wallType?.workType1) {
+      const workType = result.wallType.workType1;
+      const cost = result.totalCost || 0;
+      console.log(`✅ 엑셀 집계: ${workType} = ₩${cost.toLocaleString()}`);
 
       if (workTypeData[workType]) {
         workTypeData[workType] += cost;
       } else {
         workTypeData[workType] = cost;
       }
-    });
+    } else {
+      // 일위대가 계산 방식: layerPricing의 각 레이어별로 집계
+      Object.values(result.layerPricing || {}).forEach((layer) => {
+        if (!layer.found || !layer.workType1) return;
+
+        const workType = layer.workType1;
+        const cost = (layer.materialPrice + layer.laborPrice) * result.area;
+
+        if (workTypeData[workType]) {
+          workTypeData[workType] += cost;
+        } else {
+          workTypeData[workType] = cost;
+        }
+      });
+    }
   });
+
+  console.log('📊 집계 완료, workTypeData:', workTypeData);
 
   const labels = Object.keys(workTypeData);
   const data = Object.values(workTypeData);
   const colors = generateChartColors(labels.length);
 
+  console.log('📈 차트 데이터:', { labels, data });
+
+  if (labels.length === 0) {
+    console.warn('⚠️ 차트 데이터가 없습니다. 차트를 생성하지 않습니다.');
+    return;
+  }
+
+  console.log('🎨 Chart.js로 차트 생성 중...');
   workTypeChart = new Chart(ctx, {
     type: 'pie',
     data: {
@@ -1704,6 +1776,8 @@ function renderWorkTypeChart() {
       },
     },
   });
+
+  console.log('✅ 공종별 비용 분포 차트 생성 완료');
 }
 
 /**

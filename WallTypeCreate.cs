@@ -457,7 +457,13 @@ namespace QTO
 
                 // 새 재료 생성
                 ElementId newMaterialId = Material.Create(doc, materialName);
-                return doc.GetElement(newMaterialId) as Material;
+                Material newMaterial = doc.GetElement(newMaterialId) as Material;
+
+                // 회색(RGB 128, 128, 128) 설정
+                Autodesk.Revit.DB.Color grayColor = new Autodesk.Revit.DB.Color(128, 128, 128);
+                newMaterial.Color = grayColor;
+
+                return newMaterial;
             }
             catch (Exception ex)
             {
