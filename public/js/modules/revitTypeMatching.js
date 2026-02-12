@@ -2335,8 +2335,10 @@ async function extractThicknessFromUnitPrice(unitPriceId) {
         // 석고보드: t 필드 사용
         if (material.t !== undefined && material.t !== null) {
             const thickness = parseFloat(material.t);
-            console.log(`  ✅ 석고보드 두께 추출: ${component.name} → ${thickness}mm (t 필드)`);
-            return thickness;
+            if (!isNaN(thickness) && thickness > 0) {
+                console.log(`  ✅ 석고보드 두께 추출: ${component.name} → ${thickness}mm (t 필드)`);
+                return thickness;
+            }
         }
 
         // 경량자재 (스터드): size 필드에서 가로값 추출
@@ -2344,8 +2346,10 @@ async function extractThicknessFromUnitPrice(unitPriceId) {
             const match = material.size.match(/\d+\.?\d*T\*(\d+)/);
             if (match) {
                 const thickness = parseFloat(match[1]);
-                console.log(`  ✅ 스터드 가로값 추출: ${component.name} → ${thickness}mm (size: ${material.size})`);
-                return thickness;
+                if (!isNaN(thickness) && thickness > 0) {
+                    console.log(`  ✅ 스터드 가로값 추출: ${component.name} → ${thickness}mm (size: ${material.size})`);
+                    return thickness;
+                }
             }
         }
 
@@ -2409,8 +2413,10 @@ async function extractThicknessFromMaterial(materialId) {
     // 석고보드: t 필드 사용 (9.5, 12.5, 15.0 등)
     if (material.t !== undefined && material.t !== null) {
         const thickness = parseFloat(material.t);
-        console.log(`📏 석고보드 두께: ${materialId} → ${thickness}mm (t 필드)`);
-        return thickness;
+        if (!isNaN(thickness) && thickness > 0) {
+            console.log(`📏 석고보드 두께: ${materialId} → ${thickness}mm (t 필드)`);
+            return thickness;
+        }
     }
 
     // 경량자재: size 필드에서 가로값 추출 ("0.8T*60*45" → 60)
@@ -2418,8 +2424,10 @@ async function extractThicknessFromMaterial(materialId) {
         const match = material.size.match(/\d+\.?\d*T\*(\d+)/);
         if (match) {
             const thickness = parseFloat(match[1]);
-            console.log(`📏 경량자재 두께: ${materialId} → ${thickness}mm (size: ${material.size})`);
-            return thickness;
+            if (!isNaN(thickness) && thickness > 0) {
+                console.log(`📏 경량자재 두께: ${materialId} → ${thickness}mm (size: ${material.size})`);
+                return thickness;
+            }
         }
     }
 
