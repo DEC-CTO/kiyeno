@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command QTO</Text>
+    <Description>Some description for QTO</Description>
+    <Assembly>QTO.dll</Assembly>
+    <FullClassName>QTO.Command</FullClassName>
+    <ClientId>c350a19a-90de-4fe0-9a32-850fc681ee33</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application QTO</Name>
+    <Assembly>QTO.dll</Assembly>
+    <FullClassName>QTO.App</FullClassName>
+    <ClientId>76d15071-e1a9-45a2-9595-ca9098b760a1</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>

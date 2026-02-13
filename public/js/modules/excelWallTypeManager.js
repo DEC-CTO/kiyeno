@@ -271,14 +271,18 @@
     // 두께(mm) — WallType 다음에 위치
     mainRow += `<th rowspan="2" style="${thStyle()}; width: 65px; min-width: 55px;">두께<br>(mm)</th>`;
 
-    // 좌측마감 (Layer3, Layer2, Layer1 = 3개)
-    mainRow += `<th colspan="3" style="${thStyle()}; background: #cbd5e1;">좌측마감</th>`;
+    // 좌측마감 (추가 컬럼 + Layer3, Layer2, Layer1) — 외부→내부 순서
+    const leftExtras = extrasMap['layer1_1'] || [];
+    mainRow += `<th colspan="${3 + leftExtras.length}" style="${thStyle()}; background: #cbd5e1;">좌측마감</th>`;
+    for (const extra of leftExtras) {
+      subRow += `<th style="${thSubStyle()}; background: #d4d4d8;">
+        ${escapeHtml(extra.label)}
+        <span class="extra-col-delete" data-extra-index="${extra.extraIndex}" style="color: #94a3b8; cursor: pointer; margin-left: 4px; font-weight: 700;" title="컬럼 삭제">&times;</span>
+      </th>`;
+    }
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer3</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer2</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer1</th>`;
-
-    // 좌측마감 뒤 추가 컬럼
-    mainRow += buildExtraHeaderCells(extrasMap, 'layer1_1');
 
     // 구조체
     mainRow += `<th rowspan="2" style="${thStyle()}; background: #d1d5db;">구조체</th>`;
@@ -292,24 +296,32 @@
     // 단열재 뒤 추가 컬럼
     mainRow += buildExtraHeaderCells(extrasMap, 'infill');
 
-    // 우측마감 (Layer1, Layer2, Layer3 = 3개)
-    mainRow += `<th colspan="3" style="${thStyle()}; background: #cbd5e1;">우측마감</th>`;
+    // 우측마감 (Layer1, Layer2, Layer3 + 추가 컬럼)
+    const rightExtras = extrasMap['layer3_2'] || [];
+    mainRow += `<th colspan="${3 + rightExtras.length}" style="${thStyle()}; background: #cbd5e1;">우측마감</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer1</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer2</th>`;
     subRow += `<th style="${thSubStyle()}; background: #cbd5e1;">Layer3</th>`;
+    for (const extra of rightExtras) {
+      subRow += `<th style="${thSubStyle()}; background: #d4d4d8;">
+        ${escapeHtml(extra.label)}
+        <span class="extra-col-delete" data-extra-index="${extra.extraIndex}" style="color: #94a3b8; cursor: pointer; margin-left: 4px; font-weight: 700;" title="컬럼 삭제">&times;</span>
+      </th>`;
+    }
 
-    // 우측마감 뒤 추가 컬럼
-    mainRow += buildExtraHeaderCells(extrasMap, 'layer3_2');
-
-    // 옵션1~4
-    mainRow += `<th colspan="4" style="${thStyle()}; background: #e5e7eb;">옵션</th>`;
+    // 옵션1~4 (+ 추가 컬럼)
+    const optionExtras = extrasMap['steelPlate'] || [];
+    mainRow += `<th colspan="${4 + optionExtras.length}" style="${thStyle()}; background: #e5e7eb;">옵션</th>`;
     subRow += `<th style="${thSubStyle()}; background: #e5e7eb;">옵션1</th>`;
     subRow += `<th style="${thSubStyle()}; background: #e5e7eb;">옵션2</th>`;
     subRow += `<th style="${thSubStyle()}; background: #e5e7eb;">옵션3</th>`;
     subRow += `<th style="${thSubStyle()}; background: #e5e7eb;">옵션4</th>`;
-
-    // 옵션 뒤 추가 컬럼 (맨 끝)
-    mainRow += buildExtraHeaderCells(extrasMap, 'steelPlate');
+    for (const extra of optionExtras) {
+      subRow += `<th style="${thSubStyle()}; background: #d4d4d8;">
+        ${escapeHtml(extra.label)}
+        <span class="extra-col-delete" data-extra-index="${extra.extraIndex}" style="color: #94a3b8; cursor: pointer; margin-left: 4px; font-weight: 700;" title="컬럼 삭제">&times;</span>
+      </th>`;
+    }
 
     // 자재비
     mainRow += `<th rowspan="2" style="${thStyle()}; width: 75px; min-width: 65px;">자재비</th>`;
@@ -383,8 +395,17 @@
     const result = [];
 
     for (const col of LAYER_COLUMNS) {
+      // 좌측마감 추가 컬럼은 Layer3 앞에 배치 (외부 → 내부 순서)
+      if (col.field === 'layer3_1' && extrasMap['layer1_1']) {
+        for (const extra of extrasMap['layer1_1']) {
+          result.push({ type: 'extra', extraIndex: extra.extraIndex, label: extra.label });
+        }
+      }
+
       result.push({ type: 'fixed', field: col.field, label: col.label, group: col.group });
-      if (extrasMap[col.field]) {
+
+      // layer1_1 extras는 위에서 layer3_1 앞에 이미 배치했으므로 스킵
+      if (col.field !== 'layer1_1' && extrasMap[col.field]) {
         for (const extra of extrasMap[col.field]) {
           result.push({ type: 'extra', extraIndex: extra.extraIndex, label: extra.label });
         }
@@ -725,6 +746,13 @@
       cell.style.overflow = '';
 
       if (newName && newName !== currentName) {
+        // 중복 이름 검사 — 동일 이름 변경 차단
+        const duplicate = allWallTypes.find(w => w.id !== wtId && w.name === newName);
+        if (duplicate) {
+          alert(`"${newName}" 이름의 벽체타입이 이미 존재합니다.`);
+          cell.textContent = currentName || '(이름 없음)';
+          return;
+        }
         try {
           await ExcelUnitPriceImporter.updateExcelWallType(wtId, { name: newName });
           wt.name = newName;
@@ -1730,9 +1758,29 @@
       let importMode = 'merge'; // 기본값: 병합
 
       if (existingCount > 0) {
+        // 업데이트/신규 분류
+        const updateNames = [];
+        const newNames = [];
+        for (const wtRow of wallTypeRows) {
+          if (allWallTypes.find(w => w.name === wtRow.name)) {
+            updateNames.push(wtRow.name);
+          } else {
+            newNames.push(wtRow.name);
+          }
+        }
+
+        let mergeDetail = '';
+        if (updateNames.length > 0) {
+          mergeDetail += `\n덮어쓰기 ${updateNames.length}개: ${updateNames.join(', ')}`;
+        }
+        if (newNames.length > 0) {
+          mergeDetail += `\n신규 생성 ${newNames.length}개: ${newNames.join(', ')}`;
+        }
+
         const choice = confirm(
           `현재 ${existingCount}개의 벽체타입이 있습니다.\n` +
-          `엑셀 파일: ${wallTypeRows.length}개 벽체타입\n\n` +
+          `엑셀 파일: ${wallTypeRows.length}개 벽체타입\n` +
+          mergeDetail + `\n\n` +
           `[확인] = 병합 (기존 유지 + 추가/수정)\n` +
           `[취소] = 전체 교체 (기존 삭제 후 새로 생성)`
         );

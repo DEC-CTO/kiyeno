@@ -26,6 +26,7 @@ pids
 .env.production.local
 
 # IDE 파일
+.vs/
 .vscode/
 .idea/
 *.swp
