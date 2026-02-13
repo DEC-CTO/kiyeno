@@ -1306,7 +1306,7 @@
   }
 
   // ========================================
-  // 엑셀 내보내기 (2시트: 사용자용 + 매핑데이터)
+  // 엑셀 내보내기 (ExcelJS: 벽체타입 + 자재목록)
   // ========================================
 
   /**
@@ -1327,122 +1327,9 @@
   }
 
   /**
-   * unitPriceId → unitPriceKey 반환
-   */
-  function getUnitPriceKey(unitPriceId) {
-    if (!unitPriceId) return '';
-    const up = unitPriceMap[unitPriceId];
-    if (!up) return '';
-    return up.key || '';
-  }
-
-  /**
-   * 시트1 데이터 생성 (사용자용 — "품명 규격" 텍스트)
-   */
-  function buildExportSheet1(orderedColumns) {
-    // 헤더
-    const headers = ['WallType'];
-    for (const col of orderedColumns) {
-      headers.push(getColumnHeaderLabel(col));
-    }
-    headers.push('두께', '자재비', '노무비', '합계');
-
-    // 데이터 행
-    const rows = [];
-    for (const wt of allWallTypes) {
-      const row = [wt.name || ''];
-      const totals = calculateTotalsFromCache(wt);
-
-      for (const col of orderedColumns) {
-        let unitPriceId = '';
-        if (col.type === 'fixed') {
-          unitPriceId = wt[col.field] || '';
-        } else {
-          const extras = Array.isArray(wt.extraLayers) ? wt.extraLayers : [];
-          unitPriceId = (extras[col.extraIndex] || {}).unitPriceId || '';
-        }
-        row.push(getUnitPriceDisplayText(unitPriceId));
-      }
-
-      row.push(totals.thickness || 0);
-      row.push(totals.totalMaterialPrice || 0);
-      row.push(totals.totalLaborPrice || 0);
-      row.push(totals.totalPrice || 0);
-
-      rows.push(row);
-    }
-
-    return [headers, ...rows];
-  }
-
-  /**
-   * 시트2 데이터 생성 (매핑용 — 필드명 + unitPriceKey)
-   */
-  function buildExportSheet2(orderedColumns) {
-    // 1행: 컬럼 식별자 (필드명 또는 extra_N)
-    const metaRow1 = ['_wallTypeName'];
-    for (const col of orderedColumns) {
-      if (col.type === 'fixed') {
-        metaRow1.push(col.field);
-      } else {
-        metaRow1.push('extra_' + col.extraIndex);
-      }
-    }
-    metaRow1.push('_thickness', '_materialPrice', '_laborPrice', '_totalPrice');
-
-    // 2행: 추가 컬럼 메타데이터
-    const metaRow2 = ['_extraMeta'];
-    for (const col of orderedColumns) {
-      if (col.type === 'extra') {
-        // 추가 컬럼의 label, insertAfter 정보 추출
-        let label = col.label;
-        let insertAfter = '';
-        for (const wt of allWallTypes) {
-          const extras = Array.isArray(wt.extraLayers) ? wt.extraLayers : [];
-          if (extras[col.extraIndex]) {
-            if (!insertAfter && extras[col.extraIndex].insertAfter) {
-              insertAfter = extras[col.extraIndex].insertAfter;
-            }
-            if (extras[col.extraIndex].label) {
-              label = extras[col.extraIndex].label;
-            }
-            if (insertAfter) break;
-          }
-        }
-        metaRow2.push(`label:${label},insertAfter:${insertAfter}`);
-      } else {
-        metaRow2.push('');
-      }
-    }
-    metaRow2.push('', '', '', '');
-
-    // 3행~: 벽체타입별 데이터 (unitPriceKey 기반)
-    const dataRows = [];
-    for (const wt of allWallTypes) {
-      const row = [wt.name || ''];
-
-      for (const col of orderedColumns) {
-        let unitPriceId = '';
-        if (col.type === 'fixed') {
-          unitPriceId = wt[col.field] || '';
-        } else {
-          const extras = Array.isArray(wt.extraLayers) ? wt.extraLayers : [];
-          unitPriceId = (extras[col.extraIndex] || {}).unitPriceId || '';
-        }
-        row.push(getUnitPriceKey(unitPriceId));
-      }
-
-      // 두께/자재비/노무비/합계 — 빈 셀 (불러오기 시 자동 재계산)
-      row.push('', '', '', '');
-
-      dataRows.push(row);
-    }
-
-    return [metaRow1, metaRow2, ...dataRows];
-  }
-
-  /**
-   * 엑셀 내보내기 메인 함수
+   * 엑셀 내보내기 메인 함수 (ExcelJS)
+   * 시트1: 벽체타입 (숨김 메타행 + 헤더 + 데이터)
+   * 시트2: 자재목록 (DB 참조용)
    */
   async function handleExportWallTypes() {
     try {
@@ -1453,45 +1340,165 @@
         return;
       }
 
-      if (typeof XLSX === 'undefined') {
+      if (typeof ExcelJS === 'undefined') {
         if (typeof showToast === 'function') {
-          showToast('SheetJS(XLSX) 라이브러리를 찾을 수 없습니다.', 'error');
+          showToast('ExcelJS 라이브러리를 찾을 수 없습니다.', 'error');
         }
         return;
       }
 
       const orderedColumns = getOrderedColumnList();
+      const wb = new ExcelJS.Workbook();
 
-      // 시트1: 사용자용
-      const sheet1Data = buildExportSheet1(orderedColumns);
-      const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+      // ── 시트1: 벽체타입 ──
+      const ws1 = wb.addWorksheet('벽체타입');
+
+      // Row 1: 필드 식별자 (숨김)
+      const metaRow = ['_wallTypeName'];
+      for (const col of orderedColumns) {
+        if (col.type === 'fixed') {
+          metaRow.push(col.field);
+        } else {
+          // extra 컬럼: 메타데이터 포함
+          let label = col.label;
+          let insertAfter = '';
+          for (const wt of allWallTypes) {
+            const extras = Array.isArray(wt.extraLayers) ? wt.extraLayers : [];
+            if (extras[col.extraIndex]) {
+              if (!insertAfter && extras[col.extraIndex].insertAfter) {
+                insertAfter = extras[col.extraIndex].insertAfter;
+              }
+              if (extras[col.extraIndex].label) {
+                label = extras[col.extraIndex].label;
+              }
+              if (insertAfter) break;
+            }
+          }
+          metaRow.push(`extra_${col.extraIndex}|label:${label},insertAfter:${insertAfter}`);
+        }
+      }
+      metaRow.push('_thickness', '_materialPrice', '_laborPrice', '_totalPrice');
+      const excelRow1 = ws1.addRow(metaRow);
+      excelRow1.hidden = true;
+
+      // Row 2: 헤더 (사람이 읽는 이름)
+      const headers = ['WallType'];
+      for (const col of orderedColumns) {
+        headers.push(getColumnHeaderLabel(col));
+      }
+      headers.push('두께', '자재비', '노무비', '합계');
+      const headerRow = ws1.addRow(headers);
+      headerRow.font = { bold: true };
+      headerRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9E1F2' } };
+        cell.border = {
+          top: { style: 'thin' }, bottom: { style: 'thin' },
+          left: { style: 'thin' }, right: { style: 'thin' }
+        };
+      });
+
+      // Row 3+: 데이터
+      for (const wt of allWallTypes) {
+        const row = [wt.name || ''];
+        const totals = calculateTotalsFromCache(wt);
+
+        for (const col of orderedColumns) {
+          let unitPriceId = '';
+          if (col.type === 'fixed') {
+            unitPriceId = wt[col.field] || '';
+          } else {
+            const extras = Array.isArray(wt.extraLayers) ? wt.extraLayers : [];
+            unitPriceId = (extras[col.extraIndex] || {}).unitPriceId || '';
+          }
+          row.push(getUnitPriceDisplayText(unitPriceId));
+        }
+
+        row.push(totals.thickness || 0);
+        row.push(totals.totalMaterialPrice || 0);
+        row.push(totals.totalLaborPrice || 0);
+        row.push(totals.totalPrice || 0);
+
+        const dataRow = ws1.addRow(row);
+        dataRow.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: 'thin' }, bottom: { style: 'thin' },
+            left: { style: 'thin' }, right: { style: 'thin' }
+          };
+        });
+      }
 
       // 시트1 컬럼 너비
-      const colWidths1 = [{ wch: 15 }]; // WallType
+      ws1.getColumn(1).width = 18; // WallType
       for (let i = 0; i < orderedColumns.length; i++) {
-        colWidths1.push({ wch: 16 });
+        ws1.getColumn(i + 2).width = 18;
       }
-      colWidths1.push({ wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 10 }); // 두께, 자재비, 노무비, 합계
-      ws1['!cols'] = colWidths1;
+      const summaryStart = orderedColumns.length + 2;
+      ws1.getColumn(summaryStart).width = 8;      // 두께
+      ws1.getColumn(summaryStart + 1).width = 12;  // 자재비
+      ws1.getColumn(summaryStart + 2).width = 12;  // 노무비
+      ws1.getColumn(summaryStart + 3).width = 12;  // 합계
 
-      // 시트2: 매핑데이터
-      const sheet2Data = buildExportSheet2(orderedColumns);
-      const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+      // 합계 컬럼 숫자 포맷
+      for (let r = 3; r <= ws1.rowCount; r++) {
+        for (let c = summaryStart; c <= summaryStart + 3; c++) {
+          const cell = ws1.getRow(r).getCell(c);
+          if (typeof cell.value === 'number') {
+            cell.numFmt = '#,##0';
+          }
+        }
+      }
+
+      // ── 시트2: 자재목록 (DB 참조용) ──
+      const ws2 = wb.addWorksheet('자재목록');
+      const matHeaders = ['품명 규격', '품명', '규격', '단위', '두께', '자재비', '노무비', '합계', '자재공종', '노무공종'];
+      const matHeaderRow = ws2.addRow(matHeaders);
+      matHeaderRow.font = { bold: true };
+      matHeaderRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2EFDA' } };
+        cell.border = {
+          top: { style: 'thin' }, bottom: { style: 'thin' },
+          left: { style: 'thin' }, right: { style: 'thin' }
+        };
+      });
+
+      for (const up of allUnitPrices) {
+        const combined = `${up.item || ''} ${up.spec || ''}`.trim();
+        const matRow = ws2.addRow([
+          combined,
+          up.item || '',
+          up.spec || '',
+          up.unit || '',
+          up.thickness || 0,
+          up.materialPrice || 0,
+          up.laborPrice || 0,
+          (up.materialPrice || 0) + (up.laborPrice || 0),
+          up.materialWorkType || '',
+          up.laborWorkType || ''
+        ]);
+        matRow.eachCell((cell, colNumber) => {
+          cell.border = {
+            top: { style: 'thin' }, bottom: { style: 'thin' },
+            left: { style: 'thin' }, right: { style: 'thin' }
+          };
+          if (colNumber >= 5 && colNumber <= 8 && typeof cell.value === 'number') {
+            cell.numFmt = '#,##0';
+          }
+        });
+      }
 
       // 시트2 컬럼 너비
-      const colWidths2 = [{ wch: 15 }];
-      for (let i = 0; i < orderedColumns.length; i++) {
-        colWidths2.push({ wch: 20 });
-      }
-      colWidths2.push({ wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 });
-      ws2['!cols'] = colWidths2;
+      ws2.getColumn(1).width = 30;  // 품명 규격 (결합)
+      ws2.getColumn(2).width = 20;  // 품명
+      ws2.getColumn(3).width = 20;  // 규격
+      ws2.getColumn(4).width = 8;   // 단위
+      ws2.getColumn(5).width = 8;   // 두께
+      ws2.getColumn(6).width = 12;  // 자재비
+      ws2.getColumn(7).width = 12;  // 노무비
+      ws2.getColumn(8).width = 12;  // 합계
+      ws2.getColumn(9).width = 12;  // 자재공종
+      ws2.getColumn(10).width = 12; // 노무공종
 
-      // 워크북 생성
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws1, '벽체타입');
-      XLSX.utils.book_append_sheet(wb, ws2, '매핑데이터');
-
-      // 파일명 생성
+      // 파일 다운로드
       const now = new Date();
       const dateStr = now.getFullYear()
         + String(now.getMonth() + 1).padStart(2, '0')
@@ -1502,7 +1509,18 @@
         + String(now.getSeconds()).padStart(2, '0');
       const fileName = `엑셀벽체타입_${dateStr}.xlsx`;
 
-      XLSX.writeFile(wb, fileName);
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
       if (typeof showToast === 'function') {
         showToast(`엑셀 내보내기 완료: ${fileName}`, 'success');
@@ -1516,90 +1534,138 @@
   }
 
   // ========================================
-  // 엑셀 불러오기 (2시트 방식)
+  // 엑셀 불러오기 (시트1 직접 읽기 방식)
   // ========================================
 
   /**
-   * key로 importedUnitPrice 매칭 (캐시 우선, DB 폴백)
+   * "품명 규격" 텍스트로 importedUnitPrice 매칭
    */
-  async function matchUnitPriceByKey(key) {
-    if (!key) return null;
+  function matchUnitPriceByText(text) {
+    if (!text) return null;
+    const normalized = text.replace(/\s+/g, ' ').trim();
 
-    // 로컬 캐시에서 먼저 검색
+    // 정확 매칭
     for (const up of allUnitPrices) {
-      if (up.key === key) return up;
+      const upText = `${up.item || ''} ${up.spec || ''}`.trim();
+      if (upText === normalized) return up;
     }
 
-    // DB에서 검색
-    try {
-      return await ExcelUnitPriceImporter.getImportedUnitPriceByKey(key);
-    } catch (err) {
-      console.warn('key 매칭 실패:', key, err);
-      return null;
+    // 공백 정규화 후 재시도
+    for (const up of allUnitPrices) {
+      const upText = `${up.item || ''} ${up.spec || ''}`.replace(/\s+/g, ' ').trim();
+      if (upText === normalized) return up;
     }
+
+    // 공백 전체 제거 비교
+    const noSpace = normalized.replace(/\s/g, '');
+    for (const up of allUnitPrices) {
+      const upText = `${up.item || ''}${up.spec || ''}`.replace(/\s/g, '');
+      if (upText === noSpace) return up;
+    }
+
+    return null;
   }
 
   /**
-   * 시트2 파싱 — 메타데이터 + 데이터 행 추출
+   * 헤더 텍스트 → 필드명 역매핑 생성
    */
-  function parseImportSheet2(ws) {
+  function buildHeaderToFieldMap() {
+    const map = {};
+    for (const col of LAYER_COLUMNS) {
+      const fakeCol = { type: 'fixed', field: col.field, label: col.label, group: col.group };
+      const headerText = getColumnHeaderLabel(fakeCol);
+      map[headerText] = { type: 'fixed', field: col.field };
+    }
+    return map;
+  }
+
+  /**
+   * 시트1 파싱 — 메타행 유무 자동 감지 + 데이터 추출
+   */
+  function parseImportSheet1(ws) {
     const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
 
-    if (data.length < 3) {
-      throw new Error('매핑데이터 시트에 최소 3행이 필요합니다 (메타 2행 + 데이터 1행 이상).');
+    if (data.length < 2) {
+      throw new Error('벽체타입 시트에 최소 2행이 필요합니다 (헤더 + 데이터 1행 이상).');
     }
 
-    const metaRow1 = data[0]; // 컬럼 식별자
-    const metaRow2 = data[1]; // 추가 컬럼 메타데이터
-
-    // 첫 번째 셀이 _wallTypeName인지 확인
-    if (metaRow1[0] !== '_wallTypeName') {
-      throw new Error('매핑데이터 시트 형식이 올바르지 않습니다. (첫 셀이 _wallTypeName이어야 합니다)');
-    }
-
-    // 컬럼 매핑 파싱
+    const hasMeta = String(data[0][0] || '').trim() === '_wallTypeName';
     const columns = [];
-    for (let c = 1; c < metaRow1.length; c++) {
-      const identifier = String(metaRow1[c] || '').trim();
+    const extraColumnDefs = [];
+    let dataStartRow;
 
-      // 후미 합계 컬럼 스킵
-      if (identifier.startsWith('_')) continue;
+    if (hasMeta) {
+      // ── 메타행 있음: Row 1 = 필드 식별자, Row 2 = 헤더, Row 3+ = 데이터 ──
+      const metaRow = data[0];
+      dataStartRow = 2;
 
-      if (identifier.startsWith('extra_')) {
-        // 추가 컬럼
-        const extraIndex = parseInt(identifier.replace('extra_', ''));
-        // 메타데이터 파싱 (label:xxx,insertAfter:yyy)
-        const metaStr = String(metaRow2[c] || '');
-        const metaParts = {};
-        if (metaStr) {
-          metaStr.split(',').forEach(part => {
-            const [k, v] = part.split(':');
-            if (k && v !== undefined) {
-              metaParts[k.trim()] = v.trim();
-            }
+      for (let c = 1; c < metaRow.length; c++) {
+        const identifier = String(metaRow[c] || '').trim();
+        if (identifier.startsWith('_')) continue; // 합계 컬럼 스킵
+
+        if (identifier.startsWith('extra_')) {
+          // extra_0|label:xxx,insertAfter:yyy 형식 파싱
+          const parts = identifier.split('|');
+          const extraIndex = parseInt(parts[0].replace('extra_', ''));
+          const metaParts = {};
+          if (parts[1]) {
+            parts[1].split(',').forEach(part => {
+              const [k, v] = part.split(':');
+              if (k && v !== undefined) {
+                metaParts[k.trim()] = v.trim();
+              }
+            });
+          }
+          const colDef = {
+            colIndex: c,
+            type: 'extra',
+            extraIndex,
+            label: metaParts.label || `추가${extraIndex + 1}`,
+            insertAfter: metaParts.insertAfter || 'steelPlate'
+          };
+          columns.push(colDef);
+          extraColumnDefs.push({
+            extraIndex: colDef.extraIndex,
+            label: colDef.label,
+            insertAfter: colDef.insertAfter
+          });
+        } else {
+          // 기본 레이어 컬럼 (필드명 그대로)
+          columns.push({
+            colIndex: c,
+            type: 'fixed',
+            field: identifier
           });
         }
+      }
+    } else {
+      // ── 메타행 없음: Row 1 = 헤더, Row 2+ = 데이터 (사용자 직접 작성) ──
+      const headerRow = data[0];
+      dataStartRow = 1;
 
-        columns.push({
-          colIndex: c,
-          type: 'extra',
-          extraIndex,
-          label: metaParts.label || `추가${extraIndex + 1}`,
-          insertAfter: metaParts.insertAfter || 'steelPlate'
-        });
-      } else {
-        // 기본 레이어 컬럼
-        columns.push({
-          colIndex: c,
-          type: 'fixed',
-          field: identifier
-        });
+      const headerFieldMap = buildHeaderToFieldMap();
+
+      for (let c = 1; c < headerRow.length; c++) {
+        const headerText = String(headerRow[c] || '').trim();
+        if (!headerText) continue;
+        // 합계 컬럼 스킵
+        if (['두께', '자재비', '노무비', '합계'].includes(headerText)) continue;
+
+        const mapped = headerFieldMap[headerText];
+        if (mapped) {
+          columns.push({
+            colIndex: c,
+            type: 'fixed',
+            field: mapped.field
+          });
+        }
+        // 헤더 매칭 안 되는 컬럼은 무시 (추가 컬럼은 메타행 없이는 식별 불가)
       }
     }
 
     // 데이터 행 파싱
     const wallTypeRows = [];
-    for (let r = 2; r < data.length; r++) {
+    for (let r = dataStartRow; r < data.length; r++) {
       const row = data[r];
       const name = String(row[0] || '').trim();
       if (!name) continue;
@@ -1609,21 +1675,12 @@
         const cellValue = String(row[col.colIndex] || '').trim();
         layers.push({
           ...col,
-          key: cellValue
+          text: cellValue
         });
       }
 
       wallTypeRows.push({ name, layers });
     }
-
-    // 추가 컬럼 정보 수집
-    const extraColumnDefs = columns
-      .filter(c => c.type === 'extra')
-      .map(c => ({
-        extraIndex: c.extraIndex,
-        label: c.label,
-        insertAfter: c.insertAfter
-      }));
 
     return { columns, wallTypeRows, extraColumnDefs };
   }
@@ -1648,17 +1705,17 @@
       const arrayBuffer = await file.arrayBuffer();
       const wb = XLSX.read(arrayBuffer, { type: 'array' });
 
-      // 시트2 "매핑데이터" 확인
-      const ws2 = wb.Sheets['매핑데이터'];
-      if (!ws2) {
+      // 시트1 "벽체타입" 확인 (첫 번째 시트 또는 이름으로)
+      const ws1 = wb.Sheets['벽체타입'] || wb.Sheets[wb.SheetNames[0]];
+      if (!ws1) {
         if (typeof showToast === 'function') {
-          showToast('Excel 파일에 "매핑데이터" 시트가 없습니다.', 'error');
+          showToast('Excel 파일에서 시트를 찾을 수 없습니다.', 'error');
         }
         return;
       }
 
-      // 시트2 파싱
-      const parsed = parseImportSheet2(ws2);
+      // 시트1 파싱
+      const parsed = parseImportSheet1(ws1);
       const { wallTypeRows, extraColumnDefs } = parsed;
 
       if (wallTypeRows.length === 0) {
@@ -1668,18 +1725,49 @@
         return;
       }
 
+      // 불러오기 방식 선택
+      const existingCount = allWallTypes.length;
+      let importMode = 'merge'; // 기본값: 병합
+
+      if (existingCount > 0) {
+        const choice = confirm(
+          `현재 ${existingCount}개의 벽체타입이 있습니다.\n` +
+          `엑셀 파일: ${wallTypeRows.length}개 벽체타입\n\n` +
+          `[확인] = 병합 (기존 유지 + 추가/수정)\n` +
+          `[취소] = 전체 교체 (기존 삭제 후 새로 생성)`
+        );
+        if (!choice) {
+          // 전체 교체 재확인
+          const confirmReplace = confirm(
+            `⚠️ 주의: 기존 ${existingCount}개 벽체타입이 모두 삭제됩니다.\n` +
+            `엑셀의 ${wallTypeRows.length}개로 완전히 교체됩니다.\n\n` +
+            `정말 전체 교체하시겠습니까?`
+          );
+          if (!confirmReplace) return;
+          importMode = 'replace';
+        }
+      }
+
       // 결과 통계
       let updatedCount = 0;
       let createdCount = 0;
-      const failedMatches = []; // { wallTypeName, layerLabel, key }
+      let deletedCount = 0;
+      const failedMatches = []; // { wallTypeName, layerLabel, text }
+
+      // 전체 교체 모드: 기존 데이터 전부 삭제
+      if (importMode === 'replace') {
+        deletedCount = allWallTypes.length;
+        await ExcelUnitPriceImporter.clearAllExcelWallTypes();
+        allWallTypes = [];
+      }
 
       // 기존 추가 컬럼과 Excel 추가 컬럼 병합 결정
       const currentMaxExtra = getMaxExtraLayers();
       const importExtraCount = extraColumnDefs.length;
       const needExtraExpansion = importExtraCount > currentMaxExtra;
 
-      // Excel에 있고 DB에 없는 추가 컬럼 → 모든 기존 벽체타입에 확장
-      if (needExtraExpansion) {
+      // Excel에 있고 DB에 없는 추가 컬럼 → 모든 기존 벽체타입에 확장 (병합 모드만)
+      if (importMode === 'merge' && needExtraExpansion) {
         for (const wt of allWallTypes) {
           const extras = Array.isArray(wt.extraLayers) ? [...wt.extraLayers] : [];
           while (extras.length < importExtraCount) {
@@ -1731,12 +1819,12 @@
           }
         }
 
-        // 레이어 매칭
+        // 레이어 매칭 (텍스트 기반)
         const updateData = {};
         const extras = Array.isArray(existingWt.extraLayers) ? [...existingWt.extraLayers] : [];
 
         for (const layer of wtRow.layers) {
-          if (!layer.key) {
+          if (!layer.text) {
             // 빈 값 → 레이어 비우기
             if (layer.type === 'fixed') {
               updateData[layer.field] = '';
@@ -1754,8 +1842,8 @@
             continue;
           }
 
-          // key로 unitPrice 매칭
-          const matchedUp = await matchUnitPriceByKey(layer.key);
+          // "품명 규격" 텍스트로 unitPrice 매칭
+          const matchedUp = matchUnitPriceByText(layer.text);
 
           if (matchedUp) {
             if (layer.type === 'fixed') {
@@ -1779,7 +1867,7 @@
             failedMatches.push({
               wallTypeName: wtRow.name,
               layerLabel,
-              key: layer.key
+              text: layer.text
             });
 
             // 실패 시 빈 값으로 설정
@@ -1831,15 +1919,27 @@
       updateStatusBar();
 
       // 결과 리포트
-      let resultMsg = `불러오기 완료: 업데이트 ${updatedCount}개, 신규 생성 ${createdCount}개`;
+      let resultMsg = importMode === 'replace'
+        ? `전체 교체 완료: 기존 ${deletedCount}개 삭제, 신규 ${createdCount}개 생성`
+        : `병합 완료: 업데이트 ${updatedCount}개, 신규 생성 ${createdCount}개`;
       if (failedMatches.length > 0) {
         resultMsg += `, 매칭 실패 ${failedMatches.length}개`;
         console.warn('⚠️ 매칭 실패 목록:', failedMatches);
+
+        // 매칭 실패 상세 알림
+        const failedTexts = failedMatches
+          .map(f => `${f.wallTypeName} > ${f.layerLabel}: "${f.text}"`)
+          .join('\n');
+        alert(
+          `다음 ${failedMatches.length}개 자재를 DB에서 찾을 수 없습니다.\n` +
+          `엑셀 단가표에 먼저 등록해주세요.\n\n` +
+          failedTexts
+        );
       }
 
       if (typeof showToast === 'function') {
         if (failedMatches.length > 0) {
-          showToast(resultMsg + ' — 콘솔에서 상세 확인', 'warning');
+          showToast(resultMsg, 'warning');
         } else {
           showToast(resultMsg, 'success');
         }
