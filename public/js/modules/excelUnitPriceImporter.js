@@ -235,8 +235,8 @@ const ExcelUnitPriceImporter = (function () {
                 materialPrice: materialPrice,
                 laborPrice: laborPrice,
                 totalPrice: totalPrice || (materialPrice + laborPrice),
-                workType1: materialWorkType,
-                workType2: laborWorkType,
+                materialWorkType: materialWorkType,
+                laborWorkType: laborWorkType,
                 importedAt: now,
                 updatedAt: now
               });

@@ -101,7 +101,7 @@
           <div style="display: flex; align-items: center; gap: 6px;">
             <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;" />
             <button id="btnSelectFile" class="btn btn-sm" style="padding: 5px 10px; background: #475569; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-              <i class="fas fa-folder-open"></i> 파일 선택
+              <i class="fas fa-file-excel"></i> 엑셀 불러오기
             </button>
             <span id="selectedFileName" style="font-size: 11px; color: #6b7280;">선택된 파일 없음</span>
             <button id="btnUploadExcel" class="btn btn-sm" style="padding: 5px 10px; background: #475569; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;" disabled>
@@ -822,7 +822,12 @@
       return;
     }
 
-    const confirmed = confirm('정말 모든 엑셀 일위대가를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.');
+    const confirmed = confirm(
+      '[주의] 정말 모든 엑셀 일위대가를 삭제하시겠습니까?\n\n' +
+      '- 벽체타입에 적용된 일위대가 데이터도 함께 삭제됩니다.\n' +
+      '- 이 작업은 되돌릴 수 없습니다.\n\n' +
+      '삭제 전 "엑셀 내보내기"로 백업을 권장합니다.'
+    );
     if (!confirmed) return;
 
     try {
